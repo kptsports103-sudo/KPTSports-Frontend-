@@ -1,0 +1,423 @@
+import { useState, useEffect } from 'react';
+
+const Attendance = ({ isStudent = false }) => {
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [date, setDate] = useState('');
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [rows, setRows] = useState([
+    { slNo: 1, playerName: '', morning: 'Present', evening: 'Present' }
+  ]);
+  const [playerNames, setPlayerNames] = useState([]);
+
+  useEffect(() => {
+    const savedPlayers = localStorage.getItem("playersData");
+    if (!savedPlayers) return;
+
+    const playersData = JSON.parse(savedPlayers);
+    let names = [];
+
+    playersData.forEach(yearData => {
+      // If current year → show all
+      if (selectedYear === currentYear || yearData.year === selectedYear) {
+        yearData.players.forEach(player => {
+          if (player.name && !names.includes(player.name)) {
+            names.push(player.name);
+          }
+        });
+      }
+    });
+
+    setPlayerNames(names);
+  }, [selectedYear, currentYear]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("attendanceData");
+    if (saved) {
+      setRows(JSON.parse(saved));
+    } else {
+      setRows([{ slNo: 1, playerName: '', morning: 'Present', evening: 'Present' }]);
+    }
+  }, []);
+
+  const addRow = () => {
+    const newSlNo = rows.length + 1;
+    setRows([...rows, { slNo: newSlNo, playerName: '', morning: 'Present', evening: 'Present' }]);
+  };
+
+  const deleteRow = (index) => {
+    const newRows = rows.filter((_, i) => i !== index);
+    const updated = newRows.map((row, i) => ({ ...row, slNo: i + 1 }));
+    setRows(updated);
+  };
+
+  const updateField = (index, field, value) => {
+    if (!isEditMode) return;
+    const newRows = [...rows];
+    newRows[index][field] = value;
+    setRows(newRows);
+  };
+
+  const saveAttendance = () => {
+    if (!date) {
+      alert("Please select a date");
+      return;
+    }
+    localStorage.setItem("attendanceData", JSON.stringify(rows));
+    alert("Attendance saved for " + date);
+    setIsEditMode(false);
+  };
+
+  const saveRow = (index) => {
+    const row = rows[index];
+
+    if (!row.playerName) {
+      alert("Please select a player before saving the row");
+      return;
+    }
+
+    // Here you can later call backend for single-row save
+    console.log("Saved row:", row);
+
+    alert(`Saved Row ${row.slNo}`);
+  };
+
+  const getSelectedPlayers = (currentIndex) =>
+    rows
+      .filter((_, i) => i !== currentIndex)
+      .map(r => r.playerName)
+      .filter(Boolean);
+
+  const addYear = () => {
+    const yearInput = prompt("Enter year (e.g. 2026):");
+    if (!yearInput) return;
+
+    const year = Number(yearInput);
+    if (isNaN(year)) {
+      alert("Invalid year");
+      return;
+    }
+
+    setSelectedYear(year);
+  };
+
+  return (
+    <div style={styles.page}>
+      {/* Header */}
+      <h1 style={styles.pageTitle}>{isStudent ? 'Student Dashboard' : 'Coach Dashboard'}</h1>
+
+      {/* Section Title */}
+      <div style={styles.sectionTitle}>Attendance</div>
+
+      {!isStudent && (
+        <div style={styles.topBar}>
+          <button
+            onClick={() => setIsEditMode(p => !p)}
+            style={styles.primaryBtn}
+          >
+            <img src="/Edit button.png" width={20} height={20} alt="Edit" />
+            {isEditMode ? "Done Editing" : "Edit"}
+          </button>
+
+          {isEditMode && (
+            <>
+              <button onClick={addRow} style={styles.successBtn}>
+                <img src="/Save button.png" width={20} height={20} alt="Add" />
+                Add Row
+              </button>
+
+              <button onClick={saveAttendance} style={styles.primaryBtn}>
+                <img src="/Save button.png" width={20} height={20} alt="Save" />
+                Save All
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {!isStudent && (
+        <div style={styles.filterRow}>
+          <div style={styles.filterGroup}>
+            <label>Year</label>
+
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <select
+                value={selectedYear}
+                onChange={e => setSelectedYear(Number(e.target.value))}
+                style={styles.filterGroupInput}
+              >
+                <option value={currentYear}>{currentYear} (All)</option>
+                <option value={2025}>2025</option>
+                <option value={2026}>2026</option>
+                <option value={2027}>2027</option>
+              </select>
+
+              {isEditMode && (
+                <button
+                  onClick={addYear}
+                  style={styles.addYearBtn}
+                  title="Add Year"
+                >
+                  + Add Year
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div style={styles.filterGroup}>
+            <label>Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              disabled={!isEditMode}
+              style={styles.filterGroupInput}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Table */}
+      <table style={styles.table}>
+        <thead>
+          <tr style={styles.headerRow}>
+            <th>SL.NO</th>
+            <th>PLAYER</th>
+            <th>MORNING</th>
+            <th>EVENING</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {rows.map((row, index) => (
+            <tr key={index} style={styles.bodyRow}>
+              <td>{row.slNo}</td>
+
+              <td>
+                <select
+                  value={row.playerName}
+                  onChange={e => updateField(index, 'playerName', e.target.value)}
+                  disabled={!isEditMode}
+                >
+                  <option value="">Select Player</option>
+                  {playerNames.map(name => {
+                    const alreadySelected = getSelectedPlayers(index).includes(name);
+                    return (
+                      <option
+                        key={name}
+                        value={name}
+                        disabled={alreadySelected}
+                      >
+                        {name}{alreadySelected ? " (Already selected)" : ""}
+                      </option>
+                    );
+                  })}
+                </select>
+              </td>
+
+              <td>
+                <select
+                  value={row.morning}
+                  onChange={e => updateField(index, 'morning', e.target.value)}
+                  disabled={!isEditMode}
+                >
+                  <option>Present</option>
+                  <option>Absent</option>
+                  <option>Late</option>
+                  <option>Excused</option>
+                </select>
+              </td>
+
+              <td>
+                <select
+                  value={row.evening}
+                  onChange={e => updateField(index, 'evening', e.target.value)}
+                  disabled={!isEditMode}
+                >
+                  <option>Present</option>
+                  <option>Absent</option>
+                  <option>Late</option>
+                  <option>Excused</option>
+                </select>
+              </td>
+
+              <td style={styles.actionCell}>
+                {isEditMode && (
+                  <>
+                    <button
+                      onClick={() => saveRow(index)}
+                      style={styles.iconBtn}
+                      title="Save Row"
+                    >
+                      <img src="/Save button.png" width={20} height={20} alt="Save Row" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        deleteRow(index);
+                        alert(`Deleted Row ${rows[index].slNo}`);
+                      }}
+                      style={styles.iconBtn}
+                      title="Delete Row"
+                    >
+                      <img src="/Delete button.png" width={20} height={20} alt="Delete Row" />
+                    </button>
+                  </>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Footer */}
+      <div style={styles.footer}>
+        © 2023 KPT Sports. All rights reserved.
+      </div>
+    </div>
+  );
+};
+
+export default Attendance;
+
+/* ================= STYLES ================= */
+
+const styles = {
+  page: {
+    minHeight: "100vh",
+    backgroundColor: "#0f3b2e",
+    padding: "20px",
+    boxSizing: "border-box",
+    color: "#fff",
+  },
+
+  pageTitle: {
+    fontSize: "34px",
+    fontWeight: 700,
+    marginBottom: "6px",
+  },
+
+  sectionTitle: {
+    textAlign: "center",
+    fontSize: "18px",
+    fontWeight: 600,
+    marginBottom: "20px",
+    opacity: 0.95,
+  },
+
+  topBar: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "10px",
+    marginBottom: "14px",
+  },
+
+  primaryBtn: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    backgroundColor: "#0d6efd",
+    color: "#fff",
+    border: "none",
+    padding: "8px 14px",
+    fontSize: "14px",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+
+  successBtn: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    backgroundColor: "#198754",
+    color: "#fff",
+    border: "none",
+    padding: "8px 14px",
+    fontSize: "14px",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+
+  filterRow: {
+    display: "flex",
+    gap: "20px",
+    alignItems: "flex-end",
+    marginBottom: "18px",
+  },
+
+  filterGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+    fontSize: "13px",
+    fontWeight: 500,
+  },
+
+  filterGroupInput: {
+    height: "38px",
+    padding: "0 12px",
+    borderRadius: "8px",
+    border: "1px solid #ced4da",
+    fontSize: "14px",
+    color: "#000",
+    backgroundColor: "#fff",
+  },
+
+  addYearBtn: {
+    backgroundColor: "#198754",
+    color: "#fff",
+    border: "none",
+    padding: "8px 12px",
+    fontSize: "13px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+  },
+
+  table: {
+    width: "100%",
+    maxWidth: "1100px",
+    margin: "0 auto",
+    background: "#fff",
+    color: "#000",
+    borderCollapse: "separate",
+    borderSpacing: 0,
+    borderRadius: "12px",
+    overflow: "hidden",
+    boxShadow: "0 10px 24px rgba(0,0,0,0.15)",
+  },
+
+  headerRow: {
+    background: "linear-gradient(90deg, #0d6efd, #0a58ca)",
+    color: "#fff",
+    height: "52px",
+    fontSize: "13px",
+    letterSpacing: "0.6px",
+    textTransform: "uppercase",
+  },
+
+  bodyRow: {
+    height: "56px",
+    fontSize: "15px",
+    borderBottom: "1px solid #eee",
+  },
+
+  actionCell: {
+    textAlign: "center",
+  },
+
+  iconBtn: {
+    background: "transparent",
+    border: "none",
+    padding: "6px",
+    cursor: "pointer",
+    transition: "transform 0.15s ease",
+  },
+
+  footer: {
+    marginTop: "40px",
+    textAlign: "center",
+    fontSize: "14px",
+    opacity: 0.9,
+  },
+};

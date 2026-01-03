@@ -1,0 +1,62 @@
+/* Full background */
+.login-bg {
+  height: 100vh;
+  background-image: url("/Athlete.png"); /* your image */
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Login box */
+.login-card {
+  width: 350px;
+  background: #f2f2f2;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.login-card h2 {
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+/* Inputs */
+.login-card label {
+  font-size: 14px;
+  margin-top: 10px;
+  display: block;
+}
+
+.login-card input,
+.login-card select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Button */
+.login-card button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  background-color: #7b1515;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.login-card button:hover {
+  background-color: #5e0f0f;
+}
+
+.login-card button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

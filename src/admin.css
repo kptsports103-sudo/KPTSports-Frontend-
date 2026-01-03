@@ -1,0 +1,156 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* LOGIN */
+.login-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f4f4f4;
+}
+
+.login-card {
+  background: #fff;
+  padding: 30px;
+  width: 300px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.login-card input {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+}
+
+.login-card button {
+  width: 100%;
+  padding: 10px;
+  background: #900;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+/* TOPBAR */
+.topbar {
+  height: 60px;
+  background: #900;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+/* SIDEBAR */
+.sidebar {
+   width: 256px;
+   background: url('/sidebar.png') no-repeat center center;
+   background-size: cover;
+   position: fixed;
+   top: 60px;
+   bottom: 0;
+   left: 0;
+   color: #fff;
+   border-right: 1px solid #444;
+}
+
+.sidebar .profile {
+  padding: 20px;
+  border-bottom: 1px solid #444;
+  text-align: center;
+}
+
+.profile-logo {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.sidebar nav a {
+  display: block;
+  padding: 12px 20px;
+  color: #ddd;
+  text-decoration: none;
+}
+
+.sidebar nav a:hover {
+  background: #900;
+  color: white;
+}
+
+/* CONTENT */
+.content {
+   margin-left: 256px;
+   padding: 20px;
+   margin-top: 60px;
+   background: url('/db.png') no-repeat center center;
+   background-size: cover;
+   min-height: calc(100vh - 60px);
+   color: white;
+}
+
+.cards {
+  display: flex;
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  width: 200px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  text-align: center;
+  color: black;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 256px;
+    right: 0;
+    background: #32b009;
+    color: white;
+    text-align: center;
+    padding: 10px;
+}
+
+/* Manage Home Form */
+.home-form div {
+  margin-bottom: 15px;
+}
+
+.home-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: white;
+}
+
+.home-form textarea, .home-form input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.home-form button {
+  padding: 10px 20px;
+  background: #900;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.home-form button:hover {
+  background: #b00;
+}

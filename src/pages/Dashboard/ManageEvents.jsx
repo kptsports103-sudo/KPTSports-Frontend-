@@ -1,0 +1,308 @@
+import { useState, useEffect } from 'react';
+import AdminLayout from '../../components/AdminLayout';
+import api from '../../services/api';
+
+const ManageEvents = () => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [boxContent, setBoxContent] = useState('');
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  /* ================= LOAD DATA ================= */
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get('/home');
+        const data = res.data || {};
+
+        setBoxContent(data.about || '');
+
+        const highlights = Array.isArray(data.highlights)
+          ? data.highlights.map(h => ({
+              title: h.title || '',
+              overview: h.overview || '',
+              url: h.url || '',
+              urlFixed: true
+            }))
+          : [];
+
+        setRows(
+          highlights.length > 0
+            ? highlights
+            : [{ title: '', overview: '', url: '', urlFixed: false }]
+        );
+
+        setError('');
+      } catch (err) {
+        console.error('Load error:', err.response?.data || err);
+        setError('Server error while loading data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  /* ================= HANDLERS ================= */
+  const handleChange = (index, field, value) => {
+    const updated = [...rows];
+    updated[index][field] = value;
+    setRows(updated);
+  };
+
+  const addRow = () => {
+    if (!isEditing) return;
+    setRows([...rows, { title: '', overview: '', url: '', urlFixed: false }]);
+  };
+
+  const deleteRow = (index) => {
+    setRows(rows.filter((_, i) => i !== index));
+  };
+
+  const fixUrl = (index) => {
+    const updated = [...rows];
+    updated[index].urlFixed = true;
+    setRows(updated);
+  };
+
+  const removeFix = (index) => {
+    const updated = [...rows];
+    updated[index].urlFixed = false;
+    setRows(updated);
+  };
+
+  /* ================= SAVE ================= */
+  const saveAll = async () => {
+    try {
+      setSaving(true);
+      setError('');
+      setSuccess('');
+
+      const cleanedHighlights = rows
+        .filter(r => r.title.trim() && r.overview.trim())
+        .map(r => ({
+          title: r.title.trim(),
+          overview: r.overview.trim(),
+          url: r.url.trim()
+        }));
+
+      if (cleanedHighlights.length === 0) {
+        setError('At least one valid event is required.');
+        setSaving(false);
+        return;
+      }
+
+      await api.put('/home', {
+        about: boxContent,
+        highlights: cleanedHighlights
+      });
+
+      setSuccess('Data saved successfully.');
+      setIsEditing(false);
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      console.error('Save error:', err.response?.data || err);
+      setError(err.response?.data?.message || 'Server error while saving data.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /* ================= LOADING ================= */
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div style={pageStyle}>
+          <h1 style={pageTitle}>Manage Events Highlights</h1>
+          <p style={{ color: '#000' }}>Loading...</p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  /* ================= UI ================= */
+  return (
+    <AdminLayout>
+      <div style={pageStyle}>
+        <h1 style={pageTitle}>Manage Events Highlights</h1>
+
+        {error && <div style={errorBox}>{error}</div>}
+        {success && <div style={successBox}>{success}</div>}
+
+        <div style={{ display: 'flex', gap: '10px', margin: '20px 0' }}>
+          {!isEditing && (
+            <button onClick={() => setIsEditing(true)} style={btnBlue}>Edit</button>
+          )}
+          {isEditing && (
+            <>
+              <button onClick={saveAll} style={btnGreen} disabled={saving}>
+                {saving ? 'Saving...' : 'Save All'}
+              </button>
+              <button onClick={() => setIsEditing(false)} style={btnGrey}>Back</button>
+            </>
+          )}
+        </div>
+
+        {/* BOX */}
+        <div style={boxStyle}>
+          <h2 style={boxTitle}>Box</h2>
+          {isEditing ? (
+            <textarea
+              value={boxContent}
+              onChange={(e) => setBoxContent(e.target.value)}
+              style={textareaStyle}
+            />
+          ) : (
+            <div style={{ whiteSpace: 'pre-wrap', color: '#000' }}>
+              {boxContent || ' '}
+            </div>
+          )}
+        </div>
+
+        {/* TABLE */}
+        <div style={boxStyle}>
+          <h2 style={boxTitle}>Title / Overview / URL</h2>
+
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: '#e6f2ff' }}>
+                <th style={thStyle}>Title</th>
+                <th style={thStyle}>Overview</th>
+                <th style={thStyle}>URL</th>
+                {isEditing && <th style={thStyle}>Action</th>}
+              </tr>
+            </thead>
+
+            <tbody>
+              {rows.map((row, index) => (
+                <tr key={index}>
+                  <td style={tdStyle}>
+                    <input
+                      value={row.title}
+                      disabled={!isEditing}
+                      onChange={(e) => handleChange(index, 'title', e.target.value)}
+                      style={inputStyle(isEditing)}
+                    />
+                  </td>
+
+                  <td style={tdStyle}>
+                    <textarea
+                      value={row.overview}
+                      disabled={!isEditing}
+                      onChange={(e) => handleChange(index, 'overview', e.target.value)}
+                      style={textareaRowStyle(isEditing)}
+                    />
+                  </td>
+
+                  <td style={tdStyle}>
+                    <input
+                      value={row.url}
+                      disabled={!isEditing || row.urlFixed}
+                      onChange={(e) => handleChange(index, 'url', e.target.value)}
+                      style={inputStyle(isEditing && !row.urlFixed)}
+                    />
+
+                    {isEditing && (
+                      <div style={{ marginTop: '6px' }}>
+                        {!row.urlFixed ? (
+                          <button onClick={() => fixUrl(index)} style={btnFix}>Fix</button>
+                        ) : (
+                          <button onClick={() => removeFix(index)} style={btnGrey}>Remove</button>
+                        )}
+                      </div>
+                    )}
+                  </td>
+
+                  {isEditing && (
+                    <td style={tdStyle}>
+                      <button onClick={() => deleteRow(index)} style={btnRemove}>Delete</button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {isEditing && (
+            <button onClick={addRow} style={{ ...btnBlue, marginTop: '15px' }}>
+              + Add Row
+            </button>
+          )}
+        </div>
+      </div>
+    </AdminLayout>
+  );
+};
+
+/* ================= STYLES ================= */
+
+const pageStyle = {
+  padding: '20px',
+  background: '#f4f7ff',
+  minHeight: '100vh',
+  color: '#000'
+};
+
+const pageTitle = {
+  fontSize: '32px',
+  fontWeight: '700',
+  color: '#000'
+};
+
+const boxStyle = {
+  background: '#fff',
+  borderRadius: '14px',
+  padding: '20px',
+  marginBottom: '30px',
+  boxShadow: '0 6px 14px rgba(0,0,0,0.08)',
+  color: '#000'
+};
+
+const boxTitle = { marginBottom: '15px', color: '#000' };
+const thStyle = { padding: '12px', fontWeight: '700', textAlign: 'left', color: '#000' };
+const tdStyle = { padding: '10px', verticalAlign: 'top', color: '#000' };
+
+const inputStyle = (enabled) => ({
+  width: '100%',
+  padding: '8px',
+  borderRadius: '6px',
+  border: '1px solid #000',
+  background: enabled ? '#fff' : '#f1f1f1',
+  color: '#000'
+});
+
+const textareaRowStyle = (enabled) => ({
+  width: '100%',
+  height: '160px',
+  padding: '10px',
+  borderRadius: '6px',
+  border: '1px solid #000',
+  background: enabled ? '#fff' : '#f1f1f1',
+  resize: 'vertical',
+  color: '#000'
+});
+
+const textareaStyle = {
+  width: '100%',
+  height: '140px',
+  padding: '10px',
+  borderRadius: '8px',
+  border: '1px solid #000',
+  color: '#000'
+};
+
+const btnBlue = { padding: '10px 18px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '6px' };
+const btnGreen = { padding: '10px 18px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '6px' };
+const btnGrey = { padding: '10px 18px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '6px' };
+const btnFix = { padding: '6px 12px', background: '#17a2b8', color: '#fff', border: 'none', borderRadius: '5px' };
+const btnRemove = { padding: '6px 12px', background: '#dc3545', color: '#fff', border: 'none', borderRadius: '5px' };
+
+const errorBox = { background: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '6px', marginBottom: '10px' };
+const successBox = { background: '#d4edda', color: '#155724', padding: '10px', borderRadius: '6px', marginBottom: '10px' };
+
+export default ManageEvents;

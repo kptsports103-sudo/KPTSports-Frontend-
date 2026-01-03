@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+/* =====================
+   GLOBAL
+===================== */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* =====================
+   TOP BAR
+===================== */
+.top-bar {
+  background-color: #2b2b2b;
+  color: #ffffff;
+  font-size: 13px;
+  padding: 6px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #444;
+}
+
+.top-bar a {
+  color: white;
+  text-decoration: none;
+  margin-right: 12px;
+}
+
+.top-bar a:hover {
+  color: #ffcc00;
+}
+
+.top-bar button {
+  background: #555;
+  color: white;
+  border: none;
+  margin-left: 5px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+/* LOGIN LINK */
+.login-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: white;
+  text-decoration: none;
+}
+
+/* =====================
+   NAVBAR
+===================== */
+.navbar {
+  background-color: #8b0000; /* athletics red */
+  padding: 12px 20px;
+}
+
+/* MENU LIST */
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: space-around;
+  padding: 0;
+  margin: 0;
+}
+
+/* MENU LINKS */
+.navbar a {
+  color: #f5f5f5;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 8px 14px;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+/* HOVER EFFECT */
+.navbar a:hover {
+  color: #ffcc00;
+  transform: translateY(-2px);
+}
+
+/* UNDERLINE ANIMATION */
+.navbar a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 3px;
+  background-color: #ffcc00;
+  transition: width 0.3s ease;
+}
+
+.navbar a:hover::after {
+  width: 100%;
+}
+
+/* ACTIVE PAGE */
+.navbar a.active {
+  color: #ffcc00;
+}
+
+.navbar a.active::after {
+  width: 100%;
+}
