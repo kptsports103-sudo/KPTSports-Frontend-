@@ -1,148 +1,402 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from 'react';
+
 import api from '../services/api';
 
-const imageMap = {
-  KISHAN: "/images/result/r2.jpg",
-  MEGARAJA: "/images/result/r3.jpg",
-  RAKSHITH: "/images/result/r4.jpg",
-  YUVARAJ: "/images/result/r6.jpg",
-  RAKSHITHA: "/images/result/r7.jpg",
-  PRAJNA: "/images/result/r8.jpg",
-  PRAMILA: "/images/result/r9.jpg",
-  DEEPIKA: "/images/result/r10.jpg",
-  ANVITHA: "/images/result/r11.jpg",
-  AISHWARYA: "/images/result/r12.jpg",
-  KISHAN_SHETTY: "/images/result/r13.jpg",
-  RAKSHITH_KUMAR: "/images/result/r14.jpg",
-  MEGARAJA_N_MOOLYA: "/images/result/r15.jpg",
-  SAMITH: "/images/result/r16.jpg",
-  HARSHITH: "/images/result/r17.jpg"
-};
-
 const Results = () => {
+
   const [results, setResults] = useState([]);
-  const [selectedName, setSelectedName] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [groupResults, setGroupResults] = useState([]);
+  const [activeImage, setActiveImage] = useState(null);
 
   useEffect(() => {
-    fetchResults();
+
+    // Fetch individual results
+    api.get('/results').then(res => setResults(res.data || []))
+      .catch(err => console.error('Failed to fetch individual results:', err));
+
+    // Fetch group results
+    api.get('/results/groups').then(res => setGroupResults(res.data || []))
+      .catch(err => console.error('Failed to fetch group results:', err));
+
   }, []);
 
-  const fetchResults = async () => {
-    try {
-      const res = await api.get('/results');
-      setResults(res.data || []);
-    } catch (err) {
-      console.error("Error fetching results", err);
+  // Combine and group all results by year
+  const allResults = [...results, ...groupResults];
+  const groupedResults = allResults.reduce((acc, result) => {
+    const year = result.year || 'Unknown';
+    if (!acc[year]) {
+      acc[year] = {
+        individual: [],
+        groups: []
+      };
     }
-  };
 
-  const handleNameClick = (name) => {
-    if (imageMap[name]) {
-      setSelectedName(name);
-      setModalOpen(true);
+    // Check if it's a group result (has teamName and members array)
+    if (result.teamName && result.members) {
+      acc[year].groups.push(result);
+    } else {
+      acc[year].individual.push(result);
     }
-  };
+    return acc;
+  }, {});
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat p-8" style={{
-      backgroundImage: "url('/images/bg-results.jpg')",
-      backgroundColor: "rgba(15, 59, 46, 0.9)",
-      backgroundBlendMode: "overlay"
-    }}>
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8 text-white" style={{
-          background: "linear-gradient(45deg, #FFD700, #FFA500)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text"
-        }}>
-          🏆 Final Results Table
-        </h1>
 
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-              <tr>
-                <th className="px-6 py-4 text-left">Sport</th>
-                <th className="px-6 py-4 text-left">Players</th>
-                <th className="px-6 py-4 text-left">Winner</th>
-                <th className="px-6 py-4 text-left">Year</th>
-                <th className="px-6 py-4 text-center">Photo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.length === 0 && (
-                <tr>
-                  <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
-                    No results available.
-                  </td>
-                </tr>
+    <div style={{
+      padding: '2rem',
+      maxWidth: '1200px',
+      margin: '0 auto',
+      fontFamily: 'Arial, sans-serif'
+    }}>
+
+      <h1 style={{
+        fontSize: '2.5rem',
+        marginBottom: '2rem',
+        color: '#2c3e50',
+        textAlign: 'center',
+        fontWeight: 'bold'
+      }}>
+        🏆 Sports Results
+      </h1>
+
+      {Object.keys(groupedResults).length === 0 ? (
+        <div style={{
+          textAlign: 'center',
+          padding: '3rem',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '10px',
+          color: '#6c757d'
+        }}>
+          <h3>No Results Available</h3>
+          <p>Results will be displayed here once they are added by the administrator.</p>
+        </div>
+      ) : (
+        Object.entries(groupedResults)
+          .sort(([a], [b]) => b - a) // Sort years in descending order
+          .map(([year, yearResults]) => (
+            <div key={year} style={{ marginBottom: '3rem' }}>
+              <h2 style={{
+                fontSize: '1.8rem',
+                marginBottom: '1rem',
+                color: '#0f3b2e',
+                borderBottom: '3px solid #0f3b2e',
+                paddingBottom: '0.5rem'
+              }}>
+                Year: {year}
+              </h2>
+
+              {/* Individual Results */}
+              {yearResults.individual.length > 0 && (
+                <div style={{ marginBottom: '2rem' }}>
+                  <h3 style={{
+                    fontSize: '1.3rem',
+                    marginBottom: '1rem',
+                    color: '#2c3e50',
+                    fontWeight: '600'
+                  }}>
+                    🏅 Individual Results
+                  </h3>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: '1.5rem'
+                  }}>
+                    {yearResults.individual.map(result => (
+                      <div
+                        key={result._id}
+                        style={{
+                          backgroundColor: '#fff',
+                          border: '2px solid #e9ecef',
+                          borderRadius: '12px',
+                          padding: '1.5rem',
+                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                          transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-5px)';
+                          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          marginBottom: '1rem'
+                        }}>
+                          <span style={{
+                            fontSize: '2rem',
+                            marginRight: '1rem'
+                          }}>
+                            {result.medal === 'Gold' ? '🥇' : result.medal === 'Silver' ? '🥈' : '🥉'}
+                          </span>
+                          <div>
+                            <h3 style={{
+                              margin: 0,
+                              fontSize: '1.2rem',
+                              fontWeight: 'bold',
+                              color: '#2c3e50'
+                            }}>
+                              {result.name}
+                            </h3>
+                            <p style={{
+                              margin: '0.25rem 0',
+                              color: '#6c757d',
+                              fontSize: '0.9rem'
+                            }}>
+                              {result.event}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          paddingTop: '1rem',
+                          borderTop: '1px solid #e9ecef'
+                        }}>
+                          <span style={{
+                            background: result.medal === 'Gold' ? '#ffd700' :
+                                       result.medal === 'Silver' ? '#c0c0c0' : '#cd7f32',
+                            color: '#fff',
+                            padding: '0.25rem 0.75rem',
+                            borderRadius: '20px',
+                            fontSize: '0.8rem',
+                            fontWeight: 'bold',
+                            textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                          }}>
+                            {result.medal} Medal
+                          </span>
+
+                          {result.imageUrl && (
+                            <button
+                              onClick={() => setActiveImage(result)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#007bff',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                fontWeight: '500'
+                              }}
+                            >
+                              📷 View Photo
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
 
-              {results.map((res, index) => (
-                <tr key={res._id} className={`${
-                  index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
-                } hover:bg-blue-50 transition-colors duration-200`}>
-                  <td className="px-6 py-4 font-medium">{res.event}</td>
-                  <td className="px-6 py-4">{res.name}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`${
-                        imageMap[res.name] ? 'cursor-pointer text-blue-600 hover:text-blue-800' : ''
-                      } font-semibold`}
-                      onClick={() => handleNameClick(res.name)}
-                    >
-                      {res.name}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">{res.year}</td>
-                  <td className="px-6 py-4 text-center">
-                    {imageMap[res.name] ? (
-                      <button
-                        onClick={() => handleNameClick(res.name)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full text-sm transition-colors duration-200"
+              {/* Group Results */}
+              {yearResults.groups.length > 0 && (
+                <div>
+                  <h3 style={{
+                    fontSize: '1.3rem',
+                    marginBottom: '1rem',
+                    color: '#2c3e50',
+                    fontWeight: '600'
+                  }}>
+                    🧑‍🤝‍🧑 Team Results
+                  </h3>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                    gap: '1.5rem'
+                  }}>
+                    {yearResults.groups.map(result => (
+                      <div
+                        key={result._id}
+                        style={{
+                          backgroundColor: '#fff',
+                          border: '2px solid #e9ecef',
+                          borderRadius: '12px',
+                          padding: '1.5rem',
+                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                          transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-5px)';
+                          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                        }}
                       >
-                        👁️ View
-                      </button>
-                    ) : (
-                      <span className="text-gray-400">—</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          marginBottom: '1rem'
+                        }}>
+                          <span style={{
+                            fontSize: '2rem',
+                            marginRight: '1rem'
+                          }}>
+                            {result.medal === 'Gold' ? '🥇' : result.medal === 'Silver' ? '🥈' : '🥉'}
+                          </span>
+                          <div>
+                            <h3 style={{
+                              margin: 0,
+                              fontSize: '1.2rem',
+                              fontWeight: 'bold',
+                              color: '#2c3e50'
+                            }}>
+                              🏆 {result.teamName}
+                            </h3>
+                            <p style={{
+                              margin: '0.25rem 0',
+                              color: '#6c757d',
+                              fontSize: '0.9rem'
+                            }}>
+                              {result.event}
+                            </p>
+                          </div>
+                        </div>
 
-      {/* Image Modal */}
-      {modalOpen && selectedName && (
+                        <div style={{
+                          marginBottom: '1rem',
+                          padding: '0.75rem',
+                          backgroundColor: '#f8f9fa',
+                          borderRadius: '8px'
+                        }}>
+                          <p style={{
+                            margin: '0 0 0.5rem 0',
+                            fontSize: '0.85rem',
+                            fontWeight: '600',
+                            color: '#495057'
+                          }}>
+                            Team Members:
+                          </p>
+                          <div style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '0.5rem'
+                          }}>
+                            {result.members && result.members.map((member, i) => (
+                              <span key={i} style={{
+                                background: '#007bff',
+                                color: '#fff',
+                                padding: '0.25rem 0.5rem',
+                                borderRadius: '12px',
+                                fontSize: '0.8rem',
+                                fontWeight: '500'
+                              }}>
+                                {member}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          paddingTop: '1rem',
+                          borderTop: '1px solid #e9ecef'
+                        }}>
+                          <span style={{
+                            background: result.medal === 'Gold' ? '#ffd700' :
+                                       result.medal === 'Silver' ? '#c0c0c0' : '#cd7f32',
+                            color: '#fff',
+                            padding: '0.25rem 0.75rem',
+                            borderRadius: '20px',
+                            fontSize: '0.8rem',
+                            fontWeight: 'bold',
+                            textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                          }}>
+                            {result.medal} Medal
+                          </span>
+
+                          {result.imageUrl && (
+                            <button
+                              onClick={() => setActiveImage(result)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#007bff',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                fontWeight: '500'
+                              }}
+                            >
+                              📷 View Photo
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))
+      )}
+
+      {activeImage && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
-          onClick={() => setModalOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 999
+          }}
+          onClick={() => setActiveImage(null)}
         >
           <div
-            className="bg-white p-4 rounded-lg max-w-md w-full mx-4"
-            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              maxWidth: '90%',
+              maxHeight: '90%',
+              background: '#000',
+              padding: '1rem',
+              borderRadius: '12px'
+            }}
+            onClick={e => e.stopPropagation()}
           >
-            <h3 className="text-xl font-bold mb-4 text-center">{selectedName}</h3>
             <img
-              src={imageMap[selectedName]}
-              alt={selectedName}
-              className="w-full h-auto rounded"
+              src={activeImage.imageUrl}
+              alt=""
+              style={{
+                width: '100%',
+                maxHeight: '80vh',
+                objectFit: 'contain'
+              }}
             />
             <button
-              onClick={() => setModalOpen(false)}
-              className="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded w-full"
+              onClick={() => setActiveImage(null)}
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                background: '#fff',
+                border: 'none',
+                borderRadius: '50%',
+                width: '36px',
+                height: '36px',
+                cursor: 'pointer',
+                fontSize: '18px',
+                fontWeight: 'bold'
+              }}
             >
-              Close
+              ✖
             </button>
           </div>
         </div>
       )}
+
     </div>
+
   );
+
 };
 
 export default Results;

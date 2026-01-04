@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import AdminLayout from '../../components/AdminLayout';
 
-const YEARS = ['all', ...Array.from({ length: 15 }, (_, i) => 2011 + i)];
 const MEDALS = ['Gold', 'Silver', 'Bronze'];
 
 const ManageResults = () => {
-  const [results, setResults] = useState([]);
+  const [data, setData] = useState([]); // [{ year, results: [] }]
+  const [groupData, setGroupData] = useState([]); // [{ year, results: [] }]
   const [selectedYear, setSelectedYear] = useState('all');
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isGroupEditing, setIsGroupEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [editingGroupId, setEditingGroupId] = useState(null);
 
   const [form, setForm] = useState({
     name: '',
@@ -20,59 +22,275 @@ const ManageResults = () => {
     imageUrl: ''
   });
 
+  const [groupForm, setGroupForm] = useState({
+    teamName: '',
+    event: '',
+    year: '',
+    members: '',
+    medal: '',
+    imageUrl: ''
+  });
+
+  // Check authentication on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+
+    if (!token || !user) {
+      console.error('No authentication found');
+      alert('Please log in to access this page');
+      window.location.href = '/login';
+      return;
+    }
+
+    console.log('Authentication found:', { token: token.substring(0, 20) + '...', user });
+  }, []);
+
   /* ================= FETCH ================= */
   useEffect(() => {
     fetchResults();
+    fetchGroupResults();
   }, []);
 
   const fetchResults = async () => {
     try {
+      console.log('Fetching results...');
       const res = await api.get('/results');
-      setResults(res.data || []);
-    } catch {
-      console.error('Failed to fetch results');
+      console.log('Fetch response:', res.data);
+
+      // group results by year (Players-style)
+      const grouped = res.data.reduce((acc, item) => {
+        acc[item.year] = acc[item.year] || [];
+        acc[item.year].push(item);
+        return acc;
+      }, {});
+
+      const formatted = Object.keys(grouped).map(year => ({
+        year: Number(year),
+        results: grouped[year]
+      }));
+
+      setData(formatted);
+      console.log('Formatted data:', formatted);
+    } catch (error) {
+      console.error('Failed to fetch results:', error);
+
+      if (error.response?.status === 401) {
+        alert('Authentication expired. Please log in again.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      } else {
+        alert('Failed to load results. Please try again.');
+      }
+    }
+  };
+
+  const fetchGroupResults = async () => {
+    try {
+      console.log('Fetching group results...');
+      const res = await api.get('/results/groups');
+      console.log('Group fetch response:', res.data);
+
+      // group results by year
+      const grouped = res.data.reduce((acc, item) => {
+        acc[item.year] = acc[item.year] || [];
+        acc[item.year].push(item);
+        return acc;
+      }, {});
+
+      const formatted = Object.keys(grouped).map(year => ({
+        year: Number(year),
+        results: grouped[year]
+      }));
+
+      setGroupData(formatted);
+      console.log('Formatted group data:', formatted);
+    } catch (error) {
+      console.error('Failed to fetch group results:', error);
     }
   };
 
   /* ================= SAVE ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
+      console.log('Submitting form:', form);
+
       if (editingId) {
-        await api.put(`/results/${editingId}`, form);
+        const response = await api.put(`/results/${editingId}`, form);
+        console.log('Update response:', response.data);
       } else {
-        await api.post('/results', form);
+        const response = await api.post('/results', form);
+        console.log('Create response:', response.data);
       }
+
       resetForm();
       setIsEditing(false);
       fetchResults();
-    } catch {
-      alert('Failed to save result');
+    } catch (error) {
+      console.error('Save error:', error);
+
+      let errorMessage = 'Save failed';
+
+      if (error.response) {
+        // Server responded with error status
+        const status = error.response.status;
+        const data = error.response.data;
+
+        if (status === 401) {
+          errorMessage = 'Authentication required. Please log in again.';
+        } else if (status === 403) {
+          errorMessage = 'Permission denied. You may not have admin rights.';
+        } else if (status === 400) {
+          errorMessage = data?.message || 'Invalid data. Please check all fields.';
+        } else if (status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else {
+          errorMessage = data?.message || `Error ${status}: Failed to save`;
+        }
+      } else if (error.request) {
+        // Network error
+        errorMessage = 'Network error. Please check your connection.';
+      }
+
+      alert(errorMessage);
     }
   };
 
   /* ================= HELPERS ================= */
   const handleEdit = (item) => {
-    setForm({
-      name: item.name,
-      event: item.event,
-      year: item.year,
-      medal: item.medal,
-      imageUrl: item.imageUrl || ''
-    });
+    setForm(item);
     setEditingId(item._id);
     setIsEditing(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this record?')) return;
+  const handleGroupEdit = (item) => {
+    setGroupForm({
+      ...item,
+      members: item.members && Array.isArray(item.members)
+        ? item.members.join(', ')
+        : (item.members || '')
+    });
+    setEditingGroupId(item._id);
+    setIsGroupEditing(true);
+  };
 
+  const handleGroupSubmit = async (e) => {
+    e.preventDefault();
     try {
-      await api.delete(`/results/${id}`);
+      console.log('Submitting group form:', groupForm);
+
+      const payload = {
+        ...groupForm,
+        members: groupForm.members
+          ? groupForm.members.split(',').map(n => n.trim()).filter(n => n)
+          : []
+      };
+
+      if (editingGroupId) {
+        const response = await api.put(`/results/groups/${editingGroupId}`, payload);
+        console.log('Group update response:', response.data);
+      } else {
+        const response = await api.post('/results/groups', payload);
+        console.log('Group create response:', response.data);
+      }
+
+      setIsGroupEditing(false);
+      setEditingGroupId(null);
+      setGroupForm({ teamName: '', event: '', year: '', members: '', medal: '', imageUrl: '' });
+      fetchGroupResults();
+    } catch (error) {
+      console.error('Group save error:', error);
+
+      let errorMessage = 'Group save failed';
+
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+
+        if (status === 401) {
+          errorMessage = 'Authentication required. Please log in again.';
+        } else if (status === 403) {
+          errorMessage = 'Permission denied. You may not have admin rights.';
+        } else if (status === 400) {
+          errorMessage = data?.message || 'Invalid data. Please check all fields.';
+        } else if (status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else {
+          errorMessage = data?.message || `Error ${status}: Failed to save group`;
+        }
+      } else if (error.request) {
+        errorMessage = 'Network error. Please check your connection.';
+      }
+
+      alert(errorMessage);
+    }
+  };
+
+  const handleGroupDelete = async (id) => {
+    if (!window.confirm('Delete team result?')) return;
+    try {
+      console.log('Deleting group result:', id);
+      const response = await api.delete(`/results/groups/${id}`);
+      console.log('Group delete response:', response.data);
+      fetchGroupResults();
+    } catch (error) {
+      console.error('Group delete error:', error);
+
+      let errorMessage = 'Group delete failed';
+
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+
+        if (status === 401) {
+          errorMessage = 'Authentication required. Please log in again.';
+        } else if (status === 403) {
+          errorMessage = 'Permission denied. You may not have admin rights.';
+        } else if (status === 404) {
+          errorMessage = 'Group record not found.';
+        } else {
+          errorMessage = data?.message || `Error ${status}: Failed to delete group`;
+        }
+      } else if (error.request) {
+        errorMessage = 'Network error. Please check your connection.';
+      }
+
+      alert(errorMessage);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this record?')) return;
+    try {
+      console.log('Deleting result:', id);
+      const response = await api.delete(`/results/${id}`);
+      console.log('Delete response:', response.data);
       fetchResults();
-    } catch {
-      alert('Delete failed');
+    } catch (error) {
+      console.error('Delete error:', error);
+
+      let errorMessage = 'Delete failed';
+
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+
+        if (status === 401) {
+          errorMessage = 'Authentication required. Please log in again.';
+        } else if (status === 403) {
+          errorMessage = 'Permission denied. You may not have admin rights.';
+        } else if (status === 404) {
+          errorMessage = 'Record not found.';
+        } else {
+          errorMessage = data?.message || `Error ${status}: Failed to delete`;
+        }
+      } else if (error.request) {
+        errorMessage = 'Network error. Please check your connection.';
+      }
+
+      alert(errorMessage);
     }
   };
 
@@ -81,140 +299,222 @@ const ManageResults = () => {
     setEditingId(null);
   };
 
-  /* ================= GROUP BY YEAR ================= */
-  const groupedResults = results.reduce((acc, item) => {
-    if (selectedYear !== 'all' && String(item.year) !== String(selectedYear)) {
-      return acc;
-    }
-    acc[item.year] = acc[item.year] || [];
-    acc[item.year].push(item);
-    return acc;
-  }, {});
+  /* ================= FILTERED DATA ================= */
+  const displayedData =
+    selectedYear === 'all'
+      ? [...data].sort((a, b) => b.year - a.year)
+      : data.filter(d => d.year === Number(selectedYear));
+
+  const displayedGroupData =
+    selectedYear === 'all'
+      ? groupData
+      : groupData.filter(g => g.year === Number(selectedYear));
 
   /* ================= UI ================= */
   return (
     <AdminLayout>
-      <div style={page}>
-        <h3 style={{ fontSize: 28, fontWeight: 700 }}>Manage Results</h3>
+      <div style={styles.page}>
+        <h2 style={styles.title}>Manage Results</h2>
 
-        {/* TOP ACTION */}
+        {/* YEAR SELECT (TOP CENTER like Players) */}
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            style={styles.yearSelect}
+          >
+            <option value="all">All Years</option>
+            {[...data]
+              .map(d => d.year)
+              .sort((a, b) => b - a)
+              .map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+          </select>
+        </div>
+
+        {/* ADD / CANCEL */}
         <div style={{ marginBottom: 12 }}>
-          {!isEditing ? (
-            <button onClick={() => setIsEditing(true)} style={btnPrimary}>
-              ➕ Add / Edit Result
-            </button>
+          {!isEditing && !isGroupEditing ? (
+            <>
+              <button onClick={() => setIsEditing(true)} style={styles.btnPrimary}>
+                ➕ Individual Result
+              </button>
+              <button onClick={() => setIsGroupEditing(true)} style={styles.btnSecondary}>
+                🧑‍🤝‍🧑 Team Result
+              </button>
+            </>
           ) : (
             <button
               onClick={() => {
-                setIsEditing(false);
                 resetForm();
+                setIsEditing(false);
+                setIsGroupEditing(false);
+                setEditingGroupId(null);
+                setGroupForm({ teamName: '', event: '', year: '', members: '', medal: '', imageUrl: '' });
               }}
-              style={btnSecondary}
+              style={styles.btnSecondary}
             >
               ❌ Cancel
             </button>
           )}
         </div>
 
-        {!isEditing ? (
-          /* ============== VIEW MODE ============== */
-          <div style={tableWrapper}>
-            <table style={tableStyle}>
-              <thead style={theadSticky}>
-                <tr>
-                  <th>Name</th>
-                  <th>Event</th>
+        {/* VIEW MODE */}
+        {!isEditing && !isGroupEditing &&
+          displayedData.map(yearBlock => (
+            <div key={yearBlock.year}>
+              {/* YEAR BAR */}
+              <div style={styles.yearBar} />
+              <h3 style={styles.yearTitle}>Year: {yearBlock.year}</h3>
 
-                  {/* YEAR SELECT IN HEADER */}
-                  <th>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span>Year</span>
-                      <select
-                        value={selectedYear}
-                        onChange={(e) => setSelectedYear(e.target.value)}
-                        style={yearSelect}
-                      >
-                        {YEARS.map(y => (
-                          <option key={y} value={y}>
-                            {y === 'all' ? 'All Years' : y}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </th>
-
-                  <th>Medal</th>
-                  <th>Image</th>
-                  <th>Move</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {Object.keys(groupedResults).length === 0 && (
-                  <tr>
-                    <td colSpan="6" style={emptyCell}>
-                      No records found
-                    </td>
-                  </tr>
-                )}
-
-                {Object.entries(groupedResults).map(([year, items]) => (
-                  <React.Fragment key={year}>
-                    {/* YEAR ROW */}
-                    <tr>
-                      <td colSpan="6" style={yearRow}>
-                        Year: {year}
-                      </td>
+              <div style={styles.tableContainer}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr style={styles.headerRow}>
+                      <th style={styles.headerCell}>Name</th>
+                      <th style={styles.headerCell}>Event</th>
+                      <th style={styles.headerCell}>Medal</th>
+                      <th style={styles.headerCell}>Image</th>
+                      <th style={styles.headerCell}>Actions</th>
                     </tr>
-
-                    {items.map(item => (
-                      <tr key={item._id}>
-                        <td>{item.name}</td>
-                        <td>{item.event}</td>
-                        <td>{item.year}</td>
-                        <td>{item.medal}</td>
-                        <td>
+                  </thead>
+                  <tbody>
+                    {yearBlock.results.map(item => (
+                      <tr
+                        key={item._id}
+                        style={styles.bodyRow}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f8f9ff';
+                          e.currentTarget.style.transform = 'scale(1.001)';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#ffffff';
+                          e.currentTarget.style.transform = 'scale(1)';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                      >
+                        <td style={{...styles.cell, ...styles.nameCell}}>{item.name}</td>
+                        <td style={styles.cell}>
+                          <span style={styles.eventBadge}>{item.event}</span>
+                        </td>
+                        <td style={styles.cell}>
+                          <span style={{
+                            ...styles.medalBadge,
+                            ...(item.medal === 'Gold' ? styles.goldMedal :
+                              item.medal === 'Silver' ? styles.silverMedal : styles.bronzeMedal)
+                          }}>
+                            {item.medal}
+                          </span>
+                        </td>
+                        <td style={styles.cell}>
                           {item.imageUrl ? (
-                            <a href={item.imageUrl} target="_blank" rel="noreferrer">
-                              View
+                            <a href={item.imageUrl} target="_blank" rel="noreferrer" style={styles.imageLink}>
+                              🖼️ View Image
                             </a>
                           ) : (
-                            '-'
+                            <span style={styles.noImage}>No Image</span>
                           )}
                         </td>
-                        <td>
-                          <button
-                            onClick={() => handleEdit(item)}
-                            style={btnEdit}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(item._id)}
-                            style={btnDelete}
-                          >
-                            Delete
-                          </button>
+                        <td style={styles.cell}>
+                          <div style={styles.buttonGroup}>
+                            <button
+                              onClick={() => handleEdit(item)}
+                              style={styles.btnEdit}
+                            >
+                              ✏️ Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(item._id)}
+                              style={styles.btnDelete}
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          /* ============== EDIT MODE ============== */
-          <form onSubmit={handleSubmit}>
-            <table style={tableStyle}>
-              <tbody>
-                <tr style={theadStyle}>
-                  <th width="30%">Field</th>
-                  <th>Value</th>
-                </tr>
+                  </tbody>
+                </table>
+              </div>
 
+              {/* ================= GROUP RESULTS ================= */}
+              <h4 style={{ marginTop: 20, fontSize: 16, fontWeight: 600, color: '#fff' }}>🧑‍🤝‍🧑 Group / Team Results</h4>
+
+              <div style={styles.tableContainer}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr style={styles.headerRow}>
+                      <th style={styles.headerCell}>Team</th>
+                      <th style={styles.headerCell}>Event</th>
+                      <th style={styles.headerCell}>Members</th>
+                      <th style={styles.headerCell}>Medal</th>
+                      <th style={styles.headerCell}>URL</th>
+                      <th style={styles.headerCell}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayedGroupData
+                      .filter(g => {
+                        // Find if this year block has group results
+                        return g.year === yearBlock.year && g.results && g.results.length > 0;
+                      })
+                      .flatMap(g => g.results) // Flatten the results array
+                      .map(item => (
+                        <tr key={item._id} style={styles.bodyRow}>
+                          <td style={styles.cell}>{item.teamName || ''}</td>
+                          <td style={styles.cell}>
+                            <span style={styles.eventBadge}>{item.event || ''}</span>
+                          </td>
+                          <td style={styles.cell}>
+                            {item.members && Array.isArray(item.members) ? (
+                              <ul style={{ margin: 0, paddingLeft: 18 }}>
+                                {item.members.map((m, i) => <li key={i}>{m}</li>)}
+                              </ul>
+                            ) : (
+                              <span style={{ color: '#999' }}>No members</span>
+                            )}
+                          </td>
+                          <td style={styles.cell}>
+                            <span style={{
+                              ...styles.medalBadge,
+                              ...(item.medal === 'Gold'
+                                ? styles.goldMedal
+                                : item.medal === 'Silver'
+                                ? styles.silverMedal
+                                : styles.bronzeMedal)
+                            }}>
+                              {item.medal || ''}
+                            </span>
+                          </td>
+                          <td style={styles.cell}>
+                            {item.imageUrl ? (
+                              <a href={item.imageUrl} target="_blank" rel="noreferrer" style={styles.imageLink}>
+                                View
+                              </a>
+                            ) : '—'}
+                          </td>
+                          <td style={styles.cell}>
+                            <button onClick={() => handleGroupEdit(item)} style={styles.btnEdit}>Edit</button>
+                            <button onClick={() => handleGroupDelete(item._id)} style={styles.btnDelete}>Delete</button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
+
+        {/* INDIVIDUAL EDIT MODE */}
+        {isEditing && !isGroupEditing && (
+          <form onSubmit={handleSubmit}>
+            <table style={styles.table}>
+              <tbody>
                 <Field label="Name">
                   <input
+                    style={styles.input}
                     value={form.name}
                     onChange={e => setForm({ ...form, name: e.target.value })}
                     required
@@ -223,27 +523,26 @@ const ManageResults = () => {
 
                 <Field label="Event">
                   <input
+                    style={styles.input}
                     value={form.event}
                     onChange={e => setForm({ ...form, event: e.target.value })}
                     required
                   />
                 </Field>
 
-                <Field label="Select Year">
-                  <select
+                <Field label="Year">
+                  <input
+                    type="number"
+                    style={styles.input}
                     value={form.year}
                     onChange={e => setForm({ ...form, year: e.target.value })}
                     required
-                  >
-                    <option value="">Select Year</option>
-                    {YEARS.filter(y => y !== 'all').map(y => (
-                      <option key={y} value={y}>{y}</option>
-                    ))}
-                  </select>
+                  />
                 </Field>
 
                 <Field label="Medal">
                   <select
+                    style={styles.select}
                     value={form.medal}
                     onChange={e => setForm({ ...form, medal: e.target.value })}
                     required
@@ -258,6 +557,7 @@ const ManageResults = () => {
                 <Field label="Image URL">
                   <input
                     type="url"
+                    style={styles.input}
                     value={form.imageUrl}
                     onChange={e => setForm({ ...form, imageUrl: e.target.value })}
                   />
@@ -265,9 +565,78 @@ const ManageResults = () => {
               </tbody>
             </table>
 
-            <div style={{ textAlign: 'center', marginTop: 20 }}>
-              <button type="submit" style={btnSave}>
-                💾 Save Changes
+            <div style={{ textAlign: 'center', marginTop: 16 }}>
+              <button type="submit" style={styles.btnSave}>
+                💾 Save
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* GROUP EDIT MODE */}
+        {isGroupEditing && (
+          <form onSubmit={handleGroupSubmit}>
+            <table style={styles.table}>
+              <tbody>
+                <Field label="Team Name">
+                  <input
+                    style={styles.input}
+                    value={groupForm.teamName}
+                    onChange={e => setGroupForm({...groupForm, teamName: e.target.value})}
+                  />
+                </Field>
+
+                <Field label="Event">
+                  <input
+                    style={styles.input}
+                    value={groupForm.event}
+                    onChange={e => setGroupForm({...groupForm, event: e.target.value})}
+                  />
+                </Field>
+
+                <Field label="Year">
+                  <input
+                    type="number"
+                    style={styles.input}
+                    value={groupForm.year}
+                    onChange={e => setGroupForm({...groupForm, year: e.target.value})}
+                  />
+                </Field>
+
+                <Field label="Members (comma separated)">
+                  <input
+                    style={styles.input}
+                    value={groupForm.members}
+                    onChange={e => setGroupForm({...groupForm, members: e.target.value})}
+                  />
+                </Field>
+
+                <Field label="Medal">
+                  <select
+                    style={styles.select}
+                    value={groupForm.medal}
+                    onChange={e => setGroupForm({...groupForm, medal: e.target.value})}
+                  >
+                    <option value="">Select Medal</option>
+                    {MEDALS.map(m => (
+                      <option key={m}>{m}</option>
+                    ))}
+                  </select>
+                </Field>
+
+                <Field label="URL">
+                  <input
+                    style={styles.input}
+                    value={groupForm.imageUrl}
+                    onChange={e => setGroupForm({...groupForm, imageUrl: e.target.value})}
+                  />
+                </Field>
+              </tbody>
+            </table>
+
+            <div style={{ textAlign: 'center', marginTop: 16 }}>
+              <button type="submit" style={styles.btnSave}>
+                💾 Save Group
               </button>
             </div>
           </form>
@@ -280,67 +649,301 @@ const ManageResults = () => {
 /* ================= REUSABLE ================= */
 const Field = ({ label, children }) => (
   <tr>
-    <td style={fieldLabel}>{label}</td>
-    <td style={fieldValue}>{children}</td>
+    <td style={styles.fieldLabel}>{label}</td>
+    <td style={styles.fieldValue}>{children}</td>
   </tr>
 );
 
 /* ================= STYLES ================= */
-const page = {
-  background: '#0f3b2e',
-  minHeight: '100vh',
-  padding: 15,
-  color: '#fff'
+const styles = {
+  page: {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #0f3b2e 0%, #1a5f4a 100%)',
+    padding: 20,
+    color: '#fff'
+  },
+
+  title: {
+    fontSize: 32,
+    fontWeight: 700,
+    marginBottom: 20,
+    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+    letterSpacing: '-0.5px'
+  },
+
+  yearSelect: {
+    padding: '10px 16px',
+    borderRadius: 8,
+    background: 'rgba(255,255,255,0.1)',
+    color: '#fff',
+    border: '2px solid rgba(255,255,255,0.2)',
+    fontSize: 14,
+    fontWeight: 500,
+    backdropFilter: 'blur(10px)',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer'
+  },
+
+  yearBar: {
+    height: 6,
+    background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
+    borderRadius: 3,
+    marginBottom: 16,
+    boxShadow: '0 2px 8px rgba(102, 126, 234, 0.4)'
+  },
+
+  yearTitle: {
+    fontSize: 22,
+    fontWeight: 600,
+    marginBottom: 16,
+    color: '#fff',
+    textShadow: '0 1px 3px rgba(0,0,0,0.3)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px'
+  },
+
+  /* ================= TABLE ================= */
+
+  tableContainer: {
+    background: '#fff',
+    borderRadius: 16,
+    overflow: 'hidden',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+    marginBottom: 32,
+    border: '1px solid rgba(255,255,255,0.1)'
+  },
+
+  table: {
+    width: '100%',
+    background: '#ffffff',
+    color: '#2c3e50',
+    borderCollapse: 'collapse',
+    fontSize: 14,
+    lineHeight: 1.5
+  },
+
+  headerRow: {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: '#ffffff',
+    textTransform: 'uppercase',
+    letterSpacing: '0.8px',
+    fontWeight: 600,
+    fontSize: 12
+  },
+
+  headerCell: {
+    padding: '16px 20px',
+    textAlign: 'left',
+    fontWeight: 600,
+    border: 'none',
+    position: 'sticky',
+    top: 0,
+    zIndex: 10
+  },
+
+  bodyRow: {
+    borderBottom: '1px solid #f1f3f4',
+    transition: 'all 0.2s ease',
+    backgroundColor: '#ffffff'
+  },
+
+  bodyRowHover: {
+    backgroundColor: '#f8f9ff',
+    transform: 'scale(1.001)',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+  },
+
+  cell: {
+    padding: '16px 20px',
+    verticalAlign: 'middle',
+    borderBottom: '1px solid #f1f3f4'
+  },
+
+  nameCell: {
+    fontWeight: 600,
+    color: '#2c3e50',
+    fontSize: 15
+  },
+
+  eventBadge: {
+    display: 'inline-block',
+    background: 'linear-gradient(135deg, #e3f2fd, #bbdefb)',
+    color: '#1565c0',
+    padding: '6px 12px',
+    borderRadius: 20,
+    fontSize: 12,
+    fontWeight: 600,
+    border: '1px solid #90caf9'
+  },
+
+  medalBadge: {
+    display: 'inline-block',
+    padding: '6px 12px',
+    borderRadius: 20,
+    fontSize: 12,
+    fontWeight: 700,
+    textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+    border: '2px solid transparent'
+  },
+
+  goldMedal: {
+    background: 'linear-gradient(135deg, #ffd700, #ffed4e)',
+    color: '#8b6914',
+    borderColor: '#ffd700'
+  },
+
+  silverMedal: {
+    background: 'linear-gradient(135deg, #c0c0c0, #e8e8e8)',
+    color: '#595959',
+    borderColor: '#c0c0c0'
+  },
+
+  bronzeMedal: {
+    background: 'linear-gradient(135deg, #cd7f32, #daa520)',
+    color: '#5d4037',
+    borderColor: '#cd7f32'
+  },
+
+  imageLink: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    color: '#667eea',
+    textDecoration: 'none',
+    fontSize: 13,
+    fontWeight: 600,
+    padding: '8px 12px',
+    borderRadius: 8,
+    border: '1px solid #667eea',
+    transition: 'all 0.2s ease'
+  },
+
+  noImage: {
+    color: '#9e9e9e',
+    fontSize: 13,
+    fontStyle: 'italic'
+  },
+
+  /* ================= FORM ================= */
+
+  fieldLabel: {
+    padding: '16px 20px',
+    fontWeight: 600,
+    width: '30%',
+    background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)',
+    borderBottom: '1px solid #dee2e6',
+    color: '#495057',
+    fontSize: 14
+  },
+
+  fieldValue: {
+    padding: '16px 20px',
+    borderBottom: '1px solid #dee2e6',
+    backgroundColor: '#ffffff'
+  },
+
+  input: {
+    width: '100%',
+    padding: '10px 14px',
+    border: '2px solid #e9ecef',
+    borderRadius: 8,
+    fontSize: 14,
+    transition: 'all 0.2s ease',
+    backgroundColor: '#ffffff'
+  },
+
+  select: {
+    width: '100%',
+    padding: '10px 14px',
+    border: '2px solid #e9ecef',
+    borderRadius: 8,
+    fontSize: 14,
+    transition: 'all 0.2s ease',
+    backgroundColor: '#ffffff',
+    cursor: 'pointer'
+  },
+
+  /* ================= BUTTONS ================= */
+
+  buttonGroup: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center'
+  },
+
+  btnPrimary: {
+    padding: '10px 20px',
+    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 8,
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  },
+
+  btnSecondary: {
+    padding: '10px 20px',
+    background: 'linear-gradient(135deg, #6c757d, #495057)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 8,
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 12px rgba(108, 117, 125, 0.3)'
+  },
+
+  btnEdit: {
+    padding: '8px 14px',
+    background: 'linear-gradient(135deg, #ffc107, #ffb300)',
+    color: '#212529',
+    border: 'none',
+    borderRadius: 6,
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 2px 8px rgba(255, 193, 7, 0.3)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.3px'
+  },
+
+  btnDelete: {
+    padding: '8px 14px',
+    background: 'linear-gradient(135deg, #dc3545, #c82333)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 6,
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 2px 8px rgba(220, 53, 69, 0.3)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.3px'
+  },
+
+  btnSave: {
+    padding: '12px 28px',
+    background: 'linear-gradient(135deg, #28a745, #218838)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 8,
+    fontSize: 16,
+    fontWeight: 700,
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 16px rgba(40, 167, 69, 0.3)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  }
 };
-
-const tableWrapper = {
-  overflowX: 'auto',
-  background: '#fff',
-  borderRadius: 6
-};
-
-const tableStyle = {
-  width: '100%',
-  background: '#fff',
-  color: '#000',
-  borderCollapse: 'collapse'
-};
-
-const theadStyle = {
-  background: '#007bff',
-  color: '#fff'
-};
-
-const theadSticky = {
-  background: '#007bff',
-  color: '#fff',
-  position: 'sticky',
-  top: 0,
-  zIndex: 10
-};
-
-const yearSelect = {
-  marginTop: 4,
-  padding: 4,
-  fontSize: 12,
-  borderRadius: 4
-};
-
-const yearRow = {
-  background: '#e9f5ff',
-  fontWeight: 700,
-  color: '#0056b3',
-  padding: 10
-};
-
-const fieldLabel = { padding: 14, fontWeight: 600 };
-const fieldValue = { padding: 14 };
-const emptyCell = { padding: 20, textAlign: 'center' };
-
-const btnPrimary = { padding: '8px 14px', background: '#007bff', color: '#fff', border: 'none', borderRadius: 5 };
-const btnSecondary = { padding: '8px 14px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: 5 };
-const btnEdit = { marginRight: 6, padding: '6px 10px', background: '#ffc107', border: 'none', borderRadius: 4 };
-const btnDelete = { padding: '6px 10px', background: '#dc3545', color: '#fff', border: 'none', borderRadius: 4 };
-const btnSave = { padding: '12px 20px', background: '#28a745', color: '#fff', border: 'none', borderRadius: 6, fontSize: 16 };
 
 export default ManageResults;
