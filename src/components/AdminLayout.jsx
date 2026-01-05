@@ -71,7 +71,6 @@ const AdminLayout = ({ children }) => {
               { to: '/admin/manage-history', label: 'Manage History' },
               { to: '/admin/manage-events', label: 'Manage Events' },
               { to: '/admin/manage-gallery', label: 'Manage Gallery' },
-              { to: '/admin/manage-achievements', label: 'Manage Achievements' },
               { to: '/admin/manage-results', label: 'Manage Results' },
               { to: '/admin/media', label: 'Media' },
             ].map((item) => (
