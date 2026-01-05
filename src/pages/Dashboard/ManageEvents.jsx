@@ -16,28 +16,25 @@ const ManageEvents = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const res = await api.get('/events');
-        const events = res.data || [];
+        const res = await api.get('/home');
+        const home = res.data || {};
 
-        setBoxContent('Events Overview');
+        setBoxContent(home.about || 'Events Overview');
 
-        const eventRows = events.map(e => ({
-          title: e.event_title || '',
-          overview: e.news_highlight || '',
-          url: e.venue || '',
-          urlFixed: true
-        }));
+        const highlights = home.highlights || [];
 
         setRows(
-          eventRows.length > 0
-            ? eventRows
+          highlights.length > 0
+            ? highlights
             : [{ title: '', overview: '', url: '', urlFixed: false }]
         );
 
         setError('');
       } catch (err) {
         console.error('Load error:', err.response?.data || err);
-        setError('Server error while loading data.');
+        setError('Server error while loading data. Using default data for recovery.');
+        // Data recovery: set default rows so user can still edit
+        setRows([{ title: '', overview: '', url: '', urlFixed: false }]);
       } finally {
         setLoading(false);
       }
@@ -199,8 +196,6 @@ const ManageEvents = () => {
 
         {/* TABLE */}
         <div style={boxStyle}>
-          <h2 style={boxTitle}>Title / Overview / URL</h2>
-
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#e6f2ff' }}>
