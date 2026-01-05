@@ -54,7 +54,6 @@ const AdminDashboard = () => {
           {[
             "Manage Events",
             "Manage Gallery",
-            "Manage Achievements",
             "Manage Results",
             "Manage Home",
             "Manage About",

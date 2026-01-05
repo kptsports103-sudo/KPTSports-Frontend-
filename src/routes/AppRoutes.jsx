@@ -16,7 +16,6 @@ import Events from '../pages/Events';
 
 import Gallery from '../pages/Gallery';
 
-import Achievements from '../pages/Achievements';
 
 import Results from '../pages/Results';
 
@@ -34,7 +33,6 @@ import ManageEvents from '../pages/Dashboard/ManageEvents';
 
 import ManageGallery from '../pages/Dashboard/ManageGallery';
 
-import ManageAchievements from '../pages/Dashboard/ManageAchievements';
 
 import ManageResults from '../pages/Dashboard/ManageResults';
 
@@ -53,7 +51,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 
 const AppRoutes = () => {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AppContent />
     </Router>
   );
@@ -83,7 +81,6 @@ const AppContent = () => {
         <Route path="/history" element={<History />} />
         <Route path="/events" element={<Events />} />
         <Route path="/gallery" element={<Gallery />} />
-        <Route path="/achievements" element={<Achievements />} />
         <Route path="/results" element={<Results />} />
         <Route path="/login" element={<Login />} />
         <Route path="/otp-verify" element={<OTPVerify />} />
@@ -98,7 +95,6 @@ const AppContent = () => {
         <Route path="/admin/manage-history" element={<ProtectedRoute role="admin"><ManageHistory /></ProtectedRoute>} />
         <Route path="/admin/manage-events" element={<ProtectedRoute role="admin"><ManageEvents /></ProtectedRoute>} />
         <Route path="/admin/manage-gallery" element={<ProtectedRoute role="admin"><ManageGallery /></ProtectedRoute>} />
-        <Route path="/admin/manage-achievements" element={<ProtectedRoute role="admin"><ManageAchievements /></ProtectedRoute>} />
         <Route path="/admin/manage-results" element={<ProtectedRoute role="admin"><ManageResults /></ProtectedRoute>} />
       </Routes>
 

@@ -2,11 +2,18 @@ import { useEffect, useState } from 'react';
 
 import api from '../services/api';
 
+const medalPriority = {
+  Gold: 1,
+  Silver: 2,
+  Bronze: 3
+};
+
 const Results = () => {
 
   const [results, setResults] = useState([]);
   const [groupResults, setGroupResults] = useState([]);
   const [activeImage, setActiveImage] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
 
@@ -15,7 +22,7 @@ const Results = () => {
       .catch(err => console.error('Failed to fetch individual results:', err));
 
     // Fetch group results
-    api.get('/results/groups').then(res => setGroupResults(res.data || []))
+    api.get('/group-results').then(res => setGroupResults(res.data || []))
       .catch(err => console.error('Failed to fetch group results:', err));
 
   }, []);
@@ -96,12 +103,34 @@ const Results = () => {
                   }}>
                     🏅 Individual Results
                   </h3>
+                  <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                    <input
+                      type="text"
+                      placeholder="Search by Name or Event"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      style={{
+                        padding: '10px 14px',
+                        width: '280px',
+                        borderRadius: 8,
+                        border: '2px solid #ddd',
+                        fontSize: 14
+                      }}
+                    />
+                  </div>
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
                     gap: '1.5rem'
                   }}>
-                    {yearResults.individual.map(result => (
+                    {[...yearResults.individual]
+                      .filter(result =>
+                        (result.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        (result.event || '').toLowerCase().includes(searchTerm.toLowerCase())
+                      )
+                      .sort((a, b) => (medalPriority[a.medal] || 999) - (medalPriority[b.medal] || 999))
+                      .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'en', { sensitivity: 'base' }))
+                      .map(result => (
                       <div
                         key={result._id}
                         style={{

@@ -4,6 +4,12 @@ import AdminLayout from '../../components/AdminLayout';
 
 const MEDALS = ['Gold', 'Silver', 'Bronze'];
 
+const medalPriority = {
+  Gold: 1,
+  Silver: 2,
+  Bronze: 3
+};
+
 const ManageResults = () => {
   const [data, setData] = useState([]); // [{ year, results: [] }]
   const [groupData, setGroupData] = useState([]); // [{ year, results: [] }]
@@ -30,6 +36,9 @@ const ManageResults = () => {
     medal: '',
     imageUrl: ''
   });
+
+  const [successMessage, setSuccessMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Check authentication on component mount
   useEffect(() => {
@@ -61,7 +70,10 @@ const ManageResults = () => {
       // group results by year (Players-style)
       const grouped = res.data.reduce((acc, item) => {
         acc[item.year] = acc[item.year] || [];
-        acc[item.year].push(item);
+        acc[item.year].push({
+          ...item,
+          imageUrl: item.imageUrl || null
+        });
         return acc;
       }, {});
 
@@ -89,13 +101,16 @@ const ManageResults = () => {
   const fetchGroupResults = async () => {
     try {
       console.log('Fetching group results...');
-      const res = await api.get('/results/groups');
+      const res = await api.get('/group-results');
       console.log('Group fetch response:', res.data);
 
       // group results by year
       const grouped = res.data.reduce((acc, item) => {
         acc[item.year] = acc[item.year] || [];
-        acc[item.year].push(item);
+        acc[item.year].push({
+          ...item,
+          imageUrl: item.imageUrl || null
+        });
         return acc;
       }, {});
 
@@ -125,9 +140,13 @@ const ManageResults = () => {
         console.log('Create response:', response.data);
       }
 
-      resetForm();
-      setIsEditing(false);
+      setSuccessMessage('Data saved successfully');
       fetchResults();
+      setTimeout(() => {
+        setSuccessMessage('');
+        setIsEditing(false);
+        resetForm();
+      }, 1200);
     } catch (error) {
       console.error('Save error:', error);
 
@@ -189,17 +208,21 @@ const ManageResults = () => {
       };
 
       if (editingGroupId) {
-        const response = await api.put(`/results/groups/${editingGroupId}`, payload);
+        const response = await api.put(`/group-results/${editingGroupId}`, payload);
         console.log('Group update response:', response.data);
       } else {
-        const response = await api.post('/results/groups', payload);
+        const response = await api.post('/group-results', payload);
         console.log('Group create response:', response.data);
       }
 
-      setIsGroupEditing(false);
-      setEditingGroupId(null);
-      setGroupForm({ teamName: '', event: '', year: '', members: '', medal: '', imageUrl: '' });
+      setSuccessMessage('Data saved successfully');
       fetchGroupResults();
+      setTimeout(() => {
+        setSuccessMessage('');
+        setIsGroupEditing(false);
+        setEditingGroupId(null);
+        setGroupForm({ teamName: '', event: '', year: '', members: '', medal: '', imageUrl: '' });
+      }, 1200);
     } catch (error) {
       console.error('Group save error:', error);
 
@@ -232,7 +255,7 @@ const ManageResults = () => {
     if (!window.confirm('Delete team result?')) return;
     try {
       console.log('Deleting group result:', id);
-      const response = await api.delete(`/results/groups/${id}`);
+      const response = await api.delete(`/group-results/${id}`);
       console.log('Group delete response:', response.data);
       fetchGroupResults();
     } catch (error) {
@@ -368,6 +391,22 @@ const ManageResults = () => {
               <div style={styles.yearBar} />
               <h3 style={styles.yearTitle}>Year: {yearBlock.year}</h3>
 
+              <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                <input
+                  type="text"
+                  placeholder="Search by Name or Event"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{
+                    padding: '10px 14px',
+                    width: '280px',
+                    borderRadius: 8,
+                    border: '2px solid #ddd',
+                    fontSize: 14
+                  }}
+                />
+              </div>
+
               <div style={styles.tableContainer}>
                 <table style={styles.table}>
                   <thead>
@@ -380,7 +419,14 @@ const ManageResults = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {yearBlock.results.map(item => (
+                    {[...yearBlock.results]
+                      .filter(item =>
+                        (item.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        (item.event || '').toLowerCase().includes(searchTerm.toLowerCase())
+                      )
+                      .sort((a, b) => (medalPriority[a.medal] || 999) - (medalPriority[b.medal] || 999))
+                      .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'en', { sensitivity: 'base' }))
+                      .map(item => (
                       <tr
                         key={item._id}
                         style={styles.bodyRow}
@@ -418,19 +464,19 @@ const ManageResults = () => {
                           )}
                         </td>
                         <td style={styles.cell}>
-                          <div style={styles.buttonGroup}>
-                            <button
+                          <div style={styles.leftIconGroup}>
+                            <img
+                              src="/Edit button.png"
+                              alt="Edit"
+                              style={styles.iconButton}
                               onClick={() => handleEdit(item)}
-                              style={styles.btnEdit}
-                            >
-                              ✏️ Edit
-                            </button>
-                            <button
+                            />
+                            <img
+                              src="/Delete button.png"
+                              alt="Delete"
+                              style={styles.iconButton}
                               onClick={() => handleDelete(item._id)}
-                              style={styles.btnDelete}
-                            >
-                              🗑️ Delete
-                            </button>
+                            />
                           </div>
                         </td>
                       </tr>
@@ -496,8 +542,20 @@ const ManageResults = () => {
                             ) : '—'}
                           </td>
                           <td style={styles.cell}>
-                            <button onClick={() => handleGroupEdit(item)} style={styles.btnEdit}>Edit</button>
-                            <button onClick={() => handleGroupDelete(item._id)} style={styles.btnDelete}>Delete</button>
+                            <div style={styles.leftIconGroup}>
+                              <img
+                                src="/Edit button.png"
+                                alt="Edit"
+                                style={styles.iconButton}
+                                onClick={() => handleGroupEdit(item)}
+                              />
+                              <img
+                                src="/Delete button.png"
+                                alt="Delete"
+                                style={styles.iconButton}
+                                onClick={() => handleGroupDelete(item._id)}
+                              />
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -510,6 +568,11 @@ const ManageResults = () => {
         {/* INDIVIDUAL EDIT MODE */}
         {isEditing && !isGroupEditing && (
           <form onSubmit={handleSubmit}>
+            {successMessage && (
+              <div style={{ color: '#00ff99', marginBottom: 12, fontWeight: 600, textAlign: 'center' }}>
+                {successMessage}
+              </div>
+            )}
             <table style={styles.table}>
               <tbody>
                 <Field label="Name">
@@ -556,7 +619,7 @@ const ManageResults = () => {
 
                 <Field label="Image URL">
                   <input
-                    type="url"
+                    type="text"
                     style={styles.input}
                     value={form.imageUrl}
                     onChange={e => setForm({ ...form, imageUrl: e.target.value })}
@@ -566,8 +629,16 @@ const ManageResults = () => {
             </table>
 
             <div style={{ textAlign: 'center', marginTop: 16 }}>
-              <button type="submit" style={styles.btnSave}>
-                💾 Save
+              <button type="submit" style={{
+                ...styles.btnSaveWithIcon,
+                background: 'linear-gradient(135deg, #28a745, #218838)'
+              }}>
+                <img
+                  src="/Save button.png"
+                  alt="Save"
+                  style={styles.saveIconLeft}
+                />
+                Save
               </button>
             </div>
           </form>
@@ -576,6 +647,11 @@ const ManageResults = () => {
         {/* GROUP EDIT MODE */}
         {isGroupEditing && (
           <form onSubmit={handleGroupSubmit}>
+            {successMessage && (
+              <div style={{ color: '#00ff99', marginBottom: 12, fontWeight: 600, textAlign: 'center' }}>
+                {successMessage}
+              </div>
+            )}
             <table style={styles.table}>
               <tbody>
                 <Field label="Team Name">
@@ -635,8 +711,16 @@ const ManageResults = () => {
             </table>
 
             <div style={{ textAlign: 'center', marginTop: 16 }}>
-              <button type="submit" style={styles.btnSave}>
-                💾 Save Group
+              <button type="submit" style={{
+                ...styles.btnSaveWithIcon,
+                background: 'linear-gradient(135deg, #28a745, #218838)'
+              }}>
+                <img
+                  src="/Save button.png"
+                  alt="Save"
+                  style={styles.saveIconLeft}
+                />
+                Save Group
               </button>
             </div>
           </form>
@@ -674,8 +758,8 @@ const styles = {
   yearSelect: {
     padding: '10px 16px',
     borderRadius: 8,
-    background: 'rgba(255,255,255,0.1)',
-    color: '#fff',
+    background: '#fff',
+    color: '#000',
     border: '2px solid rgba(255,255,255,0.2)',
     fontSize: 14,
     fontWeight: 500,
@@ -943,7 +1027,46 @@ const styles = {
     boxShadow: '0 4px 16px rgba(40, 167, 69, 0.3)',
     textTransform: 'uppercase',
     letterSpacing: '0.5px'
-  }
+  },
+
+  btnSaveWithIcon: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '12px 28px',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 8,
+    fontSize: 16,
+    fontWeight: 700,
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 16px rgba(40, 167, 69, 0.3)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  },
+
+  saveIconLeft: {
+    width: '22px',
+    height: '22px',
+    objectFit: 'contain'
+  },
+
+  leftIconGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: '10px'
+  },
+
+  iconButton: {
+    width: '28px',
+    height: '28px',
+    cursor: 'pointer',
+    transition: 'transform 0.2s ease',
+  },
+
 };
 
 export default ManageResults;
+

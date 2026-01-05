@@ -9,7 +9,6 @@ const Navbar = () => {
         <li><Link to="/history">History</Link></li>
         <li><Link to="/events">Events</Link></li>
         <li><Link to="/gallery">Gallery</Link></li>
-        <li><Link to="/achievements">Achievements</Link></li>
         <li><Link to="/results">Results</Link></li>
       </ul>
     </nav>
