@@ -184,8 +184,22 @@ const Performance = ({ isStudent = false }) => {
 
           {isEditMode && (
             <>
-              <button onClick={addRow} style={styles.successBtn}>
-                + Add Row
+              <button
+                onClick={addRow}
+                style={{
+                  ...styles.successBtn,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <img
+                  src="/Add button.png"
+                  width={20}
+                  height={20}
+                  alt="Add"
+                />
+                Add Row
               </button>
 
               <button onClick={saveAll} style={styles.primaryBtn}>

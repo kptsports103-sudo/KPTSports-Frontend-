@@ -143,10 +143,18 @@ const ManageHome = () => {
                 color: '#fff',
                 border: 'none',
                 borderRadius: '5px',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}
             >
-              ✏️ Edit
+              <img
+                src="/Edit button.png"
+                alt="Edit"
+                style={{ width: '16px', height: '16px' }}
+              />
+              Edit
             </button>
           ) : (
             <button
@@ -343,10 +351,18 @@ const ManageHome = () => {
                           border: 'none',
                           borderRadius: '5px',
                           cursor: 'pointer',
-                          marginTop: '10px'
+                          marginTop: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
                         }}
                       >
-                        ➕ Add Banner
+                        <img
+                          src="/Add button.png"
+                          alt="Add"
+                          style={{ width: '18px', height: '18px' }}
+                        />
+                        Add Banner
                       </button>
                     </td>
                   </tr>
@@ -398,10 +414,18 @@ const ManageHome = () => {
                           border: 'none',
                           borderRadius: '5px',
                           cursor: 'pointer',
-                          marginTop: '10px'
+                          marginTop: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
                         }}
                       >
-                        ➕ Add Highlight
+                        <img
+                          src="/Add button.png"
+                          alt="Add"
+                          style={{ width: '16px', height: '16px' }}
+                        />
+                        Add Highlight
                       </button>
                     </td>
                   </tr>
@@ -422,12 +446,21 @@ const ManageHome = () => {
                   fontWeight: 'bold',
                   cursor: 'pointer',
                   boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                  transition: 'background 0.3s'
+                  transition: 'background 0.3s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  justifyContent: 'center'
                 }}
                 onMouseOver={(e) => e.target.style.background = '#218838'}
                 onMouseOut={(e) => e.target.style.background = '#28a745'}
               >
-                💾 Save Changes
+                <img
+                  src="/Save button.png"
+                  alt="Save"
+                  style={{ width: '18px', height: '18px' }}
+                />
+                Save Changes
               </button>
             </div>
           </form>

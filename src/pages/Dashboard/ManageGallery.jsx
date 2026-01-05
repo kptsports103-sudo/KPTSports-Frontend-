@@ -131,9 +131,22 @@ const ManageGallery = () => {
           {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
-              style={{ padding: '8px 14px', background: '#dee2e6', color: '#000', border: '1px solid #adb5bd' }}
+              style={{
+                padding: '8px 14px',
+                background: '#dee2e6',
+                color: '#000',
+                border: '1px solid #adb5bd',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
             >
-              ➕ Add Gallery
+              <img
+                src="/Edit button.png"
+                alt="Edit"
+                style={{ width: '16px', height: '16px' }}
+              />
+              Edit
             </button>
           ) : (
             <button
@@ -247,9 +260,21 @@ const ManageGallery = () => {
                     <button
                       type="button"
                       onClick={addRow}
-                      style={{ padding: '8px 14px', border: '1px solid #adb5bd', background: '#dee2e6' }}
+                      style={{
+                        padding: '8px 14px',
+                        border: '1px solid #adb5bd',
+                        background: '#dee2e6',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
                     >
-                      ➕ Add Row
+                      <img
+                        src="/Add button.png"
+                        alt="Add"
+                        style={{ width: '16px', height: '16px' }}
+                      />
+                      Add Row
                     </button>
                   </td>
                 </tr>
@@ -270,8 +295,22 @@ const ManageGallery = () => {
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
               <button
                 type="submit"
-                style={{ padding: '12px 24px', border: '1px solid #adb5bd', background: '#dee2e6', fontWeight: 'bold' }}
+                style={{
+                  padding: '12px 24px',
+                  border: '1px solid #adb5bd',
+                  background: '#dee2e6',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  justifyContent: 'center'
+                }}
               >
+                <img
+                  src="/Save button.png"
+                  alt="Save"
+                  style={{ width: '18px', height: '18px' }}
+                />
                 Save Gallery
               </button>
             </div>

@@ -77,10 +77,28 @@ const ManageAbout = () => {
           <h2 style={title}>Manage About Page</h2>
           <button
             onClick={() => setIsEditing(prev => !prev)}
-            style={isEditing ? btnCancel : btnEdit}
+            style={{
+              ...(isEditing ? btnCancel : btnEdit),
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
             disabled={loading}
           >
-            {isEditing ? 'Cancel' : 'Edit'}
+            {!isEditing ? (
+              <>
+                <img
+                  src="/Edit button.png"
+                  alt="Edit"
+                  style={{ width: '16px', height: '16px' }}
+                />
+                Edit
+              </>
+            ) : (
+              <>
+                ❌ Cancel
+              </>
+            )}
           </button>
         </header>
 
@@ -164,8 +182,29 @@ const ManageAbout = () => {
             </table>
 
             <div style={saveWrap}>
-              <button type="submit" style={btnSave} disabled={loading}>
-                {loading ? 'Saving...' : 'Save Changes'}
+              <button
+                type="submit"
+                style={{
+                  ...btnSave,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+                disabled={loading}
+              >
+                {loading ? (
+                  'Saving...'
+                ) : (
+                  <>
+                    <img
+                      src="/Save button.png"
+                      alt="Save"
+                      style={{ width: '18px', height: '18px' }}
+                    />
+                    Save Changes
+                  </>
+                )}
               </button>
             </div>
           </form>

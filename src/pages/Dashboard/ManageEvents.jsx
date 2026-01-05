@@ -16,23 +16,21 @@ const ManageEvents = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const res = await api.get('/home');
-        const data = res.data || {};
+        const res = await api.get('/events');
+        const events = res.data || [];
 
-        setBoxContent(data.about || '');
+        setBoxContent('Events Overview');
 
-        const highlights = Array.isArray(data.highlights)
-          ? data.highlights.map(h => ({
-              title: h.title || '',
-              overview: h.overview || '',
-              url: h.url || '',
-              urlFixed: true
-            }))
-          : [];
+        const eventRows = events.map(e => ({
+          title: e.event_title || '',
+          overview: e.news_highlight || '',
+          url: e.venue || '',
+          urlFixed: true
+        }));
 
         setRows(
-          highlights.length > 0
-            ? highlights
+          eventRows.length > 0
+            ? eventRows
             : [{ title: '', overview: '', url: '', urlFixed: false }]
         );
 
@@ -136,12 +134,47 @@ const ManageEvents = () => {
 
         <div style={{ display: 'flex', gap: '10px', margin: '20px 0' }}>
           {!isEditing && (
-            <button onClick={() => setIsEditing(true)} style={btnBlue}>Edit</button>
+            <button 
+              onClick={() => setIsEditing(true)} 
+              style={{
+                ...btnBlue,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <img
+                src="/Edit button.png"
+                alt="Edit"
+                style={{ width: '16px', height: '16px' }}
+              />
+              Edit
+            </button>
           )}
           {isEditing && (
             <>
-              <button onClick={saveAll} style={btnGreen} disabled={saving}>
-                {saving ? 'Saving...' : 'Save All'}
+              <button 
+                onClick={saveAll} 
+                style={{
+                  ...btnGreen,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }} 
+                disabled={saving}
+              >
+                {saving ? (
+                  'Saving...'
+                ) : (
+                  <>
+                    <img
+                      src="/Save button.png"
+                      alt="Save"
+                      style={{ width: '16px', height: '16px' }}
+                    />
+                    Save All
+                  </>
+                )}
               </button>
               <button onClick={() => setIsEditing(false)} style={btnGrey}>Back</button>
             </>
@@ -229,8 +262,22 @@ const ManageEvents = () => {
           </table>
 
           {isEditing && (
-            <button onClick={addRow} style={{ ...btnBlue, marginTop: '15px' }}>
-              + Add Row
+            <button 
+              onClick={addRow} 
+              style={{
+                ...btnBlue,
+                marginTop: '15px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <img
+                src="/Add button.png"
+                alt="Add"
+                style={{ width: '16px', height: '16px' }}
+              />
+              Add Row
             </button>
           )}
         </div>

@@ -52,7 +52,22 @@ const TrainingSchedule = ({ isStudent = false }) => {
 
           {isEditMode && (
             <>
-              <button onClick={addRow} style={styles.addBtn}>+ Add Row</button>
+              <button
+                onClick={addRow}
+                style={{
+                  ...styles.addBtn,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <img
+                  src="/Add button.png"
+                  alt="Add"
+                  style={{ width: 16, height: 16 }}
+                />
+                Add Row
+              </button>
 
               <button
                 onClick={save}
@@ -144,14 +159,43 @@ const TrainingSchedule = ({ isStudent = false }) => {
 
               <td style={styles.actionCell}>
                 {!isStudent && isEditMode && (
-                  <button
-                    onClick={() => setConfirmIndex(index)}
-                    style={styles.iconBtn}
-                    aria-label="Delete schedule"
-                    title="Delete schedule"
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      gap: "10px",
+                    }}
                   >
-                    <img src="/Delete button.png" width={20} height={20} alt="Delete" />
-                  </button>
+                    {/* Save Row */}
+                    <button
+                      onClick={save}
+                      style={styles.iconBtn}
+                      aria-label="Save schedule"
+                      title="Save schedule"
+                    >
+                      <img
+                        src="/Save button.png"
+                        width={20}
+                        height={20}
+                        alt="Save"
+                      />
+                    </button>
+
+                    {/* Delete Row */}
+                    <button
+                      onClick={() => setConfirmIndex(index)}
+                      style={styles.iconBtn}
+                      aria-label="Delete schedule"
+                      title="Delete schedule"
+                    >
+                      <img
+                        src="/Delete button.png"
+                        width={20}
+                        height={20}
+                        alt="Delete"
+                      />
+                    </button>
+                  </div>
                 )}
               </td>
             </tr>

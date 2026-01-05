@@ -56,13 +56,31 @@ const ManageHistory = () => {
     <AdminLayout>
       <div style={page}>
         <header style={header}>
-          <h2 style={title}>Manage About – Timeline</h2>
+          <h2 style={title}>Manage History – Timeline</h2>
           <button
             onClick={() => setIsEditing(v => !v)}
-            style={isEditing ? btnCancel : btnEdit}
+            style={{
+              ...(isEditing ? btnCancel : btnEdit),
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
             disabled={loading}
           >
-            {isEditing ? 'Cancel' : 'Edit'}
+            {!isEditing ? (
+              <>
+                <img
+                  src="/Edit button.png"
+                  alt="Edit"
+                  style={{ width: '16px', height: '16px' }}
+                />
+                Edit
+              </>
+            ) : (
+              <>
+                ❌ Cancel
+              </>
+            )}
           </button>
         </header>
 
@@ -141,11 +159,45 @@ const ManageHistory = () => {
             </table>
 
             <div style={actions}>
-              <button type="button" onClick={addRow} style={btnAdd}>
-                + Add Row
+              <button
+                type="button"
+                onClick={addRow}
+                style={{
+                  ...btnAdd,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <img
+                  src="/Add button.png"
+                  alt="Add"
+                  style={{ width: '18px', height: '18px' }}
+                />
+                Add Row
               </button>
-              <button type="submit" style={btnSave} disabled={loading}>
-                {loading ? 'Saving...' : 'Save Changes'}
+              <button
+                type="submit"
+                style={{
+                  ...btnSave,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                disabled={loading}
+              >
+                {loading ? (
+                  'Saving...'
+                ) : (
+                  <>
+                    <img
+                      src="/Save button.png"
+                      alt="Save"
+                      style={{ width: '18px', height: '18px' }}
+                    />
+                    Save Changes
+                  </>
+                )}
               </button>
             </div>
           </form>

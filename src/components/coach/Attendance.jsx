@@ -122,7 +122,7 @@ const Attendance = ({ isStudent = false }) => {
           {isEditMode && (
             <>
               <button onClick={addRow} style={styles.successBtn}>
-                <img src="/Save button.png" width={20} height={20} alt="Add" />
+                <img src="/Add button.png" width={20} height={20} alt="Add" />
                 Add Row
               </button>
 
@@ -155,10 +155,21 @@ const Attendance = ({ isStudent = false }) => {
               {isEditMode && (
                 <button
                   onClick={addYear}
-                  style={styles.addYearBtn}
+                  style={{
+                    ...styles.addYearBtn,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
                   title="Add Year"
                 >
-                  + Add Year
+                  <img
+                    src="/Add button.png"
+                    width={16}
+                    height={16}
+                    alt="Add"
+                  />
+                  Add Year
                 </button>
               )}
             </div>

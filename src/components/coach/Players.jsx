@@ -368,7 +368,22 @@ const Players = ({ isStudent = false }) => {
           )}
 
           {isEditMode && (
-            <button onClick={addYear} style={styles.addBtn}>+ Add New Year</button>
+            <button
+              onClick={addYear}
+              style={{
+                ...styles.addBtn,
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <img
+                src="/Add button.png"
+                alt="Add"
+                style={{ width: 16, height: 16 }}
+              />
+              Add New Year
+            </button>
           )}
         </div>
       )}
@@ -621,7 +636,22 @@ const Players = ({ isStudent = false }) => {
 
             {!isStudent && isEditMode && (
               <div style={{ marginBottom: '10px' }}>
-                <button onClick={() => addPlayerRow(yearData.year)} style={styles.addBtn}>+ Add Player</button>
+                <button
+                  onClick={() => addPlayerRow(yearData.year)}
+                  style={{
+                    ...styles.addBtn,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <img
+                    src="/Add button.png"
+                    alt="Add"
+                    style={{ width: 16, height: 16 }}
+                  />
+                  Add Player
+                </button>
               </div>
             )}
           </div>
