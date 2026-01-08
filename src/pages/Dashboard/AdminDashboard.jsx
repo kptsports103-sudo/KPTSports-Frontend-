@@ -1,3 +1,5 @@
+
+
 import { Link } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 
@@ -27,26 +29,49 @@ const AdminDashboard = () => {
 
   const topYears = [...medalData].sort((a, b) => b.total - a.total);
 
+  // Placeholder stats - replace with real data from API
+  const stats = [
+    { title: "Total Users", value: 128, icon: "👤" },
+    { title: "Coaches", value: 12, icon: "🧑‍🏫" },
+    { title: "Students", value: 116, icon: "🎓" },
+    { title: "Pages", value: 8, icon: "📄" },
+    { title: "Media Files", value: 342, icon: "🖼️" },
+    { title: "Errors (24h)", value: 1, icon: "⚠️" },
+  ];
+
   return (
     <AdminLayout>
+      <div className="dashboard-title">Admin Dashboard</div>
+      <div className="dashboard-subtitle">System Overview & Analytics</div>
+
+      {/* SYSTEM OVERVIEW */}
+      <div className="stats-grid">
+        {stats.map((stat, index) => (
+          <div key={index} className="stat-card">
+            <div style={{ fontSize: "32px", marginBottom: "10px" }}>{stat.icon}</div>
+            <h3>{stat.value}</h3>
+            <p>{stat.title}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* ANALYTICS */}
       <div
         style={{
-          minHeight: "100vh",
-          backgroundColor: "#0f3b2e",
+          backgroundColor: "#ffffff",
+          borderRadius: "12px",
           padding: "20px",
-          color: "#fff"
+          marginBottom: "40px",
+          color: "#000"
         }}
       >
-        <h1 style={{ fontSize: "34px", fontWeight: "700", marginBottom: "25px" }}>
-          Admin Dashboard
-        </h1>
 
         {/* =====================
             MEDAL TALLY (2024 & 2025)
         ====================== */}
-        <h2 style={{ marginBottom: "15px" }}>
-          📈 Medal Tally by Year (2024 – 2025)
-        </h2>
+        <h3 style={{ marginBottom: "15px", fontSize: "18px" }}>
+          Medal Tally by Year (2024 – 2025)
+        </h3>
 
         <div
           style={{

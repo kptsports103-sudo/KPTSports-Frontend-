@@ -45,6 +45,15 @@ import ManageHistory from '../pages/Dashboard/ManageHistory';
 import Media from '../pages/Dashboard/Media';
 import AddMedia from '../pages/Dashboard/AddMedia';
 
+import IAMUsers from '../pages/admin/IAMUsers';
+import CreateUser from '../pages/admin/CreateUser';
+import AuditLogs from '../pages/admin/AuditLogs';
+import ErrorDashboard from '../pages/admin/ErrorDashboard';
+import MediaStats from '../pages/admin/MediaStats';
+import LoginActivityPage from '../pages/admin/LoginActivityPage';
+import Approvals from '../pages/admin/Approvals';
+import AbuseLogs from '../pages/admin/AbuseLogs';
+
 import SportsDashboard from '../pages/SportsDashboard';
 
 import ProtectedRoute from '../components/ProtectedRoute';
@@ -96,6 +105,14 @@ const AppContent = () => {
         <Route path="/admin/manage-events" element={<ProtectedRoute role="admin"><ManageEvents /></ProtectedRoute>} />
         <Route path="/admin/manage-gallery" element={<ProtectedRoute role="admin"><ManageGallery /></ProtectedRoute>} />
         <Route path="/admin/manage-results" element={<ProtectedRoute role="admin"><ManageResults /></ProtectedRoute>} />
+        <Route path="/admin/iam/users" element={<ProtectedRoute role="admin"><IAMUsers /></ProtectedRoute>} />
+        <Route path="/admin/iam/create" element={<ProtectedRoute role="admin"><CreateUser /></ProtectedRoute>} />
+        <Route path="/admin/audit-logs" element={<ProtectedRoute role="admin"><AuditLogs /></ProtectedRoute>} />
+        <Route path="/admin/errors" element={<ProtectedRoute role="admin"><ErrorDashboard /></ProtectedRoute>} />
+        <Route path="/admin/media-stats" element={<ProtectedRoute role="admin"><MediaStats /></ProtectedRoute>} />
+        <Route path="/admin/login-activity" element={<ProtectedRoute role="admin"><LoginActivityPage /></ProtectedRoute>} />
+        <Route path="/admin/approvals" element={<ProtectedRoute role="admin"><Approvals /></ProtectedRoute>} />
+        <Route path="/admin/abuse-logs" element={<ProtectedRoute role="admin"><AbuseLogs /></ProtectedRoute>} />
       </Routes>
 
       {!isAuthPage && <Footer />}
