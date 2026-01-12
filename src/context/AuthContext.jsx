@@ -1,81 +1,67 @@
-import { createContext, useState, useEffect, useContext } from 'react';
-import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
-import api from '../services/api';
+import { createContext, useContext, useMemo, useCallback, useState } from "react";
+import { useUser, useClerk } from '@clerk/clerk-react';
+import api from '../api/axios';
+import { setAccessToken } from './tokenStorage';
 
-export const AuthContext = createContext();
+const AuthContext = createContext(null);
 
-export const useAuth = () => useContext(AuthContext);
+export const AuthProvider = ({ children }) => {
+  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+  const { signOut } = useClerk();
+  const [customUser, setCustomUser] = useState(null);
 
-export default function AuthProvider({ children }) {
-  const { user: clerkUser, isLoaded } = useUser();
-  const { getToken } = useClerkAuth();
-  const [user, setUser] = useState(null);
-  const [checking, setChecking] = useState(true);
+  const user = clerkUser ? {
+    id: clerkUser.id,
+    name: clerkUser.fullName || clerkUser.firstName,
+    email: clerkUser.primaryEmailAddress?.emailAddress,
+    role: "admin" // Default role, can be customized based on metadata
+  } : customUser;
 
-  useEffect(() => {
-    if (isLoaded) {
-      if (clerkUser) {
-        // User signed in with Clerk (Google)
-        handleClerkUser();
-      } else {
-        // Check for custom login
-        const token = localStorage.getItem('token');
-        const userData = localStorage.getItem('user');
-        if (token && userData) {
-          setUser(JSON.parse(userData));
-        }
-      }
-      setChecking(false);
-    }
-  }, [clerkUser, isLoaded]);
-
-  const handleClerkUser = async () => {
-    try {
-      const token = await getToken();
-      // Send token to backend to get or create user
-      const response = await api.post('/auth/clerk-login', { token });
-      const { token: jwtToken, user: userData } = response.data;
-      localStorage.setItem('token', jwtToken);
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
-    } catch (error) {
-      console.error('Clerk login error:', error);
-    }
-  };
-
-  const login = async (email, password, role) => {
+  const login = useCallback(async (email, password, role) => {
     const response = await api.post('/auth/login', { email, password, role });
     const data = response.data;
     if (data.token) {
-      // Direct login for coach/student
-      localStorage.setItem('token', data.token);
+      // Direct login
+      setAccessToken(data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      setUser(data.user);
+      setCustomUser(data.user);
       return { directLogin: true };
     } else {
-      // OTP for admin
-      return data; // { message: 'OTP sent...' }
+      // OTP
+      return { directLogin: false };
     }
-  };
+  }, []);
 
-  const verifyOTP = async (email, otp) => {
+  const verifyOTP = useCallback(async (email, otp) => {
     const response = await api.post('/auth/verify-otp', { email, otp });
-    const { token, user: userData } = response.data;
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
-    return userData;
-  };
+    const data = response.data;
+    setAccessToken(data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    setCustomUser(data.user);
+    return data.user;
+  }, []);
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-  };
+  const logout = useCallback(async () => {
+    if (clerkUser) {
+      await signOut();
+    } else {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+      setCustomUser(null);
+    }
+  }, [clerkUser, signOut]);
 
-  return (
-    <AuthContext.Provider value={{ user, login, verifyOTP, logout, checking }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
+  const value = useMemo(() => ({ user, login, logout, verifyOTP, isLoaded: clerkLoaded }), [user, login, logout, verifyOTP, clerkLoaded]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
+};
+
+export { AuthContext };
+
+export default AuthProvider;

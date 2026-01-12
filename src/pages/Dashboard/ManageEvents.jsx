@@ -3,13 +3,13 @@ import AdminLayout from '../../components/AdminLayout';
 import api from '../../services/api';
 
 const ManageEvents = () => {
-  const [isEditing, setIsEditing] = useState(false);
   const [boxContent, setBoxContent] = useState('');
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   /* ================= LOAD DATA ================= */
   useEffect(() => {
@@ -183,6 +183,8 @@ const ManageEvents = () => {
           <h2 style={boxTitle}>Box</h2>
           {isEditing ? (
             <textarea
+              id="boxContent"
+              name="boxContent"
               value={boxContent}
               onChange={(e) => setBoxContent(e.target.value)}
               style={textareaStyle}
@@ -211,6 +213,8 @@ const ManageEvents = () => {
                 <tr key={index}>
                   <td style={tdStyle}>
                     <input
+                      id={`title-${index}`}
+                      name={`title-${index}`}
                       value={row.title}
                       disabled={!isEditing}
                       onChange={(e) => handleChange(index, 'title', e.target.value)}
@@ -220,6 +224,8 @@ const ManageEvents = () => {
 
                   <td style={tdStyle}>
                     <textarea
+                      id={`overview-${index}`}
+                      name={`overview-${index}`}
                       value={row.overview}
                       disabled={!isEditing}
                       onChange={(e) => handleChange(index, 'overview', e.target.value)}
@@ -229,6 +235,8 @@ const ManageEvents = () => {
 
                   <td style={tdStyle}>
                     <input
+                      id={`url-${index}`}
+                      name={`url-${index}`}
                       value={row.url}
                       disabled={!isEditing || row.urlFixed}
                       onChange={(e) => handleChange(index, 'url', e.target.value)}

@@ -16,19 +16,11 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/manage-events', label: 'Manage Events', icon: '📅' },
     { path: '/admin/manage-gallery', label: 'Manage Gallery', icon: '🖼️' },
     { path: '/admin/manage-results', label: 'Manage Results', icon: '🏆' },
-    { path: '/admin/iam/users', label: 'IAM Users', icon: '👥' },
-    { path: '/admin/iam/create', label: 'Create User', icon: '➕' },
-    { path: '/admin/audit-logs', label: 'Audit Logs', icon: '📋' },
-    { path: '/admin/errors', label: 'Error Dashboard', icon: '⚠️' },
-    { path: '/admin/media-stats', label: 'Media Stats', icon: '📈' },
-    { path: '/admin/login-activity', label: 'Login Activity', icon: '🔐' },
-    { path: '/admin/approvals', label: 'Approvals', icon: '✅' },
-    { path: '/admin/abuse-logs', label: 'Abuse Logs', icon: '🚫' },
   ];
 
   const handleLogout = () => {
     // Clear authentication data
-    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
     navigate('/login');
   };

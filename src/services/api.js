@@ -8,7 +8,7 @@ const api = axios.create({
 
 api.interceptors.request.use(config => {
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
 
   if (token) {
 
@@ -28,7 +28,7 @@ api.interceptors.response.use(
 
     if (error.response && error.response.status === 401) {
 
-      localStorage.removeItem('token');
+      localStorage.removeItem('accessToken');
 
       localStorage.removeItem('user');
 

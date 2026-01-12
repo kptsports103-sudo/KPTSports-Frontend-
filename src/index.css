@@ -138,3 +138,47 @@ nav ul {
 .animate-fadeUp {
   animation: fadeUp 0.6s ease forwards;
 }
+
+@layer components {
+  .input {
+    @apply w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50;
+  }
+
+  .th {
+    @apply text-left px-3 py-2 text-xs font-semibold uppercase cursor-pointer;
+  }
+
+  .td {
+    @apply px-3 py-2;
+  }
+
+  .badge {
+    @apply px-2 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .badge-admin { @apply bg-purple-100 text-purple-700; }
+  .badge-coach { @apply bg-cyan-100 text-cyan-700; }
+  .badge-student { @apply bg-green-100 text-green-700; }
+  
+  .badge-active { @apply bg-green-100 text-green-700; }
+  .badge-inactive { @apply bg-red-100 text-red-700; }
+  
+  .input {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: border 0.2s, box-shadow 0.2s;
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+}

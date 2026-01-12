@@ -53,9 +53,9 @@ const Media = () => {
     // Delete from Cloudinary
     try {
       for (const f of item.files) {
-        await axios.delete(`http://localhost:5001/api/upload/${f.public_id}`, {
+        await axios.delete(`http://localhost:4000/api/upload/${f.public_id}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
           }
         });
       }

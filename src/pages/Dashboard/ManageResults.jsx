@@ -42,7 +42,7 @@ const ManageResults = () => {
 
   // Check authentication on component mount
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     const user = localStorage.getItem('user');
 
     if (!token || !user) {
@@ -89,7 +89,7 @@ const ManageResults = () => {
 
       if (error.response?.status === 401) {
         alert('Authentication expired. Please log in again.');
-        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
         localStorage.removeItem('user');
         window.location.href = '/login';
       } else {
