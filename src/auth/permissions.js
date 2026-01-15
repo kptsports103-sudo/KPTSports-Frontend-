@@ -1,8 +1,8 @@
 export const PERMISSIONS = {
-  USER_CREATE: ["admin"],
-  USER_EDIT: ["admin"],
-  USER_DISABLE: ["admin"],
-  USER_VIEW: ["admin", "coach"]
+  USER_CREATE: ["superadmin", "admin", "creator"],
+  USER_EDIT: ["superadmin", "admin", "creator"],
+  USER_DISABLE: ["superadmin", "admin", "creator"],
+  USER_VIEW: ["superadmin", "admin", "creator", "coach"]
 };
 
 export const can = (user, permission) =>

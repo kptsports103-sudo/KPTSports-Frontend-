@@ -25,21 +25,31 @@ const OTPVerify = () => {
 
   const handleSubmit = async (e) => {
 
-    e.preventDefault();
+   e.preventDefault();
 
-    try {
+   try {
 
-       const user = await verifyOTP(email, otp);
+      const user = await verifyOTP(email, otp);
 
-       navigate('/admin/dashboard');
+      const role = location.state?.role;
 
-     } catch (error) {
+      if (role === 'creator') {
 
-      alert('Invalid OTP');
+        navigate('/dashboard/creator');
 
-    }
+      } else {
 
-  };
+        navigate('/admin/dashboard');
+
+      }
+
+    } catch (error) {
+
+     alert('Invalid OTP');
+
+   }
+
+ };
 
   return (
     <div style={{

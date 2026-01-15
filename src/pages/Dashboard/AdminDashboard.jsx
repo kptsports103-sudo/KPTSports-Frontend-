@@ -56,12 +56,10 @@ const AdminDashboard = () => {
 
   // Dynamic stats with real user count
   const stats = [
-    { title: "Total Users", value: totalUsers, icon: "👤" },
-    { title: "Coaches", value: 12, icon: "🧑‍🏫" },
-    { title: "Students", value: 116, icon: "🎓" },
-    { title: "Update Pages", value: 8, icon: "📄" },
+    { title: "Total Users", value: totalUsers, icon: "👤", link: "/admin/users-manage" },
+    { title: "Update Pages", value: "Manage", icon: "📄", link: "/admin/update-pages" },
     { title: "Media Files", value: totalMedia, icon: "🖼️", link: "/admin/media-stats" },
-    { title: "Errors (24h)", value: 1, icon: "⚠️" },
+    { title: "Errors (24h)", value: 1, icon: "⚠️", link: "/admin/errors" },
     { title: "IAM Users", value: "Manage", icon: "🔐", link: "/admin/iam/users" },
   ];
 
@@ -90,6 +88,7 @@ const AdminDashboard = () => {
           );
         })}
       </div>
+
 
       {/* ANALYTICS */}
       <div
@@ -182,68 +181,6 @@ const AdminDashboard = () => {
               <h3 style={{ margin: 0 }}>{year.total} Total</h3>
             </div>
           ))}
-        </div>
-
-        {/* =====================
-            QUICK ACTIONS
-        ====================== */}
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <div
-            style={{
-              backgroundColor: "#fff",
-              color: "#000",
-              padding: "20px",
-              borderRadius: "8px",
-              maxWidth: "500px",
-              width: "100%"
-            }}
-          >
-            <h3 style={{ marginBottom: "15px" }}>Quick Actions</h3>
-
-            <Link
-              to="/admin/media"
-              style={{
-                display: "block",
-                padding: "12px",
-                backgroundColor: "#0d6efd",
-                color: "#fff",
-                textDecoration: "none",
-                borderRadius: "6px",
-                fontSize: "16px",
-                textAlign: "center",
-                marginBottom: "10px"
-              }}
-            >
-              📁 Media Management
-            </Link>
-
-            {[
-              { name: "Manage Events", route: "/admin/manage-events" },
-              { name: "Manage Gallery", route: "/admin/manage-gallery" },
-              { name: "Manage Results", route: "/admin/manage-results" },
-              { name: "Manage Home", route: "/admin/manage-home" },
-              { name: "Manage About", route: "/admin/manage-about" },
-              { name: "Manage History", route: "/admin/manage-history" }
-            ].map((item, index) => (
-              <Link
-                key={index}
-                to={item.route}
-                style={{
-                  display: "block",
-                  padding: "12px",
-                  backgroundColor: "#0d6efd",
-                  color: "#fff",
-                  textDecoration: "none",
-                  borderRadius: "6px",
-                  fontSize: "15px",
-                  marginBottom: "8px",
-                  textAlign: "center"
-                }}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </div>
         </div>
       </div>
     </AdminLayout>

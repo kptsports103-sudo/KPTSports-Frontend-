@@ -11,6 +11,11 @@ const CoachDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('players');
 
+  const isCreator = user?.role === 'creator';
+  const dashboardTitle = isCreator ? 'Creator Dashboard' : 'Coach Dashboard';
+  const welcomeMessage = isCreator ? 'Welcome back, Creator! Manage your team efficiently with our comprehensive tools.' : 'Welcome back, Coach! Manage your team efficiently with our comprehensive tools.';
+  const roleLabel = isCreator ? 'Creator' : 'Coach';
+
   const renderContent = () => {
     switch (activeTab) {
       case 'players':
@@ -25,8 +30,8 @@ const CoachDashboard = () => {
         return (
           <div className="space-y-8">
             <div className="text-center bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-2xl">
-              <h1 className="text-5xl font-bold mb-4">🏆 Coach Dashboard</h1>
-              <p className="text-xl opacity-90">Welcome back, Coach! Manage your team efficiently with our comprehensive tools.</p>
+              <h1 className="text-5xl font-bold mb-4">🏆 {dashboardTitle}</h1>
+              <p className="text-xl opacity-90">{welcomeMessage}</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
               <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-8 shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300 cursor-pointer group">
@@ -75,7 +80,7 @@ const CoachDashboard = () => {
             <img src="/logodb.png" alt="KPT Logo" className="w-24 h-24 mx-auto mb-4 object-contain drop-shadow-lg" />
             <img src="/persondb.png" alt="Profile" className="w-28 h-28 rounded-full mx-auto mb-4 object-cover border-4 border-blue-500 shadow-lg" />
             <h6 className="text-2xl font-bold mb-2 text-blue-300">KPT</h6>
-            <p className="text-lg font-medium text-gray-300 mb-1">Coach</p>
+            <p className="text-lg font-medium text-gray-300 mb-1">{roleLabel}</p>
             <p className="text-sm text-gray-400">{user?.email}</p>
           </div>
           <button

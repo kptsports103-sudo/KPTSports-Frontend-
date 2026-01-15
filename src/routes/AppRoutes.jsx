@@ -25,9 +25,10 @@ import OTPVerify from '../pages/OTPVerify';
 
 import AdminDashboard from '../pages/Dashboard/AdminDashboard';
 
-import StudentDashboard from '../pages/Dashboard/StudentDashboard';
 
 import CoachDashboard from '../pages/Dashboard/CoachDashboard';
+
+import CreatorDashboard from '../pages/Dashboard/CreatorDashboard';
 
 import ManageEvents from '../pages/Dashboard/ManageEvents';
 
@@ -38,6 +39,8 @@ import ManageResults from '../pages/Dashboard/ManageResults';
 
 import ManageHome from '../pages/Dashboard/ManageHome';
 
+import UpdatePages from '../pages/UpdatePages';
+
 import ManageAbout from '../pages/Dashboard/ManageAbout';
 
 import ManageHistory from '../pages/Dashboard/ManageHistory';
@@ -46,6 +49,7 @@ import Media from '../pages/Dashboard/Media';
 import AddMedia from '../pages/Dashboard/AddMedia';
 
 import IAMUsers from '../pages/admin/IAMUsers';
+import UsersManage from '../pages/admin/UsersManage';
 import CreateUser from '../pages/admin/CreateUser';
 import AuditLogs from '../pages/admin/AuditLogs';
 import ErrorDashboard from '../pages/admin/ErrorDashboard';
@@ -95,8 +99,8 @@ const AppContent = () => {
         <Route path="/otp-verify" element={<OTPVerify />} />
         <Route path="/sports-dashboard" element={<ProtectedRoute role="admin"><SportsDashboard /></ProtectedRoute>} />
         <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/dashboard/creator" element={<ProtectedRoute role="creator"><CoachDashboard /></ProtectedRoute>} />
         <Route path="/dashboard/coach" element={<ProtectedRoute role="coach"><CoachDashboard /></ProtectedRoute>} />
-        <Route path="/dashboard/student" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
         <Route path="/admin/media" element={<ProtectedRoute role="admin"><Media /></ProtectedRoute>} />
         <Route path="/admin/add-media" element={<ProtectedRoute role="admin"><AddMedia /></ProtectedRoute>} />
         <Route path="/admin/manage-home" element={<ProtectedRoute role="admin"><ManageHome /></ProtectedRoute>} />
@@ -105,7 +109,9 @@ const AppContent = () => {
         <Route path="/admin/manage-events" element={<ProtectedRoute role="admin"><ManageEvents /></ProtectedRoute>} />
         <Route path="/admin/manage-gallery" element={<ProtectedRoute role="admin"><ManageGallery /></ProtectedRoute>} />
         <Route path="/admin/manage-results" element={<ProtectedRoute role="admin"><ManageResults /></ProtectedRoute>} />
+        <Route path="/admin/update-pages" element={<ProtectedRoute role="admin"><UpdatePages /></ProtectedRoute>} />
         <Route path="/admin/iam/users" element={<ProtectedRoute role="admin"><IAMUsers /></ProtectedRoute>} />
+        <Route path="/admin/users-manage" element={<ProtectedRoute role="admin"><UsersManage /></ProtectedRoute>} />
         <Route path="/admin/iam/create" element={<ProtectedRoute role="admin"><CreateUser /></ProtectedRoute>} />
         <Route path="/admin/audit-logs" element={<ProtectedRoute role="admin"><AuditLogs /></ProtectedRoute>} />
         <Route path="/admin/errors" element={<ProtectedRoute role="admin"><ErrorDashboard /></ProtectedRoute>} />

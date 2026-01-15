@@ -20,9 +20,9 @@ export default function Login() {
    try {
      const result = await login(email, password, role);
      if (result.directLogin) {
-       // Direct login for coach/student
+       // Direct login for coach/creator
        if (role === 'coach') navigate('/dashboard/coach');
-       else if (role === 'student') navigate('/dashboard/student');
+       else if (role === 'creator') navigate('/dashboard/creator');
        else navigate('/');
      } else {
        // OTP for admin
@@ -47,9 +47,9 @@ export default function Login() {
 
           <label>Login Type</label>
           <select value={role} onChange={e=>setRole(e.target.value)}>
-            <option value="student">Student</option>
+            <option value="superadmin">Super Admin</option>
             <option value="admin">Admin</option>
-            <option value="coach">Coach</option>
+            <option value="creator">Creator</option>
           </select>
 
           <button disabled={loading} type="submit">
