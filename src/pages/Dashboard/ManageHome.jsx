@@ -5,7 +5,7 @@ import AdminLayout from '../../components/AdminLayout';
 const ManageHome = () => {
   const [content, setContent] = useState({
     welcomeText: '',
-    banners: [{ image: '', year: '', fixed: false }],
+    banners: [{ video: '', year: '' }],
     highlights: []
   });
 
@@ -23,16 +23,15 @@ const ManageHome = () => {
       const res = await api.get('/home');
 
       const normalizedBanners = (res.data.banners || []).map(b => ({
-        image: b.image || '',
-        year: b.year || '',
-        fixed: true
+        video: b.video || '',
+        year: b.year || ''
       }));
 
       setContent({
         welcomeText: res.data.welcomeText || '',
         banners: normalizedBanners.length
           ? normalizedBanners
-          : [{ image: '', year: '', fixed: false }],
+          : [{ video: '', year: '' }],
         highlights: res.data.highlights || []
       });
     } catch {
@@ -48,9 +47,9 @@ const ManageHome = () => {
 
     try {
       const processedBanners = content.banners
-        .filter(b => b.fixed && b.image.trim() && b.year)
+        .filter(b => b.video.trim() && b.year.trim())
         .map(b => ({
-          image: b.image.startsWith('http') ? b.image : b.image.startsWith('/') ? `http://localhost:5001${b.image}` : `https://${b.image}`,
+          video: b.video,
           year: parseInt(b.year, 10) || 0
         }));
 
@@ -80,11 +79,6 @@ const ManageHome = () => {
     setContent({ ...content, banners });
   };
 
-  const toggleFixedBanner = (index) => {
-    const banners = [...content.banners];
-    banners[index].fixed = !banners[index].fixed;
-    setContent({ ...content, banners });
-  };
 
   const removeBanner = (index) => {
     setContent({
@@ -93,24 +87,11 @@ const ManageHome = () => {
     });
   };
 
-  const handleFileUpload = async (index, file) => {
-    if (!file) return;
-    const formData = new FormData();
-    formData.append('banner', file);
-    try {
-      const res = await api.post('/home/upload-banner', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      updateBanners(index, 'image', res.data.url);
-    } catch {
-      alert('Upload failed');
-    }
-  };
 
   const addBanner = () => {
     setContent({
       ...content,
-      banners: [...content.banners, { image: '', year: '', fixed: false }]
+      banners: [...content.banners, { video: '', year: '' }]
     });
   };
 
@@ -132,98 +113,46 @@ const ManageHome = () => {
       <div style={{ background: '#0f3b2e', minHeight: '100vh', padding: '15px', color: '#fff' }}>
         <h3 style={{ fontSize: '34px', fontWeight: '700' }}>Manage Home</h3>
 
-        {/* TOP ACTIONS */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
           {!isEditing ? (
-            <button
-              onClick={() => setIsEditing(true)}
-              style={{
-                padding: '8px 14px',
-                background: '#007bff',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              <img
-                src="/Edit button.png"
-                alt="Edit"
-                style={{ width: '16px', height: '16px' }}
-              />
+            <button onClick={() => setIsEditing(true)} style={{ padding: '8px 14px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px' }}>
               Edit
             </button>
           ) : (
-            <button
-              onClick={() => setIsEditing(false)}
-              style={{
-                padding: '8px 14px',
-                background: '#6c757d',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer'
-              }}
-            >
-              ❌ Cancel
+            <button onClick={() => setIsEditing(false)} style={{ padding: '8px 14px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '5px' }}>
+              Cancel
             </button>
           )}
-
-          <a
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              padding: '8px 14px',
-              background: '#28a745',
-              color: '#fff',
-              borderRadius: '5px',
-              textDecoration: 'none'
-            }}
-          >
-            🔗 View Home Page
-          </a>
         </div>
 
         {!isEditing ? (
-          /* ================= VIEW MODE ================= */
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', background: '#fff', color: '#000', borderCollapse: 'collapse', border: '1px solid #ddd', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+          <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', color: '#000' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <tbody>
-                <tr style={{ background: '#007bff', color: '#fff' }}>
-                  <th style={{ padding: '15px', textAlign: 'left', fontWeight: 'bold', borderBottom: '2px solid #0056b3' }}>Field</th>
-                  <th style={{ padding: '15px', textAlign: 'left', fontWeight: 'bold', borderBottom: '2px solid #0056b3' }}>Value</th>
+                <tr style={{ borderBottom: '1px solid #ddd' }}>
+                  <td style={{ padding: '15px', fontWeight: 'bold', width: '200px' }}>Welcome Text</td>
+                  <td style={{ padding: '15px', whiteSpace: 'pre-wrap' }}>{content.welcomeText}</td>
                 </tr>
-
-                <tr style={{ background: '#f8f9fa' }}>
-                  <td style={{ padding: '15px', fontWeight: '600', borderBottom: '1px solid #ddd' }}>Welcome Text</td>
-                  <td style={{ padding: '15px', whiteSpace: 'pre-wrap', borderBottom: '1px solid #ddd' }}>
-                    {content.welcomeText}
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style={{ padding: '15px', fontWeight: '600', borderBottom: '1px solid #ddd' }}>Banners</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #ddd' }}>
-                    {content.banners.map((b, i) => (
-                      <div key={i} style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        {b.image && <img src={b.image} alt={`Banner ${i+1}`} style={{ width: '50px', height: '30px', objectFit: 'cover', borderRadius: '4px' }} />}
-                        <span>📅 {b.year}</span>
-                      </div>
-                    ))}
-                  </td>
-                </tr>
-
-                <tr style={{ background: '#f8f9fa' }}>
-                  <td style={{ padding: '15px', fontWeight: '600', borderBottom: '1px solid #ddd' }}>Highlights</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #ddd' }}>
-                    <ul style={{ margin: 0, paddingLeft: '20px' }}>
-                      {content.highlights.map((h, i) => (
-                        <li key={i} style={{ marginBottom: '5px' }}>{typeof h === 'object' ? h.title : h}</li>
+                <tr style={{ borderBottom: '1px solid #ddd' }}>
+                  <td style={{ padding: '15px', fontWeight: 'bold' }}>Banners</td>
+                  <td style={{ padding: '15px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
+                      {content.banners.map((b, i) => (
+                        <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                          {b.video && (
+                            <video src={b.video} width="120" height="70" autoPlay muted loop style={{ borderRadius: '4px' }} />
+                          )}
+                          <span style={{ fontSize: '14px', color: '#666' }}>{b.year}</span>
+                        </div>
                       ))}
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '15px', fontWeight: 'bold' }}>Highlights</td>
+                  <td style={{ padding: '15px' }}>
+                    <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                      {content.highlights.map((h, i) => <li key={i} style={{ marginBottom: '5px' }}>{h}</li>)}
                     </ul>
                   </td>
                 </tr>
@@ -231,236 +160,157 @@ const ManageHome = () => {
             </table>
           </div>
         ) : (
-          /* ================= EDIT MODE ================= */
-          <form onSubmit={handleSubmit}>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', background: '#fff', color: '#000', borderCollapse: 'collapse', border: '1px solid #ddd', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                <tbody>
-                  <tr style={{ background: '#007bff', color: '#fff' }}>
-                    <th style={{ padding: '15px', textAlign: 'left', width: '25%', fontWeight: 'bold', borderBottom: '2px solid #0056b3' }}>Field</th>
-                    <th style={{ padding: '15px', textAlign: 'left', fontWeight: 'bold', borderBottom: '2px solid #0056b3' }}>Value</th>
-                  </tr>
-
-                  {/* WELCOME TEXT */}
-                  <tr style={{ background: '#f8f9fa', borderBottom: '1px solid #ddd' }}>
-                    <td style={{ padding: '15px', fontWeight: '600' }}>Welcome Text</td>
-                    <td style={{ padding: '15px' }}>
-                      <textarea
-                        value={content.welcomeText}
-                        onChange={e =>
-                          setContent({ ...content, welcomeText: e.target.value })
-                        }
-                        style={{
-                          width: '100%',
-                          height: '90px',
-                          padding: '10px',
-                          borderRadius: '6px',
-                          border: '1px solid #ccc',
-                          fontFamily: 'inherit'
-                        }}
-                      />
-                    </td>
-                  </tr>
-
-                  {/* BANNERS */}
-                  <tr style={{ borderBottom: '1px solid #ddd' }}>
-                    <td style={{ padding: '15px', fontWeight: '600' }}>Banners</td>
-                    <td style={{ padding: '15px' }}>
-                      {content.banners.map((b, i) => (
-                        <div
-                          key={i}
-                          style={{
-                            display: 'grid',
-                            gridTemplateColumns: '1fr 120px auto',
-                            gap: '10px',
-                            alignItems: 'center',
-                            marginBottom: '12px',
-                            padding: '10px',
-                            background: '#f8f9fa',
-                            borderRadius: '6px',
-                            border: '1px solid #e9ecef'
-                          }}
-                        >
-                          <input
-                            value={b.image}
-                            disabled={b.fixed}
-                            placeholder="Image URL"
-                            onChange={e => updateBanners(i, 'image', e.target.value)}
-                            style={{
-                              padding: '8px',
-                              borderRadius: '5px',
-                              border: '1px solid #ccc',
-                              background: b.fixed ? '#eee' : '#fff'
-                            }}
-                          />
-
-                          <input
-                            value={b.year}
-                            disabled={b.fixed}
-                            placeholder="Year"
-                            onChange={e => updateBanners(i, 'year', e.target.value)}
-                            style={{
-                              padding: '8px',
-                              borderRadius: '5px',
-                              border: '1px solid #ccc',
-                              background: b.fixed ? '#eee' : '#fff'
-                            }}
-                          />
-
-                          <div style={{ display: 'flex', gap: '6px' }}>
-                            <button
-                              type="button"
-                              onClick={() => toggleFixedBanner(i)}
-                              style={{
-                                padding: '6px 10px',
-                                background: b.fixed ? '#28a745' : '#ffc107',
-                                color: '#fff',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer'
-                              }}
-                            >
-                              {b.fixed ? 'Fixed' : 'Fix'}
-                            </button>
-                            {!b.fixed && (
-                              <button
-                                type="button"
-                                onClick={() => removeBanner(i)}
-                                style={{
-                                  padding: '6px 10px',
-                                  background: '#dc3545',
-                                  color: '#fff',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  cursor: 'pointer'
-                                }}
-                              >
-                                Remove
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={addBanner}
-                        style={{
-                          padding: '10px 15px',
-                          background: '#007bff',
-                          color: '#fff',
-                          border: 'none',
-                          borderRadius: '5px',
-                          cursor: 'pointer',
-                          marginTop: '10px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px'
-                        }}
-                      >
-                        <img
-                          src="/Add button.png"
-                          alt="Add"
-                          style={{ width: '18px', height: '18px' }}
-                        />
-                        Add Banner
-                      </button>
-                    </td>
-                  </tr>
-
-                  {/* HIGHLIGHTS */}
-                  <tr style={{ background: '#f8f9fa' }}>
-                    <td style={{ padding: '15px', fontWeight: '600' }}>Highlights</td>
-                    <td style={{ padding: '15px' }}>
-                      {content.highlights.map((h, i) => (
-                        <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
-                          <input
-                            value={h}
-                            onChange={e => updateHighlights(i, e.target.value)}
-                            style={{
-                              flex: 1,
-                              padding: '8px',
-                              borderRadius: '5px',
-                              border: '1px solid #ccc'
-                            }}
-                          />
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setContent({
-                                ...content,
-                                highlights: content.highlights.filter((_, x) => x !== i)
-                              })
-                            }
-                            style={{
-                              padding: '8px 12px',
-                              background: '#dc3545',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={addHighlight}
-                        style={{
-                          padding: '10px 15px',
-                          background: '#007bff',
-                          color: '#fff',
-                          border: 'none',
-                          borderRadius: '5px',
-                          cursor: 'pointer',
-                          marginTop: '10px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px'
-                        }}
-                      >
-                        <img
-                          src="/Add button.png"
-                          alt="Add"
-                          style={{ width: '16px', height: '16px' }}
-                        />
-                        Add Highlight
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          <form onSubmit={handleSubmit} style={{ background: '#fff', padding: '20px', borderRadius: '8px', color: '#000' }}>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Welcome Text</label>
+              <textarea
+                value={content.welcomeText}
+                onChange={e => setContent({ ...content, welcomeText: e.target.value })}
+                style={{
+                  width: '100%',
+                  height: '100px',
+                  padding: '10px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  fontFamily: 'inherit',
+                  resize: 'vertical'
+                }}
+              />
             </div>
 
-            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <div style={{ marginBottom: '20px' }}>
+              <h4 style={{ marginBottom: '10px', color: '#333' }}>Banners</h4>
+              {content.banners.map((b, i) => (
+                <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px', padding: '10px', background: '#f9f9f9', borderRadius: '4px' }}>
+                  <input
+                    value={b.video}
+                    placeholder="Video URL"
+                    onChange={e => updateBanners(i, 'video', e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: '8px',
+                      border: '1px solid #ccc',
+                      borderRadius: '4px'
+                    }}
+                  />
+                  <input
+                    value={b.year}
+                    placeholder="Year"
+                    onChange={e => updateBanners(i, 'year', e.target.value)}
+                    style={{
+                      width: '80px',
+                      padding: '8px',
+                      border: '1px solid #ccc',
+                      borderRadius: '4px'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeBanner(i)}
+                    style={{
+                      padding: '8px 12px',
+                      background: '#dc3545',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <div style={{ marginTop: '15px', padding: '15px', background: '#f0f8ff', borderRadius: '6px', border: '2px dashed #007bff' }}>
+                <button
+                  type="button"
+                  onClick={addBanner}
+                  style={{
+                    padding: '12px 20px',
+                    background: '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'background 0.3s'
+                  }}
+                  onMouseOver={(e) => e.target.style.background = '#0056b3'}
+                  onMouseOut={(e) => e.target.style.background = '#007bff'}
+                >
+                  ➕ Add Banner
+                </button>
+                <p style={{ margin: '8px 0 0 0', color: '#666', fontSize: '14px' }}>
+                  Click to add a new video banner with URL and year
+                </p>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <h4 style={{ marginBottom: '10px', color: '#333' }}>Highlights</h4>
+              {content.highlights.map((h, i) => (
+                <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
+                  <input
+                    value={h}
+                    onChange={e => updateHighlights(i, e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: '8px',
+                      border: '1px solid #ccc',
+                      borderRadius: '4px'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setContent({ ...content, highlights: content.highlights.filter((_, x) => x !== i) })}
+                    style={{
+                      padding: '8px 12px',
+                      background: '#dc3545',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addHighlight}
+                style={{
+                  padding: '10px 15px',
+                  background: '#007bff',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  marginTop: '10px'
+                }}
+              >
+                Add Highlight
+              </button>
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: '30px' }}>
               <button
                 type="submit"
                 style={{
-                  padding: '12px 20px',
+                  padding: '12px 24px',
                   background: '#28a745',
                   color: '#fff',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: '4px',
                   fontSize: '16px',
                   fontWeight: 'bold',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                  transition: 'background 0.3s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  justifyContent: 'center'
+                  cursor: 'pointer'
                 }}
-                onMouseOver={(e) => e.target.style.background = '#218838'}
-                onMouseOut={(e) => e.target.style.background = '#28a745'}
               >
-                <img
-                  src="/Save button.png"
-                  alt="Save"
-                  style={{ width: '18px', height: '18px' }}
-                />
-                Save Changes
+                Save
               </button>
             </div>
           </form>

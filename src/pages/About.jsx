@@ -3,22 +3,32 @@ import api from '../services/api';
 
 const About = () => {
   const [content, setContent] = useState({
-    bannerVideo: '',
+    bannerImages: [],
     boxes: ['', '', ''],
     bigHeader: '',
     bigText: ''
   });
   const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     loadContent();
   }, []);
 
+  useEffect(() => {
+    if (content.bannerImages.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % content.bannerImages.length);
+      }, 5000); // Change slide every 5 seconds
+      return () => clearInterval(interval);
+    }
+  }, [content.bannerImages.length]);
+
   const loadContent = async () => {
     try {
       const { data } = await api.get('/home');
       setContent({
-        bannerVideo: data.bannerVideo || '',
+        bannerImages: Array.isArray(data.bannerImages) ? data.bannerImages : [],
         boxes: Array.isArray(data.boxes) && data.boxes.length ? data.boxes : ['', '', ''],
         bigHeader: data.bigHeader || '',
         bigText: data.bigText || ''
@@ -40,57 +50,46 @@ const About = () => {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
-      {/* Banner Video */}
-      {content.bannerVideo && (
+      {/* Banner Images */}
+      {content.bannerImages.length > 0 && (
         <div style={{ position: 'relative', height: '70vh', overflow: 'hidden' }}>
-          <video
-            src={content.bannerVideo}
-            autoPlay
-            muted
-            loop
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover'
-            }}
-          />
-          {/* Text Overlay */}
+          <div style={{
+            display: 'flex',
+            height: '100%',
+            transform: `translateX(-${currentSlide * 100}%)`,
+            transition: 'transform 1s ease-in-out'
+          }}>
+            {content.bannerImages.map((banner, index) => (
+              <img
+                key={index}
+                src={banner.image}
+                alt={`Banner ${index + 1}`}
+                style={{
+                  minWidth: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  flexShrink: 0
+                }}
+              />
+            ))}
+          </div>
+          {/* Year Overlay */}
           <div style={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            bottom: '20px',
+            right: '20px',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
             color: '#fff',
-            textAlign: 'center'
+            padding: '10px 20px',
+            borderRadius: '5px',
+            fontSize: '1.5rem',
+            fontWeight: 'bold'
           }}>
-            <h1 style={{
-              fontSize: '3.5rem',
-              fontWeight: '700',
-              marginBottom: '1rem',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.7)',
-              fontFamily: 'Arial, sans-serif'
-            }}>
-              About KPT Mangalore Sports
-            </h1>
-            <p style={{
-              fontSize: '1.8rem',
-              fontWeight: '300',
-              margin: 0,
-              textShadow: '1px 1px 3px rgba(0,0,0,0.7)',
-              fontFamily: 'Arial, sans-serif',
-              letterSpacing: '1px'
-            }}>
-              Champions in Spirit, Champions in Action
-            </p>
+            {content.bannerImages.length > 0 && content.bannerImages[currentSlide].year}
           </div>
         </div>
       )}
+
 
       {/* Boxes Section */}
       <div style={{

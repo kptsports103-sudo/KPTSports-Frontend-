@@ -5,7 +5,7 @@ import EventsModal from '../components/EventsModal';
 
 export default function Home() {
   const [activeTable, setActiveTable] = useState(null);
-  const [homeContent, setHomeContent] = useState({ welcomeText: '', banners: [{ image: '', year: '' }], highlights: [] });
+  const [homeContent, setHomeContent] = useState({ welcomeText: '', banners: [{ video: '', year: '' }], highlights: [] });
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [studentModalOpen, setStudentModalOpen] = useState(false);
   const [eventsModalOpen, setEventsModalOpen] = useState(false);
@@ -54,10 +54,12 @@ export default function Home() {
 
       {/* Banner */}
       <div className="banner-container" style={{ position: 'relative', height: '600px', overflow: 'hidden', background: '#ddd' }}>
-        {homeContent.banners.length > 0 && homeContent.banners[currentBannerIndex]?.image ? (
-          <img
-            src={homeContent.banners[currentBannerIndex].image}
-            alt="Banner"
+        {homeContent.banners.length > 0 && homeContent.banners[currentBannerIndex]?.video ? (
+          <video
+            src={homeContent.banners[currentBannerIndex].video}
+            autoPlay
+            muted
+            loop
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
@@ -65,6 +67,26 @@ export default function Home() {
             Banner Area
           </div>
         )}
+
+        {/* Overlay Text on Video */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          textAlign: 'center',
+          color: '#ffffff',
+          textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)',
+          zIndex: 10
+        }}>
+          <h1 style={{ fontSize: '48px', fontWeight: 'bold', margin: '0 0 10px 0', lineHeight: '1.2' }}>
+            About KPT Mangalore Sports
+          </h1>
+          <p style={{ fontSize: '24px', margin: '0', fontWeight: '300' }}>
+            Champions in Spirit, Champions in Action
+          </p>
+        </div>
+
         {homeContent.banners[currentBannerIndex]?.year && (
           <div className="banner-year" style={{
             position: 'absolute',
@@ -76,7 +98,8 @@ export default function Home() {
             color: '#ffffff',
             background: 'rgba(0, 0, 0, 0.4)',
             padding: '6px 16px',
-            borderRadius: '6px'
+            borderRadius: '6px',
+            zIndex: 15
           }}>
             {homeContent.banners[currentBannerIndex].year}
           </div>
