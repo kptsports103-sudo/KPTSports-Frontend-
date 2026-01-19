@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import AdminLayout from "../../components/AdminLayout";
 import { IAMService } from "../../services/iam.service";
 import { useAuth } from "../../context/AuthContext";
-import { can } from "../../auth/permissions";
 
 const UsersManage = () => {
   const { user } = useAuth();
@@ -32,18 +31,19 @@ const UsersManage = () => {
 
     try {
       await IAMService.deleteUser(userId);
-      setUsers(users.filter(u => u._id !== userId));
+      setUsers(users.filter((u) => u._id !== userId));
     } catch (err) {
       setError(err.response?.data?.message || "Failed to delete user");
       console.error(err);
     }
   };
 
-
   return (
     <AdminLayout>
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Manage Users</h1>
+        <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+          👥 Manage Users
+        </h1>
 
         {error && (
           <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6 border border-red-200">
@@ -56,72 +56,58 @@ const UsersManage = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Phone
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Verified
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user) => (
-                  <tr key={user._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {user.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.phone}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.role}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        user.is_verified
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}>
-                        {user.is_verified ? "Verified" : "Unverified"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleDeleteUser(user._id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <>
             {users.length === 0 && (
               <div className="text-center py-12 text-gray-500">
                 No users found
               </div>
             )}
-          </div>
+
+            <div className="grid grid-cols-4 gap-6">
+              {users.map((user) => (
+                <div
+                  key={user._id}
+                  className="bg-white rounded-lg shadow-sm p-5 flex flex-col justify-between"
+                >
+                  {/* Header */}
+                  <div className="flex justify-between items-start mb-4">
+                    <h2 className="text-lg font-medium text-gray-800">
+                      {user.name}
+                    </h2>
+                    <button className="text-xs border border-gray-300 bg-gray-50 px-3 py-1 rounded-md hover:bg-gray-100">
+                      Profile
+                    </button>
+                  </div>
+
+                  {/* Info */}
+                  <div className="space-y-3 text-sm text-gray-600">
+                    <p>Email: {user.email}</p>
+                    <p>Phone: {user.phone || "---"}</p>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex justify-between items-center mt-6">
+                    <span
+                      className={`flex items-center gap-1 text-sm font-normal ${
+                        user.is_verified
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      ✔ Verified Role: {user.role}
+                    </span>
+
+                    <button
+                      onClick={() => handleDeleteUser(user._id)}
+                      className="text-sm bg-red-600 text-white px-4 py-1.5 rounded-lg hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </AdminLayout>
