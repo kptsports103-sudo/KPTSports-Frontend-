@@ -9,6 +9,11 @@ const UsersManage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const maskPhone = (phone) => {
+    if (!phone) return "-------";
+    return "-------" + phone.slice(-3);
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -82,7 +87,7 @@ const UsersManage = () => {
                   {/* Info */}
                   <div className="space-y-3 text-sm text-gray-600">
                     <p>Email: {user.email}</p>
-                    <p>Phone: {user.phone || "---"}</p>
+                    <p>Phone: {maskPhone(user.phone)}</p>
                   </div>
 
                   {/* Footer */}
