@@ -50,6 +50,7 @@ import AddMedia from '../pages/Dashboard/AddMedia';
 
 import IAMUsers from '../pages/admin/IAMUsers';
 import UsersManage from '../pages/admin/UsersManage';
+import SuperAdminDashboard from '../pages/admin/SuperAdminDashboard';
 import CreateUser from '../pages/admin/CreateUser';
 import AuditLogs from '../pages/admin/AuditLogs';
 import ErrorDashboard from '../pages/admin/ErrorDashboard';
@@ -99,6 +100,7 @@ const AppContent = () => {
         <Route path="/otp-verify" element={<OTPVerify />} />
         <Route path="/sports-dashboard" element={<ProtectedRoute role="admin"><SportsDashboard /></ProtectedRoute>} />
         <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/super-admin-dashboard" element={<ProtectedRoute role="superadmin"><SuperAdminDashboard /></ProtectedRoute>} />
         <Route path="/dashboard/creator" element={<ProtectedRoute role="creator"><CoachDashboard /></ProtectedRoute>} />
         <Route path="/dashboard/coach" element={<ProtectedRoute role="coach"><CoachDashboard /></ProtectedRoute>} />
         <Route path="/admin/media" element={<ProtectedRoute role="admin"><Media /></ProtectedRoute>} />

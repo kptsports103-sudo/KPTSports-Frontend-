@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useCallback, useState } from "react";
+import { createContext, useContext, useMemo, useCallback, useState, useEffect } from "react";
 import { useUser, useClerk } from '@clerk/clerk-react';
 import api from '../api/axios';
 import { setAccessToken } from './tokenStorage';
@@ -9,6 +9,13 @@ export const AuthProvider = ({ children }) => {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   const { signOut } = useClerk();
   const [customUser, setCustomUser] = useState(null);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setCustomUser(JSON.parse(savedUser));
+    }
+  }, []);
 
   const user = clerkUser ? {
     id: clerkUser.id,
