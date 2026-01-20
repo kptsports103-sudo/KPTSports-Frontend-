@@ -131,7 +131,7 @@ const Media = () => {
       <div
         style={{
           minHeight: "100vh",
-          backgroundColor: "#0f3b2e",
+          backgroundColor: "#b3b7b6ff",
           padding: "15px",
           color: "#fff"
         }}
