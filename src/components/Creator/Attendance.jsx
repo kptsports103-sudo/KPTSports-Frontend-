@@ -192,20 +192,20 @@ const Attendance = ({ isStudent = false }) => {
       <table style={styles.table}>
         <thead>
           <tr style={styles.headerRow}>
-            <th>SL.NO</th>
-            <th>PLAYER</th>
-            <th>MORNING</th>
-            <th>EVENING</th>
-            <th>ACTIONS</th>
+            <th style={{ textAlign: 'center' }}>SL.NO</th>
+            <th style={{ textAlign: 'left' }}>PLAYER</th>
+            <th style={{ textAlign: 'center' }}>MORNING</th>
+            <th style={{ textAlign: 'center' }}>EVENING</th>
+            <th style={{ textAlign: 'center' }}>ACTIONS</th>
           </tr>
         </thead>
 
         <tbody>
           {rows.map((row, index) => (
             <tr key={index} style={styles.bodyRow}>
-              <td>{row.slNo}</td>
+              <td style={{ textAlign: 'center' }}>{row.slNo}</td>
 
-              <td>
+              <td style={{ textAlign: 'left' }}>
                 <select
                   value={row.playerName}
                   onChange={e => updateField(index, 'playerName', e.target.value)}
@@ -227,7 +227,7 @@ const Attendance = ({ isStudent = false }) => {
                 </select>
               </td>
 
-              <td>
+              <td style={{ textAlign: 'center' }}>
                 <select
                   value={row.morning}
                   onChange={e => updateField(index, 'morning', e.target.value)}
@@ -240,7 +240,7 @@ const Attendance = ({ isStudent = false }) => {
                 </select>
               </td>
 
-              <td>
+              <td style={{ textAlign: 'center' }}>
                 <select
                   value={row.evening}
                   onChange={e => updateField(index, 'evening', e.target.value)}
@@ -281,10 +281,7 @@ const Attendance = ({ isStudent = false }) => {
         </tbody>
       </table>
 
-      {/* Footer */}
-      <div style={styles.footer}>
-        © 2023 KPT Sports. All rights reserved.
-      </div>
+      
     </div>
   );
 };
@@ -296,10 +293,10 @@ export default Attendance;
 const styles = {
   page: {
     minHeight: "100vh",
-    backgroundColor: "#0f3b2e",
-    padding: "20px",
+    backgroundColor: "#e5e7eb", // Silver / light gray
+    padding: "15px",
     boxSizing: "border-box",
-    color: "#fff",
+    color: "#111827", // Dark professional text
   },
 
   pageTitle: {
@@ -327,9 +324,9 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    backgroundColor: "#0d6efd",
-    color: "#fff",
-    border: "none",
+    backgroundColor: "#ffffff",
+    color: "#111827",
+    border: "1px solid #d1d5db",
     padding: "8px 14px",
     fontSize: "14px",
     borderRadius: "6px",
@@ -340,9 +337,9 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    backgroundColor: "#198754",
-    color: "#fff",
-    border: "none",
+    backgroundColor: "#ffffff",
+    color: "#111827",
+    border: "1px solid #d1d5db",
     padding: "8px 14px",
     fontSize: "14px",
     borderRadius: "6px",
@@ -367,17 +364,17 @@ const styles = {
   filterGroupInput: {
     height: "38px",
     padding: "0 12px",
-    borderRadius: "8px",
-    border: "1px solid #ced4da",
+    borderRadius: "2px", // sharp
+    border: "1px solid #d1d5db",
     fontSize: "14px",
     color: "#000",
     backgroundColor: "#fff",
   },
 
   addYearBtn: {
-    backgroundColor: "#198754",
-    color: "#fff",
-    border: "none",
+    backgroundColor: "#ffffff",
+    color: "#111827",
+    border: "1px solid #d1d5db",
     padding: "8px 12px",
     fontSize: "13px",
     borderRadius: "6px",
@@ -393,17 +390,17 @@ const styles = {
     color: "#000",
     borderCollapse: "separate",
     borderSpacing: 0,
-    borderRadius: "12px",
+    borderRadius: "0px", // fully pointy
     overflow: "hidden",
-    boxShadow: "0 10px 24px rgba(0,0,0,0.15)",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
   },
 
   headerRow: {
-    background: "linear-gradient(90deg, #0d6efd, #0a58ca)",
-    color: "#fff",
+    backgroundColor: "#f3f4f6",
+    color: "#111827",
     height: "52px",
     fontSize: "13px",
-    letterSpacing: "0.6px",
+    letterSpacing: "0.5px",
     textTransform: "uppercase",
   },
 

@@ -294,7 +294,7 @@ const Players = ({ isStudent = false }) => {
   return (
     <div style={styles.page}>
       {/* Header */}
-      <h1 style={styles.pageTitle}>{isStudent ? '' : 'Coach Dashboard'}</h1>
+      
 
       {/* Section Title */}
       <div style={styles.sectionTitle}>Players List</div>
@@ -307,15 +307,15 @@ const Players = ({ isStudent = false }) => {
           style={{
             padding: '8px 14px',
             borderRadius: '6px',
-            border: '1px solid #2f6f5f',
+            border: '1px solid #d1d5db',
             fontSize: '14px',
-            backgroundColor: '#123f33',
-            color: '#ffffff',
+            backgroundColor: '#ffffff',
+            color: '#111827',
             outline: 'none',
             cursor: 'pointer',
           }}
         >
-          <option value="all" style={{ backgroundColor: '#123f33', color: '#fff' }}>
+          <option value="all" style={{ backgroundColor: '#ffffff', color: '#111827' }}>
             All Years
           </option>
           {[...data]
@@ -325,7 +325,7 @@ const Players = ({ isStudent = false }) => {
               <option
                 key={year}
                 value={year}
-                style={{ backgroundColor: '#123f33', color: '#fff' }}
+                style={{ backgroundColor: '#ffffff', color: '#111827' }}
               >
                 {year}
               </option>
@@ -559,7 +559,7 @@ const Players = ({ isStudent = false }) => {
                               {!isStudent && (
                                 <td style={styles.actionCell}>
                                   {isEditable && (
-                                    <>
+                                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                       <button
                                         onClick={() => savePlayerRow(yearData.year, playerIndex)}
                                         style={styles.actionBtn}
@@ -587,7 +587,7 @@ const Players = ({ isStudent = false }) => {
                                           alt="Delete Row"
                                         />
                                       </button>
-                                    </>
+                                    </div>
                                   )}
                                 </td>
                               )}
@@ -671,10 +671,7 @@ const Players = ({ isStudent = false }) => {
       })()}
 
 
-      {/* Footer */}
-      <div style={styles.footer}>
-        © 2023 KPT Sports. All rights reserved.
-      </div>
+      
     </div>
   );
 };
@@ -682,10 +679,10 @@ const Players = ({ isStudent = false }) => {
 const styles = {
   page: {
     minHeight: "100vh",
-    backgroundColor: "#0f3b2e",
+    backgroundColor: "#e5e7eb", // Silver / light gray
     padding: "15px",
     boxSizing: "border-box",
-    color: "#fff",
+    color: "#111827", // Dark professional text
   },
 
   pageTitle: {
@@ -703,10 +700,10 @@ const styles = {
 
   yearCard: {
     backgroundColor: "#ffffff",
-    borderRadius: "16px",
+    borderRadius: "4px", // POINTY edges
     padding: "18px",
     marginBottom: "28px",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+    boxShadow: "0 4px 12px rgba(5, 14, 175, 0.08)",
   },
 
   yearTitle: {
@@ -739,9 +736,9 @@ const styles = {
   },
 
   addBtn: {
-    backgroundColor: "#198754",
-    color: "#fff",
-    border: "none",
+    backgroundColor: "#ffffff",
+    color: "#111827",
+    border: "1px solid #d1d5db",
     padding: "8px 14px",
     fontSize: "15px",
     borderRadius: "6px",
@@ -753,9 +750,9 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "6px",
-    backgroundColor: "#198754",
-    color: "#fff",
-    border: "none",
+    backgroundColor: "#ffffff",
+    color: "#111827",
+    border: "1px solid #d1d5db",
     padding: "8px 14px",
     borderRadius: "6px",
     cursor: "pointer",
@@ -767,19 +764,19 @@ const styles = {
     color: "#000",
     borderCollapse: "separate",
     borderSpacing: "0",
-    borderRadius: "12px",
+    borderRadius: "0px", // fully pointy
     overflow: "hidden",
     marginBottom: "30px",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
   },
 
   headerRow: {
-    background: "linear-gradient(90deg, #0d6efd, #0a58ca)",
-    color: "#fff",
+    backgroundColor: "#f3f4f6",
+    color: "#111827",
     height: "52px",
-    fontSize: "14px",
+    fontSize: "13px",
     textTransform: "uppercase",
-    letterSpacing: "0.6px",
+    letterSpacing: "0.5px",
   },
 
   bodyRow: {
@@ -795,8 +792,8 @@ const styles = {
     height: "38px",
     padding: "0 12px",
     fontSize: "14px",
-    borderRadius: "8px",
-    border: "1px solid #ced4da",
+    borderRadius: "2px", // sharp
+    border: "1px solid #d1d5db",
     outline: "none",
     transition: "border 0.2s, box-shadow 0.2s",
   },
@@ -806,8 +803,8 @@ const styles = {
     height: "38px",
     padding: "0 12px",
     fontSize: "14px",
-    borderRadius: "8px",
-    border: "1px solid #ced4da",
+    borderRadius: "2px", // sharp
+    border: "1px solid #d1d5db",
     outline: "none",
     cursor: "pointer",
     transition: "border 0.2s, box-shadow 0.2s",
@@ -834,9 +831,9 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "6px",
-    backgroundColor: "#0d6efd",
-    color: "#fff",
-    border: "none",
+    backgroundColor: "#ffffff",
+    color: "#111827",
+    border: "1px solid #d1d5db",
     padding: "8px 14px",
     borderRadius: "6px",
     cursor: "pointer",

@@ -80,38 +80,84 @@ const CreatorDashboard = () => {
 
   return (
     <CreatorLayout>
-      <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Creator Dashboard</h1>
-          <p className="text-gray-600">Manage your content and team efficiently</p>
+      <div className="min-h-screen bg-gray-50">
+        {/* Refined Professional Navbar */}
+        <div className="bg-white border-b border-gray-300">
+          <div className="max-w-7xl mx-auto px-8">
+
+            {/* Top Row */}
+            <div className="flex items-center justify-between py-8">
+              <div className="flex items-center gap-6">
+                {/* Logo */}
+                <div className="w-14 h-14 bg-gray-900 text-white flex items-center justify-center font-semibold rounded-lg text-lg">
+                  KPT
+                </div>
+
+                {/* Title */}
+                <div>
+                  <h1 className="text-3xl font-semibold text-gray-900 leading-tight">
+                    Creator Dashboard
+                  </h1>
+                  <p className="text-base text-gray-500 mt-1">
+                    Manage players, schedules, and performance
+                  </p>
+                </div>
+              </div>
+
+              {/* User */}
+              <div className="flex items-center gap-6">
+                <div className="text-right">
+                  <div className="text-base font-medium text-gray-900">
+                    Creator
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Administrator
+                  </div>
+                </div>
+                <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 font-semibold text-base">
+                  C
+                </div>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-10 pb-4">
+              {[
+                { key: 'overview', label: 'Overview' },
+                { key: 'players', label: 'Players' },
+                { key: 'training', label: 'Training' },
+                { key: 'performance', label: 'Performance' },
+                { key: 'attendance', label: 'Attendance' },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => handleTabChange(tab.key)}
+                  className={`relative text-lg font-medium pb-3 transition-colors ${
+                    activeTab === tab.key
+                      ? 'text-gray-900'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                >
+                  {tab.label}
+
+                  {/* Underline */}
+                  {activeTab === tab.key && (
+                    <span className="absolute left-0 -bottom-[2px] w-full h-[3px] bg-gray-900 rounded-full"></span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+          </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex flex-wrap gap-2 mb-6 bg-white p-4 rounded-lg shadow-sm border">
-          {[
-            { key: 'overview', label: '📊 Overview' },
-            { key: 'players', label: '👥 Players' },
-            { key: 'training', label: '📅 Training' },
-            { key: 'performance', label: '📈 Performance' },
-            { key: 'attendance', label: '✅ Attendance' },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => handleTabChange(tab.key)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === tab.key
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Content */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          {renderContent()}
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="bg-white border border-gray-200">
+            <div className="p-8">
+              {renderContent()}
+            </div>
+          </div>
         </div>
       </div>
     </CreatorLayout>

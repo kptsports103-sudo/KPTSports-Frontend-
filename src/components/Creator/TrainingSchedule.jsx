@@ -235,10 +235,7 @@ const TrainingSchedule = ({ isStudent = false }) => {
         </div>
       )}
 
-      {/* Footer */}
-      <div style={styles.footer}>
-        © 2023 KPT Sports. All rights reserved.
-      </div>
+     
     </div>
   );
 };
@@ -250,10 +247,10 @@ export default TrainingSchedule;
 const styles = {
   page: {
     minHeight: "100vh",
-    backgroundColor: "#0f3b2e",
+    backgroundColor: "#e5e7eb", // Silver / light gray
     padding: "15px",
     boxSizing: "border-box",
-    color: "#fff",
+    color: "#111827", // Dark professional text
   },
 
   pageTitle: {
@@ -280,18 +277,18 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "6px",
-    backgroundColor: "#0d6efd",
-    color: "#fff",
-    border: "none",
+    backgroundColor: "#ffffff",
+    color: "#111827",
+    border: "1px solid #d1d5db",
     padding: "8px 14px",
     borderRadius: "6px",
     cursor: "pointer",
   },
 
   addBtn: {
-    backgroundColor: "#198754",
-    color: "#fff",
-    border: "none",
+    backgroundColor: "#ffffff",
+    color: "#111827",
+    border: "1px solid #d1d5db",
     padding: "8px 14px",
     fontSize: "15px",
     borderRadius: "6px",
@@ -303,9 +300,9 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "8px",
-    backgroundColor: "#198754",
-    color: "#fff",
-    border: "none",
+    backgroundColor: "#ffffff",
+    color: "#111827",
+    border: "1px solid #d1d5db",
     padding: "8px 20px",
     minWidth: "140px",
     fontSize: "15px",
@@ -319,19 +316,19 @@ const styles = {
     color: "#000",
     borderCollapse: "separate",
     borderSpacing: "0",
-    borderRadius: "12px",
+    borderRadius: "0px", // fully pointy
     overflow: "hidden",
     marginBottom: "30px",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
   },
 
   headerRow: {
-    background: "linear-gradient(90deg, #0d6efd, #0a58ca)",
-    color: "#fff",
+    backgroundColor: "#f3f4f6",
+    color: "#111827",
     height: "52px",
-    fontSize: "14px",
+    fontSize: "13px",
     textTransform: "uppercase",
-    letterSpacing: "0.6px",
+    letterSpacing: "0.5px",
   },
 
   bodyRow: {
@@ -346,8 +343,8 @@ const styles = {
     height: "38px",
     padding: "0 12px",
     fontSize: "14px",
-    borderRadius: "8px",
-    border: "1px solid #ced4da",
+    borderRadius: "2px", // sharp
+    border: "1px solid #d1d5db",
     outline: "none",
     transition: "border 0.2s, box-shadow 0.2s",
   },
@@ -357,8 +354,8 @@ const styles = {
     height: "38px",
     padding: "0 12px",
     fontSize: "14px",
-    borderRadius: "8px",
-    border: "1px solid #ced4da",
+    borderRadius: "2px", // sharp
+    border: "1px solid #d1d5db",
     outline: "none",
     cursor: "pointer",
     transition: "border 0.2s, box-shadow 0.2s",
