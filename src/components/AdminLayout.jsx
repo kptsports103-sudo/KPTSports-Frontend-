@@ -114,20 +114,6 @@ const AdminLayout = ({ children }) => {
             </table>
           </div>
 
-          {/* System Status */}
-          <div style={{ textAlign: 'left', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
-            <small style={{ color: '#6b7280', fontWeight: 500 }}>System Status</small>
-            <div style={{ marginTop: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', marginRight: '8px' }}></span>
-                <small>MongoDB Connected</small>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', marginRight: '8px' }}></span>
-                <small>Cloudinary Connected</small>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Logout */}

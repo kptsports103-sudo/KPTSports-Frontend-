@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import Players from '../../components/coach/Players';
-import TrainingSchedule from '../../components/coach/TrainingSchedule';
-import Performance from '../../components/coach/Performance';
-import Attendance from '../../components/coach/Attendance';
+import Players from '../../components/Creator/Players';
+import TrainingSchedule from '../../components/Creator/TrainingSchedule';
+import Performance from '../../components/Creator/Performance';
+import Attendance from '../../components/Creator/Attendance';
 
 const CoachDashboard = () => {
   const { user, logout } = useAuth();

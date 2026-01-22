@@ -35,7 +35,7 @@ const OTPVerify = () => {
 
       if (role === 'creator') {
 
-        navigate('/dashboard/creator');
+        navigate('/admin/creator-dashboard');
 
       } else if (role === 'superadmin') {
 

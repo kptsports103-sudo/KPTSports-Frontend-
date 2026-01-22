@@ -101,7 +101,7 @@ const AppContent = () => {
         <Route path="/sports-dashboard" element={<ProtectedRoute role="admin"><SportsDashboard /></ProtectedRoute>} />
         <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
         <Route path="/admin/super-admin-dashboard" element={<ProtectedRoute role="superadmin"><SuperAdminDashboard /></ProtectedRoute>} />
-        <Route path="/dashboard/creator" element={<ProtectedRoute role="creator"><CoachDashboard /></ProtectedRoute>} />
+        <Route path="/admin/creator-dashboard" element={<ProtectedRoute role="creator"><CreatorDashboard /></ProtectedRoute>} />
         <Route path="/dashboard/coach" element={<ProtectedRoute role="coach"><CoachDashboard /></ProtectedRoute>} />
         <Route path="/admin/media" element={<ProtectedRoute role="admin"><Media /></ProtectedRoute>} />
         <Route path="/admin/add-media" element={<ProtectedRoute role="admin"><AddMedia /></ProtectedRoute>} />

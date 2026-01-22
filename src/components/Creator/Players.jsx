@@ -438,11 +438,14 @@ const Players = ({ isStudent = false }) => {
 
             <div style={styles.tableToolbar}>
               <input
+                id="player-search"
+                name="player-search"
                 type="text"
                 placeholder="Search by name or branch..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 style={styles.searchInput}
+                aria-label="Search players by name or branch"
               />
 
               <div style={styles.resultCount}>
@@ -509,7 +512,10 @@ const Players = ({ isStudent = false }) => {
                               <td style={{ padding: "10px 16px" }}>{(currentPage - 1) * ITEMS_PER_PAGE + playerIndex + 1}</td>
                               <td style={{ padding: "10px 16px" }}>{yearData.year}</td>
                               <td style={{ padding: "10px 16px" }}>
+                                <label htmlFor={`player-name-${yearData.year}-${playerIndex}`} style={{ display: 'none' }}>Player Name for {yearData.year} Row {playerIndex + 1}</label>
                                 <input
+                                  id={`player-name-${yearData.year}-${playerIndex}`}
+                                  name={`player-name-${yearData.year}-${playerIndex}`}
                                   type="text"
                                   value={player.name}
                                   onChange={(e) => updatePlayer(yearData.year, playerIndex, 'name', e.target.value)}
@@ -520,7 +526,10 @@ const Players = ({ isStudent = false }) => {
                                 />
                               </td>
                               <td style={{ padding: "10px 16px" }}>
+                                <label htmlFor={`player-branch-${yearData.year}-${playerIndex}`} style={{ display: 'none' }}>Player Branch for {yearData.year} Row {playerIndex + 1}</label>
                                 <input
+                                  id={`player-branch-${yearData.year}-${playerIndex}`}
+                                  name={`player-branch-${yearData.year}-${playerIndex}`}
                                   type="text"
                                   value={player.branch}
                                   onChange={(e) => updatePlayer(yearData.year, playerIndex, 'branch', e.target.value)}
@@ -531,7 +540,10 @@ const Players = ({ isStudent = false }) => {
                                 />
                               </td>
                               <td style={{ padding: "10px 16px" }}>
+                                <label htmlFor={`player-diploma-${yearData.year}-${playerIndex}`} style={{ display: 'none' }}>Diploma Year for {yearData.year} Row {playerIndex + 1}</label>
                                 <select
+                                  id={`player-diploma-${yearData.year}-${playerIndex}`}
+                                  name={`player-diploma-${yearData.year}-${playerIndex}`}
                                   value={player.diplomaYear}
                                   onChange={(e) => updatePlayer(yearData.year, playerIndex, 'diplomaYear', e.target.value)}
                                   disabled={!isEditable}

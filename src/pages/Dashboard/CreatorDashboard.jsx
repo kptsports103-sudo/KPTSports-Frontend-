@@ -1,126 +1,117 @@
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import CreatorLayout from "../../components/CreatorLayout";
-import { useState, useEffect } from "react";
-import { IAMService } from "../../services/iam.service";
+import Players from '../../components/Creator/Players';
+import TrainingSchedule from '../../components/Creator/TrainingSchedule';
+import Performance from '../../components/Creator/Performance';
+import Attendance from '../../components/Creator/Attendance';
 
 const CreatorDashboard = () => {
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [totalMedia, setTotalMedia] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabParam || 'overview');
 
   useEffect(() => {
-    const fetchUserCount = async () => {
-      try {
-        const users = await IAMService.getUsers();
-        setTotalUsers(users.length);
-      } catch (error) {
-        console.error('Failed to fetch user count:', error);
-        setTotalUsers(0);
-      }
-    };
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
-    const loadMediaCount = () => {
-      const stored = JSON.parse(localStorage.getItem("media") || "[]");
-      setTotalMedia(stored.length);
-    };
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSearchParams({ tab });
+  };
 
-    fetchUserCount();
-    loadMediaCount();
-  }, []);
-
-  // Dynamic stats with real user count
-  const stats = [
-    { title: "Total Users", value: totalUsers, icon: "👤", link: "/admin/iam/users" },
-    { title: "Coaches", value: 12, icon: "🧑‍🏫" },
-    { title: "Students", value: 116, icon: "🎓" },
-    { title: "Update Pages", value: 8, icon: "📄" },
-    { title: "Media Files", value: totalMedia, icon: "🖼️", link: "/admin/media-stats" },
-    { title: "Errors (24h)", value: 1, icon: "⚠️" },
-    { title: "IAM Users", value: "Manage", icon: "🔐", link: "/admin/iam/users" },
-  ];
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'players':
+        return <Players />;
+      case 'training':
+        return <TrainingSchedule />;
+      case 'performance':
+        return <Performance />;
+      case 'attendance':
+        return <Attendance />;
+      default:
+        return (
+          <div className="space-y-8">
+            <div className="text-center bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-2xl">
+              <h1 className="text-5xl font-bold mb-4">🏆 Creator Dashboard</h1>
+              <p className="text-xl opacity-90">Welcome back, Creator! Manage your team efficiently with our comprehensive tools.</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-8 shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300 cursor-pointer group">
+                <div className="text-5xl mb-4 group-hover:animate-bounce">👥</div>
+                <h3 className="text-2xl font-bold text-white mb-2">Players</h3>
+                <p className="text-blue-100 mb-4">Manage player information and profiles</p>
+                <button onClick={() => handleTabChange('players')} className="bg-white text-blue-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition duration-200 font-semibold shadow-lg">
+                  View Players →
+                </button>
+              </div>
+              <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-8 shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300 cursor-pointer group">
+                <div className="text-5xl mb-4 group-hover:animate-bounce">📅</div>
+                <h3 className="text-2xl font-bold text-white mb-2">Training Schedule</h3>
+                <p className="text-green-100 mb-4">Plan and organize training sessions</p>
+                <button onClick={() => handleTabChange('training')} className="bg-white text-green-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition duration-200 font-semibold shadow-lg">
+                  View Schedule →
+                </button>
+              </div>
+              <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-8 shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300 cursor-pointer group">
+                <div className="text-5xl mb-4 group-hover:animate-bounce">📊</div>
+                <h3 className="text-2xl font-bold text-white mb-2">Performance Reports</h3>
+                <p className="text-purple-100 mb-4">Track and analyze player performance</p>
+                <button onClick={() => handleTabChange('performance')} className="bg-white text-purple-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition duration-200 font-semibold shadow-lg">
+                  View Reports →
+                </button>
+              </div>
+              <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-8 shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300 cursor-pointer group">
+                <div className="text-5xl mb-4 group-hover:animate-bounce">✅</div>
+                <h3 className="text-2xl font-bold text-white mb-2">Attendance</h3>
+                <p className="text-orange-100 mb-4">Monitor and track player attendance</p>
+                <button onClick={() => handleTabChange('attendance')} className="bg-white text-orange-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition duration-200 font-semibold shadow-lg">
+                  View Attendance →
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+    }
+  };
 
   return (
     <CreatorLayout>
-      <div className="dashboard-title">Creator Dashboard</div>
-      <div className="dashboard-subtitle">Content Creation & Management</div>
+      <div className="p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Creator Dashboard</h1>
+          <p className="text-gray-600">Manage your content and team efficiently</p>
+        </div>
 
-      {/* SYSTEM OVERVIEW */}
-      <div className="stats-grid">
-        {stats.map((stat, index) => {
-          const Card = (
-            <div className="stat-card" style={{ cursor: stat.link ? "pointer" : "default" }}>
-              <div style={{ fontSize: "32px", marginBottom: "10px" }}>{stat.icon}</div>
-              <h3>{stat.value}</h3>
-              <p>{stat.title}</p>
-            </div>
-          );
-
-          return stat.link ? (
-            <Link key={index} to={stat.link} style={{ textDecoration: "none", color: "inherit" }}>
-              {Card}
-            </Link>
-          ) : (
-            <div key={index}>{Card}</div>
-          );
-        })}
-      </div>
-
-      {/* QUICK ACTIONS */}
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <div
-          style={{
-            backgroundColor: "#fff",
-            color: "#000",
-            padding: "20px",
-            borderRadius: "8px",
-            maxWidth: "500px",
-            width: "100%"
-          }}
-        >
-          <h3 style={{ marginBottom: "15px" }}>Quick Actions</h3>
-
-          <Link
-            to="/admin/media"
-            style={{
-              display: "block",
-              padding: "12px",
-              backgroundColor: "#0d6efd",
-              color: "#fff",
-              textDecoration: "none",
-              borderRadius: "6px",
-              fontSize: "16px",
-              textAlign: "center",
-              marginBottom: "10px"
-            }}
-          >
-            📁 Media Management
-          </Link>
-
+        {/* Tab Navigation */}
+        <div className="flex flex-wrap gap-2 mb-6 bg-white p-4 rounded-lg shadow-sm border">
           {[
-            { name: "Manage Events", route: "/admin/manage-events" },
-            { name: "Manage Gallery", route: "/admin/manage-gallery" },
-            { name: "Manage Results", route: "/admin/manage-results" },
-            { name: "Manage Home", route: "/admin/manage-home" },
-            { name: "Manage About", route: "/admin/manage-about" },
-            { name: "Manage History", route: "/admin/manage-history" }
-          ].map((item, index) => (
-            <Link
-              key={index}
-              to={item.route}
-              style={{
-                display: "block",
-                padding: "12px",
-                backgroundColor: "#0d6efd",
-                color: "#fff",
-                textDecoration: "none",
-                borderRadius: "6px",
-                fontSize: "15px",
-                marginBottom: "8px",
-                textAlign: "center"
-              }}
+            { key: 'overview', label: '📊 Overview' },
+            { key: 'players', label: '👥 Players' },
+            { key: 'training', label: '📅 Training' },
+            { key: 'performance', label: '📈 Performance' },
+            { key: 'attendance', label: '✅ Attendance' },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => handleTabChange(tab.key)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === tab.key
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
             >
-              {item.name}
-            </Link>
+              {tab.label}
+            </button>
           ))}
+        </div>
+
+        {/* Content */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          {renderContent()}
         </div>
       </div>
     </CreatorLayout>

@@ -104,7 +104,7 @@ const Attendance = ({ isStudent = false }) => {
   return (
     <div style={styles.page}>
       {/* Header */}
-      <h1 style={styles.pageTitle}>{isStudent ? 'Student Dashboard' : 'Coach Dashboard'}</h1>
+      <h1 style={styles.pageTitle}>Attendance</h1>
 
       {/* Section Title */}
       <div style={styles.sectionTitle}>Attendance</div>

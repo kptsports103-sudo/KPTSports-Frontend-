@@ -162,7 +162,7 @@ const Performance = ({ isStudent = false }) => {
   return (
     <div style={styles.page}>
       <h1 style={styles.pageTitle}>
-        {isStudent ? "Student Dashboard" : "Coach Dashboard"}
+        Performance Reports
       </h1>
 
       <div style={styles.sectionTitle}>Performance Reports</div>
@@ -227,7 +227,10 @@ const Performance = ({ isStudent = false }) => {
               <td>{i + 1}</td>
 
               <td>
+                <label htmlFor={`performance-name-${player.id}`} style={{ display: 'none' }}>Athlete Name for Performance Record {i + 1}</label>
                 <input
+                  id={`performance-name-${player.id}`}
+                  name={`performance-name-${player.id}`}
                   value={player.name}
                   onChange={e =>
                     isEditMode &&
@@ -246,7 +249,10 @@ const Performance = ({ isStudent = false }) => {
               </td>
 
               <td>
+                <label htmlFor={`performance-status-${player.id}`} style={{ display: 'none' }}>Performance Status for Athlete {player.name}</label>
                 <select
+                  id={`performance-status-${player.id}`}
+                  name={`performance-status-${player.id}`}
                   value={player.status}
                   onChange={e =>
                     isEditMode &&

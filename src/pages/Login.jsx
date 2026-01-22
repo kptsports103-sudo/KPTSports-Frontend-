@@ -22,7 +22,7 @@ export default function Login() {
      if (result.directLogin) {
        // Direct login for coach/creator
        if (role === 'coach') navigate('/dashboard/coach');
-       else if (role === 'creator') navigate('/dashboard/creator');
+       else if (role === 'creator') navigate('/admin/creator-dashboard');
        else navigate('/');
      } else {
        // OTP for admin

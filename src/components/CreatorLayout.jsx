@@ -18,13 +18,10 @@ const CreatorLayout = ({ children }) => {
 
   const creatorMenuItems = [
     { path: '/admin/creator-dashboard', label: 'Creator Dashboard', icon: '🎨' },
-    { path: '/admin/media', label: 'Media Management', icon: '🖼️' },
-    { path: '/admin/manage-events', label: 'Manage Events', icon: '📅' },
-    { path: '/admin/manage-gallery', label: 'Manage Gallery', icon: '🖼️' },
-    { path: '/admin/manage-results', label: 'Manage Results', icon: '🏆' },
-    { path: '/admin/manage-home', label: 'Manage Home', icon: '🏠' },
-    { path: '/admin/manage-about', label: 'Manage About', icon: 'ℹ️' },
-    { path: '/admin/manage-history', label: 'Manage History', icon: '📜' },
+    { path: '/admin/creator-dashboard?tab=players', label: '👥 Players', icon: '👥' },
+    { path: '/admin/creator-dashboard?tab=training', label: '📅 Training Schedule', icon: '📅' },
+    { path: '/admin/creator-dashboard?tab=performance', label: '📊 Performance Reports', icon: '📊' },
+    { path: '/admin/creator-dashboard?tab=attendance', label: '✅ Attendance', icon: '✅' },
   ];
 
   const handleLogout = () => {
@@ -86,20 +83,6 @@ const CreatorLayout = ({ children }) => {
             </table>
           </div>
 
-          {/* System Status */}
-          <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.2)' }}>
-            <small style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>System Status</small>
-            <div style={{ marginTop: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', marginRight: '8px' }}></span>
-                <small style={{ color: 'rgba(255,255,255,0.9)' }}>MongoDB Connected</small>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', marginRight: '8px' }}></span>
-                <small style={{ color: 'rgba(255,255,255,0.9)' }}>Cloudinary Connected</small>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Logout Button */}

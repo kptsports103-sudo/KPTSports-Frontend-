@@ -31,7 +31,7 @@ const TrainingSchedule = ({ isStudent = false }) => {
   return (
     <div style={styles.page}>
       {/* Header */}
-      <h1 style={styles.pageTitle}>{isStudent ? 'Student Dashboard' : 'Coach Dashboard'}</h1>
+      <h1 style={styles.pageTitle}>Training Schedule</h1>
 
       {/* Section Title */}
       <div style={styles.sectionTitle}>Training Schedule</div>
@@ -124,7 +124,10 @@ const TrainingSchedule = ({ isStudent = false }) => {
               <td>{schedule.slNo}</td>
 
               <td>
+                <label htmlFor={`date-${index}`} style={{ display: 'none' }}>Training Date for Schedule {schedule.slNo}</label>
                 <input
+                  id={`date-${index}`}
+                  name={`date-${index}`}
                   type="date"
                   value={schedule.date}
                   onChange={(e) => !isStudent && isEditMode && updateRow(index, 'date', e.target.value)}
@@ -134,7 +137,10 @@ const TrainingSchedule = ({ isStudent = false }) => {
               </td>
 
               <td>
+                <label htmlFor={`session-${index}`} style={{ display: 'none' }}>Training Session for Schedule {schedule.slNo}</label>
                 <select
+                  id={`session-${index}`}
+                  name={`session-${index}`}
                   value={schedule.session}
                   onChange={(e) => !isStudent && isEditMode && updateRow(index, 'session', e.target.value)}
                   disabled={isStudent || !isEditMode}
@@ -147,12 +153,16 @@ const TrainingSchedule = ({ isStudent = false }) => {
 
               {!isStudent && (
                 <td>
+                  <label htmlFor={`time-${index}`} style={{ display: 'none' }}>Training Time for Schedule {schedule.slNo}</label>
                   <input
+                    id={`time-${index}`}
+                    name={`time-${index}`}
                     type="text"
                     value={schedule.time}
                     onChange={(e) => isEditMode && updateRow(index, 'time', e.target.value)}
                     readOnly={!isEditMode}
                     style={{ ...styles.input, backgroundColor: !isEditMode ? '#f8f9fa' : '#fff' }}
+                    placeholder="e.g. 6:00 AM"
                   />
                 </td>
               )}
