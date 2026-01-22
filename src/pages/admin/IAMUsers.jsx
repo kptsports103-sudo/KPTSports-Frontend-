@@ -210,6 +210,8 @@ const IAMUsers = () => {
             <div style={{ marginBottom: "20px" }}>
               <label style={{ fontWeight: 600 }}>Email Address *</label>
               <input
+                id="email"
+                name="email"
                 type="email"
                 placeholder="Enter your email address"
                 value={form.email}
@@ -297,6 +299,8 @@ const IAMUsers = () => {
             <strong>{form.email}</strong>
 
             <input
+              id="otp"
+              name="otp"
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               placeholder="000000"
@@ -345,16 +349,18 @@ const IAMUsers = () => {
             )}
 
             <label>Full Name *</label>
-            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Enter full name" style={inputStyle} />
+            <input id="name" name="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Enter full name" style={inputStyle} />
 
             <label>Mobile Number *</label>
-            <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} placeholder="10-digit mobile" style={inputStyle} />
+            <input id="phone" name="phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} placeholder="10-digit mobile" style={inputStyle} />
 
             <label>Password *</label>
-            <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Strong password" style={inputStyle} />
+            <input id="password" name="password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Strong password" style={inputStyle} />
 
             <label>Profile Image</label>
             <input
+              id="profileImage"
+              name="profileImage"
               type="file"
               accept="image/*"
               onChange={(e) => {
@@ -392,7 +398,7 @@ const IAMUsers = () => {
 
             <div style={{ textAlign: "center", marginBottom: 20 }}>
               <img
-                src={profileImage || "https://via.placeholder.com/100"}
+                src={profileImage || "/avatar.png"}
                 style={{ width: 100, height: 100, borderRadius: "50%", objectFit: "cover" }}
               />
             </div>

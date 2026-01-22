@@ -39,14 +39,14 @@ export default function Login() {
         <h2>Sign in</h2>
         {err && <div className="text-sm text-red-600 mb-2">{err}</div>}
         <form onSubmit={submitLogin}>
-          <label>Email ID *</label>
-          <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email ID" required />
+          <label htmlFor="email">Email ID *</label>
+          <input type="email" id="email" name="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email ID" required />
 
-          <label>Password *</label>
-          <input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" required />
+          <label htmlFor="password">Password *</label>
+          <input type="password" id="password" name="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" required />
 
-          <label>Login Type</label>
-          <select value={role} onChange={e=>setRole(e.target.value)}>
+          <label htmlFor="role">Login Type</label>
+          <select id="role" name="role" value={role} onChange={e=>setRole(e.target.value)}>
             <option value="superadmin">Super Admin</option>
             <option value="admin">Admin</option>
             <option value="creator">Creator</option>
@@ -55,23 +55,6 @@ export default function Login() {
           <button disabled={loading} type="submit">
             {loading ? 'Sending OTP...' : 'Login'}
           </button>
-
-          <div style={{ marginTop: '20px', textAlign: 'center' }}>
-            <p>Or</p>
-            <SignInButton mode="modal">
-              <button style={{
-                padding: '10px 20px',
-                backgroundColor: '#4285f4',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                fontSize: '16px'
-              }}>
-                Sign in with Google
-              </button>
-            </SignInButton>
-          </div>
         </form>
       </div>
     </div>

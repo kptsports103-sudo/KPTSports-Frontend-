@@ -21,16 +21,12 @@ const UsersManage = () => {
   const maskEmail = (email) => {
     if (!email || !email.includes("@")) return email;
     const [name, domain] = email.split("@");
-
-    if (name.length <= 5) return "-------@" + domain;
-
-    const visible = name.slice(0, name.length - 5);
-    return visible + "-------@" + domain;
+    return name + "*******@" + domain;
   };
 
   const maskPhone = (phone) => {
     if (!phone) return "-------";
-    return "---- " + phone.slice(-3);
+    return "******** " + phone.slice(-3);
   };
 
   useEffect(() => {
@@ -101,7 +97,6 @@ const UsersManage = () => {
   return (
     <AdminLayout>
       <div className="p-8 bg-gray-50 min-h-screen">
-
         {/* Center Heading */}
         <div className="flex justify-center mb-8">
           <h1 className="text-3xl font-bold flex items-center gap-3">
@@ -151,7 +146,7 @@ const UsersManage = () => {
                     <tr key={user._id} style={{ background: i % 2 ? '#f8f9fa' : '#fff' }}>
                       <td style={{ padding: '15px', textAlign: 'center' }}>
                         <img
-                          src={user.profileImage || "https://via.placeholder.com/40"}
+                          src={user.profileImage || "/avatar.png"}
                           alt="profile"
                           style={{
                             width: 40,
@@ -163,8 +158,8 @@ const UsersManage = () => {
                         />
                       </td>
                       <td style={{ padding: '15px' }}>{user.name}</td>
-                      <td style={{ padding: '15px' }}>{user.role === 'superadmin' || user.role === 'AssetAdmin' ? user.email : maskEmail(user.email)}</td>
-                      <td style={{ padding: '15px' }}>{user.role === 'superadmin' || user.role === 'AssetAdmin' ? user.phone : maskPhone(user.phone)}</td>
+                      <td style={{ padding: '15px' }}>{maskEmail(user.email)}</td>
+                      <td style={{ padding: '15px' }}>{maskPhone(user.phone)}</td>
                       <td style={{ padding: '15px', textAlign: 'center' }}>{user.role}</td>
                       <td style={{ padding: '15px', textAlign: 'center' }}>
                         <span
@@ -213,54 +208,49 @@ const UsersManage = () => {
 
       {/* Profile Modal */}
       {showProfileModal && selectedUser && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl w-[380px] shadow-2xl p-6 relative">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white w-[350px] p-5 rounded-lg text-center relative">
 
-            {/* Close */}
             <button
               onClick={() => setShowProfileModal(false)}
-              className="absolute top-3 right-3 text-gray-400 hover:text-black text-xl"
+              className="absolute top-2 right-3 text-gray-400 hover:text-black text-2xl"
             >
               ×
             </button>
 
-            {/* Name */}
-            <h2 className="text-xl font-semibold text-center mb-4">
-              {selectedUser.name}
-            </h2>
+            <h2 className="text-xl font-semibold mb-1">{selectedUser.name}</h2>
+            <p className="text-gray-500 mb-4">Profile</p>
 
-            {/* Image */}
             <div className="flex justify-center mb-4">
               <img
-                src={selectedUser.profileImage || "https://via.placeholder.com/150"}
+                src={selectedUser.profileImage || "/avatar.png"}
                 alt="profile"
-                className="w-32 h-32 object-cover rounded-xl border shadow"
+                className="w-20 h-20 object-cover rounded-lg border shadow"
               />
             </div>
 
-            {/* Info */}
-            <div className="space-y-2 text-sm bg-gray-50 p-4 rounded-lg">
-              <p><span className="font-semibold">Email:</span> {maskEmail(selectedUser.email)}</p>
-              <p><span className="font-semibold">Phone:</span> {maskPhone(selectedUser.phone)}</p>
-              <p><span className="font-semibold">Role:</span> {selectedUser.role}</p>
-            </div>
+            <p><b>Email:</b> {selectedUser.email}</p>
+            <p><b>Phone:</b> {selectedUser.phone}</p>
+            <p><b>Role:</b> {selectedUser.role}</p>
 
-            {/* Explanation */}
-            <p className="text-xs text-gray-600 mt-3 leading-relaxed">
-              This user logs in using <b>Email & Password</b>.
-              The assigned role <b>{selectedUser.role}</b> decides what features and pages
-              this user can access in the system.
-            </p>
+            {(() => {
+              let text = "";
+              if (selectedUser.role === "superadmin") {
+                text = "This user can access the Superadmin and Admin dashboards. They have full control over system settings and users.";
+              } else if (selectedUser.role === "admin") {
+                text = "This user can access the Admin and Creator dashboards. They can manage creators and content.";
+              } else if (selectedUser.role === "creator") {
+                text = "This user can access only the Creator dashboard. They manage their own content only.";
+              }
+              return <p className="text-sm text-gray-600 mt-4 leading-relaxed">{text}</p>;
+            })()}
 
-            {/* Button */}
-            <div className="mt-5 flex justify-center">
-              <button
-                onClick={() => setShowProfileModal(false)}
-                className="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-black"
-              >
-                Close
-              </button>
-            </div>
+            <button
+              onClick={() => setShowProfileModal(false)}
+              className="mt-4 px-5 py-2 bg-gray-800 text-white rounded hover:bg-black"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

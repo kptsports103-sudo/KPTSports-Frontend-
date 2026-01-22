@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import AdminLayout from "../../components/AdminLayout";
+import SuperAdminLayout from "../../components/SuperAdminLayout";
 import { useAuth } from "../../context/AuthContext";
 
 const SuperAdminDashboard = () => {
@@ -33,8 +33,9 @@ const SuperAdminDashboard = () => {
     }
   };
 
+  console.log('SuperAdminDashboard rendering');
   return (
-    <AdminLayout>
+    <SuperAdminLayout>
       <div className="p-6">
         {/* Header */}
         <div className="mb-8">
@@ -144,7 +145,7 @@ const SuperAdminDashboard = () => {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </SuperAdminLayout>
   );
 };
 

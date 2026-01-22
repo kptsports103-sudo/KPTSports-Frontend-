@@ -17,25 +17,55 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const user = clerkUser ? {
+  const user = customUser || (clerkUser ? {
     id: clerkUser.id,
     name: clerkUser.fullName || clerkUser.firstName,
     email: clerkUser.primaryEmailAddress?.emailAddress,
     role: "admin" // Default role, can be customized based on metadata
-  } : customUser;
+  } : null);
+
+  const refreshUser = useCallback(async () => {
+    try {
+      const response = await api.get('/me');
+      const userData = response.data.user;
+      localStorage.setItem('user', JSON.stringify(userData));
+      setCustomUser(userData);
+      return userData;
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      return null;
+    }
+  }, []);
 
   const login = useCallback(async (email, password, role) => {
-    const response = await api.post('/auth/login', { email, password, role });
-    const data = response.data;
-    if (data.token) {
-      // Direct login
-      setAccessToken(data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      setCustomUser(data.user);
-      return { directLogin: true };
-    } else {
-      // OTP
-      return { directLogin: false };
+    console.log('=== FRONTEND LOGIN DEBUG ===');
+    console.log('Email:', email);
+    console.log('Password provided:', !!password);
+    console.log('Role:', role);
+    console.log('Request data:', { email, password, role });
+    
+    try {
+      const response = await api.post('/auth/login', { email, password, role });
+      const data = response.data;
+      console.log('Response:', data);
+      console.log('Response status:', response.status);
+      
+      if (data.token) {
+        // Direct login
+        setAccessToken(data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setCustomUser(data.user);
+        return { directLogin: true };
+      } else {
+        // OTP
+        return { directLogin: false };
+      }
+    } catch (error) {
+      console.error('=== FRONTEND LOGIN ERROR ===');
+      console.error('Error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      throw error;
     }
   }, []);
 
@@ -58,7 +88,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [clerkUser, signOut]);
 
-  const value = useMemo(() => ({ user, login, logout, verifyOTP, isLoaded: clerkLoaded }), [user, login, logout, verifyOTP, clerkLoaded]);
+  const value = useMemo(() => ({ user, login, logout, verifyOTP, refreshUser, isLoaded: clerkLoaded }), [user, login, logout, verifyOTP, refreshUser, clerkLoaded]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

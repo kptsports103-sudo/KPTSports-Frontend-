@@ -99,7 +99,7 @@ const AppContent = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/otp-verify" element={<OTPVerify />} />
         <Route path="/sports-dashboard" element={<ProtectedRoute role="admin"><SportsDashboard /></ProtectedRoute>} />
-        <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
         <Route path="/admin/super-admin-dashboard" element={<ProtectedRoute role="superadmin"><SuperAdminDashboard /></ProtectedRoute>} />
         <Route path="/dashboard/creator" element={<ProtectedRoute role="creator"><CoachDashboard /></ProtectedRoute>} />
         <Route path="/dashboard/coach" element={<ProtectedRoute role="coach"><CoachDashboard /></ProtectedRoute>} />

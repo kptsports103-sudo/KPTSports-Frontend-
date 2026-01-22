@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import AdminLayout from "../../components/AdminLayout";
+import CreatorLayout from "../../components/CreatorLayout";
 import { useState, useEffect } from "react";
 import { IAMService } from "../../services/iam.service";
 
@@ -39,7 +39,7 @@ const CreatorDashboard = () => {
   ];
 
   return (
-    <AdminLayout>
+    <CreatorLayout>
       <div className="dashboard-title">Creator Dashboard</div>
       <div className="dashboard-subtitle">Content Creation & Management</div>
 
@@ -123,7 +123,7 @@ const CreatorDashboard = () => {
           ))}
         </div>
       </div>
-    </AdminLayout>
+    </CreatorLayout>
   );
 };
 
