@@ -159,6 +159,8 @@ const Media = () => {
         </div>
 
         <input
+          id="media-search"
+          name="media-search"
           placeholder="Search by title or URL..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -173,8 +175,10 @@ const Media = () => {
 
         <div style={{ marginBottom: "20px" }}>
           {["All", "Images", "Videos", "Audios", "PDF"].map((item) => (
-            <label key={item} style={{ marginRight: "15px" }}>
+            <label key={item} htmlFor={`filter-${item.toLowerCase()}`} style={{ marginRight: "15px" }}>
               <input
+                id={`filter-${item.toLowerCase()}`}
+                name="filter"
                 type="radio"
                 value={item}
                 checked={filter === item}
@@ -217,6 +221,8 @@ const Media = () => {
                 {isEditing ? (
                   <div>
                     <input
+                      id="edit-title"
+                      name="edit-title"
                       value={editData.title || ""}
                       onChange={(e) =>
                         setEditData({ ...editData, title: e.target.value })
@@ -226,6 +232,8 @@ const Media = () => {
                     />
 
                     <input
+                      id="edit-link"
+                      name="edit-link"
                       value={editData.link || ""}
                       onChange={(e) =>
                         setEditData({ ...editData, link: e.target.value })

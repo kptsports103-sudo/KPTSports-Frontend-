@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Players from '../../components/Creator/Players';
-import TrainingSchedule from '../../components/Creator/TrainingSchedule';
-import Performance from '../../components/Creator/Performance';
 import Attendance from '../../components/Creator/Attendance';
 
 const CoachDashboard = () => {
@@ -20,10 +18,6 @@ const CoachDashboard = () => {
     switch (activeTab) {
       case 'players':
         return <Players />;
-      case 'training':
-        return <TrainingSchedule />;
-      case 'performance':
-        return <Performance />;
       case 'attendance':
         return <Attendance />;
       default:
@@ -33,29 +27,13 @@ const CoachDashboard = () => {
               <h1 className="text-5xl font-bold mb-4">🏆 {dashboardTitle}</h1>
               <p className="text-xl opacity-90">{welcomeMessage}</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 lg:gap-8">
               <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-8 shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300 cursor-pointer group">
                 <div className="text-5xl mb-4 group-hover:animate-bounce">👥</div>
                 <h3 className="text-2xl font-bold text-white mb-2">Players</h3>
                 <p className="text-blue-100 mb-4">Manage player information and profiles</p>
                 <button onClick={() => setActiveTab('players')} className="bg-white text-blue-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition duration-200 font-semibold shadow-lg">
                   View Players →
-                </button>
-              </div>
-              <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-8 shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300 cursor-pointer group">
-                <div className="text-5xl mb-4 group-hover:animate-bounce">📅</div>
-                <h3 className="text-2xl font-bold text-white mb-2">Training Schedule</h3>
-                <p className="text-green-100 mb-4">Plan and organize training sessions</p>
-                <button onClick={() => setActiveTab('training')} className="bg-white text-green-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition duration-200 font-semibold shadow-lg">
-                  View Schedule →
-                </button>
-              </div>
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-8 shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300 cursor-pointer group">
-                <div className="text-5xl mb-4 group-hover:animate-bounce">📊</div>
-                <h3 className="text-2xl font-bold text-white mb-2">Performance Reports</h3>
-                <p className="text-purple-100 mb-4">Track and analyze player performance</p>
-                <button onClick={() => setActiveTab('performance')} className="bg-white text-purple-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition duration-200 font-semibold shadow-lg">
-                  View Reports →
                 </button>
               </div>
               <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-8 shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300 cursor-pointer group">
@@ -92,8 +70,6 @@ const CoachDashboard = () => {
           <nav className="space-y-2">
             {[
               { key: 'players', label: '👥 Player List', desc: 'Manage players' },
-              { key: 'training', label: '📅 Training Schedule', desc: 'Plan sessions' },
-              { key: 'performance', label: '📊 Performance Reports', desc: 'Track progress' },
               { key: 'attendance', label: '✅ Attendance', desc: 'Monitor presence' },
             ].map((item) => (
               <div

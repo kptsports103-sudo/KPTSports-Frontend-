@@ -18,11 +18,23 @@ const CreatorLayout = ({ children }) => {
 
   const creatorMenuItems = [
     { path: '/admin/creator-dashboard', label: 'Creator Dashboard', icon: '🎨' },
-    { path: '/admin/creator-dashboard?tab=players', label: '👥 Players', icon: '👥' },
-    { path: '/admin/creator-dashboard?tab=training', label: '📅 Training Schedule', icon: '📅' },
-    { path: '/admin/creator-dashboard?tab=performance', label: '📊 Performance Reports', icon: '📊' },
-    { path: '/admin/creator-dashboard?tab=attendance', label: '✅ Attendance', icon: '✅' },
+    { path: '/admin/creator-dashboard?tab=players', label: ' Players', icon: '👥' },
+    { path: '/admin/creator-dashboard?tab=attendance', label: 'Attendance', icon: '✅' },
   ];
+
+  const isActive = (itemPath) => {
+    const [path, query] = itemPath.split('?');
+
+    if (query) {
+      return (
+        location.pathname === path &&
+        location.search.includes(query)
+      );
+    }
+
+    // For base dashboard, only active when no query params or no tab param
+    return location.pathname === path && (!location.search || !location.search.includes('tab='));
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
@@ -104,21 +116,23 @@ const CreatorLayout = ({ children }) => {
             <Link
               key={item.path}
               to={item.path}
-              className={`menu-item ${location.pathname === item.path ? 'active' : ''}`}
+              className={`menu-item ${isActive(item.path) ? 'active' : ''}`}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 textDecoration: 'none',
-                color: 'rgba(255,255,255,0.9)',
-                padding: '12px 20px',
-                borderRadius: '8px',
-                margin: '4px 10px',
-                transition: 'all 0.3s ease',
-                background: location.pathname === item.path ? 'rgba(255,255,255,0.2)' : 'transparent'
+                color: 'rgba(255,255,255,0.95)',
+                padding: '14px 20px',
+                borderRadius: '10px',
+                margin: '6px 12px',
+                transition: 'all 0.25s ease',
+                background: isActive(item.path) ? 'rgba(255,255,255,0.25)' : 'transparent',
+                boxShadow: isActive(item.path) ? '0 4px 12px rgba(0,0,0,0.15)' : 'none',
+                borderLeft: isActive(item.path) ? '4px solid #fff' : '4px solid transparent'
               }}
             >
-              <span style={{ marginRight: '10px', fontSize: '18px' }}>{item.icon}</span>
-              {isSidebarOpen && <span>{item.label}</span>}
+              <span style={{ marginRight: '12px', fontSize: '18px' }}>{item.icon}</span>
+              {isSidebarOpen && <span style={{ fontWeight: 600 }}>{item.label}</span>}
             </Link>
           ))}
         </div>

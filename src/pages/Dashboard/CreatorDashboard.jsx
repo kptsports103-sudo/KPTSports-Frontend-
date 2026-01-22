@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import CreatorLayout from "../../components/CreatorLayout";
 import Players from '../../components/Creator/Players';
-import TrainingSchedule from '../../components/Creator/TrainingSchedule';
-import Performance from '../../components/Creator/Performance';
 import Attendance from '../../components/Creator/Attendance';
 
 const CreatorDashboard = () => {
@@ -26,52 +24,57 @@ const CreatorDashboard = () => {
     switch (activeTab) {
       case 'players':
         return <Players />;
-      case 'training':
-        return <TrainingSchedule />;
-      case 'performance':
-        return <Performance />;
       case 'attendance':
         return <Attendance />;
       default:
         return (
-          <div className="space-y-8">
-            <div className="text-center bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-2xl">
-              <h1 className="text-5xl font-bold mb-4">🏆 Creator Dashboard</h1>
-              <p className="text-xl opacity-90">Welcome back, Creator! Manage your team efficiently with our comprehensive tools.</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-8 shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300 cursor-pointer group">
-                <div className="text-5xl mb-4 group-hover:animate-bounce">👥</div>
-                <h3 className="text-2xl font-bold text-white mb-2">Players</h3>
-                <p className="text-blue-100 mb-4">Manage player information and profiles</p>
-                <button onClick={() => handleTabChange('players')} className="bg-white text-blue-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition duration-200 font-semibold shadow-lg">
-                  View Players →
+          <div>
+
+            {/* Feature Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10">
+
+              {/* Players Card */}
+              <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-xl hover:scale-105 transition duration-300 cursor-pointer group">
+                <div className="text-5xl mb-6 group-hover:animate-bounce">👥</div>
+
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Players
+                </h3>
+
+                <p className="text-gray-600 mb-8 leading-relaxed">
+                  Manage player information and profiles
+                </p>
+
+                <button
+                  onClick={() => handleTabChange('players')}
+                  className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition font-medium"
+                >
+                  View Players
+                  <span className="text-lg">→</span>
                 </button>
               </div>
-              <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-8 shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300 cursor-pointer group">
-                <div className="text-5xl mb-4 group-hover:animate-bounce">📅</div>
-                <h3 className="text-2xl font-bold text-white mb-2">Training Schedule</h3>
-                <p className="text-green-100 mb-4">Plan and organize training sessions</p>
-                <button onClick={() => handleTabChange('training')} className="bg-white text-green-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition duration-200 font-semibold shadow-lg">
-                  View Schedule →
+
+              {/* Attendance Card */}
+              <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-xl hover:scale-105 transition duration-300 cursor-pointer group">
+                <div className="text-5xl mb-6 group-hover:animate-bounce">✅</div>
+
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Attendance
+                </h3>
+
+                <p className="text-gray-600 mb-8 leading-relaxed">
+                  Monitor and track player attendance
+                </p>
+
+                <button
+                  onClick={() => handleTabChange('attendance')}
+                  className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition font-medium"
+                >
+                  View Attendance
+                  <span className="text-lg">→</span>
                 </button>
               </div>
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-8 shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300 cursor-pointer group">
-                <div className="text-5xl mb-4 group-hover:animate-bounce">📊</div>
-                <h3 className="text-2xl font-bold text-white mb-2">Performance Reports</h3>
-                <p className="text-purple-100 mb-4">Track and analyze player performance</p>
-                <button onClick={() => handleTabChange('performance')} className="bg-white text-purple-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition duration-200 font-semibold shadow-lg">
-                  View Reports →
-                </button>
-              </div>
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-8 shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300 cursor-pointer group">
-                <div className="text-5xl mb-4 group-hover:animate-bounce">✅</div>
-                <h3 className="text-2xl font-bold text-white mb-2">Attendance</h3>
-                <p className="text-orange-100 mb-4">Monitor and track player attendance</p>
-                <button onClick={() => handleTabChange('attendance')} className="bg-white text-orange-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition duration-200 font-semibold shadow-lg">
-                  View Attendance →
-                </button>
-              </div>
+
             </div>
           </div>
         );
@@ -80,7 +83,7 @@ const CreatorDashboard = () => {
 
   return (
     <CreatorLayout>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[#e5e7eb]">
         {/* Refined Professional Navbar */}
         <div className="bg-white border-b border-gray-300">
           <div className="max-w-7xl mx-auto px-8">
@@ -125,8 +128,6 @@ const CreatorDashboard = () => {
               {[
                 { key: 'overview', label: 'Overview' },
                 { key: 'players', label: 'Players' },
-                { key: 'training', label: 'Training' },
-                { key: 'performance', label: 'Performance' },
                 { key: 'attendance', label: 'Attendance' },
               ].map((tab) => (
                 <button
@@ -152,7 +153,7 @@ const CreatorDashboard = () => {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto px-8 py-10">
           <div className="bg-white border border-gray-200">
             <div className="p-8">
               {renderContent()}

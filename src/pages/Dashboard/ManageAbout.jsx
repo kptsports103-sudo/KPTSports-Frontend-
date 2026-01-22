@@ -141,6 +141,8 @@ const ManageAbout = () => {
               {content.bannerImages.map((b, i) => (
                 <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 120px auto', gap: '10px', alignItems: 'center' }}>
                   <input
+                    id={`banner-image-${i}`}
+                    name={`banner-image-${i}`}
                     value={b.image}
                     disabled={b.fixed}
                     placeholder="Image URL"
@@ -149,6 +151,8 @@ const ManageAbout = () => {
                   />
 
                   <input
+                    id={`banner-year-${i}`}
+                    name={`banner-year-${i}`}
                     value={b.year}
                     disabled={b.fixed}
                     placeholder="Year"
@@ -203,8 +207,10 @@ const ManageAbout = () => {
             {/* BOXES */}
             {content.boxes.map((box, i) => (
               <div key={i} style={{ marginBottom: '15px' }}>
-                <label>Box {i + 1}</label>
+                <label htmlFor={`box-${i}`}>Box {i + 1}</label>
                 <input
+                  id={`box-${i}`}
+                  name={`box-${i}`}
                   value={box}
                   onChange={e => updateBox(i, e.target.value)}
                   style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
@@ -214,6 +220,8 @@ const ManageAbout = () => {
 
             {/* BIG SECTION */}
             <input
+              id="big-header"
+              name="big-header"
               value={content.bigHeader}
               onChange={e => setContent({ ...content, bigHeader: e.target.value })}
               placeholder="Big Header"
