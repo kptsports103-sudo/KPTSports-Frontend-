@@ -22,7 +22,7 @@ const previewBox = {
 };
 
 const IAMUsers = () => {
-  const { user } = useAuth();
+  const { user, autoLoginFromToken } = useAuth();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const hasValidToken = token && token.trim() !== '';
@@ -41,6 +41,8 @@ const IAMUsers = () => {
   const [otpDeliveryMethod, setOtpDeliveryMethod] = useState("email"); // "email" or "sms"
   const [selectedRole, setSelectedRole] = useState("admin");
   const [code, setCode] = useState("");
+  const [phoneCode, setPhoneCode] = useState("");
+  const [createdUser, setCreatedUser] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
   const [error, setError] = useState("");
@@ -116,6 +118,62 @@ const IAMUsers = () => {
     }
   };
 
+  const verifyPhoneOTP = async () => {
+    if (!phoneCode || phoneCode.length !== 6) {
+      setError("Please enter a valid 6-digit code");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+      
+      console.log('=== PHONE OTP VERIFICATION DEBUG ===');
+      console.log('Created user ID:', createdUser?.id);
+      console.log('Phone code:', phoneCode);
+      
+      // Use the new phone OTP verification endpoint
+      const response = await api.post("/iam/verify-phone-otp", { 
+        userId: createdUser.id, 
+        otp: phoneCode 
+      });
+      
+      console.log('Phone OTP response:', response.data);
+      
+      const { user, token } = response.data;
+      
+      console.log('User from response:', user);
+      console.log('Token from response:', token);
+      console.log('User role:', user?.role);
+      
+      // For Creator role, automatically log them in using AuthContext and redirect to Creator Dashboard
+      if (user?.role === 'creator') {
+        console.log('=== AUTO-LOGIN CREATOR ===');
+        console.log('Calling autoLoginFromToken with:', { token, user });
+        
+        // Use AuthContext to properly set up the login session
+        autoLoginFromToken(token, user);
+        
+        console.log('Auto-login completed, redirecting to Creator Dashboard...');
+        
+        // Small delay to ensure AuthContext is updated
+        setTimeout(() => {
+          window.location.href = '/admin/creator-dashboard';
+        }, 500);
+      } else {
+        console.log('Not a creator, showing done step');
+        setStep("done");
+      }
+    } catch (err) {
+      console.error('=== PHONE OTP ERROR ===');
+      console.error('Error:', err);
+      console.error('Error response:', err.response?.data);
+      setError(err.response?.data?.message || "Invalid code");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const createUser = async () => {
     if (!form.name || !form.email || !form.password) {
       setError("Name, email, and password are required");
@@ -133,8 +191,15 @@ const IAMUsers = () => {
       if (profileImage) {
         payload.profileImage = profileImage; // base64 image
       }
-      await api.post("/iam/create-user", payload);
-      setStep("done");
+      const response = await api.post("/iam/create-user", payload);
+      const { requiresPhoneVerification, user } = response.data;
+      setCreatedUser(user);
+
+      if (requiresPhoneVerification) {
+        setStep("phone-verify");
+      } else {
+        setStep("done");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create account");
       console.error(err);
@@ -410,6 +475,57 @@ const IAMUsers = () => {
             <p style={{ color: "#6b7280", fontSize: 13, marginTop: 10 }}>
               These details will be used to log in.
             </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === "phone-verify") {
+    return (
+      <div style={{ background: "#f0f4ff", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <div style={{ width: 420, background: "white", borderRadius: 16, boxShadow: "0 12px 30px rgba(0,0,0,.1)", overflow: "hidden" }}>
+
+          <div style={{ background: "#10b981", color: "white", padding: 24, textAlign: "center" }}>
+            <h2>Verify Phone Number</h2>
+            <p>Verify your mobile number</p>
+          </div>
+
+          <div style={{ padding: 24, textAlign: "center" }}>
+            {error && (
+              <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "10px", borderRadius: "8px", marginBottom: "16px" }}>
+                {error}
+              </div>
+            )}
+
+            <p>A 6-digit code has been sent to</p>
+            <strong>{form.phone}</strong>
+
+            <input
+              id="phone-otp"
+              name="phone-otp"
+              value={phoneCode}
+              onChange={(e) => setPhoneCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="000000"
+              style={{
+                width: "100%",
+                padding: 16,
+                fontSize: 22,
+                letterSpacing: 8,
+                textAlign: "center",
+                borderRadius: 10,
+                border: "1px solid #ccc",
+                margin: "20px 0"
+              }}
+            />
+
+            <div style={{ display: "flex", gap: 12 }}>
+              <button onClick={() => setStep("profile")} style={{ flex: 1, padding: 12, borderRadius: 10 }}>Back</button>
+              <button onClick={verifyPhoneOTP} disabled={phoneCode.length !== 6}
+                style={{ flex: 1, padding: 12, borderRadius: 10, background: "#10b981", color: "white" }}>
+                {loading ? "Verifying..." : "Verify Code"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

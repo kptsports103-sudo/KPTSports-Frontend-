@@ -78,17 +78,23 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   }, []);
 
+  const autoLoginFromToken = useCallback((token, user) => {
+    setAccessToken(token);
+    localStorage.setItem('accessToken', token);
+    localStorage.setItem('user', JSON.stringify(user));
+    setCustomUser(user);
+  }, []);
+
   const logout = useCallback(async () => {
     if (clerkUser) {
       await signOut();
     } else {
-      localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
       setCustomUser(null);
     }
   }, [clerkUser, signOut]);
 
-  const value = useMemo(() => ({ user, login, logout, verifyOTP, refreshUser, isLoaded: clerkLoaded }), [user, login, logout, verifyOTP, refreshUser, clerkLoaded]);
+  const value = useMemo(() => ({ user, login, logout, verifyOTP, autoLoginFromToken, refreshUser, isLoaded: clerkLoaded }), [user, login, logout, verifyOTP, autoLoginFromToken, refreshUser, clerkLoaded]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

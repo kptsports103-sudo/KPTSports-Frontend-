@@ -18,6 +18,11 @@ export const IAMService = {
     return response.data;
   },
 
+  verifyPhoneOTP: async (userId, otp) => {
+    const response = await api.post('/iam/verify-phone-otp', { userId, otp });
+    return response.data;
+  },
+
   resendOTP: async (userId) => {
     const response = await api.post('/iam/resend-otp', { userId });
     return response.data;
