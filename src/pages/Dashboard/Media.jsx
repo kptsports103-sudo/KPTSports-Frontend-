@@ -53,7 +53,7 @@ const Media = () => {
     // Delete from Cloudinary
     try {
       for (const f of item.files) {
-        await axios.delete(`http://localhost:4000/api/upload/${f.public_id}`, {
+        await axios.delete(`https://kpt-sports-backend.vercel.app/api/upload/${f.public_id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`
           }

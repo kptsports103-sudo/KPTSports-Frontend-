@@ -54,7 +54,7 @@ const ManageAbout = () => {
           image: b.image.startsWith('http')
             ? b.image
             : b.image.startsWith('/')
-              ? `http://localhost:4000${b.image}`
+              ? `https://kpt-sports-backend.vercel.app${b.image}`
               : `https://${b.image}`,
           year: parseInt(b.year, 10) || 0
         }));
