@@ -65,6 +65,13 @@ export const AuthProvider = ({ children }) => {
       console.error('Error:', error);
       console.error('Error response:', error.response?.data);
       console.error('Error status:', error.response?.status);
+      
+      // Handle 503 (cold start) gracefully
+      if (error.response?.status === 503) {
+        const retryAfter = error.response.data?.retryAfter || 5;
+        throw new Error(`Server is waking up. Retrying in ${retryAfter} seconds...`);
+      }
+      
       throw error;
     }
   }, []);

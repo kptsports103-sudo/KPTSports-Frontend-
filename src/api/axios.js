@@ -3,7 +3,7 @@ import { getAccessToken, setAccessToken } from '../context/tokenStorage';
 
 // create an axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://kpt-sports-backend.vercel.app/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://kpt-sports-backend.vercel.app/api',
   withCredentials: true // allow cookies (refresh token)
 });
 
