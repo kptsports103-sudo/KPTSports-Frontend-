@@ -13,10 +13,10 @@ const Events = () => {
 
   const loadData = async () => {
     try {
-      const eventsRes = await api.get('/events');
+      const eventsRes = await api.get('/v1/events');
       setEvents(eventsRes.data || []);
 
-      const homeRes = await api.get('/home');
+      const homeRes = await api.get('/v1/home');
       const homeData = homeRes.data || {};
 
       setAbout(homeData.about || '');

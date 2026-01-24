@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
 
   const refreshUser = useCallback(async () => {
     try {
-      const response = await api.get('/me');
+      const response = await api.get('/v1/me');
       const userData = response.data.user;
       localStorage.setItem('user', JSON.stringify(userData));
       setCustomUser(userData);
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
     console.log('Request data:', { email, password, role });
     
     try {
-      const response = await api.post('/auth/login', { email, password, role });
+      const response = await api.post('/v1/auth/login', { email, password, role });
       const data = response.data;
       console.log('Response:', data);
       console.log('Response status:', response.status);
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const verifyOTP = useCallback(async (email, otp) => {
-    const response = await api.post('/auth/verify-otp', { email, otp });
+    const response = await api.post('/v1/auth/verify-otp', { email, otp });
     const data = response.data;
     setAccessToken(data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
