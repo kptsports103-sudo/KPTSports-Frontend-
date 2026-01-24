@@ -50,15 +50,15 @@ export const AuthProvider = ({ children }) => {
       console.log('Response:', data);
       console.log('Response status:', response.status);
       
+      // ✅ Backend always returns token for successful login
       if (data.token) {
-        // Direct login
         setAccessToken(data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         setCustomUser(data.user);
-        return { directLogin: true };
+        return data; // Return the full response
       } else {
-        // OTP
-        return { directLogin: false };
+        // This should not happen with correct backend
+        throw new Error('Login failed: No token received');
       }
     } catch (error) {
       console.error('=== FRONTEND LOGIN ERROR ===');
