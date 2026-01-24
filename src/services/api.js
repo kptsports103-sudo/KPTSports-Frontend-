@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
 
-  baseURL: 'https://kpt-sports-backend.vercel.app/api',
+  baseURL: 'https://kpt-sports-backend.vercel.app/api/v1',
 
 });
 
