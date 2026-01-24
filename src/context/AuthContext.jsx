@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
       
       // ✅ Check if OTP is required for admin roles
       if (data.message && data.message.includes('OTP sent')) {
-        return { requiresOTP: true, email, role };
+        return { requiresOTP: true, email, role: data.user?.role || role };
       }
       
       // ✅ Direct login for non-admin roles

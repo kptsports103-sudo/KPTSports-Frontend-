@@ -29,8 +29,8 @@ export default function Login() {
         setLoginData({ email: result.email, role: result.role });
         setErr('OTP sent to your email. Please check your inbox.');
       } else {
-        // Direct login success
-        handleLoginSuccess(role);
+        // Direct login success - use backend role
+        handleLoginSuccess(result.user?.role || role);
       }
     } catch (e) {
       setErr(e?.response?.data?.message || 'Invalid credentials');
@@ -46,8 +46,8 @@ export default function Login() {
 
     try {
       const result = await verifyOTP(loginData.email, otp);
-      // OTP verification successful
-      handleLoginSuccess(loginData.role);
+      // OTP verification successful - use backend role
+      handleLoginSuccess(result.user?.role || loginData.role);
     } catch (e) {
       setErr(e?.response?.data?.message || 'Invalid OTP');
     } finally {
