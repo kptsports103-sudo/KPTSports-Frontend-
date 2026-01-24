@@ -18,11 +18,11 @@ const Results = () => {
   useEffect(() => {
 
     // Fetch individual results
-    api.get('/v1/results').then(res => setResults(res.data || []))
+    api.get('/results').then(res => setResults(res.data || []))
       .catch(err => console.error('Failed to fetch individual results:', err));
 
     // Fetch group results
-    api.get('/v1/group-results').then(res => setGroupResults(res.data || []))
+    api.get('/group-results').then(res => setGroupResults(res.data || []))
       .catch(err => console.error('Failed to fetch group results:', err));
 
   }, []);

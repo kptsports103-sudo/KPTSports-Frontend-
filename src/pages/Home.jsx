@@ -27,7 +27,7 @@ export default function Home() {
 
   const fetchHomeContent = async () => {
     try {
-      const res = await api.get('/v1/home');
+      const res = await api.get('/home');
       setHomeContent(res.data);
     } catch (error) {
       console.error('Error fetching home content:', error);

@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
 
   const refreshUser = useCallback(async () => {
     try {
-      const response = await api.get('/v1/me');
+      const response = await api.get('/me');
       const userData = response.data.user;
       localStorage.setItem('user', JSON.stringify(userData));
       setCustomUser(userData);
@@ -45,17 +45,22 @@ export const AuthProvider = ({ children }) => {
     console.log('Request data:', { email, password, role });
     
     try {
-      const response = await api.post('/v1/auth/login', { email, password, role });
+      const response = await api.post('/auth/login', { email, password, role });
       const data = response.data;
       console.log('Response:', data);
       console.log('Response status:', response.status);
       
-      // ✅ Backend always returns token for successful login
+      // ✅ Check if OTP is required for admin roles
+      if (data.message && data.message.includes('OTP sent')) {
+        return { requiresOTP: true, email, role };
+      }
+      
+      // ✅ Direct login for non-admin roles
       if (data.token) {
         setAccessToken(data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         setCustomUser(data.user);
-        return data; // Return the full response
+        return { requiresOTP: false, ...data };
       } else {
         // This should not happen with correct backend
         throw new Error('Login failed: No token received');
@@ -77,7 +82,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const verifyOTP = useCallback(async (email, otp) => {
-    const response = await api.post('/v1/auth/verify-otp', { email, otp });
+    const response = await api.post('/auth/verify-otp', { email, otp });
     const data = response.data;
     setAccessToken(data.token);
     localStorage.setItem('user', JSON.stringify(data.user));

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import SuperAdminLayout from "../../components/SuperAdminLayout";
 import { useAuth } from "../../context/AuthContext";
+import api from "../../services/api";
 
 const SuperAdminDashboard = () => {
   const { user } = useAuth();
