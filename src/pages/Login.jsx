@@ -47,6 +47,7 @@ export default function Login() {
 
           <label htmlFor="role">Login Type</label>
           <select id="role" name="role" value={role} onChange={e=>setRole(e.target.value)}>
+            <option value="superadmin">Super Admin</option>
             <option value="admin">Admin</option>
             <option value="creator">Creator</option>
             <option value="coach">Coach</option>
