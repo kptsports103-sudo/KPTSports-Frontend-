@@ -103,185 +103,186 @@ const Attendance = ({ isStudent = false }) => {
 
   return (
     <div style={styles.page}>
-      {/* Header */}
-      <h1 style={styles.pageTitle}>Attendance</h1>
+   
 
       {/* Section Title */}
-      <div style={styles.sectionTitle}>Attendance</div>
+      <div style={styles.sectionTitle}>Attendance List</div>
 
-      {!isStudent && (
-        <div style={styles.topBar}>
-          <button
-            onClick={() => setIsEditMode(p => !p)}
-            style={styles.primaryBtn}
-          >
-            <img src="/Edit button.png" width={20} height={20} alt="Edit" />
-            {isEditMode ? "Done Editing" : "Edit"}
-          </button>
+      {/* White Card Container */}
+      <div style={styles.card}>
+        {/* Card Header with Edit Button */}
+        {!isStudent && (
+          <div style={styles.cardHeader}>
+            <button
+              onClick={() => setIsEditMode(p => !p)}
+              style={styles.primaryBtn}
+            >
+              <img src="/Edit button.png" width={20} height={20} alt="Edit" />
+              {isEditMode ? "Done Editing" : "Edit"}
+            </button>
 
-          {isEditMode && (
-            <>
-              <button onClick={addRow} style={styles.successBtn}>
-                <img src="/Add button.png" width={20} height={20} alt="Add" />
-                Add Row
-              </button>
-
-              <button onClick={saveAttendance} style={styles.primaryBtn}>
-                <img src="/Save button.png" width={20} height={20} alt="Save" />
-                Save All
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
-      {!isStudent && (
-        <div style={styles.filterRow}>
-          <div style={styles.filterGroup}>
-            <label>Year</label>
-
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <select
-                value={selectedYear}
-                onChange={e => setSelectedYear(Number(e.target.value))}
-                style={styles.filterGroupInput}
-              >
-                <option value={currentYear}>{currentYear} (All)</option>
-                <option value={2025}>2025</option>
-                <option value={2026}>2026</option>
-                <option value={2027}>2027</option>
-              </select>
-
-              {isEditMode && (
-                <button
-                  onClick={addYear}
-                  style={{
-                    ...styles.addYearBtn,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
-                  title="Add Year"
-                >
-                  <img
-                    src="/Add button.png"
-                    width={16}
-                    height={16}
-                    alt="Add"
-                  />
-                  Add Year
+            {isEditMode && (
+              <>
+                <button onClick={addRow} style={styles.successBtn}>
+                  <img src="/Add button.png" width={20} height={20} alt="Add" />
+                  Add Row
                 </button>
-              )}
+
+                <button onClick={saveAttendance} style={styles.primaryBtn}>
+                  <img src="/Save button.png" width={20} height={20} alt="Save" />
+                  Save All
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {!isStudent && (
+          <div style={styles.filterRow}>
+            <div style={styles.filterGroup}>
+              <label>Year</label>
+
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <select
+                  value={selectedYear}
+                  onChange={e => setSelectedYear(Number(e.target.value))}
+                  style={styles.filterGroupInput}
+                >
+                  <option value={currentYear}>{currentYear} (All)</option>
+                  <option value={2025}>2025</option>
+                  <option value={2026}>2026</option>
+                  <option value={2027}>2027</option>
+                </select>
+
+                {isEditMode && (
+                  <button
+                    onClick={addYear}
+                    style={{
+                      ...styles.addYearBtn,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                    title="Add Year"
+                  >
+                    <img
+                      src="/Add button.png"
+                      width={16}
+                      height={16}
+                      alt="Add"
+                    />
+                    Add Year
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div style={styles.filterGroup}>
+              <label>Date</label>
+              <input
+                type="date"
+                value={date}
+                onChange={e => setDate(e.target.value)}
+                disabled={!isEditMode}
+                style={styles.filterGroupInput}
+              />
             </div>
           </div>
+        )}
 
-          <div style={styles.filterGroup}>
-            <label>Date</label>
-            <input
-              type="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              disabled={!isEditMode}
-              style={styles.filterGroupInput}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Table */}
-      <table style={styles.table}>
-        <thead>
-          <tr style={styles.headerRow}>
-            <th style={{ textAlign: 'center' }}>SL.NO</th>
-            <th style={{ textAlign: 'left' }}>PLAYER</th>
-            <th style={{ textAlign: 'center' }}>MORNING</th>
-            <th style={{ textAlign: 'center' }}>EVENING</th>
-            <th style={{ textAlign: 'center' }}>ACTIONS</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {rows.map((row, index) => (
-            <tr key={index} style={styles.bodyRow}>
-              <td style={{ textAlign: 'center' }}>{row.slNo}</td>
-
-              <td style={{ textAlign: 'left' }}>
-                <select
-                  value={row.playerName}
-                  onChange={e => updateField(index, 'playerName', e.target.value)}
-                  disabled={!isEditMode}
-                >
-                  <option value="">Select Player</option>
-                  {playerNames.map(name => {
-                    const alreadySelected = getSelectedPlayers(index).includes(name);
-                    return (
-                      <option
-                        key={name}
-                        value={name}
-                        disabled={alreadySelected}
-                      >
-                        {name}{alreadySelected ? " (Already selected)" : ""}
-                      </option>
-                    );
-                  })}
-                </select>
-              </td>
-
-              <td style={{ textAlign: 'center' }}>
-                <select
-                  value={row.morning}
-                  onChange={e => updateField(index, 'morning', e.target.value)}
-                  disabled={!isEditMode}
-                >
-                  <option>Present</option>
-                  <option>Absent</option>
-                  <option>Late</option>
-                  <option>Excused</option>
-                </select>
-              </td>
-
-              <td style={{ textAlign: 'center' }}>
-                <select
-                  value={row.evening}
-                  onChange={e => updateField(index, 'evening', e.target.value)}
-                  disabled={!isEditMode}
-                >
-                  <option>Present</option>
-                  <option>Absent</option>
-                  <option>Late</option>
-                  <option>Excused</option>
-                </select>
-              </td>
-
-              <td style={styles.actionCell}>
-                {isEditMode && (
-                  <>
-                    <button
-                      onClick={() => saveRow(index)}
-                      style={styles.iconBtn}
-                      title="Save Row"
-                    >
-                      <img src="/Save button.png" width={20} height={20} alt="Save Row" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        deleteRow(index);
-                        alert(`Deleted Row ${rows[index].slNo}`);
-                      }}
-                      style={styles.iconBtn}
-                      title="Delete Row"
-                    >
-                      <img src="/Delete button.png" width={20} height={20} alt="Delete Row" />
-                    </button>
-                  </>
-                )}
-              </td>
+        {/* Table */}
+        <table style={styles.table}>
+          <thead>
+            <tr style={styles.headerRow}>
+              <th style={{ textAlign: 'center' }}>SL.NO</th>
+              <th style={{ textAlign: 'left' }}>PLAYER</th>
+              <th style={{ textAlign: 'center' }}>MORNING</th>
+              <th style={{ textAlign: 'center' }}>EVENING</th>
+              <th style={{ textAlign: 'center' }}>ACTIONS</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
 
-      
+          <tbody>
+            {rows.map((row, index) => (
+              <tr key={index} style={styles.bodyRow}>
+                <td style={{ textAlign: 'center' }}>{row.slNo}</td>
+
+                <td style={{ textAlign: 'left' }}>
+                  <select
+                    value={row.playerName}
+                    onChange={e => updateField(index, 'playerName', e.target.value)}
+                    disabled={!isEditMode}
+                  >
+                    <option value="">Select Player</option>
+                    {playerNames.map(name => {
+                      const alreadySelected = getSelectedPlayers(index).includes(name);
+                      return (
+                        <option
+                          key={name}
+                          value={name}
+                          disabled={alreadySelected}
+                        >
+                          {name}{alreadySelected ? " (Already selected)" : ""}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </td>
+
+                <td style={{ textAlign: 'center' }}>
+                  <select
+                    value={row.morning}
+                    onChange={e => updateField(index, 'morning', e.target.value)}
+                    disabled={!isEditMode}
+                  >
+                    <option>Present</option>
+                    <option>Absent</option>
+                    <option>Late</option>
+                    <option>Excused</option>
+                  </select>
+                </td>
+
+                <td style={{ textAlign: 'center' }}>
+                  <select
+                    value={row.evening}
+                    onChange={e => updateField(index, 'evening', e.target.value)}
+                    disabled={!isEditMode}
+                  >
+                    <option>Present</option>
+                    <option>Absent</option>
+                    <option>Late</option>
+                    <option>Excused</option>
+                  </select>
+                </td>
+
+                <td style={styles.actionCell}>
+                  {isEditMode && (
+                    <>
+                      <button
+                        onClick={() => saveRow(index)}
+                        style={styles.iconBtn}
+                        title="Save Row"
+                      >
+                        <img src="/Save button.png" width={20} height={20} alt="Save Row" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          deleteRow(index);
+                          alert(`Deleted Row ${rows[index].slNo}`);
+                        }}
+                        style={styles.iconBtn}
+                        title="Delete Row"
+                      >
+                        <img src="/Delete button.png" width={20} height={20} alt="Delete Row" />
+                      </button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
@@ -313,11 +314,18 @@ const styles = {
     opacity: 0.95,
   },
 
-  topBar: {
+  card: {
+    backgroundColor: "#ffffff",
+    borderRadius: "6px",
+    padding: "16px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+    position: "relative",
+  },
+
+  cardHeader: {
     display: "flex",
     justifyContent: "flex-end",
-    gap: "10px",
-    marginBottom: "14px",
+    marginBottom: "12px",
   },
 
   primaryBtn: {
