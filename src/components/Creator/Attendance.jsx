@@ -149,10 +149,12 @@ const Attendance = ({ isStudent = false }) => {
         {!isStudent && (
           <div style={styles.filterRow}>
             <div style={styles.filterGroup}>
-              <label>Year</label>
+              <label htmlFor="attendance-year">Year</label>
 
               <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                 <select
+                  id="attendance-year"
+                  name="attendance-year"
                   value={selectedYear}
                   onChange={e => setSelectedYear(Number(e.target.value))}
                   style={styles.filterGroupInput}
@@ -187,8 +189,10 @@ const Attendance = ({ isStudent = false }) => {
             </div>
 
             <div style={styles.filterGroup}>
-              <label>Date</label>
+              <label htmlFor="attendance-date">Date</label>
               <input
+                id="attendance-date"
+                name="attendance-date"
                 type="date"
                 value={date}
                 onChange={e => setDate(e.target.value)}
@@ -218,6 +222,8 @@ const Attendance = ({ isStudent = false }) => {
 
                 <td style={{ textAlign: 'left' }}>
                   <select
+                    id={`player-select-${index}`}
+                    name={`player-select-${index}`}
                     value={row.playerName}
                     onChange={e => updateField(index, 'playerName', e.target.value)}
                     disabled={!isEditMode}
@@ -240,6 +246,8 @@ const Attendance = ({ isStudent = false }) => {
 
                 <td style={{ textAlign: 'center' }}>
                   <select
+                    id={`morning-select-${index}`}
+                    name={`morning-select-${index}`}
                     value={row.morning}
                     onChange={e => updateField(index, 'morning', e.target.value)}
                     disabled={!isEditMode}
@@ -253,6 +261,8 @@ const Attendance = ({ isStudent = false }) => {
 
                 <td style={{ textAlign: 'center' }}>
                   <select
+                    id={`evening-select-${index}`}
+                    name={`evening-select-${index}`}
                     value={row.evening}
                     onChange={e => updateField(index, 'evening', e.target.value)}
                     disabled={!isEditMode}
