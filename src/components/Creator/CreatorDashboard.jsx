@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CreatorDashboard = () => {
+const CreatorDashboard = ({ onNavigate }) => {
   const cards = [
     {
       id: 1,
@@ -30,21 +30,23 @@ const CreatorDashboard = () => {
 
   const handleViewDetails = (cardId) => {
     // Handle navigation based on card ID
-    switch(cardId) {
-      case 1:
-        // Navigate to Players Management
-        console.log("Navigate to Players Management");
-        break;
-      case 2:
-        // Navigate to Attendance
-        console.log("Navigate to Attendance");
-        break;
-      case 3:
-        // Navigate to Performance Analytics
-        console.log("Navigate to Performance Analytics");
-        break;
-      default:
-        break;
+    if (onNavigate) {
+      switch(cardId) {
+        case 1:
+          // Navigate to Players Management
+          onNavigate('players');
+          break;
+        case 2:
+          // Navigate to Attendance
+          onNavigate('attendance');
+          break;
+        case 3:
+          // Navigate to Performance Analytics
+          onNavigate('analytics');
+          break;
+        default:
+          break;
+      }
     }
   };
 

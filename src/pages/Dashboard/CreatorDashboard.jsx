@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import CreatorLayout from "../../components/CreatorLayout";
 import Players from '../../components/Creator/Players';
 import Attendance from '../../components/Creator/Attendance';
+import CreatorDashboardComponent from '../../components/Creator/CreatorDashboard';
 
 const CreatorDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -27,57 +28,7 @@ const CreatorDashboard = () => {
       case 'attendance':
         return <Attendance />;
       default:
-        return (
-          <div>
-
-            {/* Feature Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10">
-
-              {/* Players Card */}
-              <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-xl hover:scale-105 transition duration-300 cursor-pointer group">
-                <div className="text-5xl mb-6 group-hover:animate-bounce">👥</div>
-
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  Players
-                </h3>
-
-                <p className="text-gray-600 mb-8 leading-relaxed">
-                  Manage player information and profiles
-                </p>
-
-                <button
-                  onClick={() => handleTabChange('players')}
-                  className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition font-medium"
-                >
-                  View Players
-                  <span className="text-lg">→</span>
-                </button>
-              </div>
-
-              {/* Attendance Card */}
-              <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-xl hover:scale-105 transition duration-300 cursor-pointer group">
-                <div className="text-5xl mb-6 group-hover:animate-bounce">✅</div>
-
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  Attendance
-                </h3>
-
-                <p className="text-gray-600 mb-8 leading-relaxed">
-                  Monitor and track player attendance
-                </p>
-
-                <button
-                  onClick={() => handleTabChange('attendance')}
-                  className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition font-medium"
-                >
-                  View Attendance
-                  <span className="text-lg">→</span>
-                </button>
-              </div>
-
-            </div>
-          </div>
-        );
+        return <CreatorDashboardComponent onNavigate={handleTabChange} />;
     }
   };
 
