@@ -12,24 +12,33 @@ const Attendance = ({ isStudent = false }) => {
 
   useEffect(() => {
     const savedPlayers = localStorage.getItem("playersData");
-    if (!savedPlayers) return;
+    if (!savedPlayers) {
+      setPlayerNames([]);
+      return;
+    }
 
     const playersData = JSON.parse(savedPlayers);
-    let names = [];
 
-    playersData.forEach(yearData => {
-      // If current year → show all
-      if (selectedYear === currentYear || yearData.year === selectedYear) {
-        yearData.players.forEach(player => {
-          if (player.name && !names.includes(player.name)) {
-            names.push(player.name);
-          }
-        });
-      }
-    });
+    const yearData = playersData.find(
+      y => Number(y.year) === Number(selectedYear)
+    );
 
-    setPlayerNames(names);
-  }, [selectedYear, currentYear]);
+    if (yearData && Array.isArray(yearData.players)) {
+      setPlayerNames(
+        yearData.players
+          .map(p => p.name)
+          .filter(Boolean)
+      );
+    } else {
+      setPlayerNames([]);
+    }
+  }, [selectedYear]);
+
+  useEffect(() => {
+    setRows([
+      { slNo: 1, playerName: '', morning: 'Present', evening: 'Present' }
+    ]);
+  }, [selectedYear]);
 
   useEffect(() => {
     const saved = localStorage.getItem("attendanceData");
