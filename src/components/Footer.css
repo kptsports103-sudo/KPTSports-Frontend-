@@ -52,20 +52,20 @@ body:not(.dashboard-layout) .footer {
 }
 
 .footer-box {
-  background: #1c71a3;
-  border: 1px solid rgba(10, 37, 64, 0.2);
+  background: #f7fbff; /* very light – matches image */
+  border: 1px solid rgba(10,37,64,0.15);
   border-radius: 12px;
   padding: 22px;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
 }
 
 .footer-box:hover {
-  background: #0e76b3;
-  transform: translateY(-3px);
+  background: #eef6fc;
+  transform: translateY(-2px);
 }
 
 .footer-box p {
-  opacity: 0.9;
+  color: #1a2b3c;
   line-height: 1.6;
   margin: 0;
 }
@@ -83,14 +83,14 @@ body:not(.dashboard-layout) .footer {
 }
 
 .footer-list svg {
-  color: #0a2540;
+  color: #2f6fa3;
   font-size: 14px;
 }
 
 .footer-list a,
 .footer-list Link,
 .footer-list button.footer-link {
-  color: #0a2540;
+  color: #1a2b3c;
   text-decoration: none;
   transition: color 0.3s ease;
   background: none;
@@ -104,18 +104,18 @@ body:not(.dashboard-layout) .footer {
 .footer-list a:hover,
 .footer-list Link:hover,
 .footer-list button.footer-link:hover {
-  color: #08304f;
+  color: #0f4c81;
 }
 
 .footer-developer svg {
-  color: #0a2540;
+  color: #1a2b3c;
   margin-right: 8px;
 }
 
 .footer-meta p,
 .footer-developer p {
   margin: 5px 0;
-  color: #0a2540;
+  color: #1a2b3c;
 }
 
 /* Info bar */
@@ -158,9 +158,9 @@ body:not(.dashboard-layout) .footer {
 .footer-developer {
   margin-top: 20px;
   padding: 15px;
-  background: #7fb7dc;
+  background: #f7fbff;
   border-radius: 8px;
-  border: 1px solid rgba(10,37,64,0.2);
+  border: 1px solid rgba(10,37,64,0.15);
 }
 
 .footer-meta p,
