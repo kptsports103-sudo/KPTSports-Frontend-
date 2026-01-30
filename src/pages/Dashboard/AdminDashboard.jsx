@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { useState, useEffect } from "react";
 import { IAMService } from "../../services/iam.service";
+import DailyVisitorsChart from "../../admin/components/DailyVisitorsChart";
+import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonChart";
 
 /* =====================
    YEAR DATA (ONLY 2024 & 2025)
@@ -100,23 +102,29 @@ const AdminDashboard = () => {
           color: "#000"
         }}
       >
+        <div style={{ padding: "30px" }}>
+          <h1 style={{ marginBottom: "30px", color: "#1f4e79" }}>
+            Admin Dashboard
+          </h1>
 
-        {/* =====================
-            MEDAL TALLY (2024 & 2025)
-        ====================== */}
-        <h3 style={{ marginBottom: "15px", fontSize: "18px" }}>
-          Medal Tally by Year (2024 – 2025)
-        </h3>
+          {/* Daily Visitors Chart */}
+          <DailyVisitorsChart />
 
-        <div
-          style={{
+          {/* Daily vs Total Visitors Comparison */}
+          <VisitorsComparisonChart />
+
+          {/* =====================
+              STATS CARDS
+          ====================== */}
+          <h2 style={{ marginBottom: "15px" }}>📊 Quick Stats</h2>
+          
+          <div style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
             gap: "25px",
             marginBottom: "40px"
-          }}
-        >
-          {medalData.map((item) => (
+          }}>
+            {medalData.map((item) => (
             <div
               key={item.year}
               style={{
@@ -154,14 +162,14 @@ const AdminDashboard = () => {
               </p>
             </div>
           ))}
-        </div>
+          </div>
 
-        {/* =====================
-            TOP YEARS
-        ====================== */}
-        <h2 style={{ marginBottom: "15px" }}>🏆 Best Performing Years</h2>
+          {/* =====================
+              TOP YEARS
+          ====================== */}
+          <h2 style={{ marginBottom: "15px" }}>🏆 Best Performing Years</h2>
 
-        <div style={{ display: "flex", gap: "20px", marginBottom: "50px" }}>
+          <div style={{ display: "flex", gap: "20px", marginBottom: "50px" }}>
           {topYears.map((year, index) => (
             <div
               key={year.year}
@@ -182,6 +190,7 @@ const AdminDashboard = () => {
             </div>
           ))}
         </div>
+      </div>
       </div>
     </AdminLayout>
   );
