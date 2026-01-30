@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import CreatorLayout from "../../components/CreatorLayout";
 import Players from '../../components/Creator/Players';
 import Attendance from '../../components/Creator/Attendance';
-import CreatorDashboardComponent from '../../components/Creator/CreatorDashboard';
+import CreatorDashboardUI from '../../components/Creator/CreatorDashboard';
 
 const CreatorDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,7 +28,7 @@ const CreatorDashboard = () => {
       case 'attendance':
         return <Attendance />;
       default:
-        return <CreatorDashboardComponent onNavigate={handleTabChange} />;
+        return <CreatorDashboardUI onNavigate={handleTabChange} />;
     }
   };
 
