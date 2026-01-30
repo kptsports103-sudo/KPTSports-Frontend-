@@ -2,6 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./Footer.css";
+import VisitorCounter from "./VisitorCounter";
 import {
   FaCheckCircle,
   FaSitemap,
@@ -75,7 +76,7 @@ const Footer = () => {
       {/* Info Bar */}
       <div className="footer-info">
         <span>Last Updated: 2026</span>
-        <span>Visitors Counter: 24891</span>
+        <VisitorCounter />
         <span>Version: KPT Sports Website 1.0</span>
       </div>
 
