@@ -56,12 +56,20 @@ const AdminDashboard = () => {
 
   const topYears = [...medalData].sort((a, b) => b.total - a.total);
 
+  // Scroll to visitor charts
+  const scrollToVisitors = () => {
+    const element = document.getElementById('visitor-charts');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   // Dynamic stats with real user count
   const stats = [
     { title: "Total Users", value: totalUsers, icon: "👤", link: "/admin/users-manage" },
     { title: "Update Pages", value: "Manage", icon: "📄", link: "/admin/update-pages" },
     { title: "Media Files", value: totalMedia, icon: "🖼️", link: "/admin/media-stats" },
-    { title: "Errors (24h)", value: 1, icon: "⚠️", link: "/admin/errors" },
+    { title: "Visitors", value: "Analytics", icon: "📊", action: "scrollToVisitors" },
     { title: "IAM Users", value: "Manage", icon: "🔐", link: "/admin/iam/users" },
   ];
 
@@ -74,7 +82,26 @@ const AdminDashboard = () => {
       <div className="stats-grid">
         {stats.map((stat, index) => {
           const Card = (
-            <div className="stat-card" style={{ cursor: stat.link ? "pointer" : "default" }}>
+            <div 
+              className="stat-card" 
+              style={{ 
+                cursor: (stat.link || stat.action) ? "pointer" : "default",
+                transition: "transform 0.2s, box-shadow 0.2s"
+              }}
+              onClick={stat.action === "scrollToVisitors" ? scrollToVisitors : undefined}
+              onMouseEnter={(e) => {
+                if (stat.link || stat.action) {
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (stat.link || stat.action) {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
+                }
+              }}
+            >
               <div style={{ fontSize: "32px", marginBottom: "10px" }}>{stat.icon}</div>
               <h3>{stat.value}</h3>
               <p>{stat.title}</p>
@@ -94,6 +121,7 @@ const AdminDashboard = () => {
 
       {/* ANALYTICS */}
       <div
+        id="visitor-charts"
         style={{
           backgroundColor: "#ffffff",
           borderRadius: "12px",
