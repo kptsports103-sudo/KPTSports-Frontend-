@@ -1,7 +1,7 @@
 /* src/components/Footer/Footer.css */
 
 .footer {
-  background: linear-gradient(180deg, #0a2540, #06192f);
+  background: linear-gradient(180deg, #0c2d4a 0%, #081f35 60%, #041426 100%);
   color: #ffffff;
   font-family: "Segoe UI", Arial, sans-serif;
   font-size: 14px;
@@ -51,16 +51,21 @@ body:not(.dashboard-layout) .footer {
 }
 
 .footer-box {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 20px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.10),
+    rgba(255, 255, 255, 0.04)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 22px;
   transition: all 0.3s ease;
+  backdrop-filter: blur(6px);
 }
 
 .footer-box:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-3px);
 }
 
 .footer-box p {
@@ -109,12 +114,17 @@ body:not(.dashboard-layout) .footer {
 /* Info bar */
 .footer-info {
   display: flex;
-  justify-content: space-around;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 12px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 30px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.10),
+    rgba(255, 255, 255, 0.06)
+  );
   font-size: 13px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid rgba(255,255,255,0.15);
+  border-bottom: 1px solid rgba(255,255,255,0.15);
 }
 
 .footer-info span {
@@ -125,9 +135,9 @@ body:not(.dashboard-layout) .footer {
 .footer-institute {
   max-width: 1200px;
   margin: auto;
-  padding: 30px 20px;
+  padding: 32px 20px;
   border-top: 1px solid rgba(255,255,255,0.2);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .footer-institute strong {
@@ -163,10 +173,10 @@ body:not(.dashboard-layout) .footer {
 /* Bottom */
 .footer-bottom {
   text-align: center;
-  padding: 15px;
+  padding: 14px;
   font-size: 13px;
-  background: #041426;
-  opacity: 0.9;
+  background: #03101f;
+  color: rgba(255,255,255,0.85);
   border-top: 1px solid rgba(255,255,255,0.1);
 }
 
