@@ -1,6 +1,30 @@
 @import "tailwindcss";
 
 /* =====================
+   GLOBAL LAYOUT - Sticky Footer Fix
+===================== */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* App Layout Classes */
+.app-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1; /* THIS pushes footer to bottom */
+}
+
+/* =====================
    GLOBAL
 ===================== */
 body {

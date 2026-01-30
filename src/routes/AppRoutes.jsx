@@ -84,48 +84,49 @@ const AppContent = () => {
   const isDashboard = location.pathname.startsWith('/dashboard') || isAdmin;
 
   return (
-    <>
+    <div className="app-wrapper">
       {!isAuthPage && !isDashboard && <TopBar toggleTheme={toggleTheme} />}
       {!isAuthPage && !isAdmin && <Navbar />}
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/events" element={<Events />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/results" element={<Results />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/otp-verify" element={<OTPVerify />} />
-        <Route path="/sports-dashboard" element={<ProtectedRoute role="admin"><SportsDashboard /></ProtectedRoute>} />
-        <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/superadmin-dashboard" element={<Navigate to="/admin/super-admin-dashboard" replace />} />
-        <Route path="/admin/super-admin-dashboard" element={<ProtectedRoute role="superadmin"><SuperAdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/creator-dashboard" element={<ProtectedRoute role="creator"><CreatorDashboard /></ProtectedRoute>} />
-        <Route path="/dashboard/coach" element={<ProtectedRoute role="coach"><CoachDashboard /></ProtectedRoute>} />
-        <Route path="/admin/media" element={<ProtectedRoute role="admin"><Media /></ProtectedRoute>} />
-        <Route path="/admin/add-media" element={<ProtectedRoute role="admin"><AddMedia /></ProtectedRoute>} />
-        <Route path="/admin/manage-home" element={<ProtectedRoute role="admin"><ManageHome /></ProtectedRoute>} />
-        <Route path="/admin/manage-about" element={<ProtectedRoute role="admin"><ManageAbout /></ProtectedRoute>} />
-        <Route path="/admin/manage-history" element={<ProtectedRoute role="admin"><ManageHistory /></ProtectedRoute>} />
-        <Route path="/admin/manage-events" element={<ProtectedRoute role="admin"><ManageEvents /></ProtectedRoute>} />
-        <Route path="/admin/manage-gallery" element={<ProtectedRoute role="admin"><ManageGallery /></ProtectedRoute>} />
-        <Route path="/admin/manage-results" element={<ProtectedRoute role="admin"><ManageResults /></ProtectedRoute>} />
-        <Route path="/admin/update-pages" element={<ProtectedRoute role="admin"><UpdatePages /></ProtectedRoute>} />
-        <Route path="/admin/iam/users" element={<ProtectedRoute role="admin"><IAMUsers /></ProtectedRoute>} />
-        <Route path="/admin/users-manage" element={<ProtectedRoute role="admin"><UsersManage /></ProtectedRoute>} />
-        <Route path="/admin/iam/create" element={<ProtectedRoute role="admin"><CreateUser /></ProtectedRoute>} />
-        <Route path="/admin/audit-logs" element={<ProtectedRoute role="admin"><AuditLogs /></ProtectedRoute>} />
-        <Route path="/admin/errors" element={<ProtectedRoute role="admin"><ErrorDashboard /></ProtectedRoute>} />
-        <Route path="/admin/media-stats" element={<ProtectedRoute role="admin"><MediaStats /></ProtectedRoute>} />
-        <Route path="/admin/login-activity" element={<ProtectedRoute role="admin"><LoginActivityPage /></ProtectedRoute>} />
-        <Route path="/admin/approvals" element={<ProtectedRoute role="admin"><Approvals /></ProtectedRoute>} />
-        <Route path="/admin/abuse-logs" element={<ProtectedRoute role="admin"><AbuseLogs /></ProtectedRoute>} />
-      </Routes>
-
+      <main className="app-content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/history" element={<History />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/results" element={<Results />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/otp-verify" element={<OTPVerify />} />
+          <Route path="/sports-dashboard" element={<ProtectedRoute role="admin"><SportsDashboard /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/superadmin-dashboard" element={<Navigate to="/admin/super-admin-dashboard" replace />} />
+          <Route path="/admin/super-admin-dashboard" element={<ProtectedRoute role="superadmin"><SuperAdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/creator-dashboard" element={<ProtectedRoute role="creator"><CreatorDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/coach" element={<ProtectedRoute role="coach"><CoachDashboard /></ProtectedRoute>} />
+          <Route path="/admin/media" element={<ProtectedRoute role="admin"><Media /></ProtectedRoute>} />
+          <Route path="/admin/add-media" element={<ProtectedRoute role="admin"><AddMedia /></ProtectedRoute>} />
+          <Route path="/admin/manage-home" element={<ProtectedRoute role="admin"><ManageHome /></ProtectedRoute>} />
+          <Route path="/admin/manage-about" element={<ProtectedRoute role="admin"><ManageAbout /></ProtectedRoute>} />
+          <Route path="/admin/manage-history" element={<ProtectedRoute role="admin"><ManageHistory /></ProtectedRoute>} />
+          <Route path="/admin/manage-events" element={<ProtectedRoute role="admin"><ManageEvents /></ProtectedRoute>} />
+          <Route path="/admin/manage-gallery" element={<ProtectedRoute role="admin"><ManageGallery /></ProtectedRoute>} />
+          <Route path="/admin/manage-results" element={<ProtectedRoute role="admin"><ManageResults /></ProtectedRoute>} />
+          <Route path="/admin/update-pages" element={<ProtectedRoute role="admin"><UpdatePages /></ProtectedRoute>} />
+          <Route path="/admin/iam/users" element={<ProtectedRoute role="admin"><IAMUsers /></ProtectedRoute>} />
+          <Route path="/admin/users-manage" element={<ProtectedRoute role="admin"><UsersManage /></ProtectedRoute>} />
+          <Route path="/admin/iam/create" element={<ProtectedRoute role="admin"><CreateUser /></ProtectedRoute>} />
+          <Route path="/admin/audit-logs" element={<ProtectedRoute role="admin"><AuditLogs /></ProtectedRoute>} />
+          <Route path="/admin/errors" element={<ProtectedRoute role="admin"><ErrorDashboard /></ProtectedRoute>} />
+          <Route path="/admin/media-stats" element={<ProtectedRoute role="admin"><MediaStats /></ProtectedRoute>} />
+          <Route path="/admin/login-activity" element={<ProtectedRoute role="admin"><LoginActivityPage /></ProtectedRoute>} />
+          <Route path="/admin/approvals" element={<ProtectedRoute role="admin"><Approvals /></ProtectedRoute>} />
+          <Route path="/admin/abuse-logs" element={<ProtectedRoute role="admin"><AbuseLogs /></ProtectedRoute>} />
+        </Routes>
+      </main>
       {!isAuthPage && <Footer />}
-    </>
+    </div>
   );
 };
 
