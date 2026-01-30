@@ -52,7 +52,7 @@ body:not(.dashboard-layout) .footer {
 }
 
 .footer-box {
-  background: #88abbf;
+  background: #1c71a3;
   border: 1px solid rgba(10, 37, 64, 0.2);
   border-radius: 12px;
   padding: 22px;
@@ -60,7 +60,7 @@ body:not(.dashboard-layout) .footer {
 }
 
 .footer-box:hover {
-  background: #7fa6bd;
+  background: #0e76b3;
   transform: translateY(-3px);
 }
 
