@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../../services/api";
+import axios from "axios";
 
 const VisitorCounter = () => {
   const [count, setCount] = useState(0);
@@ -7,7 +7,7 @@ const VisitorCounter = () => {
 
   useEffect(() => {
     // Increment visitor count on page load
-    api.get("/visitor/visit")
+    axios.get("https://kpt-sports-backend.vercel.app/api/visitor/visit")
       .then(res => {
         setCount(res.data.count);
         setLoading(false);
