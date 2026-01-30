@@ -55,13 +55,15 @@
   font-size: 14px;
 }
 
-.footer-list a {
+.footer-list a,
+.footer-list Link {
   color: #ffffff;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
-.footer-list a:hover {
+.footer-list a:hover,
+.footer-list Link:hover {
   color: #f5c542;
 }
 

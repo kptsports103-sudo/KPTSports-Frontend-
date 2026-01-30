@@ -1,5 +1,6 @@
 // src/components/Footer/Footer.jsx
 import React from "react";
+import { Link } from "react-router-dom";
 import "./Footer.css";
 import {
   FaCheckCircle,
@@ -27,6 +28,18 @@ const Footer = () => {
             information provided is related to sports activities of KPT and is
             for informational and educational purposes only.
           </p>
+        </div>
+
+        {/* Quick Links */}
+        <div className="footer-box">
+          <h4 className="footer-title">Quick Links</h4>
+          <ul className="footer-list">
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/about">About</Link></li>
+            <li><Link to="/events">Events</Link></li>
+            <li><Link to="/gallery">Gallery</Link></li>
+            <li><Link to="/results">Results</Link></li>
+          </ul>
         </div>
 
         {/* Policies */}
