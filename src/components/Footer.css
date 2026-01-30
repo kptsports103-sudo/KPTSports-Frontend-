@@ -5,6 +5,23 @@
   color: #ffffff;
   font-family: "Segoe UI", Arial, sans-serif;
   font-size: 14px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Dashboard-specific footer positioning */
+.dashboard-layout .footer {
+  position: fixed;
+  bottom: 0;
+  left: 350px; /* Same as sidebar width */
+  right: 0;
+  z-index: 10;
+}
+
+/* Non-dashboard footer */
+body:not(.dashboard-layout) .footer {
+  position: relative;
+  width: 100%;
 }
 
 .footer-container {

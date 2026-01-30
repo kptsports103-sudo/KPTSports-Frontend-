@@ -43,7 +43,7 @@ const CreatorLayout = ({ children }) => {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div className="dashboard-layout">
       {/* Creator Sidebar */}
       <div className="sidebar" style={{ 
         width: isSidebarOpen ? '350px' : '60px',
