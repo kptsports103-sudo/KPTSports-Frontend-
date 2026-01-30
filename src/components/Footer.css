@@ -70,14 +70,22 @@
 }
 
 .footer-list a,
-.footer-list Link {
+.footer-list Link,
+.footer-list button.footer-link {
   color: #ffffff;
   text-decoration: none;
   transition: color 0.3s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
 }
 
 .footer-list a:hover,
-.footer-list Link:hover {
+.footer-list Link:hover,
+.footer-list button.footer-link:hover {
   color: #f5c542;
 }
 

@@ -54,7 +54,7 @@ const Footer = () => {
               "Privacy Policy"
             ].map((item, i) => (
               <li key={i}>
-                <FaCheckCircle /> <a href="javascript:void(0)">{item}</a>
+                <FaCheckCircle /> <button className="footer-link">{item}</button>
               </li>
             ))}
           </ul>
@@ -64,10 +64,10 @@ const Footer = () => {
         <div className="footer-box">
           <h4 className="footer-title">Accessibility Resources</h4>
           <ul className="footer-list">
-            <li><FaSitemap /> <a href="javascript:void(0)">Sitemap</a></li>
-            <li><FaQuestionCircle /> <a href="javascript:void(0)">Help</a></li>
-            <li><FaVolumeUp /> <a href="javascript:void(0)">Screen Reader Access</a></li>
-            <li><FaClipboardList /> <a href="javascript:void(0)">Guidelines</a></li>
+            <li><FaSitemap /> <button className="footer-link">Sitemap</button></li>
+            <li><FaQuestionCircle /> <button className="footer-link">Help</button></li>
+            <li><FaVolumeUp /> <button className="footer-link">Screen Reader Access</button></li>
+            <li><FaClipboardList /> <button className="footer-link">Guidelines</button></li>
           </ul>
         </div>
       </div>

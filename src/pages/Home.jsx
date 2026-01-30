@@ -45,7 +45,7 @@ export default function Home() {
   };
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', margin: 0, background: '#f5f5f5', minHeight: '100vh', paddingBottom: '6rem' }}>
+    <div style={{ fontFamily: 'Arial, sans-serif', margin: 0, background: '#f5f5f5' }}>
       {/* Header */}
       <div style={{ background: '#cceeff', padding: '60px', textAlign: 'center' }}>
         <h1 style={{ fontSize: '36px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Welcome to KPT Mangalore Sports</h1>
