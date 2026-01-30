@@ -301,7 +301,10 @@ const Players = ({ isStudent = false }) => {
 
       {/* Year Selector */}
       <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+        <label htmlFor="players-year-selector" style={{ marginRight: '10px', fontWeight: 500 }}>Select Year:</label>
         <select
+          id="players-year-selector"
+          name="players-year-selector"
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value)}
           style={{

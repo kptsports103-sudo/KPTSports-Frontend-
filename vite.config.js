@@ -7,6 +7,7 @@ export default defineConfig({
     port: 5176, 
     host: 'localhost',
     https: true,
-    cors: true
+    cors: true,
+    historyApiFallback: true
   },
 });
