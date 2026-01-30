@@ -1,8 +1,8 @@
 /* src/components/Footer/Footer.css */
 
 .footer {
-  background: linear-gradient(180deg, #0c2d4a 0%, #081f35 60%, #041426 100%);
-  color: #ffffff;
+  background: #91cced; /* MAIN LIGHT BLUE */
+  color: #0a2540;
   font-family: "Segoe UI", Arial, sans-serif;
   font-size: 14px;
   position: relative;
@@ -38,6 +38,7 @@ body:not(.dashboard-layout) .footer {
   font-weight: 600;
   margin-bottom: 14px;
   position: relative;
+  color: #0a2540;
 }
 
 .footer-title::after {
@@ -51,20 +52,15 @@ body:not(.dashboard-layout) .footer {
 }
 
 .footer-box {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.10),
-    rgba(255, 255, 255, 0.04)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #88abbf;
+  border: 1px solid rgba(10, 37, 64, 0.2);
   border-radius: 12px;
   padding: 22px;
   transition: all 0.3s ease;
-  backdrop-filter: blur(6px);
 }
 
 .footer-box:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: #7fa6bd;
   transform: translateY(-3px);
 }
 
@@ -87,14 +83,14 @@ body:not(.dashboard-layout) .footer {
 }
 
 .footer-list svg {
-  color: #4cafef;
+  color: #0a2540;
   font-size: 14px;
 }
 
 .footer-list a,
 .footer-list Link,
 .footer-list button.footer-link {
-  color: #ffffff;
+  color: #0a2540;
   text-decoration: none;
   transition: color 0.3s ease;
   background: none;
@@ -108,7 +104,18 @@ body:not(.dashboard-layout) .footer {
 .footer-list a:hover,
 .footer-list Link:hover,
 .footer-list button.footer-link:hover {
-  color: #f5c542;
+  color: #08304f;
+}
+
+.footer-developer svg {
+  color: #0a2540;
+  margin-right: 8px;
+}
+
+.footer-meta p,
+.footer-developer p {
+  margin: 5px 0;
+  color: #0a2540;
 }
 
 /* Info bar */
@@ -117,18 +124,14 @@ body:not(.dashboard-layout) .footer {
   justify-content: space-between;
   align-items: center;
   padding: 14px 30px;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.10),
-    rgba(255, 255, 255, 0.06)
-  );
+  background: #7fb7dc;
   font-size: 13px;
-  border-top: 1px solid rgba(255,255,255,0.15);
-  border-bottom: 1px solid rgba(255,255,255,0.15);
+  border-top: 1px solid rgba(10,37,64,0.2);
+  border-bottom: 1px solid rgba(10,37,64,0.2);
 }
 
 .footer-info span {
-  opacity: 0.9;
+  color: #0a2540;
 }
 
 /* Institute section */
@@ -136,27 +139,28 @@ body:not(.dashboard-layout) .footer {
   max-width: 1200px;
   margin: auto;
   padding: 32px 20px;
-  border-top: 1px solid rgba(255,255,255,0.2);
-  background: rgba(255, 255, 255, 0.04);
+  background: #88abbf;
+  border-top: 1px solid rgba(10,37,64,0.2);
 }
 
 .footer-institute strong {
   font-size: 15px;
-  color: #ffffff;
+  color: #0a2540;
 }
 
 .footer-institute span {
-  opacity: 0.8;
+  opacity: 0.9;
   font-size: 13px;
+  color: #0a2540;
 }
 
 .footer-meta,
 .footer-developer {
   margin-top: 20px;
   padding: 15px;
-  background: rgba(255, 255, 255, 0.05);
+  background: #7fb7dc;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(10,37,64,0.2);
 }
 
 .footer-meta p,
@@ -175,9 +179,9 @@ body:not(.dashboard-layout) .footer {
   text-align: center;
   padding: 14px;
   font-size: 13px;
-  background: #03101f;
-  color: rgba(255,255,255,0.85);
-  border-top: 1px solid rgba(255,255,255,0.1);
+  background: #6ea6cb;
+  color: #0a2540;
+  border-top: 1px solid rgba(10,37,64,0.2);
 }
 
 /* Feedback Button */
