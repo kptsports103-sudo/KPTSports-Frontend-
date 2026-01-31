@@ -21,6 +21,9 @@ export default function Home() {
   const fetchHomeContent = async () => {
     try {
       const res = await api.get('/home');
+      console.log('Home.jsx - Raw API response:', res.data);
+      console.log('Home.jsx - API response status:', res.status);
+      console.log('Home.jsx - Full response object:', res);
       setHomeContent(res.data);
     } catch (error) {
       console.error('Error fetching home content:', error);
@@ -31,8 +34,12 @@ export default function Home() {
     try {
       const res = await api.get('/home');
       console.log('Home.jsx - Raw API response:', res.data);
+      console.log('Home.jsx - API response status:', res.status);
+      console.log('Home.jsx - Full response object:', res);
       const clubsData = res.data.clubs || [];
       console.log('Home.jsx - Clubs data from API:', clubsData);
+      console.log('Home.jsx - Clubs data type:', typeof clubsData);
+      console.log('Home.jsx - Clubs data length:', clubsData.length);
       
       // Check if clubs have required fields, add defaults if missing
       const processedClubs = clubsData.map((club, index) => ({
@@ -46,7 +53,8 @@ export default function Home() {
       console.log('Home.jsx - Processed clubs with defaults:', processedClubs);
       setClubs(processedClubs);
     } catch (error) {
-      console.error('Error fetching clubs:', error);
+      console.error('Home.jsx - Error fetching clubs:', error);
+      console.error('Home.jsx - Error details:', error.response);
       // Fallback to default clubs if API fails
       const clubData = [
         {

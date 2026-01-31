@@ -21,7 +21,9 @@ const ManageHome = () => {
   const fetchContent = async () => {
     try {
       const res = await api.get('/home');
-      console.log('Raw API response:', res.data);
+      console.log('ManageHome - Raw API response:', res.data);
+      console.log('ManageHome - API response status:', res.status);
+      console.log('ManageHome - Full response object:', res);
       
       const normalizedBanners = (res.data.banners || []).map(b => ({
         video: b.video || '',
@@ -29,7 +31,9 @@ const ManageHome = () => {
       }));
 
       const clubsData = res.data.clubs || [{ name: '', url: '' }];
-      console.log('Clubs data from API:', clubsData);
+      console.log('ManageHome - Clubs data from API:', clubsData);
+      console.log('ManageHome - Clubs data type:', typeof clubsData);
+      console.log('ManageHome - Clubs data length:', clubsData.length);
 
       setContent({
         welcomeText: res.data.welcomeText || '',
@@ -38,8 +42,9 @@ const ManageHome = () => {
           : [{ video: '', year: '' }],
         clubs: clubsData
       });
-    } catch {
-      console.error('Failed to load home content');
+    } catch (error) {
+      console.error('ManageHome - Failed to load home content:', error);
+      console.error('ManageHome - Error details:', error.response);
     }
   };
 
