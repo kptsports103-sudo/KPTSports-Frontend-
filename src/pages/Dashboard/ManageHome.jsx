@@ -49,7 +49,7 @@ const ManageHome = () => {
 
     try {
       const processedBanners = content.banners
-        .filter(b => b.video.trim() && b.year.trim())
+        .filter(b => b.video.trim() && String(b.year).trim())
         .map(b => ({
           video: b.video,
           year: parseInt(b.year, 10) || 0
@@ -197,8 +197,10 @@ const ManageHome = () => {
         ) : (
           <form onSubmit={handleSubmit} style={{ background: '#fff', padding: '20px', borderRadius: '8px', color: '#000' }}>
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Welcome Text</label>
+              <label htmlFor="welcomeText" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Welcome Text</label>
               <textarea
+                id="welcomeText"
+                name="welcomeText"
                 value={content.welcomeText}
                 onChange={e => setContent({ ...content, welcomeText: e.target.value })}
                 style={{
@@ -218,6 +220,8 @@ const ManageHome = () => {
               {content.banners.map((b, i) => (
                 <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px', padding: '10px', background: '#f9f9f9', borderRadius: '4px' }}>
                   <input
+                    id={`video-${i}`}
+                    name={`video-${i}`}
                     value={b.video}
                     placeholder="Video URL"
                     onChange={e => updateBanners(i, 'video', e.target.value)}
@@ -229,6 +233,8 @@ const ManageHome = () => {
                     }}
                   />
                   <input
+                    id={`year-${i}`}
+                    name={`year-${i}`}
                     value={b.year}
                     placeholder="Year"
                     onChange={e => updateBanners(i, 'year', e.target.value)}
@@ -289,6 +295,8 @@ const ManageHome = () => {
               {content.highlights.map((h, i) => (
                 <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
                   <input
+                    id={`highlight-${i}`}
+                    name={`highlight-${i}`}
                     value={h}
                     onChange={e => updateHighlights(i, e.target.value)}
                     style={{
@@ -344,12 +352,16 @@ const ManageHome = () => {
                   }}
                 >
                   <input
+                    id={`club-name-${i}`}
+                    name={`club-name-${i}`}
                     placeholder="Club Name"
                     value={club.name}
                     onChange={e => updateClubs(i, 'name', e.target.value)}
                     style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
                   />
                   <input
+                    id={`club-url-${i}`}
+                    name={`club-url-${i}`}
                     placeholder="URL (e.g. /clubs/eco-club)"
                     value={club.url}
                     onChange={e => updateClubs(i, 'url', e.target.value)}
