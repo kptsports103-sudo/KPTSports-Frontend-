@@ -125,7 +125,7 @@ const AppContent = () => {
           <Route path="/admin/abuse-logs" element={<ProtectedRoute role="admin"><AbuseLogs /></ProtectedRoute>} />
         </Routes>
       </main>
-      {!isAuthPage && <Footer />}
+      {!isAuthPage && !isAdmin && <Footer />}
     </div>
   );
 };
