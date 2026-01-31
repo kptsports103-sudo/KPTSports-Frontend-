@@ -6,7 +6,7 @@ const ManageHome = () => {
   const [content, setContent] = useState({
     welcomeText: '',
     banners: [{ video: '', year: '' }],
-    clubs: [{ name: '', url: '' }]
+    clubs: [{ name: '', url: '', description: '' }]
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -36,7 +36,7 @@ const ManageHome = () => {
         year: b.year || ''
       }));
 
-      const clubsData = res.data.clubs || [{ name: '', url: '' }];
+      const clubsData = res.data.clubs || [{ name: '', url: '', description: '' }];
       console.log('ManageHome - Clubs data from API:', clubsData);
       console.log('ManageHome - Clubs data type:', typeof clubsData);
       console.log('ManageHome - Clubs data length:', clubsData.length);
@@ -82,7 +82,8 @@ const ManageHome = () => {
         banners: processedBanners,
         clubs: content.clubs.filter(c => c.name.trim() && c.url.trim()).map(c => ({
           name: c.name.trim(),
-          url: c.url.trim()
+          url: c.url.trim(),
+          description: c.description ? c.description.trim() : ''
         }))
       };
 
@@ -152,7 +153,7 @@ const ManageHome = () => {
   const addClub = () => {
     setContent({
       ...content,
-      clubs: [...content.clubs, { name: '', url: '' }]
+      clubs: [...content.clubs, { name: '', url: '', description: '' }]
     });
   };
 
@@ -161,8 +162,8 @@ const ManageHome = () => {
   ========================== */
   return (
     <AdminLayout>
-      <div style={{ background: '#0f3b2e', minHeight: '100vh', padding: '15px', color: '#fff' }}>
-        <h3 style={{ fontSize: '34px', fontWeight: '700' }}>Manage Home</h3>
+      <div style={{ background: '#c0c0c0', minHeight: '100vh', padding: '15px', color: '#000' }}>
+        <h3 style={{ fontSize: '34px', fontWeight: '700', color: '#000' }}>Manage Home</h3>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
           {!isEditing ? (
@@ -204,8 +205,9 @@ const ManageHome = () => {
                   <td style={{ padding: '15px' }}>
                     <ul style={{ margin: 0, paddingLeft: '20px' }}>
                       {content.clubs.map((c, i) => (
-                        <li key={i} style={{ marginBottom: '5px' }}>
+                        <li key={i} style={{ marginBottom: '10px' }}>
                           <strong>{c.name}</strong> → {c.url}
+                          {c.description && <div style={{ color: '#666', fontSize: '14px', marginTop: '3px' }}>{c.description}</div>}
                         </li>
                       ))}
                     </ul>
@@ -311,13 +313,13 @@ const ManageHome = () => {
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <h4 style={{ marginBottom: '10px', color: '#333' }}>Clubs (Name & URL)</h4>
+              <h4 style={{ marginBottom: '10px', color: '#333' }}>Clubs (Name, URL & Description)</h4>
               {content.clubs.map((club, i) => (
                 <div
                   key={i}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr auto',
+                    gridTemplateColumns: '1fr 1fr 1fr auto',
                     gap: '10px',
                     marginBottom: '10px'
                   }}
@@ -336,6 +338,14 @@ const ManageHome = () => {
                     placeholder="URL (e.g. /clubs/eco-club)"
                     value={club.url}
                     onChange={e => updateClubs(i, 'url', e.target.value)}
+                    style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                  />
+                  <input
+                    id={`club-description-${i}`}
+                    name={`club-description-${i}`}
+                    placeholder="Description"
+                    value={club.description || ''}
+                    onChange={e => updateClubs(i, 'description', e.target.value)}
                     style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
                   />
                   <button

@@ -179,7 +179,7 @@ export default function Home() {
         <h2 className="club-title">Our Clubs & Activities</h2>
 
         <div className="carousel-container">
-          <button className="arrow left" onClick={() => setIndex((index - 1 + clubs.length) % clubs.length)}>◀</button>
+          <button className="arrow left" onClick={() => setIndex((index + 1) % clubs.length)}>◀</button>
 
           <div
             className="carousel-viewport"
