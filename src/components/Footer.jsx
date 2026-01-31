@@ -97,7 +97,7 @@ const Footer = () => {
         <div className="footer-developer">
           <p><FaUserGraduate /> Developed By: <strong>D. Yashawantha Reddy</strong></p>
           <p>Diploma CSE Student</p>
-          <p><FaPhoneAlt /> Mobile: +91 XXXXX XXXXX</p>
+          <p><FaPhoneAlt /> Mobile: +91 XXXXX XX195</p>
           <p><FaEnvelope /> yashwanth@kpt.edu</p>
           <p><strong>Website Launch:</strong> 2026</p>
         </div>

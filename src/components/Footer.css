@@ -1,8 +1,13 @@
 /* src/components/Footer/Footer.css */
 
 .footer {
-  background: #91cced; /* MAIN LIGHT BLUE */
-  color: #0a2540;
+  background: linear-gradient(
+    180deg,
+    #4a6f8a 0%,
+    #2c4d63 40%,
+    #1e3446 100%
+  );
+  color: #e6f1f8;
   font-family: "Segoe UI", Arial, sans-serif;
   font-size: 14px;
   position: relative;
@@ -25,7 +30,7 @@ body:not(.dashboard-layout) .footer {
 }
 
 .footer-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: auto;
   padding: 40px 20px;
   display: grid;
@@ -38,7 +43,7 @@ body:not(.dashboard-layout) .footer {
   font-weight: 600;
   margin-bottom: 14px;
   position: relative;
-  color: #0a2540;
+  color: #ffffff;
 }
 
 .footer-title::after {
@@ -52,11 +57,17 @@ body:not(.dashboard-layout) .footer {
 }
 
 .footer-box {
-  background: #f7fbff; /* very light – matches image */
-  border: 1px solid #6f95ab;
+  background: linear-gradient(
+    145deg,
+    #2f5066,
+    #233f52
+  );
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 12px;
   padding: 22px;
   transition: all 0.25s ease;
+  color: #eaf4fb;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
 }
 
 .footer-box:hover {
@@ -66,7 +77,7 @@ body:not(.dashboard-layout) .footer {
 }
 
 .footer-box p {
-  color: #1a2b3c;
+  color: #dcebf5;
   line-height: 1.6;
   margin: 0;
 }
@@ -84,14 +95,14 @@ body:not(.dashboard-layout) .footer {
 }
 
 .footer-list svg {
-  color: #2f6fa3;
+  color: #6fc2ff;
   font-size: 14px;
 }
 
 .footer-list a,
 .footer-list Link,
 .footer-list button.footer-link {
-  color: #1a2b3c;
+  color: #e6f1f8;
   text-decoration: none;
   transition: color 0.3s ease;
   background: none;
@@ -105,7 +116,7 @@ body:not(.dashboard-layout) .footer {
 .footer-list a:hover,
 .footer-list Link:hover,
 .footer-list button.footer-link:hover {
-  color: #0f4c81;
+  color: #f5c542;
 }
 
 .footer-developer svg {
@@ -116,7 +127,7 @@ body:not(.dashboard-layout) .footer {
 .footer-meta p,
 .footer-developer p {
   margin: 5px 0;
-  color: #1a2b3c;
+  color: #e6f1f8;
 }
 
 /* Info bar */
@@ -124,44 +135,55 @@ body:not(.dashboard-layout) .footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 30px;
-  background: #7fb7dc;
+  padding: 10px 30px;
+  background: linear-gradient(
+    90deg,
+    #355f7a,
+    #2b4d63
+  );
   font-size: 13px;
-  border-top: 1px solid rgba(10,37,64,0.2);
-  border-bottom: 1px solid rgba(10,37,64,0.2);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  color: #e6f1f8;
 }
 
 .footer-info span {
-  color: #0a2540;
+  color: #e6f1f8;
 }
 
 /* Institute section */
 .footer-institute {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: auto;
   padding: 32px 20px;
-  background: #88abbf;
-  border-top: 1px solid rgba(10,37,64,0.2);
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(4px);
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
 
 .footer-institute strong {
   font-size: 15px;
-  color: #0a2540;
+  color: #ffffff;
 }
 
 .footer-institute span {
   opacity: 0.9;
   font-size: 13px;
-  color: #0a2540;
+  color: #e6f1f8;
 }
 
 .footer-meta,
 .footer-developer {
   margin-top: 20px;
   padding: 15px;
-  background: #f7fbff;
+  background: linear-gradient(
+    145deg,
+    #2f5066,
+    #223c4f
+  );
+  color: #e6f1f8;
   border-radius: 8px;
-  border: 1px solid #6f95ab;
+  border: 1px solid rgba(255,255,255,0.12);
 }
 
 .footer-meta p,
@@ -180,18 +202,18 @@ body:not(.dashboard-layout) .footer {
   text-align: center;
   padding: 14px;
   font-size: 13px;
-  background: #6ea6cb;
-  color: #0a2540;
-  border-top: 1px solid rgba(10,37,64,0.2);
+  background: #172b3a;
+  color: #cfe6f5;
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
 
 /* Feedback Button */
 .feedback-btn {
   position: fixed;
   right: 20px;
-  bottom: 20px;
+  bottom: 30px;
   background: #f5c542;
-  color: #0a2540;
+  color: #1e3446;
   border: none;
   padding: 12px 22px;
   border-radius: 30px;
@@ -207,6 +229,11 @@ body:not(.dashboard-layout) .footer {
   background: #ffd86b;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.footer-info > * {
+  display: flex;
+  align-items: center;
 }
 
 /* Responsive */
