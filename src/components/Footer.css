@@ -155,45 +155,37 @@ body:not(.dashboard-layout) .footer {
   color: #e6f1f8;
 }
 
-/* Institute section */
-.footer-institute {
+/* INSTITUTE GRID */
+.footer-institute-grid {
   max-width: 1400px;
   margin: auto;
   padding: 32px 20px;
-  background: rgba(0,0,0,0.25);
-  backdrop-filter: blur(4px);
-  border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-.footer-institute strong {
-  font-size: 15px;
-  color: #ffffff;
-}
-
-.footer-institute span {
-  opacity: 0.9;
-  font-size: 13px;
-  color: #e6f1f8;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
 }
 
 .footer-meta,
 .footer-developer {
-  margin-top: 20px;
-  padding: 15px;
-  background: linear-gradient(
-    145deg,
-    #2f5066,
-    #223c4f
-  );
-  color: #e6f1f8;
-  border-radius: 8px;
+  background: linear-gradient(145deg, #2f5066, #223c4f);
+  padding: 20px;
+  border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.12);
+  color: #e6f1f8;
 }
 
-.footer-meta p,
-.footer-developer p {
-  margin: 5px 0;
-  opacity: 0.9;
+.footer-heading {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #ffffff;
+}
+
+.footer-sub {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-bottom: 12px;
+  color: #e6f1f8;
 }
 
 /* Bottom */
@@ -248,8 +240,8 @@ body:not(.dashboard-layout) .footer {
     gap: 20px;
   }
   
-  .footer-institute {
-    text-align: center;
+  .footer-institute-grid {
+    grid-template-columns: 1fr;
   }
   
   .feedback-btn {
