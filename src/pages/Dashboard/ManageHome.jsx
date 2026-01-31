@@ -20,10 +20,16 @@ const ManageHome = () => {
 
   const fetchContent = async () => {
     try {
+      console.log('ManageHome - Starting API call to /home');
       const res = await api.get('/home');
       console.log('ManageHome - Raw API response:', res.data);
       console.log('ManageHome - API response status:', res.status);
       console.log('ManageHome - Full response object:', res);
+      
+      // Check if clubs field exists in response
+      console.log('ManageHome - clubs field in response:', res.data.clubs);
+      console.log('ManageHome - banners field in response:', res.data.banners);
+      console.log('ManageHome - welcomeText field in response:', res.data.welcomeText);
       
       const normalizedBanners = (res.data.banners || []).map(b => ({
         video: b.video || '',
@@ -42,8 +48,15 @@ const ManageHome = () => {
           : [{ video: '', year: '' }],
         clubs: clubsData
       });
+      console.log('ManageHome - Final content state set:', {
+        welcomeText: res.data.welcomeText || '',
+        banners: normalizedBanners.length ? normalizedBanners : [{ video: '', year: '' }],
+        clubs: clubsData
+      });
     } catch (error) {
       console.error('ManageHome - Failed to load home content:', error);
+      console.error('ManageHome - Error status:', error.response?.status);
+      console.error('ManageHome - Error message:', error.response?.data?.message);
       console.error('ManageHome - Error details:', error.response);
     }
   };
@@ -53,6 +66,8 @@ const ManageHome = () => {
   ========================== */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('ManageHome - handleSubmit called');
+    console.log('ManageHome - Current content state:', content);
 
     try {
       const processedBanners = content.banners
@@ -71,20 +86,27 @@ const ManageHome = () => {
         }))
       };
 
-      console.log('Full content state:', content);
-      console.log('Clubs before filter:', content.clubs);
-      console.log('Clubs after filter:', content.clubs.filter(c => c.name.trim() && c.url.trim()));
-      console.log('Final payload to save:', payload);
+      console.log('ManageHome - Full content state:', content);
+      console.log('ManageHome - Clubs before filter:', content.clubs);
+      console.log('ManageHome - Clubs after filter:', content.clubs.filter(c => c.name.trim() && c.url.trim()));
+      console.log('ManageHome - Final payload to save:', payload);
+      
+      console.log('ManageHome - Making PUT request to /home');
       const saveResponse = await api.put('/home', payload);
-      console.log('Backend save response:', saveResponse.data);
+      console.log('ManageHome - Backend save response status:', saveResponse.status);
+      console.log('ManageHome - Backend save response data:', saveResponse.data);
+      
       alert('Home page updated successfully');
       setIsEditing(false);
       
       // Immediately fetch to verify save worked
-      console.log('Fetching data immediately after save...');
+      console.log('ManageHome - Fetching data immediately after save to verify...');
       await fetchContent();
     } catch (error) {
-      console.error('Save error:', error);
+      console.error('ManageHome - Save error:', error);
+      console.error('ManageHome - Save error status:', error.response?.status);
+      console.error('ManageHome - Save error message:', error.response?.data?.message);
+      console.error('ManageHome - Save error full response:', error.response);
       alert('Failed to save changes');
     }
   };
