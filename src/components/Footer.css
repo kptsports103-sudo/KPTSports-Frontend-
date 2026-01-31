@@ -71,9 +71,13 @@ body:not(.dashboard-layout) .footer {
 }
 
 .footer-box:hover {
-  background: #eef6fc;
+  background: linear-gradient(
+    145deg,
+    #3a6078,
+    #2e4f64
+  );
   transform: translateY(-2px);
-  border-color: #4f7f9b;
+  border-color: rgba(255,255,255,0.3);
 }
 
 .footer-box p {
@@ -120,7 +124,7 @@ body:not(.dashboard-layout) .footer {
 }
 
 .footer-developer svg {
-  color: #1a2b3c;
+  color: #add8e6;
   margin-right: 8px;
 }
 
@@ -190,11 +194,6 @@ body:not(.dashboard-layout) .footer {
 .footer-developer p {
   margin: 5px 0;
   opacity: 0.9;
-}
-
-.footer-developer svg {
-  color: #f5c542;
-  margin-right: 8px;
 }
 
 /* Bottom */
