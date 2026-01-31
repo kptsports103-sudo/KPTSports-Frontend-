@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
+import './Home.css';
 
 export default function Home() {
   const [homeContent, setHomeContent] = useState({ welcomeText: '', banners: [{ video: '', year: '' }], highlights: [] });
@@ -96,107 +97,99 @@ export default function Home() {
         {homeContent.highlights.length > 0 ? homeContent.highlights.join(' | ') : ''}
       </div>
 
-      {/* Clubs Section */}
+      {/* Clubs Section - Carousel */}
       <div style={{ padding: '40px 20px', background: '#f8f9fa' }}>
-        <h2 style={{ textAlign: 'center', fontSize: '28px', fontWeight: 'bold', marginBottom: '30px', color: '#2c3e50' }}>
+        <h2 style={{
+          textAlign: 'center',
+          fontSize: '28px',
+          fontWeight: 'bold',
+          marginBottom: '30px',
+          color: '#2c3e50'
+        }}>
           Our Clubs & Activities
         </h2>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-          gap: '20px', 
-          maxWidth: '1200px', 
-          margin: '0 auto' 
-        }}>
-          <div style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            padding: '25px',
-            borderRadius: '12px',
-            color: 'white',
-            textAlign: 'center',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-            transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-          }}>
-            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '10px' }}>Eco Club</h3>
-            <p style={{ fontSize: '14px', lineHeight: '1.5', margin: '0' }}>Promoting environmental awareness and sustainable practices</p>
-          </div>
 
-          <div style={{
-            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            padding: '25px',
-            borderRadius: '12px',
-            color: 'white',
-            textAlign: 'center',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-            transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-          }}>
-            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '10px' }}>NCC</h3>
-            <p style={{ fontSize: '14px', lineHeight: '1.5', margin: '0' }}>National Cadet Corps developing discipline and leadership</p>
-          </div>
+        <div className="club-carousel-wrapper">
+          <div className="club-carousel-track">
 
-          <div style={{
-            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-            padding: '25px',
-            borderRadius: '12px',
-            color: 'white',
-            textAlign: 'center',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-            transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-          }}>
-            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '10px' }}>Yoga Club</h3>
-            <p style={{ fontSize: '14px', lineHeight: '1.5', margin: '0' }}>Promoting physical and mental well-being through yoga</p>
-          </div>
+            {/* CARD 1 */}
+            <div className="club-card purple">
+              <h3>Eco Club</h3>
+              <p>Promoting environmental awareness and sustainable practices</p>
+            </div>
 
-          <div style={{
-            background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-            padding: '25px',
-            borderRadius: '12px',
-            color: 'white',
-            textAlign: 'center',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-            transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-          }}>
-            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '10px' }}>Youth Red Cross</h3>
-            <p style={{ fontSize: '14px', lineHeight: '1.5', margin: '0' }}>Serving humanity and providing first aid training</p>
-          </div>
+            {/* CARD 2 */}
+            <div className="club-card pink">
+              <h3>NCC</h3>
+              <p>National Cadet Corps developing discipline and leadership</p>
+            </div>
 
-          <div style={{
-            background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-            padding: '25px',
-            borderRadius: '12px',
-            color: '#2c3e50',
-            textAlign: 'center',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-            transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-          }}>
-            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '10px' }}>Arts & Culture Club</h3>
-            <p style={{ fontSize: '14px', lineHeight: '1.5', margin: '0' }}>Celebrating creativity and cultural diversity</p>
-          </div>
+            {/* CARD 3 */}
+            <div className="club-card blue">
+              <h3>Yoga Club</h3>
+              <p>Promoting physical and mental well-being through yoga</p>
+            </div>
 
-          <div style={{
-            background: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-            padding: '25px',
-            borderRadius: '12px',
-            color: '#2c3e50',
-            textAlign: 'center',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-            transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-          }}>
-            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '10px' }}>Technical Club</h3>
-            <p style={{ fontSize: '14px', lineHeight: '1.5', margin: '0' }}>Exploring innovation and technology trends</p>
-          </div>
+            {/* CARD 4 */}
+            <div className="club-card yellow">
+              <h3>Youth Red Cross</h3>
+              <p>Serving humanity and providing first aid training</p>
+            </div>
 
-          <div style={{
-            background: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
-            padding: '25px',
-            borderRadius: '12px',
-            color: '#2c3e50',
-            textAlign: 'center',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-            transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-          }}>
-            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '10px' }}>NSS</h3>
-            <p style={{ fontSize: '14px', lineHeight: '1.5', margin: '0' }}>National Service Scheme for community development</p>
+            {/* CARD 5 */}
+            <div className="club-card light">
+              <h3>Arts & Culture Club</h3>
+              <p>Celebrating creativity and cultural diversity</p>
+            </div>
+
+            {/* CARD 6 */}
+            <div className="club-card orange">
+              <h3>Technical Club</h3>
+              <p>Exploring innovation and technology trends</p>
+            </div>
+
+            {/* CARD 7 */}
+            <div className="club-card light">
+              <h3>NSS</h3>
+              <p>National Service Scheme for community development</p>
+            </div>
+
+            {/* DUPLICATE CARDS FOR INFINITE LOOP */}
+            <div className="club-card purple">
+              <h3>Eco Club</h3>
+              <p>Promoting environmental awareness and sustainable practices</p>
+            </div>
+
+            <div className="club-card pink">
+              <h3>NCC</h3>
+              <p>National Cadet Corps developing discipline and leadership</p>
+            </div>
+
+            <div className="club-card blue">
+              <h3>Yoga Club</h3>
+              <p>Promoting physical and mental well-being through yoga</p>
+            </div>
+
+            <div className="club-card yellow">
+              <h3>Youth Red Cross</h3>
+              <p>Serving humanity and providing first aid training</p>
+            </div>
+
+            <div className="club-card light">
+              <h3>Arts & Culture Club</h3>
+              <p>Celebrating creativity and cultural diversity</p>
+            </div>
+
+            <div className="club-card orange">
+              <h3>Technical Club</h3>
+              <p>Exploring innovation and technology trends</p>
+            </div>
+
+            <div className="club-card light">
+              <h3>NSS</h3>
+              <p>National Service Scheme for community development</p>
+            </div>
+
           </div>
         </div>
       </div>
