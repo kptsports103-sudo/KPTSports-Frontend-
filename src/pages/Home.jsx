@@ -152,11 +152,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* Center text */}
-      <div style={{ textAlign: 'center', margin: '20px 0', fontSize: '18px' }}>
-        {homeContent.highlights.length > 0 ? homeContent.highlights.join(' | ') : ''}
-      </div>
-
       {/* CLUB CAROUSEL */}
       <section className="club-section">
         <h2 className="club-title">Our Clubs & Activities</h2>

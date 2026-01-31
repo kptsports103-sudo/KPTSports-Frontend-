@@ -6,7 +6,6 @@ const ManageHome = () => {
   const [content, setContent] = useState({
     welcomeText: '',
     banners: [{ video: '', year: '' }],
-    highlights: [],
     clubs: [{ name: '', url: '' }]
   });
 
@@ -33,7 +32,6 @@ const ManageHome = () => {
         banners: normalizedBanners.length
           ? normalizedBanners
           : [{ video: '', year: '' }],
-        highlights: res.data.highlights || [],
         clubs: res.data.clubs || [{ name: '', url: '' }]
       });
     } catch {
@@ -58,7 +56,6 @@ const ManageHome = () => {
       const payload = {
         welcomeText: content.welcomeText,
         banners: processedBanners,
-        highlights: content.highlights,
         clubs: content.clubs.filter(c => c.name.trim() && c.url.trim())
       };
 
@@ -96,16 +93,6 @@ const ManageHome = () => {
       ...content,
       banners: [...content.banners, { video: '', year: '' }]
     });
-  };
-
-  const updateHighlights = (index, value) => {
-    const highlights = [...content.highlights];
-    highlights[index] = value;
-    setContent({ ...content, highlights });
-  };
-
-  const addHighlight = () => {
-    setContent({ ...content, highlights: [...content.highlights, ''] });
   };
 
   const updateClubs = (index, field, value) => {
@@ -169,14 +156,6 @@ const ManageHome = () => {
                         </div>
                       ))}
                     </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '15px', fontWeight: 'bold' }}>Highlights</td>
-                  <td style={{ padding: '15px' }}>
-                    <ul style={{ margin: 0, paddingLeft: '20px' }}>
-                      {content.highlights.map((h, i) => <li key={i} style={{ marginBottom: '5px' }}>{h}</li>)}
-                    </ul>
                   </td>
                 </tr>
                 <tr>
@@ -288,55 +267,6 @@ const ManageHome = () => {
                   Click to add a new video banner with URL and year
                 </p>
               </div>
-            </div>
-
-            <div style={{ marginBottom: '20px' }}>
-              <h4 style={{ marginBottom: '10px', color: '#333' }}>Highlights</h4>
-              {content.highlights.map((h, i) => (
-                <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
-                  <input
-                    id={`highlight-${i}`}
-                    name={`highlight-${i}`}
-                    value={h}
-                    onChange={e => updateHighlights(i, e.target.value)}
-                    style={{
-                      flex: 1,
-                      padding: '8px',
-                      border: '1px solid #ccc',
-                      borderRadius: '4px'
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setContent({ ...content, highlights: content.highlights.filter((_, x) => x !== i) })}
-                    style={{
-                      padding: '8px 12px',
-                      background: '#dc3545',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addHighlight}
-                style={{
-                  padding: '10px 15px',
-                  background: '#007bff',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  marginTop: '10px'
-                }}
-              >
-                Add Highlight
-              </button>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
