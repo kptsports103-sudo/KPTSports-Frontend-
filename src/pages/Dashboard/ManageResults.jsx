@@ -742,9 +742,9 @@ const Field = ({ label, children }) => (
 const styles = {
   page: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #0f3b2e 0%, #1a5f4a 100%)',
+    background: '#c0c0c0',
     padding: 20,
-    color: '#fff'
+    color: '#000'
   },
 
   title: {

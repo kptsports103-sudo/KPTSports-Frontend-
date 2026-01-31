@@ -111,8 +111,8 @@ const ManageAbout = () => {
 
   return (
     <AdminLayout>
-      <div style={{ background: '#0f3b2e', minHeight: '100vh', padding: '20px', color: '#fff' }}>
-        <h2>Manage About Page</h2>
+      <div style={{ background: '#c0c0c0', minHeight: '100vh', padding: '20px', color: '#000' }}>
+        <h2 style={{ color: '#000' }}>Manage About Page</h2>
         <button onClick={() => setIsEditing(p => !p)}>
           {isEditing ? 'Cancel' : 'Edit'}
         </button>
