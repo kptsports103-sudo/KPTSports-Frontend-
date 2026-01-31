@@ -1,29 +1,31 @@
 /* CLUB CAROUSEL */
-.club-carousel-wrapper {
-  overflow: hidden;
-  max-width: 1200px;
+.carousel-wrapper {
+  position: relative;
+  max-width: 900px;
   margin: auto;
 }
 
-.club-carousel-track {
+.carousel-viewport {
+  overflow: hidden;
+}
+
+.carousel-track {
   display: flex;
-  gap: 20px;
-  animation: slideClubs 20s linear infinite;
 }
 
 .club-card {
   min-width: 260px;
+  margin-right: 20px;
   padding: 25px;
   border-radius: 12px;
-  color: white;
   text-align: center;
+  color: white;
   box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-  transition: transform 0.3s ease;
 }
 
 .club-card h3 {
-  font-size: 20px;
   margin-bottom: 10px;
+  font-size: 20px;
 }
 
 .club-card p {
@@ -32,27 +34,62 @@
   margin: 0;
 }
 
-/* COLOR VARIANTS (same as your gradients) */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #2c3e50;
+  color: white;
+  border: none;
+  font-size: 20px;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 50%;
+  z-index: 10;
+  transition: background 0.3s ease;
+}
+
+.arrow:hover {
+  background: #34495e;
+}
+
+.arrow.left { left: -20px; }
+.arrow.right { right: -20px; }
+
+.dots {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 5px;
+  background: #bbb;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.dot.active {
+  background: #2c3e50;
+}
+
+/* THEMES */
 .purple { background: linear-gradient(135deg, #667eea, #764ba2); }
 .pink { background: linear-gradient(135deg, #f093fb, #f5576c); }
 .blue { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-.yellow { background: linear-gradient(135deg, #fa709a, #fee140); }
-.light { background: linear-gradient(135deg, #a8edea, #fed6e3); color: #2c3e50; }
-.orange { background: linear-gradient(135deg, #ffecd2, #fcb69f); color: #2c3e50; }
-
-/* AUTO SLIDE ANIMATION */
-@keyframes slideClubs {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-/* PAUSE ON HOVER */
-.club-carousel-wrapper:hover .club-carousel-track {
-  animation-play-state: paused;
-}
+.yellow { background: linear-gradient(135deg, #fa709a, #fee140); color:#2c3e50; }
+.light { background: linear-gradient(135deg, #a8edea, #fed6e3); color:#2c3e50; }
+.orange { background: linear-gradient(135deg, #ffecd2, #fcb69f); color:#2c3e50; }
 
 /* MOBILE */
 @media (max-width: 768px) {
+  .arrow { 
+    display: none; 
+  }
+  
   .club-card {
     min-width: 220px;
   }

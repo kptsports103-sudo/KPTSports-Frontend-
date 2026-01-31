@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import './Home.css';
 
 export default function Home() {
   const [homeContent, setHomeContent] = useState({ welcomeText: '', banners: [{ video: '', year: '' }], highlights: [] });
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [clubs, setClubs] = useState([]);
+  const [index, setIndex] = useState(1);
+  const trackRef = useRef(null);
+  const startX = useRef(0);
 
   useEffect(() => {
     fetchHomeContent();
+    fetchClubs();
   }, []);
 
   useEffect(() => {
@@ -20,6 +25,58 @@ export default function Home() {
       setCurrentBannerIndex(0);
     }
   }, [homeContent.banners]);
+
+  const fetchClubs = async () => {
+    try {
+      // For now, use static data - replace with API call when ready
+      const clubData = [
+        { id: 1, name: 'Eco Club', description: 'Promoting environmental awareness and sustainable practices', theme: 'purple' },
+        { id: 2, name: 'NCC', description: 'National Cadet Corps developing discipline and leadership', theme: 'pink' },
+        { id: 3, name: 'Yoga Club', description: 'Promoting physical and mental well-being through yoga', theme: 'blue' },
+        { id: 4, name: 'Youth Red Cross', description: 'Serving humanity and providing first aid training', theme: 'yellow' },
+        { id: 5, name: 'Arts & Culture Club', description: 'Celebrating creativity and cultural diversity', theme: 'light' },
+        { id: 6, name: 'Technical Club', description: 'Exploring innovation and technology trends', theme: 'orange' },
+        { id: 7, name: 'NSS', description: 'National Service Scheme for community development', theme: 'light' }
+      ];
+      const cloned = [
+        clubData[clubData.length - 1],
+        ...clubData,
+        clubData[0]
+      ];
+      setClubs(cloned);
+    } catch (error) {
+      console.error('Error fetching clubs:', error);
+    }
+  };
+
+  const slideTo = (i) => {
+    trackRef.current.style.transition = 'transform 0.5s ease';
+    trackRef.current.style.transform = `translateX(-${i * 280}px)`;
+    setIndex(i);
+  };
+
+  const next = () => slideTo(index + 1);
+  const prev = () => slideTo(index - 1);
+
+  const handleTransitionEnd = () => {
+    if (index === clubs.length - 1) {
+      trackRef.current.style.transition = 'none';
+      trackRef.current.style.transform = `translateX(-280px)`;
+      setIndex(1);
+    }
+    if (index === 0) {
+      trackRef.current.style.transition = 'none';
+      trackRef.current.style.transform = `translateX(-${(clubs.length - 2) * 280}px)`;
+      setIndex(clubs.length - 2);
+    }
+  };
+
+  const touchStart = (e) => (startX.current = e.touches[0].clientX);
+  const touchEnd = (e) => {
+    const diff = startX.current - e.changedTouches[0].clientX;
+    if (diff > 50) next();
+    if (diff < -50) prev();
+  };
 
   const fetchHomeContent = async () => {
     try {
@@ -109,88 +166,41 @@ export default function Home() {
           Our Clubs & Activities
         </h2>
 
-        <div className="club-carousel-wrapper">
-          <div className="club-carousel-track">
+        <div className="carousel-wrapper">
+          <button className="arrow left" onClick={prev}>◀</button>
 
-            {/* CARD 1 */}
-            <div className="club-card purple">
-              <h3>Eco Club</h3>
-              <p>Promoting environmental awareness and sustainable practices</p>
+          <div
+            className="carousel-viewport"
+            onTouchStart={touchStart}
+            onTouchEnd={touchEnd}
+          >
+            <div
+              className="carousel-track"
+              ref={trackRef}
+              onTransitionEnd={handleTransitionEnd}
+              style={{ transform: 'translateX(-280px)' }}
+            >
+              {clubs.map((club, i) => (
+                <div key={i} className={`club-card ${club.theme}`}>
+                  <h3>{club.name}</h3>
+                  <p>{club.description}</p>
+                </div>
+              ))}
             </div>
-
-            {/* CARD 2 */}
-            <div className="club-card pink">
-              <h3>NCC</h3>
-              <p>National Cadet Corps developing discipline and leadership</p>
-            </div>
-
-            {/* CARD 3 */}
-            <div className="club-card blue">
-              <h3>Yoga Club</h3>
-              <p>Promoting physical and mental well-being through yoga</p>
-            </div>
-
-            {/* CARD 4 */}
-            <div className="club-card yellow">
-              <h3>Youth Red Cross</h3>
-              <p>Serving humanity and providing first aid training</p>
-            </div>
-
-            {/* CARD 5 */}
-            <div className="club-card light">
-              <h3>Arts & Culture Club</h3>
-              <p>Celebrating creativity and cultural diversity</p>
-            </div>
-
-            {/* CARD 6 */}
-            <div className="club-card orange">
-              <h3>Technical Club</h3>
-              <p>Exploring innovation and technology trends</p>
-            </div>
-
-            {/* CARD 7 */}
-            <div className="club-card light">
-              <h3>NSS</h3>
-              <p>National Service Scheme for community development</p>
-            </div>
-
-            {/* DUPLICATE CARDS FOR INFINITE LOOP */}
-            <div className="club-card purple">
-              <h3>Eco Club</h3>
-              <p>Promoting environmental awareness and sustainable practices</p>
-            </div>
-
-            <div className="club-card pink">
-              <h3>NCC</h3>
-              <p>National Cadet Corps developing discipline and leadership</p>
-            </div>
-
-            <div className="club-card blue">
-              <h3>Yoga Club</h3>
-              <p>Promoting physical and mental well-being through yoga</p>
-            </div>
-
-            <div className="club-card yellow">
-              <h3>Youth Red Cross</h3>
-              <p>Serving humanity and providing first aid training</p>
-            </div>
-
-            <div className="club-card light">
-              <h3>Arts & Culture Club</h3>
-              <p>Celebrating creativity and cultural diversity</p>
-            </div>
-
-            <div className="club-card orange">
-              <h3>Technical Club</h3>
-              <p>Exploring innovation and technology trends</p>
-            </div>
-
-            <div className="club-card light">
-              <h3>NSS</h3>
-              <p>National Service Scheme for community development</p>
-            </div>
-
           </div>
+
+          <button className="arrow right" onClick={next}>▶</button>
+        </div>
+
+        {/* DOTS */}
+        <div className="dots">
+          {clubs.slice(1, -1).map((_, i) => (
+            <span
+              key={i}
+              className={index === i + 1 ? 'dot active' : 'dot'}
+              onClick={() => slideTo(i + 1)}
+            />
+          ))}
         </div>
       </div>
 
