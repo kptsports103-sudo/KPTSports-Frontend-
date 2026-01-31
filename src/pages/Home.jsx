@@ -191,7 +191,7 @@ export default function Home() {
                 <div
                   key={club.id || club.name}
                   className={`club-card ${club.theme}`}
-                  onClick={() => navigate(club.url)}
+                  onClick={() => window.open(club.url, '_blank')}
                   style={{ cursor: 'pointer' }}
                 >
                   <h3>{club.name}</h3>
