@@ -59,8 +59,8 @@ body:not(.dashboard-layout) .footer {
 .footer-box {
   background: linear-gradient(
     145deg,
-    #2f5066,
-    #233f52
+    #73bced,
+    #79bbe7
   );
   border: 1px solid rgba(255,255,255,0.15);
   border-radius: 12px;
