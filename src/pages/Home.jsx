@@ -1,14 +1,9 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import StudentParticipationModal from '../components/StudentParticipationModal';
-import EventsModal from '../components/EventsModal';
 
 export default function Home() {
-  const [activeTable, setActiveTable] = useState(null);
   const [homeContent, setHomeContent] = useState({ welcomeText: '', banners: [{ video: '', year: '' }], highlights: [] });
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
-  const [studentModalOpen, setStudentModalOpen] = useState(false);
-  const [eventsModalOpen, setEventsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchHomeContent();
@@ -31,16 +26,6 @@ export default function Home() {
       setHomeContent(res.data);
     } catch (error) {
       console.error('Error fetching home content:', error);
-    }
-  };
-
-  const handleClick = (tableId) => {
-    if (tableId === 'table1') {
-      setStudentModalOpen(true);
-    } else if (tableId === 'table2') {
-      setEventsModalOpen(true);
-    } else {
-      setActiveTable(tableId);
     }
   };
 
@@ -108,55 +93,9 @@ export default function Home() {
 
       {/* Center text */}
       <div style={{ textAlign: 'center', margin: '20px 0', fontSize: '18px' }}>
-        {homeContent.highlights.length > 0 ? homeContent.highlights.join(' | ') : 'Our Sports Overview'}
+        {homeContent.highlights.length > 0 ? homeContent.highlights.join(' | ') : ''}
       </div>
 
-      {/* Boxes */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-        <div
-          style={{
-            width: '150px',
-            padding: '20px',
-            background: '#0aa',
-            color: 'white',
-            textAlign: 'center',
-            cursor: 'pointer',
-            borderRadius: '8px'
-          }}
-          onMouseEnter={(e) => e.target.style.background = '#088'}
-          onMouseLeave={(e) => e.target.style.background = '#0aa'}
-          onClick={() => handleClick('table1')}
-        >
-          Student Participation
-        </div>
-        <div
-          style={{
-            width: '150px',
-            padding: '20px',
-            background: '#0aa',
-            color: 'white',
-            textAlign: 'center',
-            cursor: 'pointer',
-            borderRadius: '8px'
-          }}
-          onMouseEnter={(e) => e.target.style.background = '#088'}
-          onMouseLeave={(e) => e.target.style.background = '#0aa'}
-          onClick={() => handleClick('table2')}
-        >
-          Events
-        </div>
-      </div>
-
-
-
-      <StudentParticipationModal
-        isOpen={studentModalOpen}
-        onClose={() => setStudentModalOpen(false)}
-      />
-      <EventsModal
-        isOpen={eventsModalOpen}
-        onClose={() => setEventsModalOpen(false)}
-      />
     </div>
   );
 }
