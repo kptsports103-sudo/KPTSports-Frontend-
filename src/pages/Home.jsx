@@ -1,19 +1,39 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import './Home.css';
 
 export default function Home() {
+  const navigate = useNavigate();
   const [homeContent, setHomeContent] = useState({ welcomeText: '', banners: [{ video: '', year: '' }], highlights: [] });
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [clubs, setClubs] = useState([]);
-  const [index, setIndex] = useState(1);
+  const [index, setIndex] = useState(0);
   const trackRef = useRef(null);
-  const startX = useRef(0);
   const autoPlayRef = useRef(null);
+  const startX = useRef(0);
 
   useEffect(() => {
     fetchHomeContent();
-    fetchClubs();
+    
+    const clubData = [
+      {
+        id: 1,
+        name: 'KPT College',
+        slug: 'college',
+        description: 'Karnataka (Govt.) Polytechnic, Mangalore – Excellence in Technical Education',
+        theme: 'college'
+      },
+      { id: 2, name: 'Eco Club', slug: 'eco-club', description: 'Promoting environmental awareness and sustainable practices', theme: 'purple' },
+      { id: 3, name: 'NCC', slug: 'ncc', description: 'National Cadet Corps developing discipline and leadership', theme: 'pink' },
+      { id: 4, name: 'Yoga Club', slug: 'yoga-club', description: 'Promoting physical and mental well-being through yoga', theme: 'blue' },
+      { id: 5, name: 'Youth Red Cross', slug: 'youth-red-cross', description: 'Serving humanity and providing first aid training', theme: 'yellow' },
+      { id: 6, name: 'Arts & Culture Club', slug: 'arts-culture', description: 'Celebrating creativity and cultural diversity', theme: 'light' },
+      { id: 7, name: 'Technical Club', slug: 'technical-club', description: 'Exploring innovation and technology trends', theme: 'orange' },
+      { id: 8, name: 'NSS', slug: 'nss', description: 'National Service Scheme for community development', theme: 'light' }
+    ];
+
+    setClubs(clubData);
   }, []);
 
   useEffect(() => {
@@ -27,78 +47,28 @@ export default function Home() {
     }
   }, [homeContent.banners]);
 
-  const fetchClubs = async () => {
-    try {
-      // For now, use static data - replace with API call when ready
-      const clubData = [
-        {
-          id: 0,
-          name: 'KPT College',
-          description: 'Karnataka (Govt.) Polytechnic, Mangalore – Excellence in Technical Education',
-          theme: 'college'
-        },
-        { id: 1, name: 'Eco Club', description: 'Promoting environmental awareness and sustainable practices', theme: 'purple' },
-        { id: 2, name: 'NCC', description: 'National Cadet Corps developing discipline and leadership', theme: 'pink' },
-        { id: 3, name: 'Yoga Club', description: 'Promoting physical and mental well-being through yoga', theme: 'blue' },
-        { id: 4, name: 'Youth Red Cross', description: 'Serving humanity and providing first aid training', theme: 'yellow' },
-        { id: 5, name: 'Arts & Culture Club', description: 'Celebrating creativity and cultural diversity', theme: 'light' },
-        { id: 6, name: 'Technical Club', description: 'Exploring innovation and technology trends', theme: 'orange' },
-        { id: 7, name: 'NSS', description: 'National Service Scheme for community development', theme: 'light' }
-      ];
-      const cloned = [
-        clubData[clubData.length - 1],
-        ...clubData,
-        clubData[0]
-      ];
-      setClubs(cloned);
-    } catch (error) {
-      console.error('Error fetching clubs:', error);
-    }
-  };
-
-  const slideTo = (i) => {
-    trackRef.current.style.transition = 'transform 0.5s ease';
-    trackRef.current.style.transform = `translateX(-${i * 280}px)`;
-    setIndex(i);
-  };
-
-  const next = () => slideTo(index + 1);
-  const prev = () => slideTo(index - 1);
-
-  const handleTransitionEnd = () => {
-    if (index === clubs.length - 1) {
-      trackRef.current.style.transition = 'none';
-      trackRef.current.style.transform = `translateX(-280px)`;
-      setIndex(1);
-    }
-    if (index === 0) {
-      trackRef.current.style.transition = 'none';
-      trackRef.current.style.transform = `translateX(-${(clubs.length - 2) * 280}px)`;
-      setIndex(clubs.length - 2);
-    }
-  };
-
-  const touchStart = (e) => (startX.current = e.touches[0].clientX);
-  const touchEnd = (e) => {
-    const diff = startX.current - e.changedTouches[0].clientX;
-    if (diff > 50) next();
-    if (diff < -50) prev();
-  };
-
-  // Auto-play functionality
+  /* ---------- AUTO PLAY ---------- */
   useEffect(() => {
     autoPlayRef.current = setInterval(() => {
-      next();
+      setIndex((prev) => (prev + 1) % clubs.length);
     }, 3000);
 
     return () => clearInterval(autoPlayRef.current);
+  }, [clubs]);
+
+  /* ---------- SLIDE EFFECT ---------- */
+  useEffect(() => {
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translateX(-${index * 100}%)`;
+    }
   }, [index]);
 
-  const pauseAutoPlay = () => clearInterval(autoPlayRef.current);
-  const resumeAutoPlay = () => {
-    autoPlayRef.current = setInterval(() => {
-      next();
-    }, 3000);
+  /* ---------- TOUCH SWIPE ---------- */
+  const touchStart = (e) => (startX.current = e.touches[0].clientX);
+  const touchEnd = (e) => {
+    const diff = startX.current - e.changedTouches[0].clientX;
+    if (diff > 50) setIndex((prev) => (prev + 1) % clubs.length);
+    if (diff < -50) setIndex((prev) => (prev - 1 + clubs.length) % clubs.length);
   };
 
   const fetchHomeContent = async () => {
@@ -177,36 +147,30 @@ export default function Home() {
         {homeContent.highlights.length > 0 ? homeContent.highlights.join(' | ') : ''}
       </div>
 
-      {/* Clubs Section - Carousel */}
-      <div style={{ padding: '40px 20px', background: '#f8f9fa' }}>
-        <h2 style={{
-          textAlign: 'center',
-          fontSize: '28px',
-          fontWeight: 'bold',
-          marginBottom: '30px',
-          color: '#2c3e50'
-        }}>
-          Our Clubs & Activities
-        </h2>
+      {/* CLUB CAROUSEL */}
+      <section className="club-section">
+        <h2 className="club-title">Our Clubs & Activities</h2>
 
-        <div className="carousel-wrapper">
-          <button className="arrow left" onClick={prev}>◀</button>
+        <div className="carousel-container">
+          <button className="arrow left" onClick={() => setIndex((index - 1 + clubs.length) % clubs.length)}>◀</button>
 
           <div
             className="carousel-viewport"
             onTouchStart={touchStart}
             onTouchEnd={touchEnd}
-            onMouseEnter={pauseAutoPlay}
-            onMouseLeave={resumeAutoPlay}
           >
-            <div
-              className="carousel-track"
-              ref={trackRef}
-              onTransitionEnd={handleTransitionEnd}
-              style={{ transform: 'translateX(-280px)' }}
-            >
-              {clubs.map((club, i) => (
-                <div key={i} className={`club-card ${club.theme}`}>
+            <div className="carousel-track" ref={trackRef}>
+              {clubs.map((club) => (
+                <div
+                  key={club.id}
+                  className={`club-card ${club.theme}`}
+                  onClick={() =>
+                    club.slug === 'college'
+                      ? navigate('/college')
+                      : navigate(`/clubs/${club.slug}`)
+                  }
+                  style={{ cursor: 'pointer' }}
+                >
                   <h3>{club.name}</h3>
                   <p>{club.description}</p>
                 </div>
@@ -214,21 +178,20 @@ export default function Home() {
             </div>
           </div>
 
-          <button className="arrow right" onClick={next}>▶</button>
+          <button className="arrow right" onClick={() => setIndex((index + 1) % clubs.length)}>▶</button>
         </div>
 
         {/* DOTS */}
         <div className="dots">
-          {clubs.slice(1, -1).map((_, i) => (
+          {clubs.map((_, i) => (
             <span
               key={i}
-              className={index === i + 1 ? 'dot active' : 'dot'}
-              onClick={() => slideTo(i + 1)}
+              className={`dot ${index === i ? 'active' : ''}`}
+              onClick={() => setIndex(i)}
             />
           ))}
         </div>
-      </div>
-
+      </section>
     </div>
   );
 }

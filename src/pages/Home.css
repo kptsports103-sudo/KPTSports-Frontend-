@@ -1,75 +1,104 @@
 /* CLUB CAROUSEL */
-.carousel-wrapper {
+.club-section {
+  padding: 50px 0;
+  background: #f8f9fa;
+}
+
+.club-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: #2c3e50;
+}
+
+/* CAROUSEL */
+.carousel-container {
   position: relative;
   width: 100%;
-  max-width: 1200px;
-  margin: auto;
+  overflow: hidden;
 }
 
 .carousel-viewport {
-  overflow: hidden;
   width: 100%;
+  overflow: hidden;
 }
 
 .carousel-track {
   display: flex;
-  align-items: stretch;
+  transition: transform 0.6s ease-in-out;
 }
 
+/* CARD */
 .club-card {
-  min-width: 260px;
-  margin-right: 20px;
-  padding: 25px;
-  border-radius: 12px;
+  min-width: 100%;
+  padding: 60px 30px;
   text-align: center;
-  color: white;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  border-radius: 0;
+  box-shadow: none;
+  transition: transform 0.3s ease;
+}
+
+.club-card:hover {
+  transform: scale(1.02);
 }
 
 .club-card h3 {
-  margin-bottom: 10px;
-  font-size: 20px;
+  font-size: 26px;
+  margin-bottom: 12px;
 }
 
 .club-card p {
-  font-size: 14px;
+  font-size: 16px;
+  max-width: 700px;
+  margin: auto;
   line-height: 1.5;
-  margin: 0;
 }
 
+/* THEMES */
+.college { background: linear-gradient(135deg, #0f4c81, #1e90c2); color: #fff; }
+.purple { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+.pink { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; }
+.blue { background: linear-gradient(135deg, #4facfe, #00f2fe); color: #fff; }
+.yellow { background: linear-gradient(135deg, #fa709a, #fee140); color: #2c3e50; }
+.light { background: linear-gradient(135deg, #a8edea, #fed6e3); color: #2c3e50; }
+.orange { background: linear-gradient(135deg, #ffecd2, #fcb69f); color: #2c3e50; }
+
+/* ARROWS */
 .arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: #2c3e50;
+  background: rgba(0,0,0,0.5);
   color: white;
   border: none;
-  font-size: 20px;
-  padding: 10px;
+  font-size: 22px;
+  padding: 12px;
   cursor: pointer;
-  border-radius: 50%;
   z-index: 10;
+  border-radius: 50%;
   transition: background 0.3s ease;
 }
 
 .arrow:hover {
-  background: #34495e;
+  background: rgba(0,0,0,0.7);
 }
 
-.arrow.left { left: -20px; }
-.arrow.right { right: -20px; }
+.arrow.left { left: 15px; }
+.arrow.right { right: 15px; }
 
+/* DOTS */
 .dots {
   text-align: center;
-  margin-top: 15px;
+  margin-top: 20px;
 }
 
 .dot {
-  display: inline-block;
   width: 10px;
   height: 10px;
-  margin: 5px;
   background: #bbb;
+  display: inline-block;
+  margin: 6px;
   border-radius: 50%;
   cursor: pointer;
   transition: background 0.3s ease;
@@ -79,26 +108,25 @@
   background: #2c3e50;
 }
 
-/* THEMES */
-.college {
-  background: linear-gradient(135deg, #0f4c81, #1e90c2);
-  color: #ffffff;
-}
-
-.purple { background: linear-gradient(135deg, #667eea, #764ba2); }
-.pink { background: linear-gradient(135deg, #f093fb, #f5576c); }
-.blue { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-.yellow { background: linear-gradient(135deg, #fa709a, #fee140); color:#2c3e50; }
-.light { background: linear-gradient(135deg, #a8edea, #fed6e3); color:#2c3e50; }
-.orange { background: linear-gradient(135deg, #ffecd2, #fcb69f); color:#2c3e50; }
-
 /* MOBILE */
 @media (max-width: 768px) {
-  .arrow { 
-    display: none; 
+  .club-card {
+    padding: 40px 20px;
   }
   
-  .club-card {
-    min-width: 220px;
+  .club-card h3 {
+    font-size: 22px;
   }
+  
+  .club-card p {
+    font-size: 14px;
+  }
+  
+  .arrow {
+    font-size: 18px;
+    padding: 8px;
+  }
+  
+  .arrow.left { left: 10px; }
+  .arrow.right { right: 10px; }
 }
