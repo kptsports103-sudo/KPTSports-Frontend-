@@ -1,16 +1,19 @@
 /* CLUB CAROUSEL */
 .carousel-wrapper {
   position: relative;
-  max-width: 900px;
+  width: 100%;
+  max-width: 1200px;
   margin: auto;
 }
 
 .carousel-viewport {
   overflow: hidden;
+  width: 100%;
 }
 
 .carousel-track {
   display: flex;
+  align-items: stretch;
 }
 
 .club-card {
@@ -77,6 +80,11 @@
 }
 
 /* THEMES */
+.college {
+  background: linear-gradient(135deg, #0f4c81, #1e90c2);
+  color: #ffffff;
+}
+
 .purple { background: linear-gradient(135deg, #667eea, #764ba2); }
 .pink { background: linear-gradient(135deg, #f093fb, #f5576c); }
 .blue { background: linear-gradient(135deg, #4facfe, #00f2fe); }

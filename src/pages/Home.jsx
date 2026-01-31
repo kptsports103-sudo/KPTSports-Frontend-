@@ -9,6 +9,7 @@ export default function Home() {
   const [index, setIndex] = useState(1);
   const trackRef = useRef(null);
   const startX = useRef(0);
+  const autoPlayRef = useRef(null);
 
   useEffect(() => {
     fetchHomeContent();
@@ -30,6 +31,12 @@ export default function Home() {
     try {
       // For now, use static data - replace with API call when ready
       const clubData = [
+        {
+          id: 0,
+          name: 'KPT College',
+          description: 'Karnataka (Govt.) Polytechnic, Mangalore – Excellence in Technical Education',
+          theme: 'college'
+        },
         { id: 1, name: 'Eco Club', description: 'Promoting environmental awareness and sustainable practices', theme: 'purple' },
         { id: 2, name: 'NCC', description: 'National Cadet Corps developing discipline and leadership', theme: 'pink' },
         { id: 3, name: 'Yoga Club', description: 'Promoting physical and mental well-being through yoga', theme: 'blue' },
@@ -76,6 +83,22 @@ export default function Home() {
     const diff = startX.current - e.changedTouches[0].clientX;
     if (diff > 50) next();
     if (diff < -50) prev();
+  };
+
+  // Auto-play functionality
+  useEffect(() => {
+    autoPlayRef.current = setInterval(() => {
+      next();
+    }, 3000);
+
+    return () => clearInterval(autoPlayRef.current);
+  }, [index]);
+
+  const pauseAutoPlay = () => clearInterval(autoPlayRef.current);
+  const resumeAutoPlay = () => {
+    autoPlayRef.current = setInterval(() => {
+      next();
+    }, 3000);
   };
 
   const fetchHomeContent = async () => {
@@ -173,6 +196,8 @@ export default function Home() {
             className="carousel-viewport"
             onTouchStart={touchStart}
             onTouchEnd={touchEnd}
+            onMouseEnter={pauseAutoPlay}
+            onMouseLeave={resumeAutoPlay}
           >
             <div
               className="carousel-track"
