@@ -6,7 +6,8 @@ const ManageHome = () => {
   const [content, setContent] = useState({
     welcomeText: '',
     banners: [{ video: '', year: '' }],
-    highlights: []
+    highlights: [],
+    clubs: [{ name: '', url: '' }]
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -32,7 +33,8 @@ const ManageHome = () => {
         banners: normalizedBanners.length
           ? normalizedBanners
           : [{ video: '', year: '' }],
-        highlights: res.data.highlights || []
+        highlights: res.data.highlights || [],
+        clubs: res.data.clubs || [{ name: '', url: '' }]
       });
     } catch {
       console.error('Failed to load home content');
@@ -56,7 +58,8 @@ const ManageHome = () => {
       const payload = {
         welcomeText: content.welcomeText,
         banners: processedBanners,
-        highlights: content.highlights
+        highlights: content.highlights,
+        clubs: content.clubs.filter(c => c.name.trim() && c.url.trim())
       };
 
       console.log('Payload to save:', payload);
@@ -103,6 +106,26 @@ const ManageHome = () => {
 
   const addHighlight = () => {
     setContent({ ...content, highlights: [...content.highlights, ''] });
+  };
+
+  const updateClubs = (index, field, value) => {
+    const clubs = [...content.clubs];
+    clubs[index] = { ...clubs[index], [field]: value };
+    setContent({ ...content, clubs });
+  };
+
+  const removeClub = (index) => {
+    setContent({
+      ...content,
+      clubs: content.clubs.filter((_, i) => i !== index)
+    });
+  };
+
+  const addClub = () => {
+    setContent({
+      ...content,
+      clubs: [...content.clubs, { name: '', url: '' }]
+    });
   };
 
   /* =========================
@@ -153,6 +176,18 @@ const ManageHome = () => {
                   <td style={{ padding: '15px' }}>
                     <ul style={{ margin: 0, paddingLeft: '20px' }}>
                       {content.highlights.map((h, i) => <li key={i} style={{ marginBottom: '5px' }}>{h}</li>)}
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '15px', fontWeight: 'bold' }}>Clubs</td>
+                  <td style={{ padding: '15px' }}>
+                    <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                      {content.clubs.map((c, i) => (
+                        <li key={i} style={{ marginBottom: '5px' }}>
+                          <strong>{c.name}</strong> → {c.url}
+                        </li>
+                      ))}
                     </ul>
                   </td>
                 </tr>
@@ -293,6 +328,63 @@ const ManageHome = () => {
                 }}
               >
                 Add Highlight
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <h4 style={{ marginBottom: '10px', color: '#333' }}>Clubs (Name & URL)</h4>
+              {content.clubs.map((club, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr auto',
+                    gap: '10px',
+                    marginBottom: '10px'
+                  }}
+                >
+                  <input
+                    placeholder="Club Name"
+                    value={club.name}
+                    onChange={e => updateClubs(i, 'name', e.target.value)}
+                    style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                  />
+                  <input
+                    placeholder="URL (e.g. /clubs/eco-club)"
+                    value={club.url}
+                    onChange={e => updateClubs(i, 'url', e.target.value)}
+                    style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeClub(i)}
+                    style={{
+                      padding: '8px 12px',
+                      background: '#dc3545',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addClub}
+                style={{
+                  padding: '10px 15px',
+                  background: '#007bff',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  marginTop: '10px'
+                }}
+              >
+                ➕ Add Club
               </button>
             </div>
 

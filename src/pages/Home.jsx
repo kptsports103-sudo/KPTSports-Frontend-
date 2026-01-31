@@ -15,26 +15,45 @@ export default function Home() {
 
   useEffect(() => {
     fetchHomeContent();
-    
-    const clubData = [
-      {
-        id: 1,
-        name: 'KPT College',
-        slug: 'college',
-        description: 'Karnataka (Govt.) Polytechnic, Mangalore – Excellence in Technical Education',
-        theme: 'college'
-      },
-      { id: 2, name: 'Eco Club', slug: 'eco-club', description: 'Promoting environmental awareness and sustainable practices', theme: 'purple' },
-      { id: 3, name: 'NCC', slug: 'ncc', description: 'National Cadet Corps developing discipline and leadership', theme: 'pink' },
-      { id: 4, name: 'Yoga Club', slug: 'yoga-club', description: 'Promoting physical and mental well-being through yoga', theme: 'blue' },
-      { id: 5, name: 'Youth Red Cross', slug: 'youth-red-cross', description: 'Serving humanity and providing first aid training', theme: 'yellow' },
-      { id: 6, name: 'Arts & Culture Club', slug: 'arts-culture', description: 'Celebrating creativity and cultural diversity', theme: 'light' },
-      { id: 7, name: 'Technical Club', slug: 'technical-club', description: 'Exploring innovation and technology trends', theme: 'orange' },
-      { id: 8, name: 'NSS', slug: 'nss', description: 'National Service Scheme for community development', theme: 'light' }
-    ];
-
-    setClubs(clubData);
+    fetchClubs();
   }, []);
+
+  const fetchHomeContent = async () => {
+    try {
+      const res = await api.get('/home');
+      setHomeContent(res.data);
+    } catch (error) {
+      console.error('Error fetching home content:', error);
+    }
+  };
+
+  const fetchClubs = async () => {
+    try {
+      const res = await api.get('/home');
+      const clubsData = res.data.clubs || [];
+      setClubs(clubsData);
+    } catch (error) {
+      console.error('Error fetching clubs:', error);
+      // Fallback to default clubs if API fails
+      const clubData = [
+        {
+          id: 1,
+          name: 'KPT College',
+          url: '/college',
+          description: 'Karnataka (Govt.) Polytechnic, Mangalore – Excellence in Technical Education',
+          theme: 'college'
+        },
+        { id: 2, name: 'Eco Club', url: '/clubs/eco-club', description: 'Promoting environmental awareness and sustainable practices', theme: 'purple' },
+        { id: 3, name: 'NCC', url: '/clubs/ncc', description: 'National Cadet Corps developing discipline and leadership', theme: 'pink' },
+        { id: 4, name: 'Yoga Club', url: '/clubs/yoga-club', description: 'Promoting physical and mental well-being through yoga', theme: 'blue' },
+        { id: 5, name: 'Youth Red Cross', url: '/clubs/youth-red-cross', description: 'Serving humanity and providing first aid training', theme: 'yellow' },
+        { id: 6, name: 'Arts & Culture Club', url: '/clubs/arts-culture', description: 'Celebrating creativity and cultural diversity', theme: 'light' },
+        { id: 7, name: 'Technical Club', url: '/clubs/technical-club', description: 'Exploring innovation and technology trends', theme: 'orange' },
+        { id: 8, name: 'NSS', url: '/clubs/nss', description: 'National Service Scheme for community development', theme: 'light' }
+      ];
+      setClubs(clubData);
+    }
+  };
 
   useEffect(() => {
     if (homeContent.banners.length > 1) {
@@ -69,15 +88,6 @@ export default function Home() {
     const diff = startX.current - e.changedTouches[0].clientX;
     if (diff > 50) setIndex((prev) => (prev + 1) % clubs.length);
     if (diff < -50) setIndex((prev) => (prev - 1 + clubs.length) % clubs.length);
-  };
-
-  const fetchHomeContent = async () => {
-    try {
-      const res = await api.get('/home');
-      setHomeContent(res.data);
-    } catch (error) {
-      console.error('Error fetching home content:', error);
-    }
   };
 
   return (
@@ -162,13 +172,9 @@ export default function Home() {
             <div className="carousel-track" ref={trackRef}>
               {clubs.map((club) => (
                 <div
-                  key={club.id}
+                  key={club.id || club.name}
                   className={`club-card ${club.theme}`}
-                  onClick={() =>
-                    club.slug === 'college'
-                      ? navigate('/college')
-                      : navigate(`/clubs/${club.slug}`)
-                  }
+                  onClick={() => navigate(club.url)}
                   style={{ cursor: 'pointer' }}
                 >
                   <h3>{club.name}</h3>
