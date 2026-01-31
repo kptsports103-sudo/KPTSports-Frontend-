@@ -21,18 +21,22 @@ const ManageHome = () => {
   const fetchContent = async () => {
     try {
       const res = await api.get('/home');
-
+      console.log('Raw API response:', res.data);
+      
       const normalizedBanners = (res.data.banners || []).map(b => ({
         video: b.video || '',
         year: b.year || ''
       }));
+
+      const clubsData = res.data.clubs || [{ name: '', url: '' }];
+      console.log('Clubs data from API:', clubsData);
 
       setContent({
         welcomeText: res.data.welcomeText || '',
         banners: normalizedBanners.length
           ? normalizedBanners
           : [{ video: '', year: '' }],
-        clubs: res.data.clubs || [{ name: '', url: '' }]
+        clubs: clubsData
       });
     } catch {
       console.error('Failed to load home content');
@@ -56,10 +60,16 @@ const ManageHome = () => {
       const payload = {
         welcomeText: content.welcomeText,
         banners: processedBanners,
-        clubs: content.clubs.filter(c => c.name.trim() && c.url.trim())
+        clubs: content.clubs.filter(c => c.name.trim() && c.url.trim()).map(c => ({
+          name: c.name.trim(),
+          url: c.url.trim()
+        }))
       };
 
-      console.log('Payload to save:', payload);
+      console.log('Full content state:', content);
+      console.log('Clubs before filter:', content.clubs);
+      console.log('Clubs after filter:', content.clubs.filter(c => c.name.trim() && c.url.trim()));
+      console.log('Final payload to save:', payload);
       await api.put('/home', payload);
       alert('Home page updated successfully');
       setIsEditing(false);

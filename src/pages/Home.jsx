@@ -30,7 +30,9 @@ export default function Home() {
   const fetchClubs = async () => {
     try {
       const res = await api.get('/home');
+      console.log('Home.jsx - Raw API response:', res.data);
       const clubsData = res.data.clubs || [];
+      console.log('Home.jsx - Clubs data from API:', clubsData);
       setClubs(clubsData);
     } catch (error) {
       console.error('Error fetching clubs:', error);
@@ -51,6 +53,7 @@ export default function Home() {
         { id: 7, name: 'Technical Club', url: '/clubs/technical-club', description: 'Exploring innovation and technology trends', theme: 'orange' },
         { id: 8, name: 'NSS', url: '/clubs/nss', description: 'National Service Scheme for community development', theme: 'light' }
       ];
+      console.log('Home.jsx - Using fallback clubs:', clubData);
       setClubs(clubData);
     }
   };
