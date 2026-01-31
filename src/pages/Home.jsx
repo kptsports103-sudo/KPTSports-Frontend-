@@ -33,7 +33,18 @@ export default function Home() {
       console.log('Home.jsx - Raw API response:', res.data);
       const clubsData = res.data.clubs || [];
       console.log('Home.jsx - Clubs data from API:', clubsData);
-      setClubs(clubsData);
+      
+      // Check if clubs have required fields, add defaults if missing
+      const processedClubs = clubsData.map((club, index) => ({
+        id: club.id || index + 1,
+        name: club.name || 'Unknown Club',
+        url: club.url || '#',
+        description: club.description || 'Club activities and information',
+        theme: club.theme || 'blue'
+      }));
+      
+      console.log('Home.jsx - Processed clubs with defaults:', processedClubs);
+      setClubs(processedClubs);
     } catch (error) {
       console.error('Error fetching clubs:', error);
       // Fallback to default clubs if API fails

@@ -70,10 +70,14 @@ const ManageHome = () => {
       console.log('Clubs before filter:', content.clubs);
       console.log('Clubs after filter:', content.clubs.filter(c => c.name.trim() && c.url.trim()));
       console.log('Final payload to save:', payload);
-      await api.put('/home', payload);
+      const saveResponse = await api.put('/home', payload);
+      console.log('Backend save response:', saveResponse.data);
       alert('Home page updated successfully');
       setIsEditing(false);
-      fetchContent();
+      
+      // Immediately fetch to verify save worked
+      console.log('Fetching data immediately after save...');
+      await fetchContent();
     } catch (error) {
       console.error('Save error:', error);
       alert('Failed to save changes');
