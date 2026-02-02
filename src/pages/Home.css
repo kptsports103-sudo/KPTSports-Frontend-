@@ -118,6 +118,20 @@
   background: #c82333;
 }
 
+.login-btn {
+  background: #007bff;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.login-btn:hover {
+  background: #0056b3;
+}
+
 /* Navigation Bar */
 .navbar {
   display: flex;

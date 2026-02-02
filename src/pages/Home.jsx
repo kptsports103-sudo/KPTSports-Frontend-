@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import './Home.css';
 
@@ -9,15 +9,9 @@ export default function Home() {
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [clubs, setClubs] = useState([]);
   const [index, setIndex] = useState(0);
-  const [darkMode, setDarkMode] = useState(false);
   const trackRef = useRef(null);
   const autoPlayRef = useRef(null);
   const startX = useRef(0);
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.body.classList.toggle('dark-mode', !darkMode);
-  };
 
   useEffect(() => {
     fetchHomeContent();
@@ -119,45 +113,9 @@ export default function Home() {
   };
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', margin: 0, background: darkMode ? '#1a1a1a' : '#f5f5f5', color: darkMode ? '#fff' : '#000' }}>
-      {/* College Header */}
-      <div className={`college-header ${darkMode ? 'dark' : ''}`}>
-        <div className="header-content">
-          <img src="/KPT 2.1.png" alt="Government Emblem" className="logo left" />
-          
-          <div className="title">
-            <h1>KARNATAKA (GOVT.) POLYTECHNIC, MANGALORE</h1>
-            <p className="subtitle">(An Autonomous Institution Under AICTE, New Delhi)</p>
-            <p className="tagline">— Promoting Academic & Sports Excellence</p>
-          </div>
-
-          <img src="/KPT 1.png" alt="KPT Logo" className="logo right" />
-        </div>
-        
-        {/* Center Section: LOGOUT, Theme Toggle, A-AA+ */}
-        <div className="center-section">
-          <button className="theme-btn" onClick={toggleDarkMode} title="Toggle Dark/Light Mode">
-            {darkMode ? '☀️' : '🌙'}
-          </button>
-          <span className="text-size-toggle">A-AA+</span>
-          <button className="logout-btn">LOGOUT</button>
-        </div>
-        
-        {/* Navigation Bar */}
-        <nav className={`navbar ${darkMode ? 'dark' : ''}`}>
-          <ul className="nav-list">
-            <li><Link to="/">Home</Link></li>
-            <li><Link to="/about">About</Link></li>
-            <li><Link to="/history">History</Link></li>
-            <li><Link to="/events">Events</Link></li>
-            <li><Link to="/gallery">Gallery</Link></li>
-            <li><Link to="/results">Results</Link></li>
-          </ul>
-        </nav>
-      </div>
-
-      {/* Welcome Banner */}
-      <div style={{ background: darkMode ? '#1a3a5c' : '#cceeff', padding: '60px', textAlign: 'center' }}>
+    <div style={{ fontFamily: 'Arial, sans-serif', margin: 0, background: '#f5f5f5' }}>
+      {/* Header */}
+      <div style={{ background: '#cceeff', padding: '60px', textAlign: 'center' }}>
         <h1 style={{ fontSize: '36px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Welcome to KPT Mangalore Sports</h1>
         <p style={{ fontSize: '18px', margin: '0', fontWeight: 'normal' }}>Showcasing the spirit, strength, and sportsmanship of our students</p>
       </div>
