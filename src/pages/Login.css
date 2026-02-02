@@ -44,6 +44,12 @@
   border-radius: 6px;
   border: 1px solid #ccc;
   font-size: 14px;
+  color: #000;
+  background-color: #fff;
+}
+
+.login-left select option {
+  color: #000;
 }
 
 .login-left input:focus,
