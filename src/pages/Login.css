@@ -1,62 +1,151 @@
-/* Full background */
-.login-bg {
-  height: 100vh;
-  background-image: url("/Athlete.png"); /* your image */
-  background-size: cover;
-  background-position: center;
+/* PAGE BACKGROUND */
+.login-page {
+  min-height: 100vh;
+  background: #f5f6fa;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Login box */
-.login-card {
-  width: 350px;
-  background: #f2f2f2;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+/* MAIN CARD */
+.login-container {
+  width: 1100px;
+  max-width: 95%;
+  background: #fff;
+  border-radius: 20px;
+  display: flex;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  overflow: hidden;
 }
 
-.login-card h2 {
-  margin-bottom: 15px;
+/* LEFT */
+.login-left {
+  flex: 1;
+  padding: 50px;
+}
+
+.login-left h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.login-left label {
+  display: block;
+  font-size: 14px;
+  margin-top: 15px;
+  color: #555;
+}
+
+.login-left input,
+.login-left select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.login-left input:focus,
+.login-left select:focus {
+  outline: none;
+  border-color: #7b1515;
+}
+
+.login-left button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 25px;
+  background: #7b1515;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.login-left button:hover {
+  background: #5e0f0f;
+}
+
+.login-left button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.secondary-btn {
+  background: #aaa !important;
+  margin-top: 10px !important;
+}
+
+.secondary-btn:hover {
+  background: #888 !important;
+}
+
+.error-text {
+  color: red;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+/* RIGHT */
+.login-right {
+  flex: 1;
+  padding: 50px;
+  background: linear-gradient(135deg, #0b1b4d 0%, #1a3a7c 100%);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+.login-right h1 {
+  margin-bottom: 10px;
+  font-size: 28px;
+  font-weight: 300;
+}
+
+.login-right h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
   font-weight: 600;
 }
 
-/* Inputs */
-.login-card label {
-  font-size: 14px;
-  margin-top: 10px;
-  display: block;
+.login-right p {
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  max-width: 400px;
 }
 
-.login-card input,
-.login-card select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+.login-logo {
+  max-width: 200px;
+  height: auto;
 }
 
-/* Button */
-.login-card button {
-  width: 100%;
-  margin-top: 20px;
-  padding: 12px;
-  background-color: #7b1515;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.login-card button:hover {
-  background-color: #5e0f0f;
-}
-
-.login-card button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .login-container {
+    flex-direction: column;
+  }
+  
+  .login-right {
+    padding: 30px;
+  }
+  
+  .login-right h1 {
+    font-size: 24px;
+  }
+  
+  .login-right h2 {
+    font-size: 20px;
+  }
+  
+  .login-logo {
+    max-width: 150px;
+  }
 }
