@@ -25,14 +25,7 @@ const Navbar = () => {
           <img src="/KPT 1.png" alt="KPT Logo" className="logo right" />
         </div>
         
-        {/* Center Section: Theme Toggle, A-AA+ */}
-        <div className="center-section">
-          <button className="theme-btn" onClick={toggleDarkMode} title="Toggle Dark/Light Mode">
-            {darkMode ? '☀️' : '🌙'}
-          </button>
-          <span className="text-size-toggle">A-AA+</span>
-        </div>
-      </div>
+        
       
       {/* Navigation Bar */}
       <nav className="navbar">
