@@ -99,7 +99,7 @@ const UsersManage = () => {
       <div className="p-8 bg-gray-50 min-h-screen">
         {/* Center Heading */}
         <div className="flex justify-center mb-8">
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-3xl font-bold flex items-center gap-3" style={{ color: '#000' }}>
             <img src="/group.png" className="w-8 h-8" />
             Manage Users
           </h1>
@@ -111,7 +111,7 @@ const UsersManage = () => {
           {/* Inner Heading */}
           <div className="flex items-center gap-2 border-b pb-4 mb-6">
             <img src="/group.png" className="w-6 h-6" />
-            <h2 className="text-xl font-semibold">Admin Users</h2>
+            <h2 className="text-xl font-semibold" style={{ color: '#000' }}>Admin Users</h2>
           </div>
 
           {error && (
@@ -132,13 +132,13 @@ const UsersManage = () => {
                 <table style={{ width: '100%', background: '#fff', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
                 <thead>
                   <tr style={{ background: '#e9ecef' }}>
-                    <th style={{ padding: '15px', textAlign: 'center' }}>Avatar</th>
-                    <th style={{ padding: '15px', textAlign: 'left' }}>Name</th>
-                    <th style={{ padding: '15px', textAlign: 'left' }}>Email</th>
-                    <th style={{ padding: '15px', textAlign: 'left' }}>Phone</th>
-                    <th style={{ padding: '15px', textAlign: 'center' }}>Role</th>
-                    <th style={{ padding: '15px', textAlign: 'center' }}>Verified</th>
-                    <th style={{ padding: '15px', textAlign: 'right' }}>Actions</th>
+                    <th style={{ padding: '15px', textAlign: 'center', color: '#000' }}>Avatar</th>
+                    <th style={{ padding: '15px', textAlign: 'left', color: '#000' }}>Name</th>
+                    <th style={{ padding: '15px', textAlign: 'left', color: '#000' }}>Email</th>
+                    <th style={{ padding: '15px', textAlign: 'left', color: '#000' }}>Phone</th>
+                    <th style={{ padding: '15px', textAlign: 'center', color: '#000' }}>Role</th>
+                    <th style={{ padding: '15px', textAlign: 'center', color: '#000' }}>Verified</th>
+                    <th style={{ padding: '15px', textAlign: 'right', color: '#000' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -157,10 +157,10 @@ const UsersManage = () => {
                           }}
                         />
                       </td>
-                      <td style={{ padding: '15px' }}>{user.name}</td>
-                      <td style={{ padding: '15px' }}>{maskEmail(user.email)}</td>
-                      <td style={{ padding: '15px' }}>{maskPhone(user.phone)}</td>
-                      <td style={{ padding: '15px', textAlign: 'center' }}>{user.role}</td>
+                      <td style={{ padding: '15px', color: '#000' }}>{user.name}</td>
+                      <td style={{ padding: '15px', color: '#000' }}>{maskEmail(user.email)}</td>
+                      <td style={{ padding: '15px', color: '#000' }}>{maskPhone(user.phone)}</td>
+                      <td style={{ padding: '15px', textAlign: 'center', color: '#000' }}>{user.role}</td>
                       <td style={{ padding: '15px', textAlign: 'center' }}>
                         <span
                           className={`text-sm ${
@@ -218,8 +218,8 @@ const UsersManage = () => {
               ×
             </button>
 
-            <h2 className="text-xl font-semibold mb-1">{selectedUser.name}</h2>
-            <p className="text-gray-500 mb-4">Profile</p>
+            <h2 className="text-xl font-semibold mb-1" style={{ color: '#000' }}>{selectedUser.name}</h2>
+            <p className="text-gray-500 mb-4" style={{ color: '#000' }}>Profile</p>
 
             <div className="flex justify-center mb-4">
               <img
@@ -229,9 +229,9 @@ const UsersManage = () => {
               />
             </div>
 
-            <p><b>Email:</b> {selectedUser.email}</p>
-            <p><b>Phone:</b> {selectedUser.phone}</p>
-            <p><b>Role:</b> {selectedUser.role}</p>
+            <p style={{ color: '#000' }}><b>Email:</b> {selectedUser.email}</p>
+            <p style={{ color: '#000' }}><b>Phone:</b> {selectedUser.phone}</p>
+            <p style={{ color: '#000' }}><b>Role:</b> {selectedUser.role}</p>
 
             {(() => {
               let text = "";
@@ -242,7 +242,7 @@ const UsersManage = () => {
               } else if (selectedUser.role === "creator") {
                 text = "This user can access only the Creator dashboard. They manage their own content only.";
               }
-              return <p className="text-sm text-gray-600 mt-4 leading-relaxed">{text}</p>;
+              return <p className="text-sm mt-4 leading-relaxed" style={{ color: '#000' }}>{text}</p>;
             })()}
 
             <button

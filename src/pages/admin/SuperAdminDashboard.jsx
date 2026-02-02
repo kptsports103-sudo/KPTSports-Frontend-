@@ -40,10 +40,10 @@ const SuperAdminDashboard = () => {
       <div className="p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2" style={{ color: '#000' }}>
             Super Admin Dashboard
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600" style={{ color: '#000' }}>
             Welcome back, {user?.name}! Here's an overview of your system.
           </p>
         </div>
@@ -53,7 +53,7 @@ const SuperAdminDashboard = () => {
           <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Users</p>
+                <p className="text-sm font-medium text-gray-600" style={{ color: '#000' }}>Total Users</p>
                 <p className="text-3xl font-bold text-blue-600">{stats.totalUsers}</p>
               </div>
               <div className="bg-blue-100 p-3 rounded-full">
@@ -67,7 +67,7 @@ const SuperAdminDashboard = () => {
           <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Admins</p>
+                <p className="text-sm font-medium text-gray-600" style={{ color: '#000' }}>Total Admins</p>
                 <p className="text-3xl font-bold text-green-600">{stats.totalAdmins}</p>
               </div>
               <div className="bg-green-100 p-3 rounded-full">
@@ -81,7 +81,7 @@ const SuperAdminDashboard = () => {
           <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">AssetAdmin</p>
+                <p className="text-sm font-medium text-gray-600" style={{ color: '#000' }}>AssetAdmin</p>
                 <p className="text-3xl font-bold text-red-600">{stats.totalAssetAdmins}</p>
               </div>
               <div className="bg-red-100 p-3 rounded-full">
@@ -95,7 +95,7 @@ const SuperAdminDashboard = () => {
           <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Events</p>
+                <p className="text-sm font-medium text-gray-600" style={{ color: '#000' }}>Total Events</p>
                 <p className="text-3xl font-bold text-purple-600">{stats.totalEvents}</p>
               </div>
               <div className="bg-purple-100 p-3 rounded-full">

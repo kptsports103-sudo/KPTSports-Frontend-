@@ -468,16 +468,16 @@ const IAMUsers = () => {
               </div>
             )}
 
-            <label>Full Name *</label>
-            <input id="name" name="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Enter full name" style={inputStyle} />
+            <label style={{ color: "#000", fontWeight: 600 }}>Full Name *</label>
+            <input id="name" name="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Enter full name" style={{ ...inputStyle, color: "#000" }} />
 
-            <label>Mobile Number *</label>
-            <input id="phone" name="phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} placeholder="10-digit mobile" style={inputStyle} />
+            <label style={{ color: "#000", fontWeight: 600 }}>Mobile Number *</label>
+            <input id="phone" name="phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} placeholder="10-digit mobile" style={{ ...inputStyle, color: "#000" }} />
 
-            <label>Password *</label>
-            <input id="password" name="password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Strong password" style={inputStyle} />
+            <label style={{ color: "#000", fontWeight: 600 }}>Password *</label>
+            <input id="password" name="password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Strong password" style={{ ...inputStyle, color: "#000" }} />
 
-            <label>Profile Image</label>
+            <label style={{ color: "#000", fontWeight: 600 }}>Profile Image</label>
             <input
               id="profileImage"
               name="profileImage"
@@ -514,7 +514,7 @@ const IAMUsers = () => {
 
           {/* RIGHT SIDEBAR PREVIEW */}
           <div style={{ width: "45%", background: "#f8fafc", padding: 30 }}>
-            <h3>Login Preview</h3>
+            <h3 style={{ color: "#000" }}>Login Preview</h3>
 
             <div style={{ textAlign: "center", marginBottom: 20 }}>
               <img
@@ -523,11 +523,11 @@ const IAMUsers = () => {
               />
             </div>
 
-            <div style={previewBox}><strong>Email:</strong> {form.email}</div>
-            <div style={previewBox}><strong>Password:</strong> {form.password || "••••••"}</div>
-            <div style={previewBox}><strong>Role:</strong> {form.role}</div>
+            <div style={{ ...previewBox, color: "#000" }}><strong>Email:</strong> {form.email}</div>
+            <div style={{ ...previewBox, color: "#000" }}><strong>Password:</strong> {form.password || "••••••"}</div>
+            <div style={{ ...previewBox, color: "#000" }}><strong>Role:</strong> {form.role}</div>
 
-            <p style={{ color: "#6b7280", fontSize: 13, marginTop: 10 }}>
+            <p style={{ color: "#000", fontSize: 13, marginTop: 10 }}>
               These details will be used to log in.
             </p>
           </div>
@@ -620,10 +620,10 @@ const IAMUsers = () => {
 
           {/* Body */}
           <div style={{ padding:24 }}>
-            <h3 style={{ marginBottom:6 }}>
+            <h3 style={{ marginBottom:6, color: '#000' }}>
               Welcome, {form.name || "User"}!
             </h3>
-            <p style={{ color:"#6b7280", fontSize:14, lineHeight:1.5 }}>
+            <p style={{ color:"#000", fontSize:14, lineHeight:1.5 }}>
               Your account has been successfully activated.
               You can now log in using your email and password.
             </p>
@@ -634,10 +634,11 @@ const IAMUsers = () => {
               borderRadius:10,
               margin:"16px 0",
               textAlign:"left",
-              fontSize:14
+              fontSize:14,
+              color: '#000'
             }}>
-              <p><strong>Email:</strong> {form.email}</p>
-              <p><strong>Role:</strong> {form.role}</p>
+              <p style={{ color: '#000' }}><strong>Email:</strong> {form.email}</p>
+              <p style={{ color: '#000' }}><strong>Role:</strong> {form.role}</p>
             </div>
 
             <div style={{ display:"flex", gap:12 }}>
@@ -647,9 +648,11 @@ const IAMUsers = () => {
                   flex:1,
                   padding:12,
                   borderRadius:10,
-                  border:"1px solid #d1d5db",
-                  background:"#f3f4f6",
-                  fontWeight:600
+                  border:"1px solid #000",
+                  background:"#fff",
+                  fontWeight:600,
+                  color:"#000",
+                  cursor:"pointer"
                 }}
               >
                 Create Another
