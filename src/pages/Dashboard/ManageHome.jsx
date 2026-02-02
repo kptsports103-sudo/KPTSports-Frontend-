@@ -182,10 +182,6 @@ const ManageHome = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <tbody>
                 <tr style={{ borderBottom: '1px solid #ddd' }}>
-                  <td style={{ padding: '15px', fontWeight: 'bold', width: '200px' }}>Welcome Text</td>
-                  <td style={{ padding: '15px', whiteSpace: 'pre-wrap' }}>{content.welcomeText}</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={{ padding: '15px', fontWeight: 'bold' }}>Banners</td>
                   <td style={{ padding: '15px' }}>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>

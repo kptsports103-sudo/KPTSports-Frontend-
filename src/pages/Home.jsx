@@ -114,12 +114,6 @@ export default function Home() {
 
   return (
     <div style={{ fontFamily: 'Arial, sans-serif', margin: 0, background: '#f5f5f5' }}>
-      {/* Header */}
-      <div style={{ background: '#cceeff', padding: '60px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '36px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Welcome to KPT Mangalore Sports</h1>
-        <p style={{ fontSize: '18px', margin: '0', fontWeight: 'normal' }}>Showcasing the spirit, strength, and sportsmanship of our students</p>
-      </div>
-
       {/* Banner */}
       <div className="banner-container" style={{ position: 'relative', height: '600px', overflow: 'hidden', background: '#ddd' }}>
         {homeContent.banners.length > 0 && homeContent.banners[currentBannerIndex]?.video ? (
