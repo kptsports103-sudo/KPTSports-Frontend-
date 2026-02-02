@@ -1,21 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(false);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     document.body.classList.toggle('dark-mode', !darkMode);
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
   };
 
   return (
@@ -34,17 +25,12 @@ const Navbar = () => {
           <img src="/KPT 1.png" alt="KPT Logo" className="logo right" />
         </div>
         
-        {/* Center Section: LOGOUT, Theme Toggle, A-AA+ */}
+        {/* Center Section: Theme Toggle, A-AA+ */}
         <div className="center-section">
           <button className="theme-btn" onClick={toggleDarkMode} title="Toggle Dark/Light Mode">
             {darkMode ? '☀️' : '🌙'}
           </button>
           <span className="text-size-toggle">A-AA+</span>
-          {user ? (
-            <button className="logout-btn" onClick={handleLogout}>👤 LOGOUT</button>
-          ) : (
-            <Link to="/login" className="login-btn">👤 LOGIN</Link>
-          )}
         </div>
       </div>
       
