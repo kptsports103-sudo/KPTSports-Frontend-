@@ -1,16 +1,8 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
 
 const Navbar = () => {
-  const [darkMode, setDarkMode] = useState(false);
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.body.classList.toggle('dark-mode', !darkMode);
-  };
-
   return (
-    <div className={`college-navbar ${darkMode ? 'dark' : ''}`}>
+    <div className="college-navbar">
       {/* College Header */}
       <div className="college-header">
         <div className="header-content">
@@ -24,8 +16,7 @@ const Navbar = () => {
 
           <img src="/KPT 1.png" alt="KPT Logo" className="logo right" />
         </div>
-        
-        
+      </div>
       
       {/* Navigation Bar */}
       <nav className="navbar">
