@@ -247,7 +247,8 @@ const IAMUsers = () => {
 
           {/* LEFT FORM */}
           <div style={{ width: "45%", padding: "40px" }}>
-            <h2 style={{ fontSize: "28px", fontWeight: "700", marginBottom: "8px" }}>Verify Email</h2>
+            <img src="/KPT 1.png" alt="KPT Logo" style={{ width: "120px", marginBottom: "20px" }} />
+            <h2 style={{ fontSize: "28px", fontWeight: "700", marginBottom: "8px", color: "#000" }}>Verify Email</h2>
             <p style={{ color: "#6b7280", marginBottom: "24px" }}>
               Enter your email and select your role to continue
             </p>

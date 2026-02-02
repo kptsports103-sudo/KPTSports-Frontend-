@@ -75,6 +75,7 @@ export default function Login() {
 
         {/* LEFT LOGIN PANEL */}
         <div className="login-left">
+          <img src="/KPT 1.png" alt="KPT Logo" className="login-left-logo" />
           <h2>Sign in</h2>
           
           <p className="back-home">
@@ -85,10 +86,17 @@ export default function Login() {
 
           {!showOTP ? (
             <form onSubmit={submitLogin}>
-              <label>Email ID *</label>
+              <label>User Role *</label>
+              <select value={role} onChange={(e) => setRole(e.target.value)}>
+                <option value="admin">Admin</option>
+                <option value="creator">Creator</option>
+                <option value="superadmin">Super Admin</option>
+              </select>
+
+              <label>Email Address *</label>
               <input
                 type="email"
-                placeholder="Enter Email ID"
+                placeholder="Enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -97,18 +105,13 @@ export default function Login() {
               <label>Password *</label>
               <input
                 type="password"
-                placeholder="Enter Password"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
 
-              <label>Login Type</label>
-              <select value={role} onChange={(e) => setRole(e.target.value)}>
-                <option value="admin">Admin</option>
-                <option value="creator">Creator</option>
-                <option value="superadmin">Super Admin</option>
-              </select>
+              <p className="otp-hint">We'll send a 6-digit code to your email for verification</p>
 
               <button disabled={loading}>
                 {loading ? 'Signing in...' : 'Submit'}
