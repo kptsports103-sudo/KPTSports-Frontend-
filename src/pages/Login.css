@@ -26,14 +26,14 @@
 
 .login-left h2 {
   margin-bottom: 20px;
-  color: #333;
+  color: #000;
 }
 
 .login-left label {
   display: block;
   font-size: 14px;
   margin-top: 15px;
-  color: #555;
+  color: #000;
 }
 
 .login-left input,
@@ -90,6 +90,20 @@
   margin-bottom: 10px;
 }
 
+.back-home {
+  margin-bottom: 15px;
+}
+
+.back-home a {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.back-home a:hover {
+  text-decoration: underline;
+}
+
 /* RIGHT */
 .login-right {
   flex: 1;
@@ -120,6 +134,12 @@
   line-height: 1.6;
   margin-bottom: 30px;
   max-width: 400px;
+}
+
+.login-emblem {
+  width: 100px;
+  height: auto;
+  margin-bottom: 20px;
 }
 
 .login-logo {

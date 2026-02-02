@@ -76,6 +76,10 @@ export default function Login() {
         {/* LEFT LOGIN PANEL */}
         <div className="login-left">
           <h2>Sign in</h2>
+          
+          <p className="back-home">
+            <a href="/">← Back to Home</a>
+          </p>
 
           {err && <p className="error-text">{err}</p>}
 
@@ -126,6 +130,10 @@ export default function Login() {
                 {loading ? 'Verifying...' : 'Verify OTP'}
               </button>
 
+              <p className="back-home">
+                <a href="/">← Back to Home</a>
+              </p>
+
               <button
                 type="button"
                 className="secondary-btn"
@@ -143,6 +151,7 @@ export default function Login() {
 
         {/* RIGHT INFO PANEL */}
         <div className="login-right">
+          <img src="/KPT 2.1.png" alt="Government Emblem" className="login-emblem" />
           <h1>Welcome to</h1>
           <h2>Karnataka (Govt.) Polytechnic, Mangalore</h2>
           <p>
