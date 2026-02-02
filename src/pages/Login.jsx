@@ -129,29 +129,13 @@ export default function Login() {
               <button disabled={loading}>
                 {loading ? 'Verifying...' : 'Verify OTP'}
               </button>
-
-              <p className="back-home">
-                <a href="/">← Back to Home</a>
-              </p>
-
-              <button
-                type="button"
-                className="secondary-btn"
-                onClick={() => {
-                  setShowOTP(false);
-                  setOtp('');
-                  setErr(null);
-                }}
-              >
-                Back
-              </button>
             </form>
           )}
         </div>
 
         {/* RIGHT INFO PANEL */}
         <div className="login-right">
-          <img src="/KPT 2.1.png" alt="Government Emblem" className="login-emblem" />
+          <img src="/KPT 1.png" alt="Government Emblem" className="login-emblem" />
           <h1>Welcome to</h1>
           <h2>Karnataka (Govt.) Polytechnic, Mangalore</h2>
           <p>
@@ -159,7 +143,7 @@ export default function Login() {
             dedicated to excellence in technical education and sports.
           </p>
 
-          <img src="/KPT 1.png" alt="KPT Logo" className="login-logo" />
+         
         </div>
 
       </div>
