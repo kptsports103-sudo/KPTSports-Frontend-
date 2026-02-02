@@ -260,7 +260,7 @@ const IAMUsers = () => {
             )}
 
             <div style={{ marginBottom: "16px" }}>
-              <label style={{ fontWeight: 600 }}>User Role *</label>
+              <label style={{ fontWeight: 600, color: "#000" }}>User Role *</label>
               <select
                 value={selectedRole}
                 disabled={!!token}
@@ -274,7 +274,7 @@ const IAMUsers = () => {
             </div>
 
             <div style={{ marginBottom: "20px" }}>
-              <label style={{ fontWeight: 600 }}>Email Address *</label>
+              <label style={{ fontWeight: 600, color: "#000" }}>Email Address *</label>
               <input
                 id="email"
                 name="email"
