@@ -265,11 +265,11 @@ const IAMUsers = () => {
                 value={selectedRole}
                 disabled={!!token}
                 onChange={(e) => setSelectedRole(e.target.value)}
-                style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #d1d5db", marginTop: "6px" }}
+                style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #d1d5db", marginTop: "6px", color: "#000" }}
               >
-                <option value="superadmin">Super Admin</option>
-                <option value="admin">Admin</option>
-                <option value="creator">Creator</option>
+                <option value="superadmin" style={{ color: "#000" }}>Super Admin</option>
+                <option value="admin" style={{ color: "#000" }}>Admin</option>
+                <option value="creator" style={{ color: "#000" }}>Creator</option>
               </select>
             </div>
 
@@ -283,7 +283,7 @@ const IAMUsers = () => {
                 value={form.email}
                 disabled={!!form.email && !!token}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #d1d5db", marginTop: "6px" }}
+                style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #d1d5db", marginTop: "6px", color: "#000" }}
               />
               <small style={{ color: "#6b7280" }}>
                 We'll send a 6-digit code to your email for verification
