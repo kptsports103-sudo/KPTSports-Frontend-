@@ -6,7 +6,7 @@ const Navbar = () => {
       {/* College Header */}
       <div className="college-header">
         <div className="header-content">
-          <img src="/KPT 2.1.png" alt="Government Emblem" className="logo left" />
+          <img src="/KPT 1.png" alt="Government Emblem" className="logo left" />
           
           <div className="title">
             <h1>KARNATAKA (GOVT.) POLYTECHNIC, MANGALORE</h1>
@@ -14,7 +14,7 @@ const Navbar = () => {
             <p className="tagline">— Promoting Academic & Sports Excellence</p>
           </div>
 
-          <img src="/KPT 1.png" alt="KPT Logo" className="logo right" />
+          <img src="/KPT 2.png" alt="KPT Logo" className="logo right" />
         </div>
       </div>
       
