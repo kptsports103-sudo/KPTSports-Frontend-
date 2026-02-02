@@ -12,6 +12,188 @@
   color: #2c3e50;
 }
 
+/* COLLEGE HEADER STYLES */
+.college-header {
+  background: #fff;
+  border-bottom: 2px solid #ccc;
+}
+
+.college-header.dark {
+  background: #1a1a1a;
+  border-bottom: 2px solid #333;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30px 60px;
+}
+
+.logo {
+  width: 120px;
+  height: auto;
+}
+
+.logo.left {
+  margin-right: 20px;
+}
+
+.logo.right {
+  margin-left: 20px;
+}
+
+.title {
+  text-align: center;
+  flex: 1;
+}
+
+.title h1 {
+  font-size: 32px;
+  color: #0b1b4d;
+  margin: 0;
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 18px;
+  margin: 8px 0;
+  color: #333;
+}
+
+.tagline {
+  font-size: 18px;
+  color: #0b1b4d;
+  margin-top: 10px;
+}
+
+/* Center Section: LOGOUT, Theme Toggle, A-AA+ */
+.center-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  background: #f9f9f9;
+}
+
+.theme-btn {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background 0.3s ease;
+}
+
+.theme-btn:hover {
+  background: #e0e0e0;
+}
+
+.text-size-toggle {
+  font-size: 16px;
+  font-weight: bold;
+  color: #0b1b4d;
+  cursor: pointer;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.logout-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: #c82333;
+}
+
+/* Navigation Bar */
+.navbar {
+  display: flex;
+  justify-content: center;
+  background: #0b1b4d;
+  padding: 0;
+}
+
+.navbar.dark {
+  background: #0a0a3d;
+}
+
+.nav-list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+}
+
+.nav-list li {
+  margin: 0;
+}
+
+.nav-list li a {
+  display: block;
+  padding: 15px 25px;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  transition: background 0.3s ease;
+}
+
+.nav-list li a:hover {
+  background: #1a3a7c;
+}
+
+/* Dark Mode */
+body.dark-mode {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+body.dark-mode .subtitle {
+  color: #ccc;
+}
+
+body.dark-mode .title h1,
+body.dark-mode .tagline {
+  color: #4a90d9;
+}
+
+body.dark-mode .text-size-toggle {
+  color: #4a90d9;
+}
+
+body.dark-mode .center-section {
+  background: #2a2a2a;
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+}
+
+body.dark-mode .theme-btn {
+  border-color: #555;
+}
+
+body.dark-mode .theme-btn:hover {
+  background: #3a3a3a;
+}
+
+body.dark-mode .text-size-toggle {
+  border-color: #555;
+  color: #4a90d9;
+}
+
 /* CAROUSEL */
 .carousel-container {
   position: relative;
