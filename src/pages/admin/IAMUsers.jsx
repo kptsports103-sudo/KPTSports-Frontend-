@@ -346,23 +346,33 @@ const IAMUsers = () => {
 
   if (step === "otp") {
     return (
-      <div style={{ background: "#f0f4ff", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <div style={{ width: 420, background: "white", borderRadius: 16, boxShadow: "0 12px 30px rgba(0,0,0,.1)", overflow: "hidden" }}>
+      <div style={{ background: "#f0f4ff", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", padding: "40px" }}>
+        <div style={{
+          display: "flex",
+          width: "100%",
+          maxWidth: "1100px",
+          background: "white",
+          borderRadius: "20px",
+          overflow: "hidden",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.1)"
+        }}>
 
-          <div style={{ background: "#10b981", color: "white", padding: 24, textAlign: "center" }}>
-            <h2>Enter Verification Code</h2>
-            <p>Verify your email address</p>
-          </div>
+          {/* LEFT FORM */}
+          <div style={{ width: "45%", padding: "40px" }}>
+            <img src="/KPT 1.png" alt="KPT Logo" style={{ width: "120px", marginBottom: "20px" }} />
+            <h2 style={{ fontSize: "28px", fontWeight: "700", marginBottom: "8px", color: "#000" }}>Enter Verification Code</h2>
+            <p style={{ color: "#6b7280", marginBottom: "24px" }}>
+              Verify your email address
+            </p>
 
-          <div style={{ padding: 24, textAlign: "center" }}>
             {error && (
-              <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "10px", borderRadius: "8px", marginBottom: "16px" }}>
+              <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "12px", borderRadius: "8px", marginBottom: "16px" }}>
                 {error}
               </div>
             )}
 
-            <p>A 6-digit code has been sent to</p>
-            <strong>{form.email}</strong>
+            <p style={{ color: "#000", marginBottom: "8px" }}>A 6-digit code has been sent to</p>
+            <strong style={{ color: "#000" }}>{form.email}</strong>
 
             <input
               id="otp"
@@ -378,16 +388,60 @@ const IAMUsers = () => {
                 textAlign: "center",
                 borderRadius: 10,
                 border: "1px solid #ccc",
-                margin: "20px 0"
+                margin: "20px 0",
+                color: "#000"
               }}
             />
 
             <div style={{ display: "flex", gap: 12 }}>
-              <button onClick={() => setStep("email")} style={{ flex: 1, padding: 12, borderRadius: 10 }}>Back</button>
-              <button onClick={verifyOTP} disabled={code.length !== 6}
-                style={{ flex: 1, padding: 12, borderRadius: 10, background: "#10b981", color: "white" }}>
+              <button 
+                onClick={() => setStep("email")} 
+                style={{ flex: 1, padding: 14, borderRadius: 10, background: "#6b7280", color: "white", border: "none", cursor: "pointer" }}
+              >
+                Back
+              </button>
+              <button 
+                onClick={verifyOTP} 
+                disabled={code.length !== 6}
+                style={{ flex: 1, padding: 14, borderRadius: 10, background: "#10b981", color: "white", border: "none", cursor: code.length !== 6 ? "not-allowed" : "pointer", opacity: code.length !== 6 ? 0.6 : 1 }}
+              >
                 {loading ? "Verifying..." : "Verify Code"}
               </button>
+            </div>
+          </div>
+
+          {/* RIGHT INFO PANEL */}
+          <div style={{
+            width: "55%",
+            padding: "40px",
+            color: "white",
+            background: "linear-gradient(135deg, #0f1c2f, #1f4b7a)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center"
+          }}>
+            <h2 style={{ fontSize: "26px", marginBottom: "30px" }}>Mobile Verification Steps</h2>
+
+            <div style={{ display: "flex", marginBottom: "24px", alignItems: "flex-start" }}>
+              <div style={{ width: "16px", height: "16px", background: "#6c6cff", borderRadius: "50%", marginRight: "16px", marginTop: "6px" }} />
+              <div>
+                <div style={{ background: "#6c6cff", display: "inline-block", padding: "4px 10px", borderRadius: "6px", fontSize: "12px", marginBottom: "6px" }}>
+                  STEP 1
+                </div>
+                <div>Enter your email above and select your user role</div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex" }}>
+              <div style={{ width: "16px", height: "16px", background: "#6c6cff", borderRadius: "50%", marginRight: "16px", marginTop: "6px" }} />
+              <div>
+                <div style={{ background: "#6c6cff", display: "inline-block", padding: "4px 10px", borderRadius: "6px", fontSize: "12px", marginBottom: "6px" }}>
+                  STEP 2
+                </div>
+                <div>Check your email for a 6-digit code and enter it to verify.</div>
+              </div>
             </div>
           </div>
         </div>
