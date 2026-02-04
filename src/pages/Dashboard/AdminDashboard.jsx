@@ -192,6 +192,8 @@ const AdminDashboard = () => {
     return {
       ...y,
       totalPoints,
+      individualPoints,
+      groupPoints,
       totalGold,
       totalSilver,
       totalBronze,
@@ -202,6 +204,9 @@ const AdminDashboard = () => {
   const topYears = [...medalData]
     .sort((a, b) => b.totalPoints - a.totalPoints)
     .slice(0, 5);
+  const maxIndividualPoints = medalData.reduce((m, i) => Math.max(m, i.individualPoints || 0), 0);
+  const maxGroupPoints = medalData.reduce((m, i) => Math.max(m, i.groupPoints || 0), 0);
+  const maxTotalPoints = medalData.reduce((m, i) => Math.max(m, i.totalPoints || 0), 0);
 
   // Scroll to visitor charts
   const scrollToVisitors = () => {
@@ -326,6 +331,41 @@ const AdminDashboard = () => {
               <p style={{ margin: "6px 0 0", fontSize: "12px", color: "#8a8a8a" }}>
                 Weights: Individual 5/3/1 • Group 10/7/4
               </p>
+              <div className="stats-breakdown">
+                <div className="stats-mini">
+                  <div
+                    className="stats-mini-ring"
+                    style={{
+                      background: `conic-gradient(#2563eb 0 ${(item.individualPoints / (maxIndividualPoints || 1)) * 100}%, #e5e7eb ${(item.individualPoints / (maxIndividualPoints || 1)) * 100}% 100%)`,
+                    }}
+                  >
+                    <span>{item.individualPoints}</span>
+                  </div>
+                  <div className="stats-mini-label">Individual</div>
+                </div>
+                <div className="stats-mini">
+                  <div
+                    className="stats-mini-ring"
+                    style={{
+                      background: `conic-gradient(#16a34a 0 ${(item.groupPoints / (maxGroupPoints || 1)) * 100}%, #e5e7eb ${(item.groupPoints / (maxGroupPoints || 1)) * 100}% 100%)`,
+                    }}
+                  >
+                    <span>{item.groupPoints}</span>
+                  </div>
+                  <div className="stats-mini-label">Group</div>
+                </div>
+                <div className="stats-mini">
+                  <div
+                    className="stats-mini-ring"
+                    style={{
+                      background: `conic-gradient(#f97316 0 ${(item.totalPoints / (maxTotalPoints || 1)) * 100}%, #e5e7eb ${(item.totalPoints / (maxTotalPoints || 1)) * 100}% 100%)`,
+                    }}
+                  >
+                    <span>{item.totalPoints}</span>
+                  </div>
+                  <div className="stats-mini-label">Total</div>
+                </div>
+              </div>
             </div>
           ))}
           </div>
