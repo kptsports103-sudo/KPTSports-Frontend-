@@ -227,153 +227,160 @@ const AdminDashboard = () => {
 
   return (
     <AdminLayout>
-      <div className="dashboard-title">Admin Dashboard</div>
-      <div className="dashboard-subtitle">System Overview & Analytics</div>
+      {/* Improved layout wrapper for consistent spacing and readability */}
+      <div className="admin-dashboard">
+        <div className="dashboard-title">Admin Dashboard</div>
+        <div className="dashboard-subtitle">System Overview & Analytics</div>
 
-      {/* SYSTEM OVERVIEW */}
-      <div className="stats-grid">
-        {stats.map((stat, index) => {
-          const Card = (
-            <div 
-              className="stat-card" 
-              style={{ 
-                cursor: (stat.link || stat.action) ? "pointer" : "default",
-                transition: "transform 0.2s, box-shadow 0.2s"
-              }}
-              onClick={stat.action === "scrollToVisitors" ? scrollToVisitors : undefined}
-              onMouseEnter={(e) => {
-                if (stat.link || stat.action) {
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (stat.link || stat.action) {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
-                }
-              }}
-            >
-              <div style={{ fontSize: "32px", marginBottom: "10px" }}>{stat.icon}</div>
-              <h3>{stat.value}</h3>
-              <p>{stat.title}</p>
-            </div>
-          );
-
-          return stat.link ? (
-            <Link key={index} to={stat.link} style={{ textDecoration: "none", color: "inherit" }}>
-              {Card}
-            </Link>
-          ) : (
-            <div key={index}>{Card}</div>
-          );
-        })}
-      </div>
-
-
-      {/* ANALYTICS */}
-      <div
-        id="visitor-charts"
-        style={{
-          backgroundColor: "#ffffff",
-          borderRadius: "12px",
-          padding: "20px",
-          marginBottom: "40px",
-          color: "#000"
-        }}
-      >
-        <div style={{ padding: "30px" }}>
-          <h1 style={{ marginBottom: "30px", color: "#1f4e79" }}>
-            Admin Dashboard
-          </h1>
-
-          {/* Daily Visitors Chart */}
-          <DailyVisitorsChart />
-
-          {/* Daily vs Total Visitors Comparison */}
-          <VisitorsComparisonChart />
-
-          {/* =====================
-              STATS CARDS
-          ====================== */}
-          <h2 style={{ marginBottom: "15px" }}>📊 Quick Stats</h2>
-          
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: "25px",
-            marginBottom: "40px"
-          }}>
-            {medalData.length === 0 ? (
-              <div className="iam-empty">No results yet to calculate points.</div>
-            ) : medalData.map((item) => (
-            <div
-              key={item.year}
-              className="stats-card-animated"
-            >
-              <div
-                className="stats-circle-animated"
-                style={{
-                  background: `conic-gradient(
-                    #f1c40f 0 ${(item.totalGold / (item.totalMedals || 1)) * 100}%,
-                    #bdc3c7 ${(item.totalGold / (item.totalMedals || 1)) * 100}% ${((item.totalGold + item.totalSilver) / (item.totalMedals || 1)) * 100}%,
-                    #cd7f32 ${((item.totalGold + item.totalSilver) / (item.totalMedals || 1)) * 100}% 100%
-                  )`,
+        {/* SYSTEM OVERVIEW */}
+        <div className="section-header">
+          <div className="section-title">🧭 System Overview</div>
+          <div className="section-subtitle">Key operational totals at a glance</div>
+        </div>
+        <div className="stats-grid">
+          {stats.map((stat, index) => {
+            const Card = (
+              <div 
+                className="stat-card" 
+                style={{ 
+                  cursor: (stat.link || stat.action) ? "pointer" : "default",
+                  transition: "transform 0.2s, box-shadow 0.2s"
+                }}
+                onClick={stat.action === "scrollToVisitors" ? scrollToVisitors : undefined}
+                onMouseEnter={(e) => {
+                  if (stat.link || stat.action) {
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (stat.link || stat.action) {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
+                  }
                 }}
               >
-                {item.totalPoints}
+                <div className="stat-icon">{stat.icon}</div>
+                <h3>{stat.value}</h3>
+                <p>{stat.title}</p>
               </div>
+            );
 
-              <h2 style={{ marginBottom: "5px" }}>{item.year}</h2>
-              <p style={{ margin: 0, fontSize: "14px", color: "#555" }}>
-                Total Points (Individual + Group)
-              </p>
-              <p style={{ margin: "6px 0 0", fontSize: "12px", color: "#8a8a8a" }}>
-                Weights: Individual 5/3/1 • Group 10/7/4
-              </p>
-              <div className="stats-breakdown">
-                <div className="stats-mini">
-                  <div
-                    className="stats-mini-ring"
-                    style={{
-                      background: `conic-gradient(#2563eb 0 ${(item.individualPoints / (maxIndividualPoints || 1)) * 100}%, #e5e7eb ${(item.individualPoints / (maxIndividualPoints || 1)) * 100}% 100%)`,
-                    }}
-                  >
-                    <span>{item.individualPoints}</span>
-                  </div>
-                  <div className="stats-mini-label">Individual</div>
-                </div>
-                <div className="stats-mini">
-                  <div
-                    className="stats-mini-ring"
-                    style={{
-                      background: `conic-gradient(#16a34a 0 ${(item.groupPoints / (maxGroupPoints || 1)) * 100}%, #e5e7eb ${(item.groupPoints / (maxGroupPoints || 1)) * 100}% 100%)`,
-                    }}
-                  >
-                    <span>{item.groupPoints}</span>
-                  </div>
-                  <div className="stats-mini-label">Group</div>
-                </div>
-                <div className="stats-mini">
-                  <div
-                    className="stats-mini-ring"
-                    style={{
-                      background: `conic-gradient(#f97316 0 ${(item.totalPoints / (maxTotalPoints || 1)) * 100}%, #e5e7eb ${(item.totalPoints / (maxTotalPoints || 1)) * 100}% 100%)`,
-                    }}
-                  >
-                    <span>{item.totalPoints}</span>
-                  </div>
-                  <div className="stats-mini-label">Total</div>
-                </div>
-              </div>
+            return stat.link ? (
+              <Link key={index} to={stat.link} style={{ textDecoration: "none", color: "inherit" }}>
+                {Card}
+              </Link>
+            ) : (
+              <div key={index}>{Card}</div>
+            );
+          })}
+        </div>
+
+
+        {/* ANALYTICS */}
+        <div
+          id="visitor-charts"
+          className="dashboard-panel"
+        >
+          <div className="panel-inner">
+            <div className="section-header">
+              <div className="section-title">📈 Analytics</div>
+              <div className="section-subtitle">Trends, performance, and engagement</div>
             </div>
-          ))}
-          </div>
+
+            {/* Daily Visitors Chart */}
+            <DailyVisitorsChart />
+
+            {/* Daily vs Total Visitors Comparison */}
+            <VisitorsComparisonChart />
+
+            {/* =====================
+                STATS CARDS
+            ====================== */}
+            <div className="section-header compact">
+              <div className="section-title">📊 Quick Stats</div>
+              <div className="section-subtitle">Points by year (Individual + Group)</div>
+            </div>
+          
+            <div className="quick-stats-grid">
+              {medalData.length === 0 ? (
+                <div className="iam-empty">No results yet to calculate points.</div>
+              ) : medalData.map((item) => (
+              <div
+                key={item.year}
+                className="stats-card-animated"
+                title={`Year ${item.year}: Total ${item.totalPoints} points`}
+              >
+                <div className="stats-card-header">
+                  <div className="stats-year">{item.year}</div>
+                  <div className="stats-total">
+                    <span className="stats-total-value">{item.totalPoints}</span>
+                    <span className="stats-total-label">Total Points</span>
+                  </div>
+                </div>
+                <div className="stats-circle-animated"
+                  style={{
+                    background: `conic-gradient(
+                      #f1c40f 0 ${(item.totalGold / (item.totalMedals || 1)) * 100}%,
+                      #bdc3c7 ${(item.totalGold / (item.totalMedals || 1)) * 100}% ${((item.totalGold + item.totalSilver) / (item.totalMedals || 1)) * 100}%,
+                      #cd7f32 ${((item.totalGold + item.totalSilver) / (item.totalMedals || 1)) * 100}% 100%
+                    )`,
+                  }}
+                >
+                  {item.totalPoints}
+                </div>
+                <div className="stats-legend">
+                  <span className="legend-dot gold" /> Gold
+                  <span className="legend-dot silver" /> Silver
+                  <span className="legend-dot bronze" /> Bronze
+                </div>
+                <div className="stats-breakdown">
+                  <div className="stats-mini" title="Individual points">
+                    <div
+                      className="stats-mini-ring"
+                      style={{
+                        background: `conic-gradient(#2563eb 0 ${(item.individualPoints / (maxIndividualPoints || 1)) * 100}%, #e5e7eb ${(item.individualPoints / (maxIndividualPoints || 1)) * 100}% 100%)`,
+                      }}
+                    >
+                      <span>{item.individualPoints}</span>
+                    </div>
+                    <div className="stats-mini-label">Individual</div>
+                  </div>
+                  <div className="stats-mini" title="Group points">
+                    <div
+                      className="stats-mini-ring"
+                      style={{
+                        background: `conic-gradient(#16a34a 0 ${(item.groupPoints / (maxGroupPoints || 1)) * 100}%, #e5e7eb ${(item.groupPoints / (maxGroupPoints || 1)) * 100}% 100%)`,
+                      }}
+                    >
+                      <span>{item.groupPoints}</span>
+                    </div>
+                    <div className="stats-mini-label">Group</div>
+                  </div>
+                  <div className="stats-mini" title="Total points">
+                    <div
+                      className="stats-mini-ring"
+                      style={{
+                        background: `conic-gradient(#f97316 0 ${(item.totalPoints / (maxTotalPoints || 1)) * 100}%, #e5e7eb ${(item.totalPoints / (maxTotalPoints || 1)) * 100}% 100%)`,
+                      }}
+                    >
+                      <span>{item.totalPoints}</span>
+                    </div>
+                    <div className="stats-mini-label">Total</div>
+                  </div>
+                </div>
+                <div className="stats-note">Weights: Individual 5/3/1 • Group 10/7/4</div>
+              </div>
+            ))}
+            </div>
 
           {/* =====================
               TOP YEARS
           ====================== */}
-          <h2 style={{ marginBottom: "15px" }}>🏆 Best Performing Years</h2>
+          <div className="section-header compact">
+            <div className="section-title">🏆 Best Performing Years</div>
+            <div className="section-subtitle">Top 5 years by medal points</div>
+          </div>
 
           <div style={{ display: "flex", gap: "20px", marginBottom: "50px", flexWrap: "wrap" }}>
           {topYears.length === 0 ? (
@@ -395,8 +402,11 @@ const AdminDashboard = () => {
         {/* =====================
             CERTIFICATE DOWNLOADS
         ====================== */}
-        <h2 style={{ marginBottom: "15px" }}>🏅 Certificates</h2>
-        <div style={{ background: "#fff", borderRadius: "12px", padding: "20px" }}>
+        <div className="section-header compact">
+          <div className="section-title">🏅 Certificates</div>
+          <div className="section-subtitle">Generate and download student certificates</div>
+        </div>
+        <div className="table-card">
           {certificateRows.length === 0 ? (
             <div className="iam-empty">No student records available for certificates.</div>
           ) : (
