@@ -9,21 +9,34 @@ import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonCh
 import { jsPDF } from "jspdf";
 
 /* =====================
-   YEAR DATA (ONLY 2024 & 2025)
+   YEAR MEDAL DATA (UPDATE WITH REAL COUNTS)
 ====================== */
 const yearlyMedals = [
   {
+    year: 2021,
+    individual: { gold: 12, silver: 8, bronze: 10 },
+    group: { gold: 4, silver: 2, bronze: 3 },
+  },
+  {
+    year: 2022,
+    individual: { gold: 18, silver: 14, bronze: 16 },
+    group: { gold: 6, silver: 5, bronze: 4 },
+  },
+  {
+    year: 2023,
+    individual: { gold: 20, silver: 16, bronze: 14 },
+    group: { gold: 7, silver: 6, bronze: 5 },
+  },
+  {
     year: 2024,
-    gold: 52,   // Overall champion points converted to medal weight (example)
-    silver: 0,
-    bronze: 0
+    individual: { gold: 24, silver: 18, bronze: 20 },
+    group: { gold: 9, silver: 7, bronze: 6 },
   },
   {
     year: 2025,
-    gold: 4,
-    silver: 0,
-    bronze: 1
-  }
+    individual: { gold: 10, silver: 6, bronze: 8 },
+    group: { gold: 3, silver: 2, bronze: 2 },
+  },
 ];
 
 const AdminDashboard = () => {
@@ -138,12 +151,29 @@ const AdminDashboard = () => {
     }
   };
 
-  const medalData = yearlyMedals.map((y) => ({
-    ...y,
-    total: y.gold + y.silver + y.bronze
-  }));
+  const medalData = yearlyMedals.map((y) => {
+    const individualPoints =
+      y.individual.gold * 5 + y.individual.silver * 3 + y.individual.bronze * 1;
+    const groupPoints =
+      y.group.gold * 10 + y.group.silver * 7 + y.group.bronze * 4;
+    const totalPoints = individualPoints + groupPoints;
+    const totalGold = y.individual.gold + y.group.gold;
+    const totalSilver = y.individual.silver + y.group.silver;
+    const totalBronze = y.individual.bronze + y.group.bronze;
+    const totalMedals = totalGold + totalSilver + totalBronze;
+    return {
+      ...y,
+      totalPoints,
+      totalGold,
+      totalSilver,
+      totalBronze,
+      totalMedals,
+    };
+  });
 
-  const topYears = [...medalData].sort((a, b) => b.total - a.total);
+  const topYears = [...medalData]
+    .sort((a, b) => b.totalPoints - a.totalPoints)
+    .slice(0, 5);
 
   // Scroll to visitor charts
   const scrollToVisitors = () => {
@@ -244,38 +274,27 @@ const AdminDashboard = () => {
             {medalData.map((item) => (
             <div
               key={item.year}
-              style={{
-                backgroundColor: "#ffffff",
-                color: "#000",
-                borderRadius: "12px",
-                padding: "25px",
-                textAlign: "center"
-              }}
+              className="stats-card-animated"
             >
               <div
+                className="stats-circle-animated"
                 style={{
-                  width: "130px",
-                  height: "130px",
-                  borderRadius: "50%",
-                  margin: "0 auto 15px",
                   background: `conic-gradient(
-                    #f1c40f 0 ${(item.gold / item.total) * 100}%,
-                    #bdc3c7 ${(item.gold / item.total) * 100}% ${((item.gold + item.silver) / item.total) * 100}%,
-                    #cd7f32 ${((item.gold + item.silver) / item.total) * 100}% 100%
+                    #f1c40f 0 ${(item.totalGold / (item.totalMedals || 1)) * 100}%,
+                    #bdc3c7 ${(item.totalGold / (item.totalMedals || 1)) * 100}% ${((item.totalGold + item.totalSilver) / (item.totalMedals || 1)) * 100}%,
+                    #cd7f32 ${((item.totalGold + item.totalSilver) / (item.totalMedals || 1)) * 100}% 100%
                   )`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: "700",
-                  fontSize: "22px"
                 }}
               >
-                {item.total}
+                {item.totalPoints}
               </div>
 
               <h2 style={{ marginBottom: "5px" }}>{item.year}</h2>
               <p style={{ margin: 0, fontSize: "14px", color: "#555" }}>
-                Total Medals / Points
+                Total Points (Individual + Group)
+              </p>
+              <p style={{ margin: "6px 0 0", fontSize: "12px", color: "#8a8a8a" }}>
+                Weights: Individual 5/3/1 • Group 10/7/4
               </p>
             </div>
           ))}
@@ -286,24 +305,17 @@ const AdminDashboard = () => {
           ====================== */}
           <h2 style={{ marginBottom: "15px" }}>🏆 Best Performing Years</h2>
 
-          <div style={{ display: "flex", gap: "20px", marginBottom: "50px" }}>
+          <div style={{ display: "flex", gap: "20px", marginBottom: "50px", flexWrap: "wrap" }}>
           {topYears.map((year, index) => (
             <div
               key={year.year}
-              style={{
-                flex: 1,
-                backgroundColor: "#ffffff",
-                color: "#000",
-                borderRadius: "12px",
-                padding: "30px",
-                textAlign: "center"
-              }}
+              className="top-year-card-animated"
             >
               <h1 style={{ margin: 0 }}>
                 {index === 0 ? "🥇" : "🥈"}
               </h1>
               <h2 style={{ margin: "10px 0" }}>{year.year}</h2>
-              <h3 style={{ margin: 0 }}>{year.total} Total</h3>
+              <h3 style={{ margin: 0 }}>{year.totalPoints} Points</h3>
             </div>
           ))}
         </div>
