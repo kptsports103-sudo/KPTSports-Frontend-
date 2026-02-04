@@ -7,43 +7,22 @@ import { IAMService } from "../../services/iam.service";
 import DailyVisitorsChart from "../../admin/components/DailyVisitorsChart";
 import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonChart";
 import { jsPDF } from "jspdf";
+import api from "../../services/api";
 
-/* =====================
-   YEAR MEDAL DATA (UPDATE WITH REAL COUNTS)
-====================== */
-const yearlyMedals = [
-  {
-    year: 2021,
-    individual: { gold: 12, silver: 8, bronze: 10 },
-    group: { gold: 4, silver: 2, bronze: 3 },
-  },
-  {
-    year: 2022,
-    individual: { gold: 18, silver: 14, bronze: 16 },
-    group: { gold: 6, silver: 5, bronze: 4 },
-  },
-  {
-    year: 2023,
-    individual: { gold: 20, silver: 16, bronze: 14 },
-    group: { gold: 7, silver: 6, bronze: 5 },
-  },
-  {
-    year: 2024,
-    individual: { gold: 24, silver: 18, bronze: 20 },
-    group: { gold: 9, silver: 7, bronze: 6 },
-  },
-  {
-    year: 2025,
-    individual: { gold: 10, silver: 6, bronze: 8 },
-    group: { gold: 3, silver: 2, bronze: 2 },
-  },
-];
+const normalizeMedalKey = (medal = "") => {
+  const value = medal.trim().toLowerCase();
+  if (value === "gold") return "gold";
+  if (value === "silver") return "silver";
+  if (value === "bronze") return "bronze";
+  return null;
+};
 
 const AdminDashboard = () => {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalMedia, setTotalMedia] = useState(0);
   const [certificateRows, setCertificateRows] = useState([]);
   const [isGeneratingId, setIsGeneratingId] = useState(null);
+  const [yearlyStats, setYearlyStats] = useState([]);
 
   useEffect(() => {
     const fetchUserCount = async () => {
@@ -77,6 +56,55 @@ const AdminDashboard = () => {
 
     fetchUserCount();
     loadMediaCount();
+  }, []);
+
+  useEffect(() => {
+    const fetchYearlyStats = async () => {
+      try {
+        const [resultsRes, groupRes] = await Promise.all([
+          api.get("/results"),
+          api.get("/group-results"),
+        ]);
+
+        const statsMap = new Map();
+        const ensureYear = (year) => {
+          if (!statsMap.has(year)) {
+            statsMap.set(year, {
+              year,
+              individual: { gold: 0, silver: 0, bronze: 0 },
+              group: { gold: 0, silver: 0, bronze: 0 },
+            });
+          }
+          return statsMap.get(year);
+        };
+
+        (resultsRes.data || []).forEach((item) => {
+          const year = Number(item.year);
+          if (!year) return;
+          const medalKey = normalizeMedalKey(item.medal);
+          if (!medalKey) return;
+          const entry = ensureYear(year);
+          entry.individual[medalKey] += 1;
+        });
+
+        (groupRes.data || []).forEach((item) => {
+          const year = Number(item.year);
+          if (!year) return;
+          const medalKey = normalizeMedalKey(item.medal);
+          if (!medalKey) return;
+          const entry = ensureYear(year);
+          entry.group[medalKey] += 1;
+        });
+
+        const stats = Array.from(statsMap.values()).sort((a, b) => b.year - a.year);
+        setYearlyStats(stats);
+      } catch (error) {
+        console.error("Failed to load yearly stats:", error);
+        setYearlyStats([]);
+      }
+    };
+
+    fetchYearlyStats();
   }, []);
 
   const loadImage = (src) =>
@@ -151,7 +179,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const medalData = yearlyMedals.map((y) => {
+  const medalData = yearlyStats.map((y) => {
     const individualPoints =
       y.individual.gold * 5 + y.individual.silver * 3 + y.individual.bronze * 1;
     const groupPoints =
@@ -271,7 +299,9 @@ const AdminDashboard = () => {
             gap: "25px",
             marginBottom: "40px"
           }}>
-            {medalData.map((item) => (
+            {medalData.length === 0 ? (
+              <div className="iam-empty">No results yet to calculate points.</div>
+            ) : medalData.map((item) => (
             <div
               key={item.year}
               className="stats-card-animated"
@@ -306,7 +336,9 @@ const AdminDashboard = () => {
           <h2 style={{ marginBottom: "15px" }}>🏆 Best Performing Years</h2>
 
           <div style={{ display: "flex", gap: "20px", marginBottom: "50px", flexWrap: "wrap" }}>
-          {topYears.map((year, index) => (
+          {topYears.length === 0 ? (
+            <div className="iam-empty">No results yet to rank top years.</div>
+          ) : topYears.map((year, index) => (
             <div
               key={year.year}
               className="top-year-card-animated"
