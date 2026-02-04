@@ -348,6 +348,27 @@
   color: #6b7280;
 }
 
+.download-btn {
+  background: #1d4ed8;
+  color: #ffffff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.download-btn:hover {
+  background: #1e40af;
+}
+
+.download-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 
 @media (max-width: 768px) {
   .sidebar {
