@@ -445,7 +445,7 @@
 
 .stats-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 10px;
 }
@@ -475,11 +475,12 @@
 
 .stats-legend {
   display: flex;
+  align-items: center;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 14px;
   font-size: 12px;
   color: var(--text-muted);
-  margin-top: 6px;
+  margin: 10px 0 14px;
 }
 
 .legend-dot {
@@ -520,7 +521,7 @@
 
 .stats-breakdown {
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 18px;
   margin-top: 16px;
 }
