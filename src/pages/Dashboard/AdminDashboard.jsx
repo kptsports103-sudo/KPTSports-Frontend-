@@ -232,11 +232,11 @@ const AdminDashboard = () => {
 
   // Dynamic stats with real user count
   const stats = [
-    { title: "Total Users", value: totalUsers, icon: "ðŸ‘¤", link: "/admin/users-manage" },
-    { title: "Update Pages", value: "Manage", icon: "ðŸ“„", link: "/admin/update-pages" },
-    { title: "Media Files", value: totalMedia, icon: "ðŸ–¼ï¸", link: "/admin/media-stats" },
-    { title: "Visitors", value: "Analytics", icon: "ðŸ“Š", action: "scrollToVisitors" },
-    { title: "IAM Users", value: "Manage", icon: "ðŸ”", link: "/admin/iam/users" },
+    { title: "Total Users", value: totalUsers, icon: "👤", link: "/admin/users-manage" },
+    { title: "Update Pages", value: "Manage", icon: "📄", link: "/admin/update-pages" },
+    { title: "Media Files", value: totalMedia, icon: "🖼️", link: "/admin/media-stats" },
+    { title: "Visitors", value: "Analytics", icon: "📊", action: "scrollToVisitors" },
+    { title: "IAM Users", value: "Manage", icon: "🔐", link: "/admin/iam/users" },
   ];
 
   return (
@@ -248,7 +248,7 @@ const AdminDashboard = () => {
 
         {/* SYSTEM OVERVIEW */}
         <div className="section-header">
-          <div className="section-title">ðŸ§­ System Overview</div>
+          <div className="section-title">🧭 System Overview</div>
           <div className="section-subtitle">Key operational totals at a glance</div>
         </div>
         <div className="stats-grid">
@@ -298,7 +298,7 @@ const AdminDashboard = () => {
         >
           <div className="panel-inner">
             <div className="section-header">
-              <div className="section-title">ðŸ“ˆ Analytics</div>
+              <div className="section-title">📈 Analytics</div>
               <div className="section-subtitle">Trends, performance, and engagement</div>
             </div>
 
@@ -338,9 +338,7 @@ const AdminDashboard = () => {
             {medalData.length === 0 ? (
               <div className="iam-empty">No results yet to calculate points.</div>
             ) : (
-            <div className="quick-stats-wrapper">
-              {/* LEFT BIG CARD - Main Stats */}
-              <div className="quick-stats-main">
+              <div className="stats-main-card">
                 <div className="stats-left">
                   <div
                     className="stats-circle-animated"
@@ -361,12 +359,10 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                <div className="stats-right">
-                  <h2 className="stats-right-title">Total Points</h2>
-                  <h1 className="stats-right-year">{selectedStats?.year || "-"}</h1>
-                  <p className="stats-right-subtitle">Total Points (Individual + Group)</p>
-                  <p className="stats-note">Weights: Individual 5/3/1 • Group 10/7/4</p>
-
+                <div className="stats-center">
+                  <h3 className="stats-center-title">Total Points</h3>
+                  <h2 className="stats-center-year">{selectedStats?.year || "-"}</h2>
+                  <p className="stats-center-subtitle">Total Points (Individual + Group)</p>
                   <div className="stats-breakdown">
                     <div className="stats-mini">
                       <div
@@ -402,24 +398,22 @@ const AdminDashboard = () => {
                       <span className="stats-mini-label">Total</span>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* RIGHT SIDE STACK */}
-              <div className="quick-stats-side">
-                <div className="side-card">
-                  <h3>ðŸ† Best Performing Years</h3>
-                  <h2>{topYears[0]?.year || '-'}</h2>
-                  <p>{topYears[0]?.totalPoints || 0} Points</p>
+                  <div className="stats-note">Weights: Individual 5/3/1 • Group 10/7/4</div>
                 </div>
 
-                <div className="side-card">
-                  <h3>ðŸŽ– Certificates</h3>
-                  <h2>{certificateRows.length}</h2>
-                  <p>Total Certificates</p>
+                <div className="stats-right-cards">
+                  <div className="small-card">
+                    <h4>🏆 Best Performing Years</h4>
+                    <h2>{topYears[0]?.year || "-"}</h2>
+                    <p>{topYears[0]?.totalPoints || 0} Points</p>
+                  </div>
+                  <div className="small-card">
+                    <h4>🎖 Certificates</h4>
+                    <h2>{certificateRows.length}</h2>
+                    <p>Total Certificates</p>
+                  </div>
                 </div>
               </div>
-            </div>
             )}
 
           {/* =====================
@@ -439,7 +433,7 @@ const AdminDashboard = () => {
               className="top-year-card-animated"
             >
               <h1 style={{ margin: 0 }}>
-                {index === 0 ? "ðŸ¥‡" : "ðŸ¥ˆ"}
+                {index === 0 ? "🥇" : "🥈"}
               </h1>
               <h2 style={{ margin: "10px 0" }}>{year.year}</h2>
               <h3 style={{ margin: 0 }}>{year.totalPoints} Points</h3>
