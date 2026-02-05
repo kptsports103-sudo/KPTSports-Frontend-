@@ -1,4 +1,4 @@
-
+﻿
 
 import { Link } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
@@ -23,6 +23,7 @@ const AdminDashboard = () => {
   const [certificateRows, setCertificateRows] = useState([]);
   const [isGeneratingId, setIsGeneratingId] = useState(null);
   const [yearlyStats, setYearlyStats] = useState([]);
+  const [selectedYear, setSelectedYear] = useState("");
 
   useEffect(() => {
     const fetchUserCount = async () => {
@@ -208,6 +209,19 @@ const AdminDashboard = () => {
   const maxGroupPoints = medalData.reduce((m, i) => Math.max(m, i.groupPoints || 0), 0);
   const maxTotalPoints = medalData.reduce((m, i) => Math.max(m, i.totalPoints || 0), 0);
 
+  useEffect(() => {
+    if (medalData.length === 0) {
+      if (selectedYear !== "") setSelectedYear("");
+      return;
+    }
+    const hasYear = medalData.some((m) => String(m.year) === String(selectedYear));
+    if (!hasYear) {
+      setSelectedYear(medalData[0].year);
+    }
+  }, [medalData, selectedYear]);
+
+  const selectedStats = medalData.find((m) => String(m.year) === String(selectedYear)) || medalData[0];
+
   // Scroll to visitor charts
   const scrollToVisitors = () => {
     const element = document.getElementById('visitor-charts');
@@ -218,11 +232,11 @@ const AdminDashboard = () => {
 
   // Dynamic stats with real user count
   const stats = [
-    { title: "Total Users", value: totalUsers, icon: "👤", link: "/admin/users-manage" },
-    { title: "Update Pages", value: "Manage", icon: "📄", link: "/admin/update-pages" },
-    { title: "Media Files", value: totalMedia, icon: "🖼️", link: "/admin/media-stats" },
-    { title: "Visitors", value: "Analytics", icon: "📊", action: "scrollToVisitors" },
-    { title: "IAM Users", value: "Manage", icon: "🔐", link: "/admin/iam/users" },
+    { title: "Total Users", value: totalUsers, icon: "ðŸ‘¤", link: "/admin/users-manage" },
+    { title: "Update Pages", value: "Manage", icon: "ðŸ“„", link: "/admin/update-pages" },
+    { title: "Media Files", value: totalMedia, icon: "ðŸ–¼ï¸", link: "/admin/media-stats" },
+    { title: "Visitors", value: "Analytics", icon: "ðŸ“Š", action: "scrollToVisitors" },
+    { title: "IAM Users", value: "Manage", icon: "ðŸ”", link: "/admin/iam/users" },
   ];
 
   return (
@@ -234,7 +248,7 @@ const AdminDashboard = () => {
 
         {/* SYSTEM OVERVIEW */}
         <div className="section-header">
-          <div className="section-title">🧭 System Overview</div>
+          <div className="section-title">ðŸ§­ System Overview</div>
           <div className="section-subtitle">Key operational totals at a glance</div>
         </div>
         <div className="stats-grid">
@@ -284,7 +298,7 @@ const AdminDashboard = () => {
         >
           <div className="panel-inner">
             <div className="section-header">
-              <div className="section-title">📈 Analytics</div>
+              <div className="section-title">ðŸ“ˆ Analytics</div>
               <div className="section-subtitle">Trends, performance, and engagement</div>
             </div>
 
@@ -299,8 +313,26 @@ const AdminDashboard = () => {
                 LEFT: Main stats card | RIGHT: Two stacked side cards
             ====================== */}
             <div className="section-header compact">
-              <div className="section-title">📊 Quick Stats</div>
-              <div className="section-subtitle">Points by year (Individual + Group)</div>
+              <div className="section-header-left">
+                <div className="section-title">📊 Quick Stats</div>
+                <div className="section-subtitle">Points by year (Individual + Group)</div>
+              </div>
+              <div className="quick-stats-controls">
+                <label className="quick-stats-label" htmlFor="quick-stats-year">Select Year</label>
+                <select
+                  id="quick-stats-year"
+                  className="quick-stats-select"
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  disabled={medalData.length === 0}
+                >
+                  {medalData.map((item) => (
+                    <option key={item.year} value={item.year}>
+                      {item.year}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             
             {medalData.length === 0 ? (
@@ -314,13 +346,13 @@ const AdminDashboard = () => {
                     className="stats-circle-animated"
                     style={{
                       background: `conic-gradient(
-                        #f1c40f 0 ${(medalData[0]?.totalGold / (medalData[0]?.totalMedals || 1)) * 100}%,
-                        #bdc3c7 ${(medalData[0]?.totalGold / (medalData[0]?.totalMedals || 1)) * 100}% ${((medalData[0]?.totalGold + medalData[0]?.totalSilver) / (medalData[0]?.totalMedals || 1)) * 100}%,
-                        #cd7f32 ${((medalData[0]?.totalGold + medalData[0]?.totalSilver) / (medalData[0]?.totalMedals || 1)) * 100}% 100%
+                        #f1c40f 0 ${(selectedStats?.totalGold / (selectedStats?.totalMedals || 1)) * 100}%,
+                        #bdc3c7 ${(selectedStats?.totalGold / (selectedStats?.totalMedals || 1)) * 100}% ${((selectedStats?.totalGold + selectedStats?.totalSilver) / (selectedStats?.totalMedals || 1)) * 100}%,
+                        #cd7f32 ${((selectedStats?.totalGold + selectedStats?.totalSilver) / (selectedStats?.totalMedals || 1)) * 100}% 100%
                       )`,
                     }}
                   >
-                    {medalData[0]?.totalPoints || 0}
+                    {selectedStats?.totalPoints || 0}
                   </div>
                   <div className="stats-legend">
                     <span><span className="legend-dot gold"></span> Gold</span>
@@ -331,19 +363,19 @@ const AdminDashboard = () => {
 
                 <div className="stats-right">
                   <h2 className="stats-right-title">Total Points</h2>
-                  <h1 className="stats-right-year">{medalData[0]?.year || "-"}</h1>
+                  <h1 className="stats-right-year">{selectedStats?.year || "-"}</h1>
                   <p className="stats-right-subtitle">Total Points (Individual + Group)</p>
-                  <p className="stats-note">Weights: Individual 5/3/1 � Group 10/7/4</p>
+                  <p className="stats-note">Weights: Individual 5/3/1 • Group 10/7/4</p>
 
                   <div className="stats-breakdown">
                     <div className="stats-mini">
                       <div
                         className="stats-mini-ring"
                         style={{
-                          background: `conic-gradient(#2563eb 0 ${(medalData[0]?.individualPoints / (maxIndividualPoints || 1)) * 100}%, #e5e7eb ${(medalData[0]?.individualPoints / (maxIndividualPoints || 1)) * 100}% 100%)`,
+                          background: `conic-gradient(#2563eb 0 ${(selectedStats?.individualPoints / (maxIndividualPoints || 1)) * 100}%, #e5e7eb ${(selectedStats?.individualPoints / (maxIndividualPoints || 1)) * 100}% 100%)`,
                         }}
                       >
-                        <span>{medalData[0]?.individualPoints || 0}</span>
+                        <span>{selectedStats?.individualPoints || 0}</span>
                       </div>
                       <span className="stats-mini-label">Individual</span>
                     </div>
@@ -351,10 +383,10 @@ const AdminDashboard = () => {
                       <div
                         className="stats-mini-ring"
                         style={{
-                          background: `conic-gradient(#16a34a 0 ${(medalData[0]?.groupPoints / (maxGroupPoints || 1)) * 100}%, #e5e7eb ${(medalData[0]?.groupPoints / (maxGroupPoints || 1)) * 100}% 100%)`,
+                          background: `conic-gradient(#16a34a 0 ${(selectedStats?.groupPoints / (maxGroupPoints || 1)) * 100}%, #e5e7eb ${(selectedStats?.groupPoints / (maxGroupPoints || 1)) * 100}% 100%)`,
                         }}
                       >
-                        <span>{medalData[0]?.groupPoints || 0}</span>
+                        <span>{selectedStats?.groupPoints || 0}</span>
                       </div>
                       <span className="stats-mini-label">Group</span>
                     </div>
@@ -362,10 +394,10 @@ const AdminDashboard = () => {
                       <div
                         className="stats-mini-ring"
                         style={{
-                          background: `conic-gradient(#f97316 0 ${(medalData[0]?.totalPoints / (maxTotalPoints || 1)) * 100}%, #e5e7eb ${(medalData[0]?.totalPoints / (maxTotalPoints || 1)) * 100}% 100%)`,
+                          background: `conic-gradient(#f97316 0 ${(selectedStats?.totalPoints / (maxTotalPoints || 1)) * 100}%, #e5e7eb ${(selectedStats?.totalPoints / (maxTotalPoints || 1)) * 100}% 100%)`,
                         }}
                       >
-                        <span>{medalData[0]?.totalPoints || 0}</span>
+                        <span>{selectedStats?.totalPoints || 0}</span>
                       </div>
                       <span className="stats-mini-label">Total</span>
                     </div>
@@ -376,13 +408,13 @@ const AdminDashboard = () => {
               {/* RIGHT SIDE STACK */}
               <div className="quick-stats-side">
                 <div className="side-card">
-                  <h3>🏆 Best Performing Years</h3>
+                  <h3>ðŸ† Best Performing Years</h3>
                   <h2>{topYears[0]?.year || '-'}</h2>
                   <p>{topYears[0]?.totalPoints || 0} Points</p>
                 </div>
 
                 <div className="side-card">
-                  <h3>🎖 Certificates</h3>
+                  <h3>ðŸŽ– Certificates</h3>
                   <h2>{certificateRows.length}</h2>
                   <p>Total Certificates</p>
                 </div>
@@ -407,7 +439,7 @@ const AdminDashboard = () => {
               className="top-year-card-animated"
             >
               <h1 style={{ margin: 0 }}>
-                {index === 0 ? "🥇" : "🥈"}
+                {index === 0 ? "ðŸ¥‡" : "ðŸ¥ˆ"}
               </h1>
               <h2 style={{ margin: "10px 0" }}>{year.year}</h2>
               <h3 style={{ margin: 0 }}>{year.totalPoints} Points</h3>
@@ -474,4 +506,10 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+
+
+
+
+
 
