@@ -671,6 +671,7 @@
   padding: 18px;
   box-shadow: var(--card-shadow);
   border: 1px solid var(--card-border);
+  color: var(--text-dark);
 }
 
 /* ================= NEW QUICK STATS WRAPPER LAYOUT ================= */
