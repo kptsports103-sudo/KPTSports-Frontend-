@@ -303,38 +303,70 @@ const AdminDashboard = () => {
               <div className="section-subtitle">Points by year (Individual + Group)</div>
             </div>
             
-            {/* DEBUG: Current structure renders N cards (one per year). Reference shows 1 card with LEFT+RIGHT split */}
-            {console.log('[DEBUG] Current medalData count:', medalData.length, '| Reference expects: 1 wrapper with LEFT+RIGHT split')}
-            
+            {medalData.length === 0 ? (
+              <div className="iam-empty">No results yet to calculate points.</div>
+            ) : (
             <div className="quick-stats-wrapper">
               {/* LEFT BIG CARD - Main Stats */}
               <div className="quick-stats-main">
                 <div className="stats-left">
-                  <div className="stats-circle-animated">{medalData[0]?.totalPoints || 0}</div>
+                  <div
+                    className="stats-circle-animated"
+                    style={{
+                      background: `conic-gradient(
+                        #f1c40f 0 ${(medalData[0]?.totalGold / (medalData[0]?.totalMedals || 1)) * 100}%,
+                        #bdc3c7 ${(medalData[0]?.totalGold / (medalData[0]?.totalMedals || 1)) * 100}% ${((medalData[0]?.totalGold + medalData[0]?.totalSilver) / (medalData[0]?.totalMedals || 1)) * 100}%,
+                        #cd7f32 ${((medalData[0]?.totalGold + medalData[0]?.totalSilver) / (medalData[0]?.totalMedals || 1)) * 100}% 100%
+                      )`,
+                    }}
+                  >
+                    {medalData[0]?.totalPoints || 0}
+                  </div>
                   <div className="stats-legend">
-                    <span><span className="legend-dot gold" /> Gold</span>
-                    <span><span className="legend-dot silver" /> Silver</span>
-                    <span><span className="legend-dot bronze" /> Bronze</span>
+                    <span><span className="legend-dot gold"></span> Gold</span>
+                    <span><span className="legend-dot silver"></span> Silver</span>
+                    <span><span className="legend-dot bronze"></span> Bronze</span>
                   </div>
                 </div>
 
                 <div className="stats-right">
-                  <h2 style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '4px' }}>Total Points</h2>
-                  <h1 style={{ fontSize: '32px', fontWeight: '700', margin: '0 0 8px' }}>{medalData[0]?.year || '-'}</h1>
-                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '4px' }}>Total Points (Individual + Group)</p>
-                  <p className="stats-note">Weights: Individual 5/3/1 Â· Group 10/7/4</p>
+                  <h2 className="stats-right-title">Total Points</h2>
+                  <h1 className="stats-right-year">{medalData[0]?.year || "-"}</h1>
+                  <p className="stats-right-subtitle">Total Points (Individual + Group)</p>
+                  <p className="stats-note">Weights: Individual 5/3/1 • Group 10/7/4</p>
 
                   <div className="stats-breakdown">
                     <div className="stats-mini">
-                      <div className="stats-mini-ring blue">{medalData[0]?.individualPoints || 0}</div>
+                      <div
+                        className="stats-mini-ring"
+                        style={{
+                          background: `conic-gradient(#2563eb 0 ${(medalData[0]?.individualPoints / (maxIndividualPoints || 1)) * 100}%, #e5e7eb ${(medalData[0]?.individualPoints / (maxIndividualPoints || 1)) * 100}% 100%)`,
+                        }}
+                      >
+                        <span>{medalData[0]?.individualPoints || 0}</span>
+                      </div>
                       <span className="stats-mini-label">Individual</span>
                     </div>
                     <div className="stats-mini">
-                      <div className="stats-mini-ring green">{medalData[0]?.groupPoints || 0}</div>
+                      <div
+                        className="stats-mini-ring"
+                        style={{
+                          background: `conic-gradient(#16a34a 0 ${(medalData[0]?.groupPoints / (maxGroupPoints || 1)) * 100}%, #e5e7eb ${(medalData[0]?.groupPoints / (maxGroupPoints || 1)) * 100}% 100%)`,
+                        }}
+                      >
+                        <span>{medalData[0]?.groupPoints || 0}</span>
+                      </div>
                       <span className="stats-mini-label">Group</span>
                     </div>
                     <div className="stats-mini">
-                      <div className="stats-mini-ring orange">{medalData[0]?.totalPoints || 0}</div>
+                      <div
+                        className="stats-mini-ring"
+                        style={{
+                          background: `conic-gradient(#f97316 0 ${(medalData[0]?.totalPoints / (maxTotalPoints || 1)) * 100}%, #e5e7eb ${(medalData[0]?.totalPoints / (maxTotalPoints || 1)) * 100}% 100%)`,
+                        }}
+                      >
+                        <span>{medalData[0]?.totalPoints || 0}</span>
+                      </div>
                       <span className="stats-mini-label">Total</span>
                     </div>
                   </div>
@@ -356,9 +388,7 @@ const AdminDashboard = () => {
                 </div>
               </div>
             </div>
-
-            {/* DEBUG: Old structure (hidden for now) */}
-            {console.log('[DEBUG] Side cards now inside Quick Stats wrapper:', true)}
+            )}
 
           {/* =====================
               TOP YEARS
@@ -444,3 +474,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
