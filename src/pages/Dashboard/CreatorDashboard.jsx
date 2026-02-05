@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import CreatorLayout from "../../components/CreatorLayout";
 import Players from '../../components/Creator/Players';
 import Attendance from '../../components/Creator/Attendance';
+import PerformanceAnalytics from '../../components/Creator/PerformanceAnalytics';
 import CreatorDashboardUI from '../../components/Creator/CreatorDashboard';
 
 const CreatorDashboard = () => {
@@ -27,6 +28,8 @@ const CreatorDashboard = () => {
         return <Players />;
       case 'attendance':
         return <Attendance />;
+      case 'performance':
+        return <PerformanceAnalytics />;
       default:
         return <CreatorDashboardUI onNavigate={handleTabChange} />;
     }
@@ -80,6 +83,7 @@ const CreatorDashboard = () => {
                 { key: 'overview', label: 'Overview' },
                 { key: 'players', label: 'Players' },
                 { key: 'attendance', label: 'Attendance' },
+                { key: 'performance', label: 'Performance Analytics' },
               ].map((tab) => (
                 <button
                   key={tab.key}
