@@ -311,13 +311,7 @@ const AdminDashboard = () => {
                 className="stats-card-animated"
                 title={`Year ${item.year}: Total ${item.totalPoints} points`}
               >
-                <div className="stats-card-header">
-                  <div className="stats-year">{item.year}</div>
-                  <div className="stats-total">
-                    <span className="stats-total-value">{item.totalPoints}</span>
-                    <span className="stats-total-label">Total Points</span>
-                  </div>
-                </div>
+                <div className="stats-left">
                 <div className="stats-circle-animated"
                   style={{
                     background: `conic-gradient(
@@ -330,9 +324,18 @@ const AdminDashboard = () => {
                   {item.totalPoints}
                 </div>
                 <div className="stats-legend">
-                  <span className="legend-dot gold" /> Gold
-                  <span className="legend-dot silver" /> Silver
-                  <span className="legend-dot bronze" /> Bronze
+                  <span><span className="legend-dot gold"></span> Gold</span>
+                  <span><span className="legend-dot silver"></span> Silver</span>
+                  <span><span className="legend-dot bronze"></span> Bronze</span>
+                </div>
+                </div>
+                <div className="stats-right">
+                <div className="stats-card-header">
+                  <div className="stats-year">{item.year}</div>
+                  <div className="stats-total">
+                    <span className="stats-total-value">{item.totalPoints}</span>
+                    <span className="stats-total-label">Total Points</span>
+                  </div>
                 </div>
                 <div className="stats-breakdown">
                   <div className="stats-mini" title="Individual points">
@@ -370,6 +373,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
                 <div className="stats-note">Weights: Individual 5/3/1 • Group 10/7/4</div>
+                </div>
               </div>
             ))}
             </div>

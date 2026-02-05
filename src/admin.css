@@ -531,6 +531,18 @@
   justify-self: start;
 }
 
+.stats-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stats-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .stats-breakdown {
   display: flex;
   justify-content: flex-start;
