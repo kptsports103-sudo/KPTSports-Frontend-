@@ -995,3 +995,36 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+.info-row .points-badge {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.info-row .meets-badge {
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.info-row .total-row {
+  border-top: 2px solid #e5e7eb;
+  margin-top: 8px;
+  padding-top: 14px !important;
+}
+
+.info-row .total-badge {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 15px;
+  font-weight: 700;
+}
