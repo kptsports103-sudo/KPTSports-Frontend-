@@ -450,6 +450,7 @@ const AdminDashboard = () => {
             </table>
           )}
         </div>
+        </div>
       </div>
       </div>
     </AdminLayout>
