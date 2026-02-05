@@ -2,11 +2,28 @@ import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import "../../admin.css";
 
-// Medal points configuration
-const MEDAL_POINTS = {
-  'Gold': 10,
-  'Silver': 7,
-  'Bronze': 5
+// Medal points configuration (aligned with Admin Dashboard)
+const INDIVIDUAL_POINTS = {
+  Gold: 5,
+  Silver: 3,
+  Bronze: 1,
+};
+
+const GROUP_POINTS = {
+  Gold: 10,
+  Silver: 7,
+  Bronze: 4,
+};
+
+// Fuzzy name matching helper
+const normalizeName = (name) => {
+  return name.toLowerCase().trim().replace(/\s+/g, ' ');
+};
+
+const namesMatch = (name1, name2) => {
+  const n1 = normalizeName(name1);
+  const n2 = normalizeName(name2);
+  return n1 === n2;
 };
 
 export default function PerformanceAnalytics() {
@@ -15,6 +32,8 @@ export default function PerformanceAnalytics() {
   const [groupResults, setGroupResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [playerDetails, setPlayerDetails] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,40 +72,63 @@ export default function PerformanceAnalytics() {
         // Group players by name (merge same player across years)
         const playersMap = {};
         allPlayers.forEach(player => {
-          const key = player.name.trim().toLowerCase();
+          const key = normalizeName(player.name);
+          if (!key) return; // Skip empty names
+          
           if (!playersMap[key]) {
             playersMap[key] = {
+              originalName: player.name,
               name: player.name,
               branch: player.branch,
               years: [],
+              yearDetails: {},
               firstYearPoints: 0,
               secondYearPoints: 0,
               thirdYearPoints: 0,
               totalPoints: 0,
-              totalMeets: 0
+              totalMeets: 0,
+              individualResults: [],
+              groupResults: []
             };
           }
           playersMap[key].years.push(player.participationYear);
+          playersMap[key].yearDetails[player.participationYear] = {
+            branch: player.branch,
+            diplomaYear: player.diplomaYear
+          };
         });
         
+        const addPoints = (player, diplomaYear, points) => {
+          if (diplomaYear === "1") player.firstYearPoints += points;
+          if (diplomaYear === "2") player.secondYearPoints += points;
+          if (diplomaYear === "3") player.thirdYearPoints += points;
+        };
+
         // Calculate points for each player
         Object.keys(playersMap).forEach(key => {
           const player = playersMap[key];
           const years = player.years.sort((a, b) => a - b);
-          player.totalMeets = years.length;
+          player.totalMeets = Array.from(new Set(years)).length;
           
           // Individual results points
           results.forEach(result => {
-            if (result.name && result.name.trim().toLowerCase() === key) {
-              const medalPoints = MEDAL_POINTS[result.medal] || 0;
+            if (result.name && namesMatch(result.name, player.originalName)) {
+              const medalPoints = INDIVIDUAL_POINTS[result.medal] || 0;
               const resultYear = parseInt(result.year);
+              const diplomaYear = String(player.yearDetails[resultYear]?.diplomaYear || "");
               
-              if (years.length >= 1 && resultYear === years[0]) {
-                player.firstYearPoints += medalPoints;
-              } else if (years.length >= 2 && resultYear === years[1]) {
-                player.secondYearPoints += medalPoints;
-              } else if (years.length >= 3 && resultYear === years[2]) {
-                player.thirdYearPoints += medalPoints;
+              // Store individual result
+              player.individualResults.push({
+                year: resultYear,
+                event: result.event,
+                medal: result.medal,
+                points: medalPoints,
+                imageUrl: result.imageUrl
+              });
+              
+              // Add points to appropriate year
+              if (diplomaYear) {
+                addPoints(player, diplomaYear, medalPoints);
               }
             }
           });
@@ -95,21 +137,33 @@ export default function PerformanceAnalytics() {
           groupResults.forEach(group => {
             if (group.members && Array.isArray(group.members)) {
               group.members.forEach(member => {
-                if (member && member.trim().toLowerCase() === key) {
-                  const medalPoints = (MEDAL_POINTS[group.medal] || 0) / group.members.length;
+                if (member && namesMatch(member, player.originalName)) {
+                  const medalPoints = (GROUP_POINTS[group.medal] || 0) / group.members.length;
                   const resultYear = parseInt(group.year);
+                  const diplomaYear = String(player.yearDetails[resultYear]?.diplomaYear || "");
                   
-                  if (years.length >= 1 && resultYear === years[0]) {
-                    player.firstYearPoints += medalPoints;
-                  } else if (years.length >= 2 && resultYear === years[1]) {
-                    player.secondYearPoints += medalPoints;
-                  } else if (years.length >= 3 && resultYear === years[2]) {
-                    player.thirdYearPoints += medalPoints;
+                  // Store group result
+                  player.groupResults.push({
+                    year: resultYear,
+                    event: group.event,
+                    medal: group.medal,
+                    points: medalPoints,
+                    teamName: group.teamName,
+                    members: group.members
+                  });
+                  
+                  // Add points to appropriate year
+                  if (diplomaYear) {
+                    addPoints(player, diplomaYear, medalPoints);
                   }
                 }
               });
             }
           });
+          
+          // Sort results by year
+          player.individualResults.sort((a, b) => a.year - b.year);
+          player.groupResults.sort((a, b) => a.year - b.year);
           
           // Round points
           player.firstYearPoints = Math.round(player.firstYearPoints * 100) / 100;
@@ -129,6 +183,16 @@ export default function PerformanceAnalytics() {
     
     fetchData();
   }, []);
+
+  const handlePlayerClick = (player) => {
+    setSelectedPlayer(player);
+    setPlayerDetails(player);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedPlayer(null);
+    setPlayerDetails(null);
+  };
 
   if (loading) {
     return (
@@ -176,7 +240,11 @@ export default function PerformanceAnalytics() {
       ) : (
         <div className="player-grid">
           {players.map((player, index) => (
-            <div key={index} className="player-card">
+            <div 
+              key={index} 
+              className="player-card player-clickable"
+              onClick={() => handlePlayerClick(player)}
+            >
               <div className="player-header">
                 <h2>{player.name}</h2>
                 <span className="dept">{player.branch}</span>
@@ -211,6 +279,107 @@ export default function PerformanceAnalytics() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* PLAYER DETAIL MODAL */}
+      {selectedPlayer && playerDetails && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={handleCloseModal}>×</button>
+            
+            <div className="modal-header">
+              <div className="player-avatar">
+                {playerDetails.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h2>{playerDetails.name}</h2>
+                <p>{playerDetails.branch}</p>
+              </div>
+            </div>
+
+            {playerDetails.individualResults.some(r => r.imageUrl) && (
+              <img
+                src={playerDetails.individualResults.find(r => r.imageUrl)?.imageUrl}
+                alt={playerDetails.name}
+                className="modal-player-image"
+              />
+            )}
+
+            <div className="modal-stats">
+              <div className="modal-stat">
+                <span className="stat-value">{playerDetails.totalPoints}</span>
+                <span className="stat-label">Total Points</span>
+              </div>
+              <div className="modal-stat">
+                <span className="stat-value">{playerDetails.totalMeets}</span>
+                <span className="stat-label">Meets</span>
+              </div>
+            </div>
+
+            <div className="modal-section">
+              <h3>🏅 Individual Results</h3>
+              {playerDetails.individualResults.length === 0 ? (
+                <p className="no-results">No individual results</p>
+              ) : (
+                <div className="results-list">
+                  {playerDetails.individualResults.map((result, idx) => (
+                    <div key={idx} className="result-item">
+                      <div className="result-year">{result.year}</div>
+                      <div className="result-event">{result.event}</div>
+                      <span className={`medal-badge medal-${result.medal.toLowerCase()}`}>
+                        {result.medal}
+                      </span>
+                      <span className="result-points">+{result.points}</span>
+                      {result.imageUrl && (
+                        <a href={result.imageUrl} target="_blank" rel="noreferrer" className="result-image">
+                          📷
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="modal-section">
+              <h3>👥 Group/Team Results</h3>
+              {playerDetails.groupResults.length === 0 ? (
+                <p className="no-results">No group results</p>
+              ) : (
+                <div className="results-list">
+                  {playerDetails.groupResults.map((result, idx) => (
+                    <div key={idx} className="result-item">
+                      <div className="result-year">{result.year}</div>
+                      <div className="result-event">{result.event}</div>
+                      <span className={`medal-badge medal-${result.medal.toLowerCase()}`}>
+                        {result.medal}
+                      </span>
+                      <span className="result-points">+{result.points}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="modal-year-summary">
+              <h3>📊 Year-wise Summary</h3>
+              <div className="year-summary-grid">
+                <div className="year-summary">
+                  <span className="year-label">1st Year</span>
+                  <span className="year-points">{playerDetails.firstYearPoints} pts</span>
+                </div>
+                <div className="year-summary">
+                  <span className="year-label">2nd Year</span>
+                  <span className="year-points">{playerDetails.secondYearPoints} pts</span>
+                </div>
+                <div className="year-summary">
+                  <span className="year-label">3rd Year</span>
+                  <span className="year-points">{playerDetails.thirdYearPoints} pts</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

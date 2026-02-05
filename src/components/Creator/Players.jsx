@@ -120,6 +120,7 @@ const Players = ({ isStudent = false }) => {
 
 
   const addPlayerRow = (year) => {
+    setCurrentPage(1); // Reset to first page when adding new row
     const newData = data.map(d =>
       d.year === year
         ? { ...d, players: [...d.players, { name: '', branch: '', diplomaYear: '1' }] }
@@ -155,6 +156,7 @@ const Players = ({ isStudent = false }) => {
   };
 
   const deleteRow = (year, playerIndex) => {
+    setCurrentPage(1); // Reset to first page when deleting row
     const newData = data.map(d =>
       d.year === year
         ? { ...d, players: d.players.filter((_, i) => i !== playerIndex) }
@@ -453,10 +455,12 @@ const Players = ({ isStudent = false }) => {
 
               <div style={styles.resultCount}>
                 Showing {(() => {
-                  const filteredPlayers = yearData.players.filter(player =>
-                    player.name.toLowerCase().includes(search.toLowerCase()) ||
-                    player.branch.toLowerCase().includes(search.toLowerCase())
-                  );
+                  const filteredPlayers = yearData.players
+                    .map((player, idx) => ({ player, idx }))
+                    .filter(row =>
+                      row.player.name.toLowerCase().includes(search.toLowerCase()) ||
+                      row.player.branch.toLowerCase().includes(search.toLowerCase())
+                    );
                   const totalPages = Math.ceil(filteredPlayers.length / ITEMS_PER_PAGE);
                   const paginatedPlayers = filteredPlayers.slice(
                     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -468,10 +472,12 @@ const Players = ({ isStudent = false }) => {
             </div>
 
             {(() => {
-              const filteredPlayers = yearData.players.filter(player =>
-                player.name.toLowerCase().includes(search.toLowerCase()) ||
-                player.branch.toLowerCase().includes(search.toLowerCase())
-              );
+              const filteredPlayers = yearData.players
+                .map((player, idx) => ({ player, idx }))
+                .filter(row =>
+                  row.player.name.toLowerCase().includes(search.toLowerCase()) ||
+                  row.player.branch.toLowerCase().includes(search.toLowerCase())
+                );
               const totalPages = Math.ceil(filteredPlayers.length / ITEMS_PER_PAGE);
               const paginatedPlayers = filteredPlayers.slice(
                 (currentPage - 1) * ITEMS_PER_PAGE,
@@ -500,11 +506,13 @@ const Players = ({ isStudent = false }) => {
                           </td>
                         </tr>
                       ) : (
-                        paginatedPlayers.map((player, playerIndex) => {
+                        paginatedPlayers.map((row, playerIndex) => {
+                          const player = row.player;
+                          const originalIndex = row.idx;
                           const isEditable = !isStudent && isEditMode;
                           return (
                             <tr
-                              key={playerIndex}
+                              key={originalIndex}
                               style={{
                                 ...styles.bodyRow,
                                 backgroundColor: playerIndex % 2 === 0 ? "#ffffff" : "#f8f9fb",
@@ -521,7 +529,7 @@ const Players = ({ isStudent = false }) => {
                                   name={`player-name-${yearData.year}-${playerIndex}`}
                                   type="text"
                                   value={player.name}
-                                  onChange={(e) => updatePlayer(yearData.year, playerIndex, 'name', e.target.value)}
+                                  onChange={(e) => updatePlayer(yearData.year, originalIndex, 'name', e.target.value)}
                                   readOnly={!isEditable}
                                   style={{ ...styles.input, backgroundColor: !isEditable ? '#f8f9fa' : '#fff' }}
                                   onFocus={(e) => e.target.style.boxShadow = "0 0 0 2px rgba(13,110,253,.25)"}
@@ -535,7 +543,7 @@ const Players = ({ isStudent = false }) => {
                                   name={`player-branch-${yearData.year}-${playerIndex}`}
                                   type="text"
                                   value={player.branch}
-                                  onChange={(e) => updatePlayer(yearData.year, playerIndex, 'branch', e.target.value)}
+                                  onChange={(e) => updatePlayer(yearData.year, originalIndex, 'branch', e.target.value)}
                                   readOnly={!isEditable}
                                   style={{ ...styles.input, backgroundColor: !isEditable ? '#f8f9fa' : '#fff' }}
                                   onFocus={(e) => e.target.style.boxShadow = "0 0 0 2px rgba(13,110,253,.25)"}
@@ -548,7 +556,7 @@ const Players = ({ isStudent = false }) => {
                                   id={`player-diploma-${yearData.year}-${playerIndex}`}
                                   name={`player-diploma-${yearData.year}-${playerIndex}`}
                                   value={player.diplomaYear}
-                                  onChange={(e) => updatePlayer(yearData.year, playerIndex, 'diplomaYear', e.target.value)}
+                                  onChange={(e) => updatePlayer(yearData.year, originalIndex, 'diplomaYear', e.target.value)}
                                   disabled={!isEditable}
                                   style={{ ...styles.select, backgroundColor: !isEditable ? '#f8f9fa' : '#fff' }}
                                   onFocus={(e) => e.target.style.boxShadow = "0 0 0 2px rgba(13,110,253,.25)"}
@@ -564,7 +572,7 @@ const Players = ({ isStudent = false }) => {
                                   {isEditable && (
                                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                       <button
-                                        onClick={() => savePlayerRow(yearData.year, playerIndex)}
+                                        onClick={() => savePlayerRow(yearData.year, originalIndex)}
                                         style={styles.actionBtn}
                                         title="Save Row"
                                       >
@@ -577,7 +585,7 @@ const Players = ({ isStudent = false }) => {
                                       </button>
                                       <button
                                         onClick={() => {
-                                          deleteRow(yearData.year, playerIndex);
+                                          deleteRow(yearData.year, originalIndex);
                                           alert(`Deleted Row ${playerIndex + 1}`);
                                         }}
                                         style={styles.actionBtn}
