@@ -292,13 +292,14 @@ export default function PerformanceAnalytics() {
               border: '2px solid #ddd',
               fontSize: '14px',
               backgroundColor: '#fff',
+              color: '#111827',
               cursor: 'pointer',
               minWidth: '120px'
             }}
           >
-            <option value="all">All Years</option>
+            <option value="all" style={{ color: '#111827' }}>All Years</option>
             {availableYears.map(year => (
-              <option key={year} value={year}>{year}</option>
+              <option key={year} value={year} style={{ color: '#111827' }}>{year}</option>
             ))}
           </select>
         </div>
@@ -319,7 +320,8 @@ export default function PerformanceAnalytics() {
               border: '2px solid #ddd',
               fontSize: '14px',
               width: '250px',
-              outline: 'none'
+              outline: 'none',
+              color: '#111827'
             }}
             onFocus={(e) => e.target.style.borderColor = '#0d6efd'}
             onBlur={(e) => e.target.style.borderColor = '#ddd'}
@@ -327,7 +329,7 @@ export default function PerformanceAnalytics() {
         </div>
         
         {/* Results Count */}
-        <div style={{ display: 'flex', alignItems: 'center', fontSize: '14px', color: '#666' }}>
+        <div style={{ display: 'flex', alignItems: 'center', fontSize: '14px', color: '#111827' }}>
           Showing {players.length} player{players.length !== 1 ? 's' : ''}
         </div>
       </div>

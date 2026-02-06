@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, cloneElement } from 'react';
 import api from '../../services/api';
 import AdminLayout from '../../components/AdminLayout';
 
@@ -406,7 +406,10 @@ const ManageResults = () => {
 
         {/* YEAR SELECT (TOP CENTER like Players) */}
         <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <label htmlFor="manage-results-year" style={{ marginRight: '10px', fontWeight: 500 }}>Select Year:</label>
           <select
+            id="manage-results-year"
+            name="manage-results-year"
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
             style={styles.yearSelect}
@@ -457,7 +460,10 @@ const ManageResults = () => {
               <h3 style={styles.yearTitle}>Year: {yearBlock.year}</h3>
 
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                <label htmlFor="manage-results-search" style={{ display: 'none' }}>Search by Name or Event</label>
                 <input
+                  id="manage-results-search"
+                  name="manage-results-search"
                   type="text"
                   placeholder="Search by Name or Event"
                   value={searchTerm}
@@ -645,7 +651,7 @@ const ManageResults = () => {
             )}
             <table style={styles.table}>
               <tbody>
-                <Field label="Player">
+                <Field label="Player" htmlFor="result-player">
                   <select
                     style={styles.select}
                     value={form.playerId}
@@ -669,7 +675,7 @@ const ManageResults = () => {
                   </select>
                 </Field>
 
-                <Field label="Name (manual)">
+                <Field label="Name (manual)" htmlFor="result-name">
                   <input
                     style={styles.input}
                     value={form.name}
@@ -679,7 +685,7 @@ const ManageResults = () => {
                   />
                 </Field>
 
-                <Field label="Event">
+                <Field label="Event" htmlFor="result-event">
                   <input
                     style={styles.input}
                     value={form.event}
@@ -688,7 +694,7 @@ const ManageResults = () => {
                   />
                 </Field>
 
-                <Field label="Year">
+                <Field label="Year" htmlFor="result-year">
                   <input
                     type="number"
                     style={styles.input}
@@ -698,7 +704,7 @@ const ManageResults = () => {
                   />
                 </Field>
 
-                <Field label="Diploma Year">
+                <Field label="Diploma Year" htmlFor="result-diploma">
                   <select
                     style={styles.select}
                     value={form.diplomaYear}
@@ -711,7 +717,7 @@ const ManageResults = () => {
                   </select>
                 </Field>
 
-                <Field label="Medal">
+                <Field label="Medal" htmlFor="result-medal">
                   <select
                     style={styles.select}
                     value={form.medal}
@@ -725,7 +731,7 @@ const ManageResults = () => {
                   </select>
                 </Field>
 
-                <Field label="Image URL">
+                <Field label="Image URL" htmlFor="result-image">
                   <input
                     type="text"
                     style={styles.input}
@@ -762,7 +768,7 @@ const ManageResults = () => {
             )}
             <table style={styles.table}>
               <tbody>
-                <Field label="Team Name">
+                <Field label="Team Name" htmlFor="group-team">
                   <input
                     style={styles.input}
                     value={groupForm.teamName}
@@ -770,7 +776,7 @@ const ManageResults = () => {
                   />
                 </Field>
 
-                <Field label="Event">
+                <Field label="Event" htmlFor="group-event">
                   <input
                     style={styles.input}
                     value={groupForm.event}
@@ -778,7 +784,7 @@ const ManageResults = () => {
                   />
                 </Field>
 
-                <Field label="Year">
+                <Field label="Year" htmlFor="group-year">
                   <input
                     type="number"
                     style={styles.input}
@@ -787,7 +793,7 @@ const ManageResults = () => {
                   />
                 </Field>
 
-                <Field label="Members">
+                <Field label="Members" htmlFor="group-members">
                   <select
                     multiple
                     style={{ ...styles.select, height: 140 }}
@@ -806,7 +812,7 @@ const ManageResults = () => {
                   </select>
                 </Field>
 
-                <Field label="Medal">
+                <Field label="Medal" htmlFor="group-medal">
                   <select
                     style={styles.select}
                     value={groupForm.medal}
@@ -819,7 +825,7 @@ const ManageResults = () => {
                   </select>
                 </Field>
 
-                <Field label="URL">
+                <Field label="URL" htmlFor="group-url">
                   <input
                     style={styles.input}
                     value={groupForm.imageUrl}
@@ -850,10 +856,18 @@ const ManageResults = () => {
 };
 
 /* ================= REUSABLE ================= */
-const Field = ({ label, children }) => (
+const Field = ({ label, htmlFor, children }) => (
   <tr>
-    <td style={styles.fieldLabel}>{label}</td>
-    <td style={styles.fieldValue}>{children}</td>
+    <td style={styles.fieldLabel}>
+      <label htmlFor={htmlFor}>{label}</label>
+    </td>
+    <td style={styles.fieldValue}>
+      {children && typeof children === 'object' && children.type ? (
+        React.cloneElement(children, { id: htmlFor, name: htmlFor })
+      ) : (
+        children
+      )}
+    </td>
   </tr>
 );
 
