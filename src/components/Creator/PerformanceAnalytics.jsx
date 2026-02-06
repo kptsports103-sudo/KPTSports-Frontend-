@@ -280,7 +280,10 @@ export default function PerformanceAnalytics() {
       <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
         {/* Year Select */}
         <div>
+          <label htmlFor="analytics-year-select" style={{ display: 'none' }}>Select Year</label>
           <select
+            id="analytics-year-select"
+            name="analytics-year-select"
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
             style={{
@@ -302,7 +305,10 @@ export default function PerformanceAnalytics() {
         
         {/* Search Input */}
         <div>
+          <label htmlFor="analytics-search" style={{ display: 'none' }}>Search players</label>
           <input
+            id="analytics-search"
+            name="analytics-search"
             type="text"
             placeholder="Search by name or branch..."
             value={searchTerm}

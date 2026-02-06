@@ -463,14 +463,20 @@ const AdminDashboard = () => {
             <div className="section-subtitle">Search by name or branch and filter by year</div>
           </div>
           <div className="table-filters">
+            <label htmlFor="player-search" style={{ display: 'none' }}>Search by name or branch</label>
             <input
+              id="player-search"
+              name="player-search"
               className="iam-search"
               type="search"
               placeholder="Search name or branch"
               value={playerSearch}
               onChange={(e) => setPlayerSearch(e.target.value)}
             />
+            <label htmlFor="player-year-filter" style={{ display: 'none' }}>Filter by year</label>
             <select
+              id="player-year-filter"
+              name="player-year-filter"
               className="quick-stats-select"
               value={playerYear}
               onChange={(e) => setPlayerYear(e.target.value)}
