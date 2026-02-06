@@ -104,10 +104,10 @@ const Results = () => {
                     🏅 Individual Results
                   </h3>
                   <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                    <label htmlFor="results-search" style={{ display: 'none' }}>Search by Name or Event</label>
+                    <label htmlFor={`results-search-${year}`} style={{ display: 'none' }}>Search by Name or Event</label>
                     <input
-                      id="results-search"
-                      name="results-search"
+                      id={`results-search-${year}`}
+                      name={`results-search-${year}`}
                       type="text"
                       placeholder="Search by Name or Event"
                       value={searchTerm}

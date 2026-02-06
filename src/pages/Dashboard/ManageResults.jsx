@@ -460,10 +460,10 @@ const ManageResults = () => {
               <h3 style={styles.yearTitle}>Year: {yearBlock.year}</h3>
 
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <label htmlFor="manage-results-search" style={{ display: 'none' }}>Search by Name or Event</label>
+                <label htmlFor={`manage-results-search-${yearBlock.year}`} style={{ display: 'none' }}>Search by Name or Event</label>
                 <input
-                  id="manage-results-search"
-                  name="manage-results-search"
+                  id={`manage-results-search-${yearBlock.year}`}
+                  name={`manage-results-search-${yearBlock.year}`}
                   type="text"
                   placeholder="Search by Name or Event"
                   value={searchTerm}

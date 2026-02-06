@@ -334,6 +334,7 @@ const AdminDashboard = () => {
                 <label className="quick-stats-label" htmlFor="quick-stats-year">Select Year</label>
                 <select
                   id="quick-stats-year"
+                  name="quick-stats-year"
                   className="quick-stats-select"
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
@@ -573,7 +574,6 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-
 
 
 
