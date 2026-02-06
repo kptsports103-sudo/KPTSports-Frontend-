@@ -22,12 +22,16 @@ const normalizeName = (name) => {
 
 export default function PerformanceAnalytics() {
   const [players, setPlayers] = useState([]);
+  const [allPlayers, setAllPlayers] = useState([]);
   const [results, setResults] = useState([]);
   const [groupResults, setGroupResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [playerDetails, setPlayerDetails] = useState(null);
+  const [selectedYear, setSelectedYear] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [availableYears, setAvailableYears] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -181,7 +185,20 @@ export default function PerformanceAnalytics() {
           player.totalPoints = Number((player.firstYearPoints + player.secondYearPoints + player.thirdYearPoints).toFixed(2));
         });
         
+        // Get available years from players
+        const allYears = [];
+        Object.values(playersMap).forEach(player => {
+          player.years.forEach(year => {
+            if (!allYears.includes(year)) {
+              allYears.push(year);
+            }
+          });
+        });
+        const sortedYears = Array.from(new Set(allYears)).sort((a, b) => b - a);
+        setAvailableYears(sortedYears);
+        
         setPlayers(Object.values(playersMap));
+        setAllPlayers(Object.values(playersMap));
         setLoading(false);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -192,6 +209,30 @@ export default function PerformanceAnalytics() {
     
     fetchData();
   }, []);
+
+  // Filter players based on year and search term
+  useEffect(() => {
+    let filtered = allPlayers;
+    
+    // Filter by year (show players who participated in that year)
+    if (selectedYear !== 'all') {
+      const year = parseInt(selectedYear);
+      filtered = filtered.filter(player => 
+        player.years.includes(year)
+      );
+    }
+    
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(player =>
+        player.name.toLowerCase().includes(term) ||
+        player.branch.toLowerCase().includes(term)
+      );
+    }
+    
+    setPlayers(filtered);
+  }, [selectedYear, searchTerm, allPlayers]);
 
   const handlePlayerClick = (player) => {
     setSelectedPlayer(player);
@@ -235,8 +276,58 @@ export default function PerformanceAnalytics() {
       <h1 className="page-title">📊 Performance Analytics</h1>
       <p className="page-subtitle">Player participation & year-wise performance overview</p>
 
+      {/* FILTERS */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        {/* Year Select */}
+        <div>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            style={{
+              padding: '10px 14px',
+              borderRadius: '8px',
+              border: '2px solid #ddd',
+              fontSize: '14px',
+              backgroundColor: '#fff',
+              cursor: 'pointer',
+              minWidth: '120px'
+            }}
+          >
+            <option value="all">All Years</option>
+            {availableYears.map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </select>
+        </div>
+        
+        {/* Search Input */}
+        <div>
+          <input
+            type="text"
+            placeholder="Search by name or branch..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              padding: '10px 14px',
+              borderRadius: '8px',
+              border: '2px solid #ddd',
+              fontSize: '14px',
+              width: '250px',
+              outline: 'none'
+            }}
+            onFocus={(e) => e.target.style.borderColor = '#0d6efd'}
+            onBlur={(e) => e.target.style.borderColor = '#ddd'}
+          />
+        </div>
+        
+        {/* Results Count */}
+        <div style={{ display: 'flex', alignItems: 'center', fontSize: '14px', color: '#666' }}>
+          Showing {players.length} player{players.length !== 1 ? 's' : ''}
+        </div>
+      </div>
+
       {/* EMPTY STATE */}
-      {players.length === 0 ? (
+      {allPlayers.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">📭</div>
           <h2>No Performance Data Available</h2>
@@ -244,6 +335,18 @@ export default function PerformanceAnalytics() {
             No students have participated in
             <br />
             <b>Karnataka State Inter-Polytechnic Meets</b>
+          </p>
+        </div>
+      ) : players.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🔍</div>
+          <h2>No Players Found</h2>
+          <p>
+            {selectedYear !== 'all' || searchTerm ? (
+              <>Try adjusting your filters to find more players</>
+            ) : (
+              <>No players match your criteria</>
+            )}
           </p>
         </div>
       ) : (
