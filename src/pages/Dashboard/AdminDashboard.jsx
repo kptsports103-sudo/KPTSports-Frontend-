@@ -24,6 +24,8 @@ const AdminDashboard = () => {
   const [isGeneratingId, setIsGeneratingId] = useState(null);
   const [yearlyStats, setYearlyStats] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
+  const [playerSearch, setPlayerSearch] = useState("");
+  const [playerYear, setPlayerYear] = useState("all");
 
   useEffect(() => {
     const fetchUserCount = async () => {
@@ -221,6 +223,17 @@ const AdminDashboard = () => {
   }, [medalData, selectedYear]);
 
   const selectedStats = medalData.find((m) => String(m.year) === String(selectedYear)) || medalData[0];
+  const availablePlayerYears = Array.from(
+    new Set(certificateRows.map((row) => row.year).filter(Boolean))
+  ).sort((a, b) => Number(b) - Number(a));
+  const filteredPlayers = certificateRows.filter((row) => {
+    const matchesYear = playerYear === "all" || String(row.year) === String(playerYear);
+    const term = playerSearch.trim().toLowerCase();
+    if (!term) return matchesYear;
+    const name = (row.name || "").toLowerCase();
+    const branch = (row.department || "").toLowerCase();
+    return matchesYear && (name.includes(term) || branch.includes(term));
+  });
 
   // Scroll to visitor charts
   const scrollToVisitors = () => {
@@ -439,6 +452,60 @@ const AdminDashboard = () => {
               <h3 style={{ margin: 0 }}>{year.totalPoints} Points</h3>
             </div>
           ))}
+        </div>
+
+        {/* =====================
+            PLAYERS LIST
+        ====================== */}
+        <div className="section-header compact">
+          <div className="section-header-left">
+            <div className="section-title">🧑‍🎓 Players List</div>
+            <div className="section-subtitle">Search by name or branch and filter by year</div>
+          </div>
+          <div className="table-filters">
+            <input
+              className="iam-search"
+              type="search"
+              placeholder="Search name or branch"
+              value={playerSearch}
+              onChange={(e) => setPlayerSearch(e.target.value)}
+            />
+            <select
+              className="quick-stats-select"
+              value={playerYear}
+              onChange={(e) => setPlayerYear(e.target.value)}
+              disabled={availablePlayerYears.length === 0}
+            >
+              <option value="all">All Years</option>
+              {availablePlayerYears.map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="table-card">
+          {filteredPlayers.length === 0 ? (
+            <div className="iam-empty">No matching players found.</div>
+          ) : (
+            <table className="iam-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Branch</th>
+                  <th>Year</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPlayers.map((row) => (
+                  <tr key={row.id}>
+                    <td>{row.name || "-"}</td>
+                    <td>{row.department || "-"}</td>
+                    <td>{row.year || "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* =====================

@@ -33,7 +33,10 @@ const Players = ({ isStudent = false }) => {
         const grouped = res.data;
         const dataArray = Object.keys(grouped).map(year => ({
           year: parseInt(year),
-          players: grouped[year]
+          players: grouped[year].map(p => ({
+            ...p,
+            id: p.id || p.playerId || crypto.randomUUID(),
+          })),
         }));
         setData(dataArray);
         setDirtyRows(new Set());
@@ -51,10 +54,17 @@ const Players = ({ isStudent = false }) => {
         const saved = localStorage.getItem("playersData");
         if (saved) {
           const parsed = JSON.parse(saved);
-          setData(parsed);
+          const withIds = parsed.map(yearData => ({
+            ...yearData,
+            players: yearData.players.map(p => ({
+              ...p,
+              id: p.id || p.playerId || crypto.randomUUID(),
+            })),
+          }));
+          setData(withIds);
           setDirtyRows(new Set());
 
-          const years = parsed.map(d => d.year);
+          const years = withIds.map(d => d.year);
           if (years.includes(currentYear)) {
             setSelectedYear(String(currentYear));
           } else if (years.length > 0) {
@@ -123,7 +133,7 @@ const Players = ({ isStudent = false }) => {
     setCurrentPage(1); // Reset to first page when adding new row
     const newData = data.map(d =>
       d.year === year
-        ? { ...d, players: [...d.players, { name: '', branch: '', diplomaYear: '1' }] }
+        ? { ...d, players: [...d.players, { id: crypto.randomUUID(), name: '', branch: '', diplomaYear: '1' }] }
         : d
     );
     setData(newData);
@@ -242,10 +252,15 @@ const Players = ({ isStudent = false }) => {
     // Filter out invalid players (missing name or branch)
     const validData = data.map(yearData => ({
       ...yearData,
-      players: yearData.players.filter(player =>
-        player.name && player.name.trim() &&
-        player.branch && player.branch.trim()
-      )
+      players: yearData.players
+        .map(player => ({
+          ...player,
+          id: player.id || player.playerId || crypto.randomUUID(),
+        }))
+        .filter(player =>
+          player.name && player.name.trim() &&
+          player.branch && player.branch.trim()
+        )
     })).filter(yearData => yearData.players.length > 0);
 
     console.log("Original data:", data);
@@ -509,10 +524,11 @@ const Players = ({ isStudent = false }) => {
                         paginatedPlayers.map((row, playerIndex) => {
                           const player = row.player;
                           const originalIndex = row.idx;
+                          const playerAtIndex = yearData.players[originalIndex];
                           const isEditable = !isStudent && isEditMode;
                           return (
                             <tr
-                              key={originalIndex}
+                              key={`${yearData.year}-${originalIndex}`}
                               style={{
                                 ...styles.bodyRow,
                                 backgroundColor: playerIndex % 2 === 0 ? "#ffffff" : "#f8f9fb",
@@ -523,12 +539,12 @@ const Players = ({ isStudent = false }) => {
                               <td style={{ padding: "10px 16px" }}>{(currentPage - 1) * ITEMS_PER_PAGE + playerIndex + 1}</td>
                               <td style={{ padding: "10px 16px" }}>{yearData.year}</td>
                               <td style={{ padding: "10px 16px" }}>
-                                <label htmlFor={`player-name-${yearData.year}-${playerIndex}`} style={{ display: 'none' }}>Player Name for {yearData.year} Row {playerIndex + 1}</label>
+                                <label htmlFor={`player-name-${yearData.year}-${originalIndex}`} style={{ display: 'none' }}>Player Name for {yearData.year} Row {playerIndex + 1}</label>
                                 <input
-                                  id={`player-name-${yearData.year}-${playerIndex}`}
-                                  name={`player-name-${yearData.year}-${playerIndex}`}
+                                  id={`player-name-${yearData.year}-${originalIndex}`}
+                                  name={`player-name-${yearData.year}-${originalIndex}`}
                                   type="text"
-                                  value={player.name}
+                                  value={playerAtIndex?.name || ''}
                                   onChange={(e) => updatePlayer(yearData.year, originalIndex, 'name', e.target.value)}
                                   readOnly={!isEditable}
                                   style={{ ...styles.input, backgroundColor: !isEditable ? '#f8f9fa' : '#fff' }}
@@ -537,12 +553,12 @@ const Players = ({ isStudent = false }) => {
                                 />
                               </td>
                               <td style={{ padding: "10px 16px" }}>
-                                <label htmlFor={`player-branch-${yearData.year}-${playerIndex}`} style={{ display: 'none' }}>Player Branch for {yearData.year} Row {playerIndex + 1}</label>
+                                <label htmlFor={`player-branch-${yearData.year}-${originalIndex}`} style={{ display: 'none' }}>Player Branch for {yearData.year} Row {playerIndex + 1}</label>
                                 <input
-                                  id={`player-branch-${yearData.year}-${playerIndex}`}
-                                  name={`player-branch-${yearData.year}-${playerIndex}`}
+                                  id={`player-branch-${yearData.year}-${originalIndex}`}
+                                  name={`player-branch-${yearData.year}-${originalIndex}`}
                                   type="text"
-                                  value={player.branch}
+                                  value={playerAtIndex?.branch || ''}
                                   onChange={(e) => updatePlayer(yearData.year, originalIndex, 'branch', e.target.value)}
                                   readOnly={!isEditable}
                                   style={{ ...styles.input, backgroundColor: !isEditable ? '#f8f9fa' : '#fff' }}
@@ -551,11 +567,11 @@ const Players = ({ isStudent = false }) => {
                                 />
                               </td>
                               <td style={{ padding: "10px 16px" }}>
-                                <label htmlFor={`player-diploma-${yearData.year}-${playerIndex}`} style={{ display: 'none' }}>Diploma Year for {yearData.year} Row {playerIndex + 1}</label>
+                                <label htmlFor={`player-diploma-${yearData.year}-${originalIndex}`} style={{ display: 'none' }}>Diploma Year for {yearData.year} Row {playerIndex + 1}</label>
                                 <select
-                                  id={`player-diploma-${yearData.year}-${playerIndex}`}
-                                  name={`player-diploma-${yearData.year}-${playerIndex}`}
-                                  value={player.diplomaYear}
+                                  id={`player-diploma-${yearData.year}-${originalIndex}`}
+                                  name={`player-diploma-${yearData.year}-${originalIndex}`}
+                                  value={playerAtIndex?.diplomaYear || '1'}
                                   onChange={(e) => updatePlayer(yearData.year, originalIndex, 'diplomaYear', e.target.value)}
                                   disabled={!isEditable}
                                   style={{ ...styles.select, backgroundColor: !isEditable ? '#f8f9fa' : '#fff' }}

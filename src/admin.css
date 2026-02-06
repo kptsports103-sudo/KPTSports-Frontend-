@@ -394,6 +394,17 @@
   border-radius: 6px;
 }
 
+.table-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.table-filters .iam-search {
+  min-width: 220px;
+}
+
 .iam-table th {
   text-align: left;
   font-size: 0.85rem;

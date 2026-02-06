@@ -10,10 +10,16 @@ const medalPriority = {
   Bronze: 3
 };
 
+const normalizeName = (name) => {
+  return (name || '').toLowerCase().trim().replace(/\s+/g, ' ');
+};
+
 const ManageResults = () => {
   const [data, setData] = useState([]); // [{ year, results: [] }]
   const [groupData, setGroupData] = useState([]); // [{ year, results: [] }]
   const [selectedYear, setSelectedYear] = useState('all');
+  const [players, setPlayers] = useState([]);
+  const [playersById, setPlayersById] = useState({});
 
   const [isEditing, setIsEditing] = useState(false);
   const [isGroupEditing, setIsGroupEditing] = useState(false);
@@ -22,9 +28,11 @@ const ManageResults = () => {
 
   const [form, setForm] = useState({
     name: '',
+    playerId: '',
     event: '',
     year: '',
     medal: '',
+    diplomaYear: '',
     imageUrl: ''
   });
 
@@ -32,7 +40,8 @@ const ManageResults = () => {
     teamName: '',
     event: '',
     year: '',
-    members: '',
+    memberIds: [],
+    members: [],
     medal: '',
     imageUrl: ''
   });
@@ -59,6 +68,7 @@ const ManageResults = () => {
   useEffect(() => {
     fetchResults();
     fetchGroupResults();
+    fetchPlayers();
   }, []);
 
   const fetchResults = async () => {
@@ -126,17 +136,51 @@ const ManageResults = () => {
     }
   };
 
+  const fetchPlayers = async () => {
+    try {
+      const res = await api.get('/home/players');
+      const grouped = res.data || {};
+      const flat = [];
+      Object.keys(grouped).forEach(year => {
+        grouped[year].forEach(p => {
+          flat.push({
+            ...p,
+            id: p.id || p.playerId,
+            participationYear: Number(year),
+          });
+        });
+      });
+
+      const byId = flat.reduce((acc, p) => {
+        if (p.id) acc[p.id] = p;
+        return acc;
+      }, {});
+
+      setPlayers(flat);
+      setPlayersById(byId);
+    } catch (error) {
+      console.error('Failed to fetch players:', error);
+    }
+  };
+
   /* ================= SAVE ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       console.log('Submitting form:', form);
 
+      const selectedPlayer = form.playerId ? playersById[form.playerId] : null;
+      const payload = {
+        ...form,
+        name: selectedPlayer?.name || form.name,
+        diplomaYear: form.diplomaYear || selectedPlayer?.diplomaYear || ''
+      };
+
       if (editingId) {
-        const response = await api.put(`/results/${editingId}`, form);
+        const response = await api.put(`/results/${editingId}`, payload);
         console.log('Update response:', response.data);
       } else {
-        const response = await api.post('/results', form);
+        const response = await api.post('/results', payload);
         console.log('Create response:', response.data);
       }
 
@@ -179,17 +223,30 @@ const ManageResults = () => {
 
   /* ================= HELPERS ================= */
   const handleEdit = (item) => {
-    setForm(item);
+    const matchedPlayer = item.playerId
+      ? playersById[item.playerId]
+      : players.find(p => normalizeName(p.name) === normalizeName(item.name));
+
+    setForm({
+      ...item,
+      playerId: item.playerId || matchedPlayer?.id || '',
+      diplomaYear: item.diplomaYear || matchedPlayer?.diplomaYear || ''
+    });
     setEditingId(item._id);
     setIsEditing(true);
   };
 
   const handleGroupEdit = (item) => {
+    const resolvedMemberIds = Array.isArray(item.memberIds) && item.memberIds.length > 0
+      ? item.memberIds
+      : (item.members || [])
+          .map(name => players.find(p => normalizeName(p.name) === normalizeName(name))?.id)
+          .filter(Boolean);
+
     setGroupForm({
       ...item,
-      members: item.members && Array.isArray(item.members)
-        ? item.members.join(', ')
-        : (item.members || '')
+      memberIds: resolvedMemberIds,
+      members: item.members && Array.isArray(item.members) ? item.members : []
     });
     setEditingGroupId(item._id);
     setIsGroupEditing(true);
@@ -200,11 +257,19 @@ const ManageResults = () => {
     try {
       console.log('Submitting group form:', groupForm);
 
+      const resolvedMembers = (groupForm.memberIds || [])
+        .map(id => playersById[id]?.name)
+        .filter(Boolean);
+
+      if (!resolvedMembers.length) {
+        alert('Please select at least one member.');
+        return;
+      }
+
       const payload = {
         ...groupForm,
-        members: groupForm.members
-          ? groupForm.members.split(',').map(n => n.trim()).filter(n => n)
-          : []
+        members: resolvedMembers,
+        memberIds: groupForm.memberIds || []
       };
 
       if (editingGroupId) {
@@ -221,7 +286,7 @@ const ManageResults = () => {
         setSuccessMessage('');
         setIsGroupEditing(false);
         setEditingGroupId(null);
-        setGroupForm({ teamName: '', event: '', year: '', members: '', medal: '', imageUrl: '' });
+        setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], medal: '', imageUrl: '' });
       }, 1200);
     } catch (error) {
       console.error('Group save error:', error);
@@ -318,7 +383,7 @@ const ManageResults = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: '', event: '', year: '', medal: '', imageUrl: '' });
+    setForm({ name: '', playerId: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
     setEditingId(null);
   };
 
@@ -374,7 +439,7 @@ const ManageResults = () => {
                 setIsEditing(false);
                 setIsGroupEditing(false);
                 setEditingGroupId(null);
-                setGroupForm({ teamName: '', event: '', year: '', members: '', medal: '', imageUrl: '' });
+                setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], medal: '', imageUrl: '' });
               }}
               style={styles.btnSecondary}
             >
@@ -514,13 +579,18 @@ const ManageResults = () => {
                             <span style={styles.eventBadge}>{item.event || ''}</span>
                           </td>
                           <td style={styles.cell}>
-                            {item.members && Array.isArray(item.members) ? (
-                              <ul style={{ margin: 0, paddingLeft: 18 }}>
-                                {item.members.map((m, i) => <li key={i}>{m}</li>)}
-                              </ul>
-                            ) : (
-                              <span style={{ color: '#999' }}>No members</span>
-                            )}
+                            {(() => {
+                              const resolvedMembers = item.members && Array.isArray(item.members)
+                                ? item.members
+                                : (item.memberIds || []).map(id => playersById[id]?.name).filter(Boolean);
+                              return resolvedMembers.length > 0 ? (
+                                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                                  {resolvedMembers.map((m, i) => <li key={i}>{m}</li>)}
+                                </ul>
+                              ) : (
+                                <span style={{ color: '#999' }}>No members</span>
+                              );
+                            })()}
                           </td>
                           <td style={styles.cell}>
                             <span style={{
@@ -575,12 +645,37 @@ const ManageResults = () => {
             )}
             <table style={styles.table}>
               <tbody>
-                <Field label="Name">
+                <Field label="Player">
+                  <select
+                    style={styles.select}
+                    value={form.playerId}
+                    onChange={e => {
+                      const selectedId = e.target.value;
+                      const selectedPlayer = playersById[selectedId];
+                      setForm({
+                        ...form,
+                        playerId: selectedId,
+                        name: selectedPlayer?.name || form.name,
+                        diplomaYear: selectedPlayer?.diplomaYear || form.diplomaYear
+                      });
+                    }}
+                  >
+                    <option value="">Manual entry</option>
+                    {players.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} - {p.branch} (Y{p.diplomaYear}, {p.participationYear})
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+
+                <Field label="Name (manual)">
                   <input
                     style={styles.input}
                     value={form.name}
                     onChange={e => setForm({ ...form, name: e.target.value })}
-                    required
+                    readOnly={!!form.playerId}
+                    required={!form.playerId}
                   />
                 </Field>
 
@@ -601,6 +696,19 @@ const ManageResults = () => {
                     onChange={e => setForm({ ...form, year: e.target.value })}
                     required
                   />
+                </Field>
+
+                <Field label="Diploma Year">
+                  <select
+                    style={styles.select}
+                    value={form.diplomaYear}
+                    onChange={e => setForm({ ...form, diplomaYear: e.target.value })}
+                  >
+                    <option value="">Select Year</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                  </select>
                 </Field>
 
                 <Field label="Medal">
@@ -679,12 +787,23 @@ const ManageResults = () => {
                   />
                 </Field>
 
-                <Field label="Members (comma separated)">
-                  <input
-                    style={styles.input}
-                    value={groupForm.members}
-                    onChange={e => setGroupForm({...groupForm, members: e.target.value})}
-                  />
+                <Field label="Members">
+                  <select
+                    multiple
+                    style={{ ...styles.select, height: 140 }}
+                    value={groupForm.memberIds}
+                    onChange={e => {
+                      const selectedIds = Array.from(e.target.selectedOptions).map(o => o.value);
+                      setGroupForm({ ...groupForm, memberIds: selectedIds });
+                    }}
+                    required
+                  >
+                    {players.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} - {p.branch} (Y{p.diplomaYear}, {p.participationYear})
+                      </option>
+                    ))}
+                  </select>
                 </Field>
 
                 <Field label="Medal">
