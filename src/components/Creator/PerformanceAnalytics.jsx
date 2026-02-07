@@ -136,12 +136,8 @@ export default function PerformanceAnalytics() {
 
             const medalPoints = INDIVIDUAL_POINTS[result.medal] || 0;
             const resultYear = parseInt(result.year);
-            const diplomaYear = Number(
-              result.diplomaYear ??
-              player.yearDetails[resultYear]?.diplomaYear ??
-              player.yearDetails[player.years[0]]?.diplomaYear ??
-              ""
-            );
+            const diplomaYearRaw = result.diplomaYear ?? player.yearDetails[resultYear]?.diplomaYear ?? player.yearDetails[player.years[0]]?.diplomaYear;
+            const diplomaYear = Number(diplomaYearRaw);
 
             // Store individual result
             player.individualResults.push({
@@ -152,8 +148,8 @@ export default function PerformanceAnalytics() {
               imageUrl: result.imageUrl
             });
 
-            // Add points to appropriate year
-            if (diplomaYear) {
+            // Add points to appropriate year (only if diplomaYear is 1, 2, or 3)
+            if (diplomaYear >= 1 && diplomaYear <= 3) {
               addPoints(player, diplomaYear, medalPoints);
             }
           });
@@ -173,11 +169,8 @@ export default function PerformanceAnalytics() {
 
               const medalPoints = (GROUP_POINTS[group.medal] || 0) / memberIds.length;
               const resultYear = parseInt(group.year);
-              const diplomaYear = Number(
-                player.yearDetails[resultYear]?.diplomaYear ??
-                player.yearDetails[player.years[0]]?.diplomaYear ??
-                ""
-              );
+              const diplomaYearRaw = player.yearDetails[resultYear]?.diplomaYear ?? player.yearDetails[player.years[0]]?.diplomaYear;
+              const diplomaYear = Number(diplomaYearRaw);
 
               // Store group result
               player.groupResults.push({
@@ -189,8 +182,8 @@ export default function PerformanceAnalytics() {
                 members: group.members
               });
 
-              // Add points to appropriate year
-              if (diplomaYear) {
+              // Add points to appropriate year (only if diplomaYear is 1, 2, or 3)
+              if (diplomaYear >= 1 && diplomaYear <= 3) {
                 addPoints(player, diplomaYear, medalPoints);
               }
             });
