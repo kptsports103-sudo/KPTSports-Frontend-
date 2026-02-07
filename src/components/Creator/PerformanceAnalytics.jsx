@@ -138,6 +138,9 @@ export default function PerformanceAnalytics() {
         Object.keys(playersMap).forEach(key => {
           const player = playersMap[key];
           
+          // Debug: log player data
+          console.log('Processing player:', player.name, 'ID:', player.id);
+          
           // 🔴 RESET per-player accumulators (ensures no stale values)
           player.firstYearPoints = 0;
           player.secondYearPoints = 0;
@@ -152,21 +155,24 @@ export default function PerformanceAnalytics() {
           // Initialize totalPoints accumulator
           let playerTotalPoints = 0;
           
+          // Debug: log results count
+          console.log('Processing ' + results.length + ' results for player:', player.name);
+          
           // Individual results points
           results.forEach(result => {
             // Fuzzy name matching: find best player match
             const resultNameKey = normalizeName(result.name);
             
             // Check for playerId match first
-            if (result.playerId && Number(result.playerId) === Number(player.id)) {
-              // Match found via playerId
-            } else if (
-              resultNameKey === normalizeName(player.name) ||
-              resultNameKey.includes(normalizeName(player.name)) ||
-              normalizeName(player.name).includes(resultNameKey)
-            ) {
-              // Match found via name similarity
-            } else {
+            const idMatch = result.playerId && Number(result.playerId) === Number(player.id);
+            const nameMatch = resultNameKey === normalizeName(player.name) ||
+                             resultNameKey.includes(normalizeName(player.name)) ||
+                             normalizeName(player.name).includes(resultNameKey);
+            
+            // Debug: log matching
+            console.log('  Result:', result.name, '| playerId:', result.playerId, '| ID match:', idMatch, '| Name match:', nameMatch);
+            
+            if (!idMatch && !nameMatch) {
               // No match, skip
               return;
             }
@@ -176,8 +182,14 @@ export default function PerformanceAnalytics() {
             const resultYear = parseInt(result.year);
             const academicYear = getAcademicYear(player, resultYear, result.diplomaYear);
             
+            // Debug: log academic year
+            console.log('    Matched! medal:', result.medal, '| points:', medalPoints, '| academicYear:', academicYear, '| diplomaYear:', result.diplomaYear);
+            
             // Skip if academic year is invalid
-            if (!academicYear) return;
+            if (!academicYear) {
+              console.log('    Skipping - invalid academic year');
+              return;
+            }
 
             // Store individual result
             player.individualResults.push({
