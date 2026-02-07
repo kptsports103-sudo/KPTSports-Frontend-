@@ -104,7 +104,22 @@ const Results = () => {
                     🏅 Individual Results
                   </h3>
                   <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                    <label htmlFor={`results-search-${year}`} style={{ display: 'none' }}>Search by Name or Event</label>
+                    <label
+                      htmlFor={`results-search-${year}`}
+                      style={{
+                        position: 'absolute',
+                        width: 1,
+                        height: 1,
+                        padding: 0,
+                        margin: -1,
+                        overflow: 'hidden',
+                        clip: 'rect(0, 0, 0, 0)',
+                        whiteSpace: 'nowrap',
+                        border: 0
+                      }}
+                    >
+                      Search by Name or Event
+                    </label>
                     <input
                       id={`results-search-${year}`}
                       name={`results-search-${year}`}
