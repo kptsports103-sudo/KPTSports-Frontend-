@@ -135,8 +135,22 @@ export default function PerformanceAnalytics() {
           
           // Individual results points
           results.forEach(result => {
-            const resolvedId = result.playerId || playersByName[normalizeName(result.name)];
-            if (!resolvedId || resolvedId !== player.id) return;
+            // Fuzzy name matching: find best player match
+            const resultNameKey = normalizeName(result.name);
+            
+            // Check for playerId match first
+            if (result.playerId && result.playerId === player.id) {
+              // Match found via playerId
+            } else if (
+              resultNameKey === normalizeName(player.name) ||
+              resultNameKey.includes(normalizeName(player.name)) ||
+              normalizeName(player.name).includes(resultNameKey)
+            ) {
+              // Match found via name similarity
+            } else {
+              // No match, skip
+              return;
+            }
 
             const medalKey = normalizeMedal(result.medal);
             const medalPoints = INDIVIDUAL_POINTS[medalKey] || 0;
@@ -161,11 +175,27 @@ export default function PerformanceAnalytics() {
           
           // Group results points (split among members)
           groupResults.forEach(group => {
-            const memberIds = Array.isArray(group.memberIds) && group.memberIds.length > 0
-              ? group.memberIds
-              : (group.members || [])
-                  .map(name => playersByName[normalizeName(name)])
-                  .filter(Boolean);
+            // Build member list with fuzzy matching
+            const memberIds = [];
+            const memberNames = group.members || [];
+            
+            memberNames.forEach(memberName => {
+              const memberNameKey = normalizeName(memberName);
+              
+              // Find matching player by name similarity
+              const matchingPlayer = Object.values(playersMap).find(p => {
+                const playerNameKey = normalizeName(p.name);
+                return (
+                  memberNameKey === playerNameKey ||
+                  memberNameKey.includes(playerNameKey) ||
+                  playerNameKey.includes(memberNameKey)
+                );
+              });
+              
+              if (matchingPlayer) {
+                memberIds.push(matchingPlayer.id);
+              }
+            });
 
             if (!memberIds.length) return;
 
