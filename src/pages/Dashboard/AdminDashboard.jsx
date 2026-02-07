@@ -24,6 +24,17 @@ const AdminDashboard = () => {
   const [selectedYear, setSelectedYear] = useState("");
   const [playerSearch, setPlayerSearch] = useState("");
   const [playerYear, setPlayerYear] = useState("all");
+  const srOnlyStyle = {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: "hidden",
+    clip: "rect(0, 0, 0, 0)",
+    whiteSpace: "nowrap",
+    border: 0,
+  };
 
   useEffect(() => {
     const fetchPlayerData = async () => {
@@ -107,16 +118,6 @@ const AdminDashboard = () => {
 
     fetchYearlyStats();
   }, []);
-
-  // Set default selected year after medalData is loaded
-  useEffect(() => {
-    if (medalData.length > 0) {
-      const defaultYear = String(medalData[0].year);
-      if (selectedYear === "" || !medalData.some(m => String(m.year) === selectedYear)) {
-        setSelectedYear(defaultYear);
-      }
-    }
-  }, [medalData]);
 
   const loadImage = (src) =>
     new Promise((resolve, reject) => {
@@ -220,6 +221,16 @@ const AdminDashboard = () => {
       totalMedals,
     };
   });
+
+  // Set default selected year after medalData is loaded
+  useEffect(() => {
+    if (medalData.length > 0) {
+      const defaultYear = String(medalData[0].year);
+      if (selectedYear === "" || !medalData.some(m => String(m.year) === selectedYear)) {
+        setSelectedYear(defaultYear);
+      }
+    }
+  }, [medalData]);
 
   const topYears = [...medalData]
     .sort((a, b) => b.totalPoints - a.totalPoints)
@@ -501,7 +512,7 @@ const AdminDashboard = () => {
             <div className="section-subtitle">Search by name or branch and filter by year</div>
           </div>
           <div className="table-filters">
-            <label htmlFor="player-search" style={{ display: 'none' }}>Search by name or branch</label>
+            <label htmlFor="player-search" style={srOnlyStyle}>Search by name or branch</label>
             <input
               id="player-search"
               name="player-search"
@@ -511,7 +522,7 @@ const AdminDashboard = () => {
               value={playerSearch}
               onChange={(e) => setPlayerSearch(e.target.value)}
             />
-            <label htmlFor="player-year-filter" style={{ display: 'none' }}>Filter by year</label>
+            <label htmlFor="player-year-filter" style={srOnlyStyle}>Filter by year</label>
             <select
               id="player-year-filter"
               name="player-year-filter"
@@ -609,4 +620,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-

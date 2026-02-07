@@ -117,9 +117,10 @@ export default function PerformanceAnalytics() {
         });
         
         const addPoints = (player, diplomaYear, points) => {
-          if (diplomaYear === "1") player.firstYearPoints += points;
-          if (diplomaYear === "2") player.secondYearPoints += points;
-          if (diplomaYear === "3") player.thirdYearPoints += points;
+          const year = Number(diplomaYear);
+          if (year === 1) player.firstYearPoints += points;
+          if (year === 2) player.secondYearPoints += points;
+          if (year === 3) player.thirdYearPoints += points;
         };
 
         // Calculate points for each player
@@ -135,7 +136,12 @@ export default function PerformanceAnalytics() {
 
             const medalPoints = INDIVIDUAL_POINTS[result.medal] || 0;
             const resultYear = parseInt(result.year);
-            const diplomaYear = String(result.diplomaYear || player.yearDetails[resultYear]?.diplomaYear || "");
+            const diplomaYear = Number(
+              result.diplomaYear ??
+              player.yearDetails[resultYear]?.diplomaYear ??
+              player.yearDetails[player.years[0]]?.diplomaYear ??
+              ""
+            );
 
             // Store individual result
             player.individualResults.push({
@@ -167,7 +173,11 @@ export default function PerformanceAnalytics() {
 
               const medalPoints = (GROUP_POINTS[group.medal] || 0) / memberIds.length;
               const resultYear = parseInt(group.year);
-              const diplomaYear = String(player.yearDetails[resultYear]?.diplomaYear || "");
+              const diplomaYear = Number(
+                player.yearDetails[resultYear]?.diplomaYear ??
+                player.yearDetails[player.years[0]]?.diplomaYear ??
+                ""
+              );
 
               // Store group result
               player.groupResults.push({
