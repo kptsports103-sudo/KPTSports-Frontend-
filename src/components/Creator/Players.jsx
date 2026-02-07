@@ -308,6 +308,18 @@ const Players = ({ isStudent = false }) => {
     }
   };
 
+  const srOnlyStyle = {
+    position: 'absolute',
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: 'hidden',
+    clip: 'rect(0, 0, 0, 0)',
+    whiteSpace: 'nowrap',
+    border: 0
+  };
+
   return (
     <div style={styles.page}>
       {/* Header */}
@@ -457,9 +469,12 @@ const Players = ({ isStudent = false }) => {
             </h3>
 
             <div style={styles.tableToolbar}>
+              <label htmlFor={`player-search-${yearData.year}`} style={srOnlyStyle}>
+                Search players by name or branch for {yearData.year}
+              </label>
               <input
-                id="player-search"
-                name="player-search"
+                id={`player-search-${yearData.year}`}
+                name={`player-search-${yearData.year}`}
                 type="text"
                 placeholder="Search by name or branch..."
                 value={searchInput}
@@ -539,7 +554,9 @@ const Players = ({ isStudent = false }) => {
                               <td style={{ padding: "10px 16px" }}>{(currentPage - 1) * ITEMS_PER_PAGE + playerIndex + 1}</td>
                               <td style={{ padding: "10px 16px" }}>{yearData.year}</td>
                               <td style={{ padding: "10px 16px" }}>
-                                <label htmlFor={`player-name-${yearData.year}-${originalIndex}`} style={{ display: 'none' }}>Player Name for {yearData.year} Row {playerIndex + 1}</label>
+                                <label htmlFor={`player-name-${yearData.year}-${originalIndex}`} style={srOnlyStyle}>
+                                  Player Name for {yearData.year} Row {playerIndex + 1}
+                                </label>
                                 <input
                                   id={`player-name-${yearData.year}-${originalIndex}`}
                                   name={`player-name-${yearData.year}-${originalIndex}`}
@@ -553,7 +570,9 @@ const Players = ({ isStudent = false }) => {
                                 />
                               </td>
                               <td style={{ padding: "10px 16px" }}>
-                                <label htmlFor={`player-branch-${yearData.year}-${originalIndex}`} style={{ display: 'none' }}>Player Branch for {yearData.year} Row {playerIndex + 1}</label>
+                                <label htmlFor={`player-branch-${yearData.year}-${originalIndex}`} style={srOnlyStyle}>
+                                  Player Branch for {yearData.year} Row {playerIndex + 1}
+                                </label>
                                 <input
                                   id={`player-branch-${yearData.year}-${originalIndex}`}
                                   name={`player-branch-${yearData.year}-${originalIndex}`}
@@ -567,7 +586,9 @@ const Players = ({ isStudent = false }) => {
                                 />
                               </td>
                               <td style={{ padding: "10px 16px" }}>
-                                <label htmlFor={`player-diploma-${yearData.year}-${originalIndex}`} style={{ display: 'none' }}>Diploma Year for {yearData.year} Row {playerIndex + 1}</label>
+                                <label htmlFor={`player-diploma-${yearData.year}-${originalIndex}`} style={srOnlyStyle}>
+                                  Diploma Year for {yearData.year} Row {playerIndex + 1}
+                                </label>
                                 <select
                                   id={`player-diploma-${yearData.year}-${originalIndex}`}
                                   name={`player-diploma-${yearData.year}-${originalIndex}`}

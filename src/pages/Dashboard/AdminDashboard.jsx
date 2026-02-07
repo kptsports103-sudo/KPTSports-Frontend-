@@ -3,7 +3,6 @@
 import { Link } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { useState, useEffect } from "react";
-import { IAMService } from "../../services/iam.service";
 import DailyVisitorsChart from "../../admin/components/DailyVisitorsChart";
 import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonChart";
 import { jsPDF } from "jspdf";
@@ -18,7 +17,6 @@ const normalizeMedalKey = (medal = "") => {
 };
 
 const AdminDashboard = () => {
-  const [totalUsers, setTotalUsers] = useState(0);
   const [totalMedia, setTotalMedia] = useState(0);
   const [certificateRows, setCertificateRows] = useState([]);
   const [isGeneratingId, setIsGeneratingId] = useState(null);
@@ -28,37 +26,37 @@ const AdminDashboard = () => {
   const [playerYear, setPlayerYear] = useState("all");
 
   useEffect(() => {
-    const fetchUserCount = async () => {
+    const fetchPlayerData = async () => {
       try {
-        const users = await IAMService.getUsers();
-        setTotalUsers(users.length);
-        const students = users.filter((u) => (u.role || "").toLowerCase() === "student");
-        const rows = students.map((u) => ({
-          id: u._id || u.id || u.email,
-          name: u.name || "",
-          kpmNo: u.kpmNo || u.kpm_no || "",
-          semester: u.semester || "",
-          department: u.department || u.dept || "",
-          competition: u.competition || u.event || "",
-          year: u.year || "",
-          position: u.position || "",
-          achievement: u.achievement || "",
-        }));
-        setCertificateRows(rows);
+        const playersRes = await api.get('/home/players');
+        const playersGrouped = playersRes.data || {};
+        
+        // Flatten players by year
+        const allPlayers = [];
+        Object.keys(playersGrouped).forEach(year => {
+          const yearNum = parseInt(year);
+          playersGrouped[year].forEach(player => {
+            allPlayers.push({
+              id: player.id || player.playerId,
+              name: player.name || '',
+              kpmNo: player.kpmNo || '',
+              semester: player.semester || '',
+              department: player.branch || player.department || player.dept || '',
+              competition: player.competition || player.event || '',
+              year: yearNum,
+              diplomaYear: player.diplomaYear || ''
+            });
+          });
+        });
+        
+        setCertificateRows(allPlayers);
       } catch (error) {
-        console.error('Failed to fetch user count:', error);
-        setTotalUsers(0);
+        console.error('Failed to fetch player data:', error);
         setCertificateRows([]);
       }
     };
 
-    const loadMediaCount = () => {
-      const stored = JSON.parse(localStorage.getItem("media") || "[]");
-      setTotalMedia(stored.length);
-    };
-
-    fetchUserCount();
-    loadMediaCount();
+    fetchPlayerData();
   }, []);
 
   useEffect(() => {
@@ -110,6 +108,16 @@ const AdminDashboard = () => {
     fetchYearlyStats();
   }, []);
 
+  // Set default selected year after medalData is loaded
+  useEffect(() => {
+    if (medalData.length > 0) {
+      const defaultYear = String(medalData[0].year);
+      if (selectedYear === "" || !medalData.some(m => String(m.year) === selectedYear)) {
+        setSelectedYear(defaultYear);
+      }
+    }
+  }, [medalData]);
+
   const loadImage = (src) =>
     new Promise((resolve, reject) => {
       const img = new Image();
@@ -124,6 +132,11 @@ const AdminDashboard = () => {
   };
 
   const handleDownloadCertificate = async (row) => {
+    if (!row || !row.name) {
+      alert("Invalid certificate data");
+      return;
+    }
+    
     setIsGeneratingId(row.id);
     try {
       const template = await loadImage("/certificate.jpeg");
@@ -131,6 +144,10 @@ const AdminDashboard = () => {
       canvas.width = template.width;
       canvas.height = template.height;
       const ctx = canvas.getContext("2d");
+      
+      if (!ctx) {
+        throw new Error("Canvas not supported");
+      }
 
       ctx.drawImage(template, 0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#111";
@@ -141,7 +158,7 @@ const AdminDashboard = () => {
       const scaleX = canvas.width / base.w;
       const scaleY = canvas.height / base.h;
       const fontSize = Math.round(28 * scaleY);
-      ctx.font = `${fontSize}px "Times New Roman", serif`;
+      ctx.font = `${fontSize}px serif`; // Use system serif font for cross-platform compatibility
 
       const positions = {
         kpmNo: { x: 260, y: 515 },
@@ -222,16 +239,35 @@ const AdminDashboard = () => {
     }
   }, [medalData, selectedYear]);
 
-  const selectedStats = medalData.find((m) => String(m.year) === String(selectedYear)) || medalData[0];
+  const selectedStats = medalData.length > 0
+    ? medalData.find((m) => String(m.year) === String(selectedYear)) || medalData[0]
+    : null;
+
+  // Calculate safe values for conic gradient
+  const medalBase = selectedStats?.totalMedals > 0 ? selectedStats.totalMedals : 1;
+  const goldPercent = selectedStats ? (selectedStats.totalGold / medalBase) * 100 : 0;
+  const silverPercent = selectedStats ? ((selectedStats.totalGold + selectedStats.totalSilver) / medalBase) * 100 : 0;
+
+  // Available years - normalize to strings
   const availablePlayerYears = Array.from(
-    new Set(certificateRows.map((row) => row.year).filter(Boolean))
+    new Set(
+      certificateRows
+        .map((row) => String(row.year || "").trim())
+        .filter(Boolean)
+    )
   ).sort((a, b) => Number(b) - Number(a));
+
+  // Filter players based on search and year
   const filteredPlayers = certificateRows.filter((row) => {
-    const matchesYear = playerYear === "all" || String(row.year) === String(playerYear);
+    const matchesYear =
+      playerYear === "all" || String(row.year) === String(playerYear);
+
     const term = playerSearch.trim().toLowerCase();
     if (!term) return matchesYear;
+
     const name = (row.name || "").toLowerCase();
     const branch = (row.department || "").toLowerCase();
+
     return matchesYear && (name.includes(term) || branch.includes(term));
   });
 
@@ -243,9 +279,8 @@ const AdminDashboard = () => {
     }
   };
 
-  // Dynamic stats with real user count
+  // Dynamic stats
   const stats = [
-    { title: "Total Users", value: totalUsers, icon: "👤", link: "/admin/users-manage" },
     { title: "Update Pages", value: "Manage", icon: "📄", link: "/admin/update-pages" },
     { title: "Media Files", value: totalMedia, icon: "🖼️", link: "/admin/media-stats" },
     { title: "Visitors", value: "Analytics", icon: "📊", action: "scrollToVisitors" },
@@ -358,9 +393,9 @@ const AdminDashboard = () => {
                     className="stats-circle-animated"
                     style={{
                       background: `conic-gradient(
-                        #f1c40f 0 ${(selectedStats?.totalGold / (selectedStats?.totalMedals || 1)) * 100}%,
-                        #bdc3c7 ${(selectedStats?.totalGold / (selectedStats?.totalMedals || 1)) * 100}% ${((selectedStats?.totalGold + selectedStats?.totalSilver) / (selectedStats?.totalMedals || 1)) * 100}%,
-                        #cd7f32 ${((selectedStats?.totalGold + selectedStats?.totalSilver) / (selectedStats?.totalMedals || 1)) * 100}% 100%
+                        #f1c40f 0 ${goldPercent}%,
+                        #bdc3c7 ${goldPercent}% ${silverPercent}%,
+                        #cd7f32 ${silverPercent}% 100%
                       )`,
                     }}
                   >
@@ -454,6 +489,8 @@ const AdminDashboard = () => {
             </div>
           ))}
         </div>
+      </div>
+    </div>
 
         {/* =====================
             PLAYERS LIST
@@ -566,17 +603,10 @@ const AdminDashboard = () => {
             </table>
           )}
         </div>
-        </div>
-      </div>
       </div>
     </AdminLayout>
   );
 };
 
 export default AdminDashboard;
-
-
-
-
-
 

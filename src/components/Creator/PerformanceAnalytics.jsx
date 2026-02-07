@@ -33,6 +33,18 @@ export default function PerformanceAnalytics() {
   const [searchTerm, setSearchTerm] = useState('');
   const [availableYears, setAvailableYears] = useState([]);
 
+  const srOnlyStyle = {
+    position: 'absolute',
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: 'hidden',
+    clip: 'rect(0, 0, 0, 0)',
+    whiteSpace: 'nowrap',
+    border: 0
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -244,6 +256,41 @@ export default function PerformanceAnalytics() {
     setPlayerDetails(null);
   };
 
+  const selectedYearNumber = selectedYear === 'all' ? null : parseInt(selectedYear);
+
+  const visiblePlayerRows = players.flatMap((player) => {
+    const yearsToShow = selectedYearNumber
+      ? player.years.filter((year) => year === selectedYearNumber)
+      : player.years;
+    return yearsToShow.map((year) => ({
+      year,
+      name: player.name,
+      branch: player.yearDetails[year]?.branch || player.branch || '',
+      diplomaYear: player.yearDetails[year]?.diplomaYear || ''
+    }));
+  });
+
+  const medalRows = [
+    ...(results || []).map((result) => ({
+      year: parseInt(result.year),
+      medal: result.medal,
+      type: 'Individual',
+      name: result.name,
+      playerName: result.name,
+      points: INDIVIDUAL_POINTS[result.medal] || 0
+    })),
+    ...(groupResults || []).map((result) => ({
+      year: parseInt(result.year),
+      medal: result.medal,
+      type: 'Group',
+      name: result.teamName,
+      teamName: result.teamName,
+      points: GROUP_POINTS[result.medal] || 0
+    }))
+  ]
+    .filter((row) => !selectedYearNumber || row.year === selectedYearNumber)
+    .sort((a, b) => b.year - a.year);
+
   if (loading) {
     return (
       <div className="performance-page">
@@ -280,7 +327,7 @@ export default function PerformanceAnalytics() {
       <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
         {/* Year Select */}
         <div>
-          <label htmlFor="analytics-year-select" style={{ display: 'none' }}>Select Year</label>
+          <label htmlFor="analytics-year-select" style={srOnlyStyle}>Select Year</label>
           <select
             id="analytics-year-select"
             name="analytics-year-select"
@@ -306,7 +353,7 @@ export default function PerformanceAnalytics() {
         
         {/* Search Input */}
         <div>
-          <label htmlFor="analytics-search" style={{ display: 'none' }}>Search players</label>
+          <label htmlFor="analytics-search" style={srOnlyStyle}>Search players</label>
           <input
             id="analytics-search"
             name="analytics-search"
@@ -334,6 +381,85 @@ export default function PerformanceAnalytics() {
         </div>
       </div>
 
+      {/* PLAYERS LIST TABLE */}
+      {allPlayers.length > 0 && (
+        <div className="analytics-table" style={{ marginBottom: '28px' }}>
+          <h2 style={{ marginBottom: '12px' }}>Players List</h2>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>YEAR</th>
+                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>PLAYER NAME</th>
+                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>BRANCH</th>
+                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>DIPLOMA YEAR</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visiblePlayerRows.length === 0 ? (
+                <tr>
+                  <td colSpan="4" style={{ padding: '12px', textAlign: 'center', color: '#6b7280' }}>
+                    No player data available
+                  </td>
+                </tr>
+              ) : (
+                visiblePlayerRows.map((row, idx) => (
+                  <tr key={`${row.year}-${row.name}-${idx}`}>
+                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.year}</td>
+                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.name}</td>
+                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.branch}</td>
+                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.diplomaYear}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* MEDAL ANALYTICS TABLE */}
+      {(results.length > 0 || groupResults.length > 0) && (
+        <div className="analytics-table" style={{ marginBottom: '28px' }}>
+          <h2 style={{ marginBottom: '12px' }}>Medal Performance</h2>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>YEAR</th>
+                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>PLAYER / TEAM</th>
+                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>MEDAL</th>
+                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>TYPE</th>
+                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>POINTS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {medalRows.length === 0 ? (
+                <tr>
+                  <td colSpan="5" style={{ padding: '12px', textAlign: 'center', color: '#6b7280' }}>
+                    No medal data available
+                  </td>
+                </tr>
+              ) : (
+                medalRows.map((row, idx) => {
+                  const points = INDIVIDUAL_POINTS[row.medal] || 0;
+                  return (
+                    <tr key={`${row.type}-${row.year}-${idx}`}>
+                      <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.year}</td>
+                      <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.playerName || row.teamName || row.name || '-'}</td>
+                      <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>
+                        <span className={`medal-badge medal-${row.medal?.toLowerCase() || 'gold'}`}>
+                          {row.medal}
+                        </span>
+                      </td>
+                      <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.type}</td>
+                      <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{points} pts</td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {/* EMPTY STATE */}
       {allPlayers.length === 0 ? (
         <div className="empty-state">
@@ -359,46 +485,94 @@ export default function PerformanceAnalytics() {
         </div>
       ) : (
         <div className="player-grid">
-          {players.map((player, index) => (
-            <div 
-              key={index} 
-              className="player-card player-clickable"
-              onClick={() => handlePlayerClick(player)}
-            >
-              <div className="player-header">
-                <h2>{player.name}</h2>
-                <span className="dept">{player.branch}</span>
+          {players.map((player, index) => {
+            const totalMedals = player.individualResults.length + player.groupResults.length;
+            const goldCount = [...player.individualResults, ...player.groupResults].filter(r => r.medal === 'Gold').length;
+            const silverCount = [...player.individualResults, ...player.groupResults].filter(r => r.medal === 'Silver').length;
+            const bronzeCount = [...player.individualResults, ...player.groupResults].filter(r => r.medal === 'Bronze').length;
+            
+            return (
+              <div 
+                key={index} 
+                className="player-card player-clickable"
+                onClick={() => handlePlayerClick(player)}
+              >
+                <div className="player-header">
+                  <h2>{player.name}</h2>
+                  <span className="dept">{player.branch}</span>
+                </div>
+
+                <div className="player-body">
+                  {/* Medals Row */}
+                  {(totalMedals > 0) && (
+                    <div style={{ 
+                      display: 'flex', 
+                      gap: '8px', 
+                      marginBottom: '12px',
+                      justifyContent: 'center'
+                    }}>
+                      {goldCount > 0 && (
+                        <span style={{ 
+                          background: '#fff3cd', 
+                          color: '#856404',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>🥇 {goldCount}</span>
+                      )}
+                      {silverCount > 0 && (
+                        <span style={{ 
+                          background: '#e2e3e5', 
+                          color: '#383d41',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>🥈 {silverCount}</span>
+                      )}
+                      {bronzeCount > 0 && (
+                        <span style={{ 
+                          background: '#ffe8cc', 
+                          color: '#663c00',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>🥉 {bronzeCount}</span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Year-wise Points */}
+                  <div className="info-row">
+                    <strong>1st Year</strong>
+                    <span className="points-badge">{player.firstYearPoints} pts</span>
+                  </div>
+
+                  <div className="info-row">
+                    <strong>2nd Year</strong>
+                    <span className="points-badge">{player.secondYearPoints} pts</span>
+                  </div>
+
+                  <div className="info-row">
+                    <strong>3rd Year</strong>
+                    <span className="points-badge">{player.thirdYearPoints} pts</span>
+                  </div>
+
+                  <div className="info-row">
+                    <strong>Total Meets</strong>
+                    <span className="meets-badge">{player.totalMeets}</span>
+                  </div>
+
+                  <div className="info-row total-row">
+                    <strong>Total Points</strong>
+                    <span className="total-badge">{player.totalPoints} pts</span>
+                  </div>
+                </div>
               </div>
-
-              <div className="player-body">
-                {/* Year-wise Points */}
-                <div className="info-row">
-                  <strong>1st Year</strong>
-                  <span className="points-badge">{player.firstYearPoints} pts</span>
-                </div>
-
-                <div className="info-row">
-                  <strong>2nd Year</strong>
-                  <span className="points-badge">{player.secondYearPoints} pts</span>
-                </div>
-
-                <div className="info-row">
-                  <strong>3rd Year</strong>
-                  <span className="points-badge">{player.thirdYearPoints} pts</span>
-                </div>
-
-                <div className="info-row">
-                  <strong>Total Meets</strong>
-                  <span className="meets-badge">{player.totalMeets}</span>
-                </div>
-
-                <div className="info-row total-row">
-                  <strong>Total Points</strong>
-                  <span className="total-badge">{player.totalPoints} pts</span>
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
