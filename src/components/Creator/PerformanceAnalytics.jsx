@@ -130,8 +130,20 @@ export default function PerformanceAnalytics() {
         // Calculate points for each player
         Object.keys(playersMap).forEach(key => {
           const player = playersMap[key];
+          
+          // 🔴 RESET per-player accumulators (ensures no stale values)
+          player.firstYearPoints = 0;
+          player.secondYearPoints = 0;
+          player.thirdYearPoints = 0;
+          player.totalPoints = 0;
+          player.individualResults = [];
+          player.groupResults = [];
+          
           const years = player.years.sort((a, b) => a - b);
           player.totalMeets = Array.from(new Set(years)).length;
+          
+          // Initialize totalPoints accumulator
+          let playerTotalPoints = 0;
           
           // Individual results points
           results.forEach(result => {
@@ -156,7 +168,7 @@ export default function PerformanceAnalytics() {
             const medalPoints = INDIVIDUAL_POINTS[medalKey] || 0;
             const resultYear = parseInt(result.year);
             const diplomaYearRaw = result.diplomaYear ?? player.yearDetails[resultYear]?.diplomaYear ?? player.yearDetails[player.years[0]]?.diplomaYear;
-            const diplomaYear = Number(diplomaYearRaw);
+            const academicYear = Number(diplomaYearRaw);
 
             // Store individual result
             player.individualResults.push({
@@ -167,9 +179,16 @@ export default function PerformanceAnalytics() {
               imageUrl: result.imageUrl
             });
 
-            // Add points to appropriate year (only if diplomaYear is 1, 2, or 3)
-            if (diplomaYear >= 1 && diplomaYear <= 3) {
-              addPoints(player, diplomaYear, medalPoints);
+            // Add points to academic year bucket (1, 2, or 3)
+            if (academicYear === 1) {
+              player.firstYearPoints += medalPoints;
+              playerTotalPoints += medalPoints;
+            } else if (academicYear === 2) {
+              player.secondYearPoints += medalPoints;
+              playerTotalPoints += medalPoints;
+            } else if (academicYear === 3) {
+              player.thirdYearPoints += medalPoints;
+              playerTotalPoints += medalPoints;
             }
           });
           
@@ -206,7 +225,7 @@ export default function PerformanceAnalytics() {
               const medalPoints = (GROUP_POINTS[medalKey] || 0) / memberIds.length;
               const resultYear = parseInt(group.year);
               const diplomaYearRaw = player.yearDetails[resultYear]?.diplomaYear ?? player.yearDetails[player.years[0]]?.diplomaYear;
-              const diplomaYear = Number(diplomaYearRaw);
+              const academicYear = Number(diplomaYearRaw);
 
               // Store group result
               player.groupResults.push({
@@ -218,9 +237,16 @@ export default function PerformanceAnalytics() {
                 members: group.members
               });
 
-              // Add points to appropriate year (only if diplomaYear is 1, 2, or 3)
-              if (diplomaYear >= 1 && diplomaYear <= 3) {
-                addPoints(player, diplomaYear, medalPoints);
+              // Add points to academic year bucket (1, 2, or 3)
+              if (academicYear === 1) {
+                player.firstYearPoints += medalPoints;
+                playerTotalPoints += medalPoints;
+              } else if (academicYear === 2) {
+                player.secondYearPoints += medalPoints;
+                playerTotalPoints += medalPoints;
+              } else if (academicYear === 3) {
+                player.thirdYearPoints += medalPoints;
+                playerTotalPoints += medalPoints;
               }
             });
           });
@@ -229,11 +255,11 @@ export default function PerformanceAnalytics() {
           player.individualResults.sort((a, b) => a.year - b.year);
           player.groupResults.sort((a, b) => a.year - b.year);
           
-          // Round points after accumulation
+          // Round points after accumulation and set total
           player.firstYearPoints = Number(player.firstYearPoints.toFixed(2));
           player.secondYearPoints = Number(player.secondYearPoints.toFixed(2));
           player.thirdYearPoints = Number(player.thirdYearPoints.toFixed(2));
-          player.totalPoints = Number((player.firstYearPoints + player.secondYearPoints + player.thirdYearPoints).toFixed(2));
+          player.totalPoints = Number(playerTotalPoints.toFixed(2));
         });
         
         // Get available years from players
