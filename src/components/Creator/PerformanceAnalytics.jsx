@@ -20,6 +20,10 @@ const normalizeName = (name) => {
   return (name || '').toLowerCase().trim().replace(/\s+/g, ' ');
 };
 
+// Normalize medal key (handle lowercase/uppercase from backend)
+const normalizeMedal = (medal) =>
+  medal ? medal.charAt(0).toUpperCase() + medal.slice(1).toLowerCase() : '';
+
 export default function PerformanceAnalytics() {
   const [players, setPlayers] = useState([]);
   const [allPlayers, setAllPlayers] = useState([]);
@@ -134,7 +138,8 @@ export default function PerformanceAnalytics() {
             const resolvedId = result.playerId || playersByName[normalizeName(result.name)];
             if (!resolvedId || resolvedId !== player.id) return;
 
-            const medalPoints = INDIVIDUAL_POINTS[result.medal] || 0;
+            const medalKey = normalizeMedal(result.medal);
+            const medalPoints = INDIVIDUAL_POINTS[medalKey] || 0;
             const resultYear = parseInt(result.year);
             const diplomaYearRaw = result.diplomaYear ?? player.yearDetails[resultYear]?.diplomaYear ?? player.yearDetails[player.years[0]]?.diplomaYear;
             const diplomaYear = Number(diplomaYearRaw);
@@ -167,7 +172,8 @@ export default function PerformanceAnalytics() {
             memberIds.forEach(memberId => {
               if (memberId !== player.id) return;
 
-              const medalPoints = (GROUP_POINTS[group.medal] || 0) / memberIds.length;
+              const medalKey = normalizeMedal(group.medal);
+              const medalPoints = (GROUP_POINTS[medalKey] || 0) / memberIds.length;
               const resultYear = parseInt(group.year);
               const diplomaYearRaw = player.yearDetails[resultYear]?.diplomaYear ?? player.yearDetails[player.years[0]]?.diplomaYear;
               const diplomaYear = Number(diplomaYearRaw);
@@ -280,7 +286,7 @@ export default function PerformanceAnalytics() {
       type: 'Individual',
       name: result.name,
       playerName: result.name,
-      points: INDIVIDUAL_POINTS[result.medal] || 0
+      points: INDIVIDUAL_POINTS[normalizeMedal(result.medal)] || 0
     })),
     ...(groupResults || []).map((result) => ({
       year: parseInt(result.year),
@@ -288,7 +294,7 @@ export default function PerformanceAnalytics() {
       type: 'Group',
       name: result.teamName,
       teamName: result.teamName,
-      points: GROUP_POINTS[result.medal] || 0
+      points: GROUP_POINTS[normalizeMedal(result.medal)] || 0
     }))
   ]
     .filter((row) => !selectedYearNumber || row.year === selectedYearNumber)
@@ -442,7 +448,10 @@ export default function PerformanceAnalytics() {
                 </tr>
               ) : (
                 medalRows.map((row, idx) => {
-                  const points = INDIVIDUAL_POINTS[row.medal] || 0;
+                  const medalKey = normalizeMedal(row.medal);
+                  const points = row.type === 'Group'
+                    ? GROUP_POINTS[medalKey] || 0
+                    : INDIVIDUAL_POINTS[medalKey] || 0;
                   return (
                     <tr key={`${row.type}-${row.year}-${idx}`}>
                       <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.year}</td>
@@ -490,9 +499,10 @@ export default function PerformanceAnalytics() {
         <div className="player-grid">
           {players.map((player, index) => {
             const totalMedals = player.individualResults.length + player.groupResults.length;
-            const goldCount = [...player.individualResults, ...player.groupResults].filter(r => r.medal === 'Gold').length;
-            const silverCount = [...player.individualResults, ...player.groupResults].filter(r => r.medal === 'Silver').length;
-            const bronzeCount = [...player.individualResults, ...player.groupResults].filter(r => r.medal === 'Bronze').length;
+            const allResults = [...player.individualResults, ...player.groupResults];
+            const goldCount = allResults.filter(r => normalizeMedal(r.medal) === 'Gold').length;
+            const silverCount = allResults.filter(r => normalizeMedal(r.medal) === 'Silver').length;
+            const bronzeCount = allResults.filter(r => normalizeMedal(r.medal) === 'Bronze').length;
             
             return (
               <div 
