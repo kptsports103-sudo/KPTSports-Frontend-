@@ -24,6 +24,13 @@ const normalizeName = (name) => {
 const normalizeMedal = (medal) =>
   medal ? medal.charAt(0).toUpperCase() + medal.slice(1).toLowerCase() : '';
 
+// Safe academic year resolver - returns 1, 2, 3 or null
+const getAcademicYear = (player, resultYear, resultDiplomaYear) => {
+  const year = resultDiplomaYear ?? player.yearDetails[resultYear]?.diplomaYear;
+  const num = Number(year);
+  return [1, 2, 3].includes(num) ? num : null;
+};
+
 export default function PerformanceAnalytics() {
   const [players, setPlayers] = useState([]);
   const [allPlayers, setAllPlayers] = useState([]);
@@ -151,7 +158,7 @@ export default function PerformanceAnalytics() {
             const resultNameKey = normalizeName(result.name);
             
             // Check for playerId match first
-            if (result.playerId && result.playerId === player.id) {
+            if (result.playerId && Number(result.playerId) === Number(player.id)) {
               // Match found via playerId
             } else if (
               resultNameKey === normalizeName(player.name) ||
@@ -167,8 +174,10 @@ export default function PerformanceAnalytics() {
             const medalKey = normalizeMedal(result.medal);
             const medalPoints = INDIVIDUAL_POINTS[medalKey] || 0;
             const resultYear = parseInt(result.year);
-            const diplomaYearRaw = result.diplomaYear ?? player.yearDetails[resultYear]?.diplomaYear ?? player.yearDetails[player.years[0]]?.diplomaYear;
-            const academicYear = Number(diplomaYearRaw);
+            const academicYear = getAcademicYear(player, resultYear, result.diplomaYear);
+            
+            // Skip if academic year is invalid
+            if (!academicYear) return;
 
             // Store individual result
             player.individualResults.push({
@@ -219,13 +228,15 @@ export default function PerformanceAnalytics() {
             if (!memberIds.length) return;
 
             memberIds.forEach(memberId => {
-              if (memberId !== player.id) return;
+              if (Number(memberId) !== Number(player.id)) return;
 
               const medalKey = normalizeMedal(group.medal);
               const medalPoints = (GROUP_POINTS[medalKey] || 0) / memberIds.length;
               const resultYear = parseInt(group.year);
-              const diplomaYearRaw = player.yearDetails[resultYear]?.diplomaYear ?? player.yearDetails[player.years[0]]?.diplomaYear;
-              const academicYear = Number(diplomaYearRaw);
+              const academicYear = getAcademicYear(player, resultYear);
+              
+              // Skip if academic year is invalid
+              if (!academicYear) return;
 
               // Store group result
               player.groupResults.push({
