@@ -390,7 +390,8 @@ export default function PerformanceAnalytics() {
         </div>
       </div>
 
-      {/* PLAYERS LIST TABLE */}
+      {/* PLAYERS LIST TABLE - Commented out for card-only view */}
+      {/*
       {allPlayers.length > 0 && (
         <div className="analytics-table" style={{ marginBottom: '28px' }}>
           <h2 style={{ marginBottom: '12px' }}>Players List</h2>
@@ -424,8 +425,10 @@ export default function PerformanceAnalytics() {
           </table>
         </div>
       )}
+      */}
 
-      {/* MEDAL ANALYTICS TABLE */}
+      {/* MEDAL ANALYTICS TABLE - Commented out for card-only view */}
+      {/*
       {(results.length > 0 || groupResults.length > 0) && (
         <div className="analytics-table" style={{ marginBottom: '28px' }}>
           <h2 style={{ marginBottom: '12px' }}>Medal Performance</h2>
@@ -471,6 +474,7 @@ export default function PerformanceAnalytics() {
           </table>
         </div>
       )}
+      */}
 
       {/* EMPTY STATE */}
       {allPlayers.length === 0 ? (
