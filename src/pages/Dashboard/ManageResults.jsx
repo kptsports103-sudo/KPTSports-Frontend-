@@ -247,15 +247,6 @@ const ManageResults = () => {
   };
 
   const handleGroupEdit = (item) => {
-    const resolvedMemberIds = Array.isArray(item.memberIds) && item.memberIds.length > 0
-      ? item.memberIds
-      : (item.members || [])
-          .map((member) => {
-            const name = typeof member === 'string' ? member : member?.name;
-            return players.find(p => normalizeName(p.name) === normalizeName(name))?.id;
-          })
-          .filter(Boolean);
-
     const manualNames = (item.members || [])
       .map((member) => {
         if (typeof member === 'string') return member;
@@ -266,7 +257,7 @@ const ManageResults = () => {
 
     setGroupForm({
       ...item,
-      memberIds: resolvedMemberIds,
+      memberIds: [],
       members: item.members && Array.isArray(item.members) ? item.members : [],
       manualMembers: manualNames.join('\n')
     });
@@ -278,18 +269,6 @@ const ManageResults = () => {
     e.preventDefault();
     try {
       console.log('Submitting group form:', groupForm);
-
-      const selectedMembers = (groupForm.memberIds || [])
-        .map(id => {
-          const player = playersById[id];
-          if (!player) return null;
-          return {
-            playerId: player.id,
-            name: player.name,
-            diplomaYear: player.diplomaYear || null
-          };
-        })
-        .filter(Boolean);
 
       const manualNames = (groupForm.manualMembers || '')
         .split(/[\n,]+/)
@@ -308,7 +287,7 @@ const ManageResults = () => {
         return { playerId: null, name, diplomaYear: null };
       });
 
-      const combinedMembers = [...selectedMembers, ...manualMembers];
+      const combinedMembers = [...manualMembers];
       const dedupedMembers = [];
       const seen = new Set();
       combinedMembers.forEach(m => {
@@ -869,24 +848,6 @@ const ManageResults = () => {
                     value={groupForm.year}
                     onChange={e => setGroupForm({...groupForm, year: e.target.value})}
                   />
-                </Field>
-
-                <Field label="Members" htmlFor="group-members">
-                  <select
-                    multiple
-                    style={{ ...styles.select, height: 140 }}
-                    value={groupForm.memberIds}
-                    onChange={e => {
-                      const selectedIds = Array.from(e.target.selectedOptions).map(o => o.value);
-                      setGroupForm({ ...groupForm, memberIds: selectedIds });
-                    }}
-                  >
-                    {players.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} - {p.branch} (Y{p.diplomaYear}, {p.participationYear})
-                      </option>
-                    ))}
-                  </select>
                 </Field>
 
                 <Field label="Manual Members" htmlFor="group-manual-members">
