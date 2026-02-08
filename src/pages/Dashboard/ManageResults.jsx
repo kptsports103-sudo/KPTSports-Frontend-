@@ -29,6 +29,7 @@ const ManageResults = () => {
   const [form, setForm] = useState({
     name: '',
     playerId: '',
+    branch: '',
     event: '',
     year: '',
     medal: '',
@@ -182,6 +183,7 @@ const ManageResults = () => {
       const payload = {
         ...form,
         name: selectedPlayer?.name || form.name,
+        branch: selectedPlayer?.branch || form.branch,
         diplomaYear: finalDiplomaYear,
         playerId: selectedPlayer?.id || form.playerId || ''
       };
@@ -240,7 +242,8 @@ const ManageResults = () => {
     setForm({
       ...item,
       playerId: item.playerId || matchedPlayer?.id || '',
-      diplomaYear: item.diplomaYear || matchedPlayer?.diplomaYear || ''
+      diplomaYear: item.diplomaYear || matchedPlayer?.diplomaYear || '',
+      branch: item.branch || matchedPlayer?.branch || ''
     });
     setEditingId(item._id);
     setIsEditing(true);
@@ -433,7 +436,7 @@ const ManageResults = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: '', playerId: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
+    setForm({ name: '', playerId: '', branch: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
     setEditingId(null);
   };
 
@@ -719,6 +722,7 @@ const ManageResults = () => {
                 <tr style={styles.headerRow}>
                   <th style={styles.headerCell}>Player</th>
                   <th style={styles.headerCell}>Name (manual)</th>
+                  <th style={styles.headerCell}>Branch</th>
                   <th style={styles.headerCell}>Event</th>
                   <th style={styles.headerCell}>Year</th>
                   <th style={styles.headerCell}>Diploma Year</th>
@@ -741,6 +745,7 @@ const ManageResults = () => {
                           ...form,
                           playerId: selectedId,
                           name: selectedPlayer?.name || form.name,
+                          branch: selectedPlayer?.branch || form.branch,
                           diplomaYear: selectedPlayer?.diplomaYear || form.diplomaYear
                         });
                       }}
@@ -762,6 +767,17 @@ const ManageResults = () => {
                       onChange={e => setForm({ ...form, name: e.target.value })}
                       readOnly={!!form.playerId}
                       required={!form.playerId}
+                    />
+                  </td>
+                  <td style={styles.cell}>
+                    <input
+                      id="result-branch"
+                      name="result-branch"
+                      style={styles.input}
+                      value={form.branch}
+                      onChange={e => setForm({ ...form, branch: e.target.value })}
+                      readOnly={!!form.playerId}
+                      placeholder="Branch"
                     />
                   </td>
                   <td style={styles.cell}>
