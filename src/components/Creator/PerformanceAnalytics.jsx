@@ -24,16 +24,23 @@ const normalizeName = (name) => {
 const normalizeMedal = (medal) =>
   medal ? medal.charAt(0).toUpperCase() + medal.slice(1).toLowerCase() : '';
 
-// Get academic year from result
-// After migration, all results have diplomaYear stored
-const getAcademicYear = (result) => {
-  if (result.diplomaYear) {
-    const year = Number(result.diplomaYear);
-    if ([1, 2, 3].includes(year)) {
-      return year;
-    }
+// Get academic year from result data with fallback calculation
+const getAcademicYear = (player, resultYear, resultDiplomaYear) => {
+  const directYear = Number(resultDiplomaYear);
+  if ([1, 2, 3].includes(directYear)) {
+    return directYear;
   }
-  return null;
+
+  const ry = Number(resultYear);
+  const baseYear = Number(player?.baseYear);
+  const baseDiplomaYear = Number(player?.baseDiplomaYear);
+
+  if (!Number.isFinite(ry) || !Number.isFinite(baseYear) || !Number.isFinite(baseDiplomaYear)) {
+    return null;
+  }
+
+  const calculated = baseDiplomaYear + (ry - baseYear);
+  return [1, 2, 3].includes(calculated) ? calculated : null;
 };
 
 export default function PerformanceAnalytics() {
@@ -76,11 +83,13 @@ export default function PerformanceAnalytics() {
         
         // Fetch individual results
         const resultsRes = await api.get('/results');
-        setResults(resultsRes.data || []);
+        const resultsData = resultsRes.data || [];
+        setResults(resultsData);
         
         // Fetch group results
         const groupRes = await api.get('/group-results');
-        setGroupResults(groupRes.data || []);
+        const groupResultsData = groupRes.data || [];
+        setGroupResults(groupResultsData);
         
         // Flatten all players with their year info
         const allPlayers = [];
@@ -107,16 +116,16 @@ export default function PerformanceAnalytics() {
         console.log('\n' + '='.repeat(60));
         console.log('🔍 DIAGNOSTIC: Results Data Sample');
         console.log('='.repeat(60));
-        console.log('Total results loaded:', results.length);
-        results.slice(0, 5).forEach((r, i) => {
+        console.log('Total results loaded:', resultsData.length);
+        resultsData.slice(0, 5).forEach((r, i) => {
           console.log(`  [${i}] Name: "${r.name}" | playerId: "${r.playerId}" | medal: "${r.medal}" | year: ${r.year} | diplomaYear: "${r.diplomaYear}"`);
         });
         
         console.log('\n' + '='.repeat(60));
         console.log('🔍 DIAGNOSTIC: Group Results Data Sample');
         console.log('='.repeat(60));
-        console.log('Total group results loaded:', groupResults.length);
-        groupResults.slice(0, 3).forEach((g, i) => {
+        console.log('Total group results loaded:', groupResultsData.length);
+        groupResultsData.slice(0, 3).forEach((g, i) => {
           console.log(`  [${i}] Event: "${g.event}" | teamName: "${g.teamName}" | members: [${g.members?.slice(0, 3).join(', ')}${g.members?.length > 3 ? '...' : ''}] | medal: "${g.medal}" | year: ${g.year}`);
         });
         
@@ -206,10 +215,10 @@ export default function PerformanceAnalytics() {
           let playerTotalPoints = 0;
           
           // Debug: log results count
-          console.log('Processing ' + results.length + ' results for player:', player.name);
+          console.log('Processing ' + resultsData.length + ' results for player:', player.name);
           
           // Individual results points
-          results.forEach(result => {
+          resultsData.forEach(result => {
             // FIXED: Prioritize playerId match, use name as fallback only
             const resultPlayerId = result.playerId ? String(result.playerId).trim() : null;
             const playerIdStr = player.id ? String(player.id).trim() : null;
@@ -291,7 +300,7 @@ export default function PerformanceAnalytics() {
           
           // Group results points (split among members)
           // FIXED: Use memberIds directly if available, fallback to name matching
-          groupResults.forEach(group => {
+          groupResultsData.forEach(group => {
             // First, try to use memberIds directly (most reliable)
             let memberIds = group.memberIds || [];
             const memberNames = group.members || [];
