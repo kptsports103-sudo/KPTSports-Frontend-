@@ -42,7 +42,7 @@ const ManageResults = () => {
     year: '',
     memberIds: [],
     members: [],
-    manualMembers: '',
+    manualMembers: [{ name: '', branch: '', year: '' }],
     medal: '',
     imageUrl: ''
   });
@@ -259,7 +259,9 @@ const ManageResults = () => {
       ...item,
       memberIds: [],
       members: item.members && Array.isArray(item.members) ? item.members : [],
-      manualMembers: manualNames.join('\n')
+      manualMembers: manualNames.length
+        ? manualNames.map(name => ({ name, branch: '', year: '' }))
+        : [{ name: '', branch: '', year: '' }]
     });
     setEditingGroupId(item._id);
     setIsGroupEditing(true);
@@ -270,24 +272,30 @@ const ManageResults = () => {
     try {
       console.log('Submitting group form:', groupForm);
 
-      const manualNames = (groupForm.manualMembers || '')
-        .split(/[\n,]+/)
-        .map(s => s.trim())
-        .filter(Boolean);
+      const manualRows = Array.isArray(groupForm.manualMembers) ? groupForm.manualMembers : [];
+      const manualMembers = manualRows
+        .map(row => ({
+          name: (row.name || '').trim(),
+          branch: (row.branch || '').trim(),
+          year: (row.year || '').toString().trim()
+        }))
+        .filter(row => row.name);
 
-      const manualMembers = manualNames.map(name => {
-        const matched = players.find(p => normalizeName(p.name) === normalizeName(name));
+      const manualMembersResolved = manualMembers.map(row => {
+        const matched = players.find(p => normalizeName(p.name) === normalizeName(row.name));
+        const yearNum = Number(row.year);
+        const diplomaYear = [1, 2, 3].includes(yearNum) ? yearNum : null;
         if (matched) {
           return {
             playerId: matched.id,
             name: matched.name,
-            diplomaYear: matched.diplomaYear || null
+            diplomaYear: diplomaYear || matched.diplomaYear || null
           };
         }
-        return { playerId: null, name, diplomaYear: null };
+        return { playerId: null, name: row.name, diplomaYear: diplomaYear || null };
       });
 
-      const combinedMembers = [...manualMembers];
+      const combinedMembers = [...manualMembersResolved];
       const dedupedMembers = [];
       const seen = new Set();
       combinedMembers.forEach(m => {
@@ -298,7 +306,7 @@ const ManageResults = () => {
       });
 
       if (!dedupedMembers.length) {
-        alert('Please select members or type names manually.');
+        alert('Please add at least one member name.');
         return;
       }
 
@@ -328,7 +336,7 @@ const ManageResults = () => {
         setSuccessMessage('');
         setIsGroupEditing(false);
         setEditingGroupId(null);
-        setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: '', medal: '', imageUrl: '' });
+        setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: [{ name: '', branch: '', year: '' }], medal: '', imageUrl: '' });
       }, 1200);
     } catch (error) {
       console.error('Group save error:', error);
@@ -484,7 +492,7 @@ const ManageResults = () => {
                 setIsEditing(false);
                 setIsGroupEditing(false);
                 setEditingGroupId(null);
-                setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: '', medal: '', imageUrl: '' });
+                setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: [{ name: '', branch: '', year: '' }], medal: '', imageUrl: '' });
               }}
               style={styles.btnSecondary}
             >
@@ -851,12 +859,88 @@ const ManageResults = () => {
                 </Field>
 
                 <Field label="Manual Members" htmlFor="group-manual-members">
-                  <textarea
-                    style={{ ...styles.input, minHeight: 120, resize: 'vertical' }}
-                    value={groupForm.manualMembers}
-                    onChange={e => setGroupForm({ ...groupForm, manualMembers: e.target.value })}
-                    placeholder="Type one name per line (comma also works)"
-                  />
+                  <div>
+                    <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setGroupForm({
+                            ...groupForm,
+                            manualMembers: [...(groupForm.manualMembers || []), { name: '', branch: '', year: '' }]
+                          });
+                        }}
+                        style={styles.btnSecondary}
+                      >
+                        <img src="/Add button.png" alt="Add" style={styles.saveIconLeft} />
+                        Add Rows
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const rows = [...(groupForm.manualMembers || [])];
+                          if (rows.length <= 1) return;
+                          rows.pop();
+                          setGroupForm({ ...groupForm, manualMembers: rows });
+                        }}
+                        style={styles.btnSecondary}
+                      >
+                        <img src="/Delete button.png" alt="Delete" style={styles.saveIconLeft} />
+                        Delete Rows
+                      </button>
+                    </div>
+                    <table style={styles.table}>
+                      <thead>
+                        <tr style={styles.headerRow}>
+                          <th style={styles.headerCell}>Name</th>
+                          <th style={styles.headerCell}>Branch</th>
+                          <th style={styles.headerCell}>Year</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(groupForm.manualMembers || []).map((row, idx) => (
+                          <tr key={idx} style={styles.bodyRow}>
+                            <td style={styles.cell}>
+                              <input
+                                style={styles.input}
+                                value={row.name || ''}
+                                onChange={e => {
+                                  const rows = [...groupForm.manualMembers];
+                                  rows[idx] = { ...rows[idx], name: e.target.value };
+                                  setGroupForm({ ...groupForm, manualMembers: rows });
+                                }}
+                                placeholder="Name"
+                              />
+                            </td>
+                            <td style={styles.cell}>
+                              <input
+                                style={styles.input}
+                                value={row.branch || ''}
+                                onChange={e => {
+                                  const rows = [...groupForm.manualMembers];
+                                  rows[idx] = { ...rows[idx], branch: e.target.value };
+                                  setGroupForm({ ...groupForm, manualMembers: rows });
+                                }}
+                                placeholder="Branch"
+                              />
+                            </td>
+                            <td style={styles.cell}>
+                              <input
+                                type="number"
+                                style={styles.input}
+                                value={row.year || ''}
+                                onChange={e => {
+                                  const rows = [...groupForm.manualMembers];
+                                  rows[idx] = { ...rows[idx], year: e.target.value };
+                                  setGroupForm({ ...groupForm, manualMembers: rows });
+                                }}
+                                placeholder="1/2/3"
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </Field>
 
                 <Field label="Medal" htmlFor="group-medal">
