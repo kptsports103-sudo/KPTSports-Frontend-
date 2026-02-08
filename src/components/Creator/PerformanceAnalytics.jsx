@@ -353,7 +353,7 @@ export default function PerformanceAnalytics() {
               if (String(memberId) !== String(player.id)) return;
 
               const medalKey = normalizeMedal(group.medal);
-              const medalPoints = (GROUP_POINTS[medalKey] || 0) / memberIds.length;
+              const medalPoints = GROUP_POINTS[medalKey] || 0;
               const resultYear = parseInt(group.year);
               
               // FIXED: Pass result's diplomaYear to getAcademicYear
