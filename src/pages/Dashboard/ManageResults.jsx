@@ -42,6 +42,7 @@ const ManageResults = () => {
     year: '',
     memberIds: [],
     members: [],
+    manualMembers: '',
     medal: '',
     imageUrl: ''
   });
@@ -249,13 +250,25 @@ const ManageResults = () => {
     const resolvedMemberIds = Array.isArray(item.memberIds) && item.memberIds.length > 0
       ? item.memberIds
       : (item.members || [])
-          .map(name => players.find(p => normalizeName(p.name) === normalizeName(name))?.id)
+          .map((member) => {
+            const name = typeof member === 'string' ? member : member?.name;
+            return players.find(p => normalizeName(p.name) === normalizeName(name))?.id;
+          })
           .filter(Boolean);
+
+    const manualNames = (item.members || [])
+      .map((member) => {
+        if (typeof member === 'string') return member;
+        if (member && typeof member === 'object' && !member.playerId) return member.name;
+        return null;
+      })
+      .filter(Boolean);
 
     setGroupForm({
       ...item,
       memberIds: resolvedMemberIds,
-      members: item.members && Array.isArray(item.members) ? item.members : []
+      members: item.members && Array.isArray(item.members) ? item.members : [],
+      manualMembers: manualNames.join('\n')
     });
     setEditingGroupId(item._id);
     setIsGroupEditing(true);
@@ -266,19 +279,60 @@ const ManageResults = () => {
     try {
       console.log('Submitting group form:', groupForm);
 
-      const resolvedMembers = (groupForm.memberIds || [])
-        .map(id => playersById[id]?.name)
+      const selectedMembers = (groupForm.memberIds || [])
+        .map(id => {
+          const player = playersById[id];
+          if (!player) return null;
+          return {
+            playerId: player.id,
+            name: player.name,
+            diplomaYear: player.diplomaYear || null
+          };
+        })
         .filter(Boolean);
 
-      if (!resolvedMembers.length) {
-        alert('Please select at least one member.');
+      const manualNames = (groupForm.manualMembers || '')
+        .split(/[\n,]+/)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      const manualMembers = manualNames.map(name => {
+        const matched = players.find(p => normalizeName(p.name) === normalizeName(name));
+        if (matched) {
+          return {
+            playerId: matched.id,
+            name: matched.name,
+            diplomaYear: matched.diplomaYear || null
+          };
+        }
+        return { playerId: null, name, diplomaYear: null };
+      });
+
+      const combinedMembers = [...selectedMembers, ...manualMembers];
+      const dedupedMembers = [];
+      const seen = new Set();
+      combinedMembers.forEach(m => {
+        const key = m.playerId ? `id:${m.playerId}` : `name:${normalizeName(m.name)}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        dedupedMembers.push(m);
+      });
+
+      if (!dedupedMembers.length) {
+        alert('Please select members or type names manually.');
         return;
       }
 
+      const combinedMemberIds = Array.from(new Set(dedupedMembers.map(m => m.playerId).filter(Boolean)));
+
       const payload = {
-        ...groupForm,
-        members: resolvedMembers,
-        memberIds: groupForm.memberIds || []
+        teamName: groupForm.teamName,
+        event: groupForm.event,
+        year: groupForm.year,
+        medal: groupForm.medal,
+        imageUrl: groupForm.imageUrl,
+        members: dedupedMembers,
+        memberIds: combinedMemberIds
       };
 
       if (editingGroupId) {
@@ -295,7 +349,7 @@ const ManageResults = () => {
         setSuccessMessage('');
         setIsGroupEditing(false);
         setEditingGroupId(null);
-        setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], medal: '', imageUrl: '' });
+        setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: '', medal: '', imageUrl: '' });
       }, 1200);
     } catch (error) {
       console.error('Group save error:', error);
@@ -451,7 +505,7 @@ const ManageResults = () => {
                 setIsEditing(false);
                 setIsGroupEditing(false);
                 setEditingGroupId(null);
-                setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], medal: '', imageUrl: '' });
+                setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: '', medal: '', imageUrl: '' });
               }}
               style={styles.btnSecondary}
             >
@@ -826,7 +880,6 @@ const ManageResults = () => {
                       const selectedIds = Array.from(e.target.selectedOptions).map(o => o.value);
                       setGroupForm({ ...groupForm, memberIds: selectedIds });
                     }}
-                    required
                   >
                     {players.map(p => (
                       <option key={p.id} value={p.id}>
@@ -834,6 +887,15 @@ const ManageResults = () => {
                       </option>
                     ))}
                   </select>
+                </Field>
+
+                <Field label="Manual Members" htmlFor="group-manual-members">
+                  <textarea
+                    style={{ ...styles.input, minHeight: 120, resize: 'vertical' }}
+                    value={groupForm.manualMembers}
+                    onChange={e => setGroupForm({ ...groupForm, manualMembers: e.target.value })}
+                    placeholder="Type one name per line (comma also works)"
+                  />
                 </Field>
 
                 <Field label="Medal" htmlFor="group-medal">

@@ -126,7 +126,12 @@ export default function PerformanceAnalytics() {
         console.log('='.repeat(60));
         console.log('Total group results loaded:', groupResultsData.length);
         groupResultsData.slice(0, 3).forEach((g, i) => {
-          console.log(`  [${i}] Event: "${g.event}" | teamName: "${g.teamName}" | members: [${g.members?.slice(0, 3).join(', ')}${g.members?.length > 3 ? '...' : ''}] | medal: "${g.medal}" | year: ${g.year}`);
+          const memberNamesSample = (g.members || [])
+            .map(m => (typeof m === 'string' ? m : m?.name))
+            .filter(Boolean)
+            .slice(0, 3)
+            .join(', ');
+          console.log(`  [${i}] Event: "${g.event}" | teamName: "${g.teamName}" | members: [${memberNamesSample}${(g.members?.length || 0) > 3 ? '...' : ''}] | medal: "${g.medal}" | year: ${g.year}`);
         });
         
         console.log('\n' + '='.repeat(60));
@@ -299,13 +304,22 @@ export default function PerformanceAnalytics() {
           });
           
           // Group results points (split among members)
-          // FIXED: Use memberIds directly if available, fallback to name matching
+          // Use memberIds when available, otherwise fallback to names
           groupResultsData.forEach(group => {
-            // First, try to use memberIds directly (most reliable)
-            let memberIds = group.memberIds || [];
-            const memberNames = group.members || [];
-            
-            // If no memberIds, build from member names (legacy data)
+            let memberIds = Array.isArray(group.memberIds) ? group.memberIds.filter(Boolean) : [];
+            const rawMembers = Array.isArray(group.members) ? group.members : [];
+            const memberNames = rawMembers
+              .map(m => (typeof m === 'string' ? m : m?.name))
+              .filter(Boolean);
+
+            // If memberIds missing, try to derive from member objects
+            if (!memberIds.length && rawMembers.length) {
+              memberIds = rawMembers
+                .map(m => (typeof m === 'object' ? m?.playerId : null))
+                .filter(Boolean);
+            }
+
+            // If still no memberIds, build from names (legacy/manual data)
             if (!memberIds.length && memberNames.length) {
               memberIds = [];
               memberNames.forEach(memberName => {
