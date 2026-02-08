@@ -104,25 +104,7 @@ const Results = () => {
                     🏅 Individual Results
                   </h3>
                   <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                    <label
-                      htmlFor={`results-search-${year}`}
-                      style={{
-                        position: 'absolute',
-                        width: 1,
-                        height: 1,
-                        padding: 0,
-                        margin: -1,
-                        overflow: 'hidden',
-                        clip: 'rect(0, 0, 0, 0)',
-                        whiteSpace: 'nowrap',
-                        border: 0
-                      }}
-                    >
-                      Search by Name or Event
-                    </label>
                     <input
-                      id={`results-search-${year}`}
-                      name={`results-search-${year}`}
                       type="text"
                       placeholder="Search by Name or Event"
                       value={searchTerm}
@@ -325,7 +307,10 @@ const Results = () => {
                             flexWrap: 'wrap',
                             gap: '0.5rem'
                           }}>
-                            {result.members && result.members.map((member, i) => (
+                            {result.members && result.members.map((member, i) => {
+                              // Handle both legacy (string) and new (object) formats
+                              const memberName = typeof member === 'string' ? member : (member.name || '');
+                              return (
                               <span key={i} style={{
                                 background: '#007bff',
                                 color: '#fff',
@@ -334,9 +319,10 @@ const Results = () => {
                                 fontSize: '0.8rem',
                                 fontWeight: '500'
                               }}>
-                                {member}
+                                {memberName}
                               </span>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
 

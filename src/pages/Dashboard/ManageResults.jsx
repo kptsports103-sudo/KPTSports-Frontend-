@@ -595,12 +595,27 @@ const ManageResults = () => {
                           </td>
                           <td style={styles.cell}>
                             {(() => {
-                              const resolvedMembers = item.members && Array.isArray(item.members)
-                                ? item.members
-                                : (item.memberIds || []).map(id => playersById[id]?.name).filter(Boolean);
-                              return resolvedMembers.length > 0 ? (
+                              // Handle both legacy (string array) and new (object array) formats
+                              let memberNames = [];
+                              
+                              if (item.members && Array.isArray(item.members)) {
+                                // New format: array of objects
+                                if (typeof item.members[0] === 'object') {
+                                  memberNames = item.members.map(m => m.name).filter(Boolean);
+                                } else {
+                                  // Legacy format: array of strings
+                                  memberNames = item.members;
+                                }
+                              }
+                              
+                              // Fallback: try memberIds
+                              if (memberNames.length === 0 && item.memberIds) {
+                                memberNames = (item.memberIds || []).map(id => playersById[id]?.name).filter(Boolean);
+                              }
+                              
+                              return memberNames.length > 0 ? (
                                 <ul style={{ margin: 0, paddingLeft: 18 }}>
-                                  {resolvedMembers.map((m, i) => <li key={i}>{m}</li>)}
+                                  {memberNames.map((m, i) => <li key={i}>{m}</li>)}
                                 </ul>
                               ) : (
                                 <span style={{ color: '#999' }}>No members</span>

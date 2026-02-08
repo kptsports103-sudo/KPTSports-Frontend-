@@ -15,6 +15,11 @@ const GROUP_POINTS = {
   Bronze: 4,
 };
 
+// Normalize name for legacy matching
+const normalizeName = (name) => {
+  return (name || '').toLowerCase().trim().replace(/\s+/g, ' ');
+};
+
 // Normalize medal key
 const normalizeMedal = (medal) =>
   medal ? medal.charAt(0).toUpperCase() + medal.slice(1).toLowerCase() : '';
