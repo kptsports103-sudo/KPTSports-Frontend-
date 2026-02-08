@@ -170,10 +170,19 @@ const ManageResults = () => {
       console.log('Submitting form:', form);
 
       const selectedPlayer = form.playerId ? playersById[form.playerId] : null;
+      
+      // FIXED: Validate diplomaYear is mandatory
+      const finalDiplomaYear = form.diplomaYear || selectedPlayer?.diplomaYear || '';
+      if (!finalDiplomaYear) {
+        alert('❌ Diploma Year is required. Please select 1, 2, or 3.');
+        return;
+      }
+      
       const payload = {
         ...form,
         name: selectedPlayer?.name || form.name,
-        diplomaYear: form.diplomaYear || selectedPlayer?.diplomaYear || ''
+        diplomaYear: finalDiplomaYear,
+        playerId: selectedPlayer?.id || form.playerId || ''
       };
 
       if (editingId) {

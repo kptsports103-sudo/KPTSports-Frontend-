@@ -25,10 +25,40 @@ const normalizeMedal = (medal) =>
   medal ? medal.charAt(0).toUpperCase() + medal.slice(1).toLowerCase() : '';
 
 // Safe academic year resolver - returns 1, 2, 3 or null
+// CORRECTED: Calculate academic year based on baseDiplomaYear + (resultYear - baseYear)
+// This is the correct model: Meet Year (2025) ≠ Academic Year (2nd year)
 const getAcademicYear = (player, resultYear, resultDiplomaYear) => {
-  const year = resultDiplomaYear ?? player.yearDetails[resultYear]?.diplomaYear;
-  const num = Number(year);
-  return [1, 2, 3].includes(num) ? num : null;
+  // First, try result's diplomaYear (admin-selected, most reliable)
+  if (resultDiplomaYear) {
+    const num = Number(resultDiplomaYear);
+    if ([1, 2, 3].includes(num)) {
+      return num;
+    }
+  }
+  
+  // CORRECTED LOGIC: Use baseDiplomaYear + (resultYear - baseYear)
+  // This properly handles: Meet Year ≠ Academic Year
+  if (player.baseYear && player.baseDiplomaYear) {
+    const yearDiff = resultYear - player.baseYear;
+    const academicYear = player.baseDiplomaYear + yearDiff;
+    if (academicYear >= 1 && academicYear <= 3) {
+      return academicYear;
+    }
+  }
+  
+  // Legacy fallback: use stored yearDetails
+  // (for existing data before baseYear was added)
+  if (player.yearDetails && player.yearDetails[resultYear]) {
+    const storedYear = player.yearDetails[resultYear];
+    if (storedYear && storedYear.diplomaYear) {
+      const num = Number(storedYear.diplomaYear);
+      if ([1, 2, 3].includes(num)) {
+        return num;
+      }
+    }
+  }
+  
+  return null;
 };
 
 export default function PerformanceAnalytics() {
@@ -127,12 +157,24 @@ export default function PerformanceAnalytics() {
           const key = player.id;
           
           if (!playersMap[key]) {
+            // CORRECTED: Store baseYear and baseDiplomaYear for proper academic calculation
+            // baseYear = first participation year
+            // baseDiplomaYear = diplomaYear at first participation
+            const sortedYears = allPlayers
+              .filter(p => p.id === player.id)
+              .map(p => p.participationYear)
+              .sort((a, b) => a - b);
+            
+            const baseYearEntry = allPlayers.find(p => p.id === player.id && p.participationYear === sortedYears[0]);
+            
             playersMap[key] = {
               id: player.id,
               originalName: player.name,
               name: player.name,
               branch: player.branch,
               years: [],
+              baseYear: sortedYears[0] || player.participationYear,
+              baseDiplomaYear: Number(baseYearEntry?.diplomaYear) || Number(player.diplomaYear) || 1,
               yearDetails: {},
               firstYearPoints: 0,
               secondYearPoints: 0,
@@ -168,6 +210,8 @@ export default function PerformanceAnalytics() {
           
           // Debug: log player data
           console.log('Processing player:', player.name, 'ID:', player.id);
+          console.log('  baseYear:', player.baseYear, '| baseDiplomaYear:', player.baseDiplomaYear);
+          console.log('  years participated:', player.years.join(', '));
           
           // Debug: log yearDetails structure
           console.log('  yearDetails keys:', Object.keys(player.yearDetails));
@@ -191,24 +235,38 @@ export default function PerformanceAnalytics() {
           
           // Individual results points
           results.forEach(result => {
-            // Fuzzy name matching: find best player match
-            const resultNameKey = normalizeName(result.name);
+            // FIXED: Prioritize playerId match, use name as fallback only
+            const resultPlayerId = result.playerId ? String(result.playerId).trim() : null;
+            const playerIdStr = player.id ? String(player.id).trim() : null;
             
-            // Check for playerId match first
-            const idMatch = result.playerId && Number(result.playerId) === Number(player.id);
-            const nameMatch = resultNameKey === normalizeName(player.name) ||
-                             resultNameKey.includes(normalizeName(player.name)) ||
-                             normalizeName(player.name).includes(resultNameKey);
+            // Try ID match FIRST (most reliable)
+            const idMatch = resultPlayerId && playerIdStr && resultPlayerId === playerIdStr;
+            
+            // Fuzzy name matching as LAST RESORT only
+            let nameMatch = false;
+            if (!idMatch && result.name && player.name) {
+              const resultNameKey = normalizeName(result.name);
+              const playerNameKey = normalizeName(player.name);
+              
+              // Exact match or close match
+              nameMatch = (
+                resultNameKey === playerNameKey ||
+                resultNameKey.includes(playerNameKey) ||
+                playerNameKey.includes(resultNameKey)
+              );
+              
+              // Log warning for admin (shows data quality issue)
+              if (result.name && player.name && resultNameKey !== playerNameKey) {
+                console.warn(`  ⚠️  NAME MATCH FALLBACK: "${result.name}" matched to "${player.name}" - consider adding playerId`);
+              }
+            }
             
             // Debug: log matching
             console.log('  Result:', result.name, '| playerId:', result.playerId, '| ID match:', idMatch, '| Name match:', nameMatch);
             
             if (!idMatch && !nameMatch) {
-              // Debug: log WHY no match
-              const playerNameKey = normalizeName(player.name);
-              console.log('    ❌ NO MATCH: resultNameKey="' + resultNameKey + '" vs playerNameKey="' + playerNameKey + '"');
-              console.log('    ❌ ID check: Number("' + result.playerId + '") === Number("' + player.id + '") =', Number(result.playerId) === Number(player.id));
-              // No match, skip
+              // FIXED: Log warning instead of silent skip
+              console.warn(`  ⚠️  SKIPPED: Result "${result.name}" (playerId: ${result.playerId || 'N/A'}) did not match player "${player.name}" (id: ${player.id})`);
               return;
             }
 
@@ -219,9 +277,9 @@ export default function PerformanceAnalytics() {
             // Debug: log academic year lookup
             console.log('    ✅ MATCHED! Looking up academic year...');
             console.log('      resultYear:', resultYear);
+            console.log('      player.baseYear:', player.baseYear, '| baseDiplomaYear:', player.baseDiplomaYear);
+            console.log('      Calculation: baseDiplomaYear + (resultYear - baseYear) =', player.baseDiplomaYear, '+ (', resultYear, '-', player.baseYear, ') =', player.baseDiplomaYear + (resultYear - player.baseYear));
             console.log('      result.diplomaYear:', result.diplomaYear, '(type:', typeof result.diplomaYear + ')');
-            console.log('      player.yearDetails:', JSON.stringify(player.yearDetails));
-            console.log('      player.yearDetails[' + resultYear + ']:', player.yearDetails[resultYear]);
             
             const academicYear = getAcademicYear(player, resultYear, result.diplomaYear);
             
@@ -257,41 +315,57 @@ export default function PerformanceAnalytics() {
           });
           
           // Group results points (split among members)
+          // FIXED: Use memberIds directly if available, fallback to name matching
           groupResults.forEach(group => {
-            // Build member list with fuzzy matching
-            const memberIds = [];
+            // First, try to use memberIds directly (most reliable)
+            let memberIds = group.memberIds || [];
             const memberNames = group.members || [];
             
-            memberNames.forEach(memberName => {
-              const memberNameKey = normalizeName(memberName);
-              
-              // Find matching player by name similarity
-              const matchingPlayer = Object.values(playersMap).find(p => {
-                const playerNameKey = normalizeName(p.name);
-                return (
-                  memberNameKey === playerNameKey ||
-                  memberNameKey.includes(playerNameKey) ||
-                  playerNameKey.includes(memberNameKey)
-                );
+            // If no memberIds, build from member names (legacy data)
+            if (!memberIds.length && memberNames.length) {
+              memberIds = [];
+              memberNames.forEach(memberName => {
+                const memberNameKey = normalizeName(memberName);
+                
+                // Find matching player by name similarity
+                const matchingPlayer = Object.values(playersMap).find(p => {
+                  const playerNameKey = normalizeName(p.name);
+                  return (
+                    memberNameKey === playerNameKey ||
+                    memberNameKey.includes(playerNameKey) ||
+                    playerNameKey.includes(memberNameKey)
+                  );
+                });
+                
+                if (matchingPlayer) {
+                  memberIds.push(matchingPlayer.id);
+                  console.warn(`  ⚠️  GROUP NAME MATCH: "${memberName}" matched to "${matchingPlayer.name}" (id: ${matchingPlayer.id}) - consider storing memberIds`);
+                } else {
+                  console.warn(`  ⚠️  GROUP MEMBER NOT FOUND: "${memberName}" has no matching player`);
+                }
               });
-              
-              if (matchingPlayer) {
-                memberIds.push(matchingPlayer.id);
-              }
-            });
+            }
 
-            if (!memberIds.length) return;
+            if (!memberIds.length) {
+              console.warn(`  ⚠️  GROUP SKIPPED: Team "${group.teamName}" has no matching members`);
+              return;
+            }
 
             memberIds.forEach(memberId => {
-              if (Number(memberId) !== Number(player.id)) return;
+              if (String(memberId) !== String(player.id)) return;
 
               const medalKey = normalizeMedal(group.medal);
               const medalPoints = (GROUP_POINTS[medalKey] || 0) / memberIds.length;
               const resultYear = parseInt(group.year);
-              const academicYear = getAcademicYear(player, resultYear);
               
-              // Skip if academic year is invalid
-              if (!academicYear) return;
+              // FIXED: Pass result's diplomaYear to getAcademicYear
+              // Group results may not have diplomaYear stored, use player's stored year
+              const academicYear = getAcademicYear(player, resultYear, group.diplomaYear || null);
+              
+              if (!academicYear) {
+                console.warn(`  ⚠️  GROUP YEAR INVALID: Player "${player.name}" has no valid academic year for result year ${resultYear}`);
+                return;
+              }
 
               // Store group result
               player.groupResults.push({
