@@ -715,95 +715,116 @@ const ManageResults = () => {
               </div>
             )}
             <table style={styles.table}>
+              <thead>
+                <tr style={styles.headerRow}>
+                  <th style={styles.headerCell}>Player</th>
+                  <th style={styles.headerCell}>Name (manual)</th>
+                  <th style={styles.headerCell}>Event</th>
+                  <th style={styles.headerCell}>Year</th>
+                  <th style={styles.headerCell}>Diploma Year</th>
+                  <th style={styles.headerCell}>Medal</th>
+                  <th style={styles.headerCell}>Image URL</th>
+                </tr>
+              </thead>
               <tbody>
-                <Field label="Player" htmlFor="result-player">
-                  <select
-                    style={styles.select}
-                    value={form.playerId}
-                    onChange={e => {
-                      const selectedId = e.target.value;
-                      const selectedPlayer = playersById[selectedId];
-                      setForm({
-                        ...form,
-                        playerId: selectedId,
-                        name: selectedPlayer?.name || form.name,
-                        diplomaYear: selectedPlayer?.diplomaYear || form.diplomaYear
-                      });
-                    }}
-                  >
-                    <option value="">Manual entry</option>
-                    {players.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} - {p.branch} (Y{p.diplomaYear}, {p.participationYear})
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-
-                <Field label="Name (manual)" htmlFor="result-name">
-                  <input
-                    style={styles.input}
-                    value={form.name}
-                    onChange={e => setForm({ ...form, name: e.target.value })}
-                    readOnly={!!form.playerId}
-                    required={!form.playerId}
-                  />
-                </Field>
-
-                <Field label="Event" htmlFor="result-event">
-                  <input
-                    style={styles.input}
-                    value={form.event}
-                    onChange={e => setForm({ ...form, event: e.target.value })}
-                    required
-                  />
-                </Field>
-
-                <Field label="Year" htmlFor="result-year">
-                  <input
-                    type="number"
-                    style={styles.input}
-                    value={form.year}
-                    onChange={e => setForm({ ...form, year: e.target.value })}
-                    required
-                  />
-                </Field>
-
-                <Field label="Diploma Year" htmlFor="result-diploma">
-                  <select
-                    style={styles.select}
-                    value={form.diplomaYear}
-                    onChange={e => setForm({ ...form, diplomaYear: e.target.value })}
-                  >
-                    <option value="">Select Year</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                  </select>
-                </Field>
-
-                <Field label="Medal" htmlFor="result-medal">
-                  <select
-                    style={styles.select}
-                    value={form.medal}
-                    onChange={e => setForm({ ...form, medal: e.target.value })}
-                    required
-                  >
-                    <option value="">Select Medal</option>
-                    {MEDALS.map(m => (
-                      <option key={m}>{m}</option>
-                    ))}
-                  </select>
-                </Field>
-
-                <Field label="Image URL" htmlFor="result-image">
-                  <input
-                    type="text"
-                    style={styles.input}
-                    value={form.imageUrl}
-                    onChange={e => setForm({ ...form, imageUrl: e.target.value })}
-                  />
-                </Field>
+                <tr style={styles.bodyRow}>
+                  <td style={styles.cell}>
+                    <select
+                      id="result-player"
+                      name="result-player"
+                      style={styles.select}
+                      value={form.playerId}
+                      onChange={e => {
+                        const selectedId = e.target.value;
+                        const selectedPlayer = playersById[selectedId];
+                        setForm({
+                          ...form,
+                          playerId: selectedId,
+                          name: selectedPlayer?.name || form.name,
+                          diplomaYear: selectedPlayer?.diplomaYear || form.diplomaYear
+                        });
+                      }}
+                    >
+                      <option value="">Manual entry</option>
+                      {players.map(p => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} - {p.branch} (Y{p.diplomaYear}, {p.participationYear})
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td style={styles.cell}>
+                    <input
+                      id="result-name"
+                      name="result-name"
+                      style={styles.input}
+                      value={form.name}
+                      onChange={e => setForm({ ...form, name: e.target.value })}
+                      readOnly={!!form.playerId}
+                      required={!form.playerId}
+                    />
+                  </td>
+                  <td style={styles.cell}>
+                    <input
+                      id="result-event"
+                      name="result-event"
+                      style={styles.input}
+                      value={form.event}
+                      onChange={e => setForm({ ...form, event: e.target.value })}
+                      required
+                    />
+                  </td>
+                  <td style={styles.cell}>
+                    <input
+                      id="result-year"
+                      name="result-year"
+                      type="number"
+                      style={styles.input}
+                      value={form.year}
+                      onChange={e => setForm({ ...form, year: e.target.value })}
+                      required
+                    />
+                  </td>
+                  <td style={styles.cell}>
+                    <select
+                      id="result-diploma"
+                      name="result-diploma"
+                      style={styles.select}
+                      value={form.diplomaYear}
+                      onChange={e => setForm({ ...form, diplomaYear: e.target.value })}
+                    >
+                      <option value="">Select Year</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                    </select>
+                  </td>
+                  <td style={styles.cell}>
+                    <select
+                      id="result-medal"
+                      name="result-medal"
+                      style={styles.select}
+                      value={form.medal}
+                      onChange={e => setForm({ ...form, medal: e.target.value })}
+                      required
+                    >
+                      <option value="">Select Medal</option>
+                      {MEDALS.map(m => (
+                        <option key={m}>{m}</option>
+                      ))}
+                    </select>
+                  </td>
+                  <td style={styles.cell}>
+                    <input
+                      id="result-image"
+                      name="result-image"
+                      type="text"
+                      style={styles.input}
+                      value={form.imageUrl}
+                      onChange={e => setForm({ ...form, imageUrl: e.target.value })}
+                    />
+                  </td>
+                </tr>
               </tbody>
             </table>
 
