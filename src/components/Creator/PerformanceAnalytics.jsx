@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import "../../admin.css";
 
-// Medal points configuration (aligned with Admin Dashboard)
+// Medal points configuration
 const INDIVIDUAL_POINTS = {
   Gold: 5,
   Silver: 3,
@@ -15,49 +15,19 @@ const GROUP_POINTS = {
   Bronze: 4,
 };
 
-// Fuzzy name matching helper (fallback for legacy results)
-const normalizeName = (name) => {
-  return (name || '').toLowerCase().trim().replace(/\s+/g, ' ');
-};
-
-// Normalize medal key (handle lowercase/uppercase from backend)
+// Normalize medal key
 const normalizeMedal = (medal) =>
   medal ? medal.charAt(0).toUpperCase() + medal.slice(1).toLowerCase() : '';
 
-// Safe academic year resolver - returns 1, 2, 3 or null
-// CORRECTED: Calculate academic year based on baseDiplomaYear + (resultYear - baseYear)
-// This is the correct model: Meet Year (2025) ≠ Academic Year (2nd year)
-const getAcademicYear = (player, resultYear, resultDiplomaYear) => {
-  // First, try result's diplomaYear (admin-selected, most reliable)
-  if (resultDiplomaYear) {
-    const num = Number(resultDiplomaYear);
-    if ([1, 2, 3].includes(num)) {
-      return num;
+// Get academic year from result
+// After migration, all results have diplomaYear stored
+const getAcademicYear = (result) => {
+  if (result.diplomaYear) {
+    const year = Number(result.diplomaYear);
+    if ([1, 2, 3].includes(year)) {
+      return year;
     }
   }
-  
-  // CORRECTED LOGIC: Use baseDiplomaYear + (resultYear - baseYear)
-  // This properly handles: Meet Year ≠ Academic Year
-  if (player.baseYear && player.baseDiplomaYear) {
-    const yearDiff = resultYear - player.baseYear;
-    const academicYear = player.baseDiplomaYear + yearDiff;
-    if (academicYear >= 1 && academicYear <= 3) {
-      return academicYear;
-    }
-  }
-  
-  // Legacy fallback: use stored yearDetails
-  // (for existing data before baseYear was added)
-  if (player.yearDetails && player.yearDetails[resultYear]) {
-    const storedYear = player.yearDetails[resultYear];
-    if (storedYear && storedYear.diplomaYear) {
-      const num = Number(storedYear.diplomaYear);
-      if ([1, 2, 3].includes(num)) {
-        return num;
-      }
-    }
-  }
-  
   return null;
 };
 
