@@ -869,137 +869,155 @@ const ManageResults = () => {
               </div>
             )}
             <table style={styles.table}>
+              <thead>
+                <tr style={styles.headerRow}>
+                  <th style={styles.headerCell}>Team Name</th>
+                  <th style={styles.headerCell}>Event</th>
+                  <th style={styles.headerCell}>Year</th>
+                  <th style={styles.headerCell}>Medal</th>
+                  <th style={styles.headerCell}>URL</th>
+                </tr>
+              </thead>
               <tbody>
-                <Field label="Team Name" htmlFor="group-team">
-                  <input
-                    style={styles.input}
-                    value={groupForm.teamName}
-                    onChange={e => setGroupForm({...groupForm, teamName: e.target.value})}
-                  />
-                </Field>
-
-                <Field label="Event" htmlFor="group-event">
-                  <input
-                    style={styles.input}
-                    value={groupForm.event}
-                    onChange={e => setGroupForm({...groupForm, event: e.target.value})}
-                  />
-                </Field>
-
-                <Field label="Year" htmlFor="group-year">
-                  <input
-                    type="number"
-                    style={styles.input}
-                    value={groupForm.year}
-                    onChange={e => setGroupForm({...groupForm, year: e.target.value})}
-                  />
-                </Field>
-
-                <Field label="Manual Members" htmlFor="group-manual-members">
-                  <div>
-                    <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setGroupForm({
-                            ...groupForm,
-                            manualMembers: [...(groupForm.manualMembers || []), { name: '', branch: '', year: '' }]
-                          });
-                        }}
-                        style={styles.btnSecondary}
-                      >
-                        <img src="/Add button.png" alt="Add" style={styles.saveIconLeft} />
-                        Add Rows
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const rows = [...(groupForm.manualMembers || [])];
-                          if (rows.length <= 1) return;
-                          rows.pop();
-                          setGroupForm({ ...groupForm, manualMembers: rows });
-                        }}
-                        style={styles.btnSecondary}
-                      >
-                        <img src="/Delete button.png" alt="Delete" style={styles.saveIconLeft} />
-                        Delete Rows
-                      </button>
-                    </div>
-                    <table style={styles.table}>
-                      <thead>
-                        <tr style={styles.headerRow}>
-                          <th style={styles.headerCell}>Name</th>
-                          <th style={styles.headerCell}>Branch</th>
-                          <th style={styles.headerCell}>Year</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(groupForm.manualMembers || []).map((row, idx) => (
-                          <tr key={idx} style={styles.bodyRow}>
-                            <td style={styles.cell}>
-                              <input
-                                style={styles.input}
-                                value={row.name || ''}
-                                onChange={e => {
-                                  const rows = [...groupForm.manualMembers];
-                                  rows[idx] = { ...rows[idx], name: e.target.value };
-                                  setGroupForm({ ...groupForm, manualMembers: rows });
-                                }}
-                                placeholder="Name"
-                              />
-                            </td>
-                            <td style={styles.cell}>
-                              <input
-                                style={styles.input}
-                                value={row.branch || ''}
-                                onChange={e => {
-                                  const rows = [...groupForm.manualMembers];
-                                  rows[idx] = { ...rows[idx], branch: e.target.value };
-                                  setGroupForm({ ...groupForm, manualMembers: rows });
-                                }}
-                                placeholder="Branch"
-                              />
-                            </td>
-                            <td style={styles.cell}>
-                              <input
-                                type="number"
-                                style={styles.input}
-                                value={row.year || ''}
-                                onChange={e => {
-                                  const rows = [...groupForm.manualMembers];
-                                  rows[idx] = { ...rows[idx], year: e.target.value };
-                                  setGroupForm({ ...groupForm, manualMembers: rows });
-                                }}
-                                placeholder="1/2/3"
-                              />
-                            </td>
+                <tr style={styles.bodyRow}>
+                  <td style={styles.cell}>
+                    <input
+                      id="group-team"
+                      name="group-team"
+                      style={styles.input}
+                      value={groupForm.teamName}
+                      onChange={e => setGroupForm({ ...groupForm, teamName: e.target.value })}
+                    />
+                  </td>
+                  <td style={styles.cell}>
+                    <input
+                      id="group-event"
+                      name="group-event"
+                      style={styles.input}
+                      value={groupForm.event}
+                      onChange={e => setGroupForm({ ...groupForm, event: e.target.value })}
+                    />
+                  </td>
+                  <td style={styles.cell}>
+                    <input
+                      id="group-year"
+                      name="group-year"
+                      type="number"
+                      style={styles.input}
+                      value={groupForm.year}
+                      onChange={e => setGroupForm({ ...groupForm, year: e.target.value })}
+                    />
+                  </td>
+                  <td style={styles.cell}>
+                    <select
+                      id="group-medal"
+                      name="group-medal"
+                      style={styles.select}
+                      value={groupForm.medal}
+                      onChange={e => setGroupForm({ ...groupForm, medal: e.target.value })}
+                    >
+                      <option value="">Select Medal</option>
+                      {MEDALS.map(m => (
+                        <option key={m}>{m}</option>
+                      ))}
+                    </select>
+                  </td>
+                  <td style={styles.cell}>
+                    <input
+                      id="group-url"
+                      name="group-url"
+                      style={styles.input}
+                      value={groupForm.imageUrl}
+                      onChange={e => setGroupForm({ ...groupForm, imageUrl: e.target.value })}
+                    />
+                  </td>
+                </tr>
+                <tr style={styles.bodyRow}>
+                  <td style={styles.cell} colSpan={5}>
+                    <div>
+                      <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGroupForm({
+                              ...groupForm,
+                              manualMembers: [...(groupForm.manualMembers || []), { name: '', branch: '', year: '' }]
+                            });
+                          }}
+                          style={styles.btnSecondary}
+                        >
+                          <img src="/Add button.png" alt="Add" style={styles.saveIconLeft} />
+                          Add Rows
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const rows = [...(groupForm.manualMembers || [])];
+                            if (rows.length <= 1) return;
+                            rows.pop();
+                            setGroupForm({ ...groupForm, manualMembers: rows });
+                          }}
+                          style={styles.btnSecondary}
+                        >
+                          <img src="/Delete button.png" alt="Delete" style={styles.saveIconLeft} />
+                          Delete Rows
+                        </button>
+                      </div>
+                      <table style={styles.table}>
+                        <thead>
+                          <tr style={styles.headerRow}>
+                            <th style={styles.headerCell}>Name</th>
+                            <th style={styles.headerCell}>Branch</th>
+                            <th style={styles.headerCell}>Year</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </Field>
-
-                <Field label="Medal" htmlFor="group-medal">
-                  <select
-                    style={styles.select}
-                    value={groupForm.medal}
-                    onChange={e => setGroupForm({...groupForm, medal: e.target.value})}
-                  >
-                    <option value="">Select Medal</option>
-                    {MEDALS.map(m => (
-                      <option key={m}>{m}</option>
-                    ))}
-                  </select>
-                </Field>
-
-                <Field label="URL" htmlFor="group-url">
-                  <input
-                    style={styles.input}
-                    value={groupForm.imageUrl}
-                    onChange={e => setGroupForm({...groupForm, imageUrl: e.target.value})}
-                  />
-                </Field>
+                        </thead>
+                        <tbody>
+                          {(groupForm.manualMembers || []).map((row, idx) => (
+                            <tr key={idx} style={styles.bodyRow}>
+                              <td style={styles.cell}>
+                                <input
+                                  style={styles.input}
+                                  value={row.name || ''}
+                                  onChange={e => {
+                                    const rows = [...groupForm.manualMembers];
+                                    rows[idx] = { ...rows[idx], name: e.target.value };
+                                    setGroupForm({ ...groupForm, manualMembers: rows });
+                                  }}
+                                  placeholder="Name"
+                                />
+                              </td>
+                              <td style={styles.cell}>
+                                <input
+                                  style={styles.input}
+                                  value={row.branch || ''}
+                                  onChange={e => {
+                                    const rows = [...groupForm.manualMembers];
+                                    rows[idx] = { ...rows[idx], branch: e.target.value };
+                                    setGroupForm({ ...groupForm, manualMembers: rows });
+                                  }}
+                                  placeholder="Branch"
+                                />
+                              </td>
+                              <td style={styles.cell}>
+                                <input
+                                  type="number"
+                                  style={styles.input}
+                                  value={row.year || ''}
+                                  onChange={e => {
+                                    const rows = [...groupForm.manualMembers];
+                                    rows[idx] = { ...rows[idx], year: e.target.value };
+                                    setGroupForm({ ...groupForm, manualMembers: rows });
+                                  }}
+                                  placeholder="1/2/3"
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
               </tbody>
             </table>
 
