@@ -856,20 +856,26 @@ const ManageResults = () => {
 };
 
 /* ================= REUSABLE ================= */
-const Field = ({ label, htmlFor, children }) => (
-  <tr>
-    <td style={styles.fieldLabel}>
-      <label htmlFor={htmlFor}>{label}</label>
-    </td>
-    <td style={styles.fieldValue}>
-      {children && typeof children === 'object' && children.type ? (
-        React.cloneElement(children, { id: htmlFor, name: htmlFor })
-      ) : (
-        children
-      )}
-    </td>
-  </tr>
-);
+const Field = ({ label, htmlFor, children }) => {
+  // Ensure children have id and name attributes
+  const childWithAttributes = React.isValidElement(children)
+    ? React.cloneElement(children, {
+        id: children.props.id || htmlFor,
+        name: children.props.name || htmlFor
+      })
+    : children;
+
+  return (
+    <tr>
+      <td style={styles.fieldLabel}>
+        <label htmlFor={htmlFor}>{label}</label>
+      </td>
+      <td style={styles.fieldValue}>
+        {childWithAttributes}
+      </td>
+    </tr>
+  );
+};
 
 /* ================= STYLES ================= */
 const styles = {

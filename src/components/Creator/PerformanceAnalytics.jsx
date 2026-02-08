@@ -91,6 +91,34 @@ export default function PerformanceAnalytics() {
           });
         });
         
+        console.log('='.repeat(60));
+        console.log('🔍 DIAGNOSTIC: Players Data Sample');
+        console.log('='.repeat(60));
+        console.log('Total players loaded:', allPlayers.length);
+        allPlayers.slice(0, 5).forEach((p, i) => {
+          console.log(`  [${i}] ID: "${p.id}" | Name: "${p.name}" | Branch: "${p.branch}" | diplomaYear: "${p.diplomaYear}" | participationYear: ${p.participationYear}`);
+        });
+        
+        console.log('\n' + '='.repeat(60));
+        console.log('🔍 DIAGNOSTIC: Results Data Sample');
+        console.log('='.repeat(60));
+        console.log('Total results loaded:', results.length);
+        results.slice(0, 5).forEach((r, i) => {
+          console.log(`  [${i}] Name: "${r.name}" | playerId: "${r.playerId}" | medal: "${r.medal}" | year: ${r.year} | diplomaYear: "${r.diplomaYear}"`);
+        });
+        
+        console.log('\n' + '='.repeat(60));
+        console.log('🔍 DIAGNOSTIC: Group Results Data Sample');
+        console.log('='.repeat(60));
+        console.log('Total group results loaded:', groupResults.length);
+        groupResults.slice(0, 3).forEach((g, i) => {
+          console.log(`  [${i}] Event: "${g.event}" | teamName: "${g.teamName}" | members: [${g.members?.slice(0, 3).join(', ')}${g.members?.length > 3 ? '...' : ''}] | medal: "${g.medal}" | year: ${g.year}`);
+        });
+        
+        console.log('\n' + '='.repeat(60));
+        console.log('🔍 DIAGNOSTIC: Player-to-Result Matching Process');
+        console.log('='.repeat(60));
+        
         // Group players by id (merge same player across years)
         const playersMap = {};
         const playersByName = {};
@@ -141,6 +169,9 @@ export default function PerformanceAnalytics() {
           // Debug: log player data
           console.log('Processing player:', player.name, 'ID:', player.id);
           
+          // Debug: log yearDetails structure
+          console.log('  yearDetails keys:', Object.keys(player.yearDetails));
+          
           // 🔴 RESET per-player accumulators (ensures no stale values)
           player.firstYearPoints = 0;
           player.secondYearPoints = 0;
@@ -173,6 +204,10 @@ export default function PerformanceAnalytics() {
             console.log('  Result:', result.name, '| playerId:', result.playerId, '| ID match:', idMatch, '| Name match:', nameMatch);
             
             if (!idMatch && !nameMatch) {
+              // Debug: log WHY no match
+              const playerNameKey = normalizeName(player.name);
+              console.log('    ❌ NO MATCH: resultNameKey="' + resultNameKey + '" vs playerNameKey="' + playerNameKey + '"');
+              console.log('    ❌ ID check: Number("' + result.playerId + '") === Number("' + player.id + '") =', Number(result.playerId) === Number(player.id));
               // No match, skip
               return;
             }
@@ -180,10 +215,18 @@ export default function PerformanceAnalytics() {
             const medalKey = normalizeMedal(result.medal);
             const medalPoints = INDIVIDUAL_POINTS[medalKey] || 0;
             const resultYear = parseInt(result.year);
+            
+            // Debug: log academic year lookup
+            console.log('    ✅ MATCHED! Looking up academic year...');
+            console.log('      resultYear:', resultYear);
+            console.log('      result.diplomaYear:', result.diplomaYear, '(type:', typeof result.diplomaYear + ')');
+            console.log('      player.yearDetails:', JSON.stringify(player.yearDetails));
+            console.log('      player.yearDetails[' + resultYear + ']:', player.yearDetails[resultYear]);
+            
             const academicYear = getAcademicYear(player, resultYear, result.diplomaYear);
             
-            // Debug: log academic year
-            console.log('    Matched! medal:', result.medal, '| points:', medalPoints, '| academicYear:', academicYear, '| diplomaYear:', result.diplomaYear);
+            // Debug: log academic year result
+            console.log('    🎓 Academic year result:', academicYear, '| (1=1st, 2=2nd, 3=3rd, null=invalid)');
             
             // Skip if academic year is invalid
             if (!academicYear) {
@@ -283,6 +326,15 @@ export default function PerformanceAnalytics() {
           player.secondYearPoints = Number(player.secondYearPoints.toFixed(2));
           player.thirdYearPoints = Number(player.thirdYearPoints.toFixed(2));
           player.totalPoints = Number(playerTotalPoints.toFixed(2));
+          
+          // Debug: log final points
+          console.log('  📊 FINAL for', player.name + ':');
+          console.log('     1st Year:', player.firstYearPoints, '| 2nd Year:', player.secondYearPoints, '| 3rd Year:', player.thirdYearPoints, '| TOTAL:', player.totalPoints);
+          console.log('     Individual results matched:', player.individualResults.length);
+          console.log('     Group results matched:', player.groupResults.length);
+          if (player.individualResults.length === 0 && player.groupResults.length === 0) {
+            console.log('     ⚠️  ZERO POINTS - No results matched this player!');
+          }
         });
         
         // Get available years from players
