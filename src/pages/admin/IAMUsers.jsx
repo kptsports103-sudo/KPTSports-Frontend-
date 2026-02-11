@@ -260,8 +260,10 @@ const IAMUsers = () => {
             )}
 
             <div style={{ marginBottom: "16px" }}>
-              <label style={{ fontWeight: 600, color: "#000" }}>User Role *</label>
+              <label htmlFor="iam-role" style={{ fontWeight: 600, color: "#000" }}>User Role *</label>
               <select
+                id="iam-role"
+                name="iam-role"
                 value={selectedRole}
                 disabled={!!token}
                 onChange={(e) => setSelectedRole(e.target.value)}
@@ -274,7 +276,7 @@ const IAMUsers = () => {
             </div>
 
             <div style={{ marginBottom: "20px" }}>
-              <label style={{ fontWeight: 600, color: "#000" }}>Email Address *</label>
+              <label htmlFor="email" style={{ fontWeight: 600, color: "#000" }}>Email Address *</label>
               <input
                 id="email"
                 name="email"
@@ -374,6 +376,9 @@ const IAMUsers = () => {
             <p style={{ color: "#000", marginBottom: "8px" }}>A 6-digit code has been sent to</p>
             <strong style={{ color: "#000" }}>{form.email}</strong>
 
+            <label htmlFor="otp" style={{ display: "block", marginTop: "16px", color: "#000", fontWeight: 600 }}>
+              Email OTP Code
+            </label>
             <input
               id="otp"
               name="otp"
@@ -468,16 +473,16 @@ const IAMUsers = () => {
               </div>
             )}
 
-            <label style={{ color: "#000", fontWeight: 600 }}>Full Name *</label>
+            <label htmlFor="name" style={{ color: "#000", fontWeight: 600 }}>Full Name *</label>
             <input id="name" name="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Enter full name" style={{ ...inputStyle, color: "#000" }} />
 
-            <label style={{ color: "#000", fontWeight: 600 }}>Mobile Number *</label>
+            <label htmlFor="phone" style={{ color: "#000", fontWeight: 600 }}>Mobile Number *</label>
             <input id="phone" name="phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} placeholder="10-digit mobile" style={{ ...inputStyle, color: "#000" }} />
 
-            <label style={{ color: "#000", fontWeight: 600 }}>Password *</label>
+            <label htmlFor="password" style={{ color: "#000", fontWeight: 600 }}>Password *</label>
             <input id="password" name="password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Strong password" style={{ ...inputStyle, color: "#000" }} />
 
-            <label style={{ color: "#000", fontWeight: 600 }}>Profile Image</label>
+            <label htmlFor="profileImage" style={{ color: "#000", fontWeight: 600 }}>Profile Image</label>
             <input
               id="profileImage"
               name="profileImage"
@@ -556,6 +561,9 @@ const IAMUsers = () => {
             <p>A 6-digit code has been sent to</p>
             <strong>{form.phone}</strong>
 
+            <label htmlFor="phone-otp" style={{ display: "block", marginTop: "16px", fontWeight: 600 }}>
+              Phone OTP Code
+            </label>
             <input
               id="phone-otp"
               name="phone-otp"

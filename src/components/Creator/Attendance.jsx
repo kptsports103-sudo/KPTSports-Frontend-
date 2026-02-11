@@ -9,6 +9,17 @@ const Attendance = ({ isStudent = false }) => {
     { slNo: 1, playerName: '', morning: 'Present', evening: 'Present' }
   ]);
   const [playerNames, setPlayerNames] = useState([]);
+  const srOnlyStyle = {
+    position: 'absolute',
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: 'hidden',
+    clip: 'rect(0, 0, 0, 0)',
+    whiteSpace: 'nowrap',
+    border: 0,
+  };
 
   useEffect(() => {
     const savedPlayers = localStorage.getItem("playersData");
@@ -221,9 +232,13 @@ const Attendance = ({ isStudent = false }) => {
                 <td style={{ textAlign: 'center' }}>{row.slNo}</td>
 
                 <td style={{ textAlign: 'left' }}>
+                  <label htmlFor={`player-select-${index}`} style={srOnlyStyle}>
+                    Player name for row {row.slNo}
+                  </label>
                   <select
                     id={`player-select-${index}`}
                     name={`player-select-${index}`}
+                    aria-label={`Player name for row ${row.slNo}`}
                     value={row.playerName}
                     onChange={e => updateField(index, 'playerName', e.target.value)}
                     disabled={!isEditMode}
@@ -245,9 +260,13 @@ const Attendance = ({ isStudent = false }) => {
                 </td>
 
                 <td style={{ textAlign: 'center' }}>
+                  <label htmlFor={`morning-select-${index}`} style={srOnlyStyle}>
+                    Morning attendance for row {row.slNo}
+                  </label>
                   <select
                     id={`morning-select-${index}`}
                     name={`morning-select-${index}`}
+                    aria-label={`Morning attendance for row ${row.slNo}`}
                     value={row.morning}
                     onChange={e => updateField(index, 'morning', e.target.value)}
                     disabled={!isEditMode}
@@ -260,9 +279,13 @@ const Attendance = ({ isStudent = false }) => {
                 </td>
 
                 <td style={{ textAlign: 'center' }}>
+                  <label htmlFor={`evening-select-${index}`} style={srOnlyStyle}>
+                    Evening attendance for row {row.slNo}
+                  </label>
                   <select
                     id={`evening-select-${index}`}
                     name={`evening-select-${index}`}
+                    aria-label={`Evening attendance for row ${row.slNo}`}
                     value={row.evening}
                     onChange={e => updateField(index, 'evening', e.target.value)}
                     disabled={!isEditMode}
