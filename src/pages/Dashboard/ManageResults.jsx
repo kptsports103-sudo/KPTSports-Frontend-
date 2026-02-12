@@ -16,9 +16,10 @@ const normalizeName = (name) => {
 };
 
 const ManageResults = () => {
+  const currentYear = new Date().getFullYear();
   const [data, setData] = useState([]); // [{ year, results: [] }]
   const [groupData, setGroupData] = useState([]); // [{ year, results: [] }]
-  const [selectedYear, setSelectedYear] = useState('all');
+  const [selectedYear, setSelectedYear] = useState(String(currentYear));
   const [players, setPlayers] = useState([]);
   const [playersById, setPlayersById] = useState({});
 
@@ -452,15 +453,16 @@ const ManageResults = () => {
   };
 
   /* ================= FILTERED DATA ================= */
-  const displayedData =
-    selectedYear === 'all'
-      ? [...data].sort((a, b) => b.year - a.year)
-      : data.filter(d => d.year === Number(selectedYear));
+  const availableYears = Array.from(
+    new Set([
+      ...data.map(d => Number(d.year)).filter(Boolean),
+      ...groupData.map(g => Number(g.year)).filter(Boolean),
+      currentYear
+    ])
+  ).sort((a, b) => b - a);
 
-  const displayedGroupData =
-    selectedYear === 'all'
-      ? groupData
-      : groupData.filter(g => g.year === Number(selectedYear));
+  const displayedData = data.filter(d => d.year === Number(selectedYear));
+  const displayedGroupData = groupData.filter(g => g.year === Number(selectedYear));
 
   /* ================= UI ================= */
   return (
@@ -478,10 +480,7 @@ const ManageResults = () => {
             onChange={(e) => setSelectedYear(e.target.value)}
             style={styles.yearSelect}
           >
-            <option value="all">All Years</option>
-            {[...data]
-              .map(d => d.year)
-              .sort((a, b) => b - a)
+            {availableYears
               .map(y => (
                 <option key={y} value={y}>{y}</option>
               ))}
@@ -1064,7 +1063,7 @@ const Field = ({ label, htmlFor, children }) => {
 const styles = {
   page: {
     minHeight: '100vh',
-    background: 'linear-gradient(145deg, #fff7ed 0%, #ffe8cc 52%, #ffd7a3 100%)',
+    background: '#f6f8fb',
     padding: 20,
     color: '#1f2937'
   },
@@ -1073,7 +1072,7 @@ const styles = {
     fontSize: 32,
     fontWeight: 700,
     marginBottom: 20,
-    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+    textShadow: 'none',
     letterSpacing: '-0.5px'
   },
 
@@ -1081,21 +1080,20 @@ const styles = {
     padding: '10px 16px',
     borderRadius: 8,
     background: '#fff',
-    color: '#000',
-    border: '2px solid rgba(255,255,255,0.2)',
+    color: '#1f2937',
+    border: '1px solid #e5e7eb',
     fontSize: 14,
     fontWeight: 500,
-    backdropFilter: 'blur(10px)',
     transition: 'all 0.3s ease',
     cursor: 'pointer'
   },
 
   yearBar: {
     height: 6,
-    background: 'linear-gradient(90deg, #d6dbe2 0%, #b8c0ca 100%)',
+    background: 'linear-gradient(90deg, #1f2937 0%, #374151 100%)',
     borderRadius: 3,
     marginBottom: 16,
-    boxShadow: '0 2px 8px rgba(71, 85, 105, 0.22)'
+    boxShadow: '0 2px 8px rgba(31, 41, 55, 0.24)'
   },
 
   yearTitle: {
@@ -1330,29 +1328,29 @@ const styles = {
 
   topBtnPrimary: {
     padding: '11px 22px',
-    background: 'linear-gradient(135deg, #ffb347, #ff8c42)',
-    color: '#3b1f0f',
-    border: '1px solid #d97706',
+    background: 'linear-gradient(135deg, #1d4ed8, #1e40af)',
+    color: '#ffffff',
+    border: '1px solid #1e40af',
     borderRadius: 10,
     fontSize: 14,
     fontWeight: 700,
     cursor: 'pointer',
     transition: 'all 0.2s ease',
-    boxShadow: '0 5px 14px rgba(217, 119, 6, 0.28)',
+    boxShadow: '0 5px 14px rgba(37, 99, 235, 0.28)',
     letterSpacing: '0.2px'
   },
 
   topBtnSecondary: {
     padding: '11px 22px',
-    background: 'linear-gradient(135deg, #fff1e6, #ffe2cc)',
-    color: '#7c2d12',
-    border: '1px solid #fdba74',
+    background: 'linear-gradient(135deg, #f9fafb, #e5e7eb)',
+    color: '#1f2937',
+    border: '1px solid #d1d5db',
     borderRadius: 10,
     fontSize: 14,
     fontWeight: 700,
     cursor: 'pointer',
     transition: 'all 0.2s ease',
-    boxShadow: '0 5px 14px rgba(124, 45, 18, 0.15)',
+    boxShadow: '0 5px 14px rgba(15, 23, 42, 0.12)',
     letterSpacing: '0.2px'
   },
 
