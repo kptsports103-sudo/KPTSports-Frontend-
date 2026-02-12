@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import DailyVisitorsChart from "../../admin/components/DailyVisitorsChart";
 import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonChart";
 import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 import api from "../../services/api";
 import logoLeft from "/college-logo-left.png";
 import logoRight from "/college-logo-right.png";
@@ -257,6 +258,15 @@ const AdminDashboard = () => {
       document.body.appendChild(certificateNode);
       const cert = certificateNode.querySelector(".cert");
 
+      const canvas = await html2canvas(cert, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#fffaf0",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+
       const pdf = new jsPDF({
         orientation: "landscape",
         unit: "px",
@@ -264,20 +274,7 @@ const AdminDashboard = () => {
         compress: true,
       });
 
-      await pdf.html(cert, {
-        x: 0,
-        y: 0,
-        width: 900,
-        windowWidth: 900,
-        margin: [0, 0, 0, 0],
-        pagebreak: { mode: ["avoid-all", "css"] },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: "#fffaf0",
-        },
-      });
+      pdf.addImage(imgData, "PNG", 0, 0, 900, 650);
 
       const safeName = (row.name || "student")
         .toLowerCase()
