@@ -58,6 +58,8 @@ const AdminDashboard = () => {
               semester: player.semester || '',
               department: player.branch || player.department || player.dept || '',
               competition: player.competition || player.event || '',
+              position: player.position || player.rank || '',
+              achievement: player.achievement || '',
               year: yearNum,
               diplomaYear: player.diplomaYear || ''
             });
@@ -133,7 +135,8 @@ const AdminDashboard = () => {
     wrapper.style.position = "absolute";
     wrapper.style.left = "-9999px";
     wrapper.style.top = "0";
-    wrapper.style.visibility = "hidden";
+    wrapper.style.opacity = "0";
+    wrapper.style.pointerEvents = "none";
     wrapper.style.width = "980px";
     wrapper.style.background = "#f2f2f2";
     wrapper.style.padding = "20px";
