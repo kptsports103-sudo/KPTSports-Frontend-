@@ -119,17 +119,124 @@ const AdminDashboard = () => {
     fetchYearlyStats();
   }, []);
 
-  const loadImage = (src) =>
-    new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = src;
-    });
+  const safeField = (value, fallback = "________") => {
+    const text = value === null || value === undefined ? "" : String(value).trim();
+    return text || fallback;
+  };
 
-  const drawText = (ctx, text, x, y) => {
-    const safeText = text ?? "";
-    ctx.fillText(safeText, x, y);
+  const buildCertificateNode = (row) => {
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "fixed";
+    wrapper.style.left = "-10000px";
+    wrapper.style.top = "0";
+    wrapper.style.width = "980px";
+    wrapper.style.background = "#f2f2f2";
+    wrapper.style.padding = "20px";
+
+    wrapper.innerHTML = `
+      <style>
+        .cert-wrap { font-family: "Times New Roman", serif; }
+        .cert {
+          width: 900px;
+          min-height: 650px;
+          margin: 0 auto;
+          padding: 30px 40px;
+          background: #fffaf0;
+          border: 10px solid #7b2d2d;
+          position: relative;
+          box-sizing: border-box;
+        }
+        .cert-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 4px;
+        }
+        .cert-logo { height: 80px; width: 80px; object-fit: contain; }
+        .cert-logo.center { height: 90px; width: 90px; }
+        .cert-text-center { text-align: center; margin: 0; color: #111827; }
+        .cert-gov, .cert-dept { font-size: 14px; margin: 6px 0; font-weight: 700; }
+        .cert-college {
+          text-align: center;
+          font-size: 30px;
+          color: #2b2b7f;
+          margin: 10px 0 6px;
+          font-weight: 800;
+          letter-spacing: 0.3px;
+        }
+        .cert-subtitle { text-align: center; font-size: 14px; margin: 0 0 16px; color: #374151; }
+        .cert-kpm { font-size: 14px; margin: 4px 0 8px; color: #111827; font-weight: 700; }
+        .cert-title {
+          text-align: center;
+          font-size: 42px;
+          color: darkred;
+          margin: 12px 0 16px;
+          font-family: "Old English Text MT", "Times New Roman", serif;
+          font-weight: 700;
+        }
+        .cert-content { text-align: center; font-size: 18px; line-height: 1.9; color: #111827; }
+        .cert-field { font-size: 20px; margin: 8px 0; }
+        .cert-line {
+          border-bottom: 1px solid #000;
+          padding: 0 10px;
+          display: inline-block;
+          min-width: 200px;
+          font-weight: 700;
+        }
+        .cert-footer {
+          display: flex;
+          justify-content: space-between;
+          position: absolute;
+          bottom: 30px;
+          left: 40px;
+          right: 40px;
+          font-weight: bold;
+          color: darkred;
+          font-size: 16px;
+        }
+      </style>
+      <div class="cert-wrap">
+        <div class="cert">
+          <div class="cert-header">
+            <img src="/images/college-logo-left.png" class="cert-logo" alt="College Logo Left" />
+            <img src="/images/karnataka-emblem.png" class="cert-logo center" alt="Karnataka Emblem" />
+            <img src="/images/college-logo-right.png" class="cert-logo" alt="College Logo Right" />
+          </div>
+          <p class="cert-text-center cert-gov">GOVERNMENT OF KARNATAKA</p>
+          <p class="cert-text-center cert-dept">DEPARTMENT OF COLLEGIATE AND TECHNICAL EDUCATION</p>
+          <h1 class="cert-college">KARNATAKA (GOVT.) POLYTECHNIC, MANGALURU</h1>
+          <p class="cert-subtitle">(First Autonomous Polytechnic in India under AICTE, New Delhi)</p>
+          <div class="cert-kpm">KPM No.: ${safeField(row.kpmNo)}</div>
+          <h2 class="cert-title">Certificate of Merit</h2>
+          <div class="cert-content">
+            <p>This award certificate is proudly presented to</p>
+            <p class="cert-field">Mr./Ms. <span class="cert-line">${safeField(row.name)}</span></p>
+            <p>
+              studying in the <span class="cert-line">${safeField(row.semester)}</span> semester of the
+              <span class="cert-line">${safeField(row.department)}</span> Department,
+            </p>
+            <p>
+              for participating in the <span class="cert-line">${safeField(row.competition)}</span>
+              sports/cultural competition
+            </p>
+            <p>
+              organized by the Sports and Students Union in the year
+              <span class="cert-line">${safeField(row.year)}</span>
+            </p>
+            <p>
+              and securing the <span class="cert-line">${safeField(row.position)}</span> position.
+            </p>
+          </div>
+          <div class="cert-footer">
+            <div>Student Welfare Officer</div>
+            <div>Sports Officer</div>
+            <div>Principal</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    return wrapper;
   };
 
   const handleDownloadCertificate = async (row) => {
@@ -139,53 +246,28 @@ const AdminDashboard = () => {
     }
     
     setIsGeneratingId(row.id);
+    let certificateNode = null;
     try {
-      const template = await loadImage("/certificate.jpeg");
-      const canvas = document.createElement("canvas");
-      canvas.width = template.width;
-      canvas.height = template.height;
-      const ctx = canvas.getContext("2d");
-      
-      if (!ctx) {
-        throw new Error("Canvas not supported");
-      }
+      certificateNode = buildCertificateNode(row);
+      document.body.appendChild(certificateNode);
 
-      ctx.drawImage(template, 0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#111";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "alphabetic";
-
-      const base = { w: 1235, h: 1600 };
-      const scaleX = canvas.width / base.w;
-      const scaleY = canvas.height / base.h;
-      const fontSize = Math.round(28 * scaleY);
-      ctx.font = `${fontSize}px serif`; // Use system serif font for cross-platform compatibility
-
-      const positions = {
-        kpmNo: { x: 260, y: 515 },
-        name: { x: 470, y: 594 },
-        semester: { x: 563, y: 656 },
-        department: { x: 766, y: 656 },
-        competition: { x: 641, y: 718 },
-        year: { x: 922, y: 781 },
-        position: { x: 703, y: 843 },
-      };
-
-      drawText(ctx, row.kpmNo, positions.kpmNo.x * scaleX, positions.kpmNo.y * scaleY);
-      drawText(ctx, row.name, positions.name.x * scaleX, positions.name.y * scaleY);
-      drawText(ctx, row.semester, positions.semester.x * scaleX, positions.semester.y * scaleY);
-      drawText(ctx, row.department, positions.department.x * scaleX, positions.department.y * scaleY);
-      drawText(ctx, row.competition, positions.competition.x * scaleX, positions.competition.y * scaleY);
-      drawText(ctx, row.year, positions.year.x * scaleX, positions.year.y * scaleY);
-      drawText(ctx, row.position, positions.position.x * scaleX, positions.position.y * scaleY);
-
-      const imgData = canvas.toDataURL("image/jpeg", 1.0);
       const pdf = new jsPDF({
-        orientation: "portrait",
+        orientation: "landscape",
         unit: "px",
-        format: [canvas.width, canvas.height],
+        format: [980, 700],
       });
-      pdf.addImage(imgData, "JPEG", 0, 0, canvas.width, canvas.height);
+
+      await pdf.html(certificateNode, {
+        x: 0,
+        y: 0,
+        width: 980,
+        windowWidth: 980,
+        html2canvas: {
+          scale: 1.5,
+          useCORS: true,
+          backgroundColor: "#f2f2f2",
+        },
+      });
 
       const safeName = (row.name || "student")
         .toLowerCase()
@@ -196,6 +278,7 @@ const AdminDashboard = () => {
       console.error("Failed to generate certificate PDF:", error);
       alert("Failed to generate certificate. Please try again.");
     } finally {
+      if (certificateNode) certificateNode.remove();
       setIsGeneratingId(null);
     }
   };
