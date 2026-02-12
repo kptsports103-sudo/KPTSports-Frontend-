@@ -67,15 +67,15 @@ code {
 .kpt-notify-modal {
   width: min(560px, 95vw);
   border-radius: 18px;
-  background: linear-gradient(160deg, #f8fafc 0%, #eef2f7 100%);
-  border: 1px solid #d8dee9;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.25);
+  background: linear-gradient(160deg, #fff4e6 0%, #ffe8cc 100%);
+  border: 1px solid #f2c38b;
+  box-shadow: 0 18px 40px rgba(107, 70, 22, 0.18);
   padding: 24px;
 }
 
 .kpt-notify-title {
   margin: 0 0 12px;
-  color: #0f172a;
+  color: #7c3e0a;
   font-size: 30px;
   line-height: 1.15;
   font-weight: 700;
@@ -83,14 +83,14 @@ code {
 
 .kpt-notify-message {
   margin: 0;
-  color: #1f2937;
+  color: #9a3412;
   font-size: 22px;
   line-height: 1.35;
   font-weight: 500;
 }
 
 .kpt-notify-info {
-  color: #1f2937;
+  color: #9a3412;
 }
 
 .kpt-notify-error {
@@ -123,10 +123,10 @@ code {
 }
 
 .kpt-notify-cancel {
-  border: 1px solid #64748b;
+  border: 1px solid #d97706;
   border-radius: 999px;
-  background: #ffffff;
-  color: #334155;
+  background: #fff7ed;
+  color: #9a3412;
   padding: 10px 24px;
   font-size: 18px;
   font-weight: 600;

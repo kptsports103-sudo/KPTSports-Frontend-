@@ -376,7 +376,7 @@ const ManageResults = () => {
     }
   };
 
-  const handleGroupDelete = async (id) => {
+  const handleGroupDelete = async (id, teamName) => {
     const shouldDelete = await confirmAction('Delete team result?');
     if (!shouldDelete) return;
     try {
@@ -384,6 +384,7 @@ const ManageResults = () => {
       const response = await api.delete(`/group-results/${id}`);
       console.log('Group delete response:', response.data);
       fetchGroupResults();
+      notify(`deleted ${teamName || 'record'}`, { type: 'success', position: 'top-center' });
     } catch (error) {
       console.error('Group delete error:', error);
 
@@ -410,7 +411,7 @@ const ManageResults = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, name) => {
     const shouldDelete = await confirmAction('Delete this record?');
     if (!shouldDelete) return;
     try {
@@ -418,6 +419,7 @@ const ManageResults = () => {
       const response = await api.delete(`/results/${id}`);
       console.log('Delete response:', response.data);
       fetchResults();
+      notify(`deleted ${name || 'record'}`, { type: 'success', position: 'top-center' });
     } catch (error) {
       console.error('Delete error:', error);
 
@@ -487,13 +489,13 @@ const ManageResults = () => {
         </div>
 
         {/* ADD / CANCEL */}
-        <div style={{ marginBottom: 12 }}>
+        <div style={styles.topActionBar}>
           {!isEditing && !isGroupEditing ? (
             <>
-              <button onClick={() => setIsEditing(true)} style={styles.btnPrimary}>
+              <button onClick={() => setIsEditing(true)} style={styles.topBtnPrimary}>
                 ➕ Individual Result
               </button>
-              <button onClick={() => setIsGroupEditing(true)} style={styles.btnSecondary}>
+              <button onClick={() => setIsGroupEditing(true)} style={styles.topBtnSecondary}>
                 🧑‍🤝‍🧑 Team Result
               </button>
             </>
@@ -506,7 +508,7 @@ const ManageResults = () => {
                 setEditingGroupId(null);
                 setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: [{ name: '', branch: '', year: '' }], medal: '', imageUrl: '' });
               }}
-              style={styles.btnSecondary}
+              style={styles.topBtnSecondary}
             >
               ❌ Cancel
             </button>
@@ -530,13 +532,7 @@ const ManageResults = () => {
                   placeholder="Search by Name or Event"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{
-                    padding: '10px 14px',
-                    width: '280px',
-                    borderRadius: 8,
-                    border: '2px solid #ddd',
-                    fontSize: 14
-                  }}
+                  style={styles.searchInput}
                 />
               </div>
 
@@ -610,7 +606,7 @@ const ManageResults = () => {
                               src="/Delete button.png"
                               alt="Delete"
                               style={styles.iconButton}
-                              onClick={() => handleDelete(item._id)}
+                              onClick={() => handleDelete(item._id, item.name)}
                             />
                           </div>
                         </td>
@@ -708,7 +704,7 @@ const ManageResults = () => {
                                 src="/Delete button.png"
                                 alt="Delete"
                                 style={styles.iconButton}
-                                onClick={() => handleGroupDelete(item._id)}
+                                onClick={() => handleGroupDelete(item._id, item.teamName)}
                               />
                             </div>
                           </td>
@@ -1068,7 +1064,7 @@ const Field = ({ label, htmlFor, children }) => {
 const styles = {
   page: {
     minHeight: '100vh',
-    background: 'linear-gradient(180deg, #e6e9ed 0%, #d9dde2 100%)',
+    background: 'linear-gradient(145deg, #fff7ed 0%, #ffe8cc 52%, #ffd7a3 100%)',
     padding: 20,
     color: '#1f2937'
   },
@@ -1111,6 +1107,27 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '10px'
+  },
+
+  topActionBar: {
+    marginBottom: 12,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    flexWrap: 'wrap'
+  },
+
+  searchInput: {
+    padding: '10px 14px',
+    width: '320px',
+    maxWidth: '92%',
+    borderRadius: 8,
+    border: '2px solid #000000',
+    fontSize: 14,
+    color: '#111827',
+    backgroundColor: '#ffffff',
+    outline: 'none',
+    boxShadow: 'none'
   },
 
   /* ================= TABLE ================= */
@@ -1309,6 +1326,34 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     boxShadow: '0 4px 12px rgba(108, 117, 125, 0.3)'
+  },
+
+  topBtnPrimary: {
+    padding: '11px 22px',
+    background: 'linear-gradient(135deg, #ffb347, #ff8c42)',
+    color: '#3b1f0f',
+    border: '1px solid #d97706',
+    borderRadius: 10,
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 5px 14px rgba(217, 119, 6, 0.28)',
+    letterSpacing: '0.2px'
+  },
+
+  topBtnSecondary: {
+    padding: '11px 22px',
+    background: 'linear-gradient(135deg, #fff1e6, #ffe2cc)',
+    color: '#7c2d12',
+    border: '1px solid #fdba74',
+    borderRadius: 10,
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 5px 14px rgba(124, 45, 18, 0.15)',
+    letterSpacing: '0.2px'
   },
 
   btnEdit: {
