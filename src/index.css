@@ -59,6 +59,11 @@ code {
   padding: 20px;
 }
 
+.kpt-notify-overlay-top-center {
+  align-items: flex-start;
+  padding-top: 56px;
+}
+
 .kpt-notify-modal {
   width: min(560px, 95vw);
   border-radius: 18px;

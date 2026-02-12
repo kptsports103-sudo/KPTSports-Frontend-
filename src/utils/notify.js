@@ -8,6 +8,7 @@ export const notify = (message, options = {}) => {
         title: options.title || 'KPT Sports Results',
         message: text,
         type: options.type || 'info',
+        position: options.position || 'center',
       },
     })
   );
@@ -22,6 +23,7 @@ export const confirmAction = (message, options = {}) =>
           title: options.title || 'KPT Sports Results',
           message: text,
           type: options.type || 'info',
+          position: options.position || 'center',
           mode: 'confirm',
           resolve,
         },

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
 import AdminLayout from '../../components/AdminLayout';
-import { confirmAction } from '../../utils/notify';
+import { confirmAction, notify } from '../../utils/notify';
 
 const MEDALS = ['Gold', 'Silver', 'Bronze'];
 
@@ -49,7 +49,6 @@ const ManageResults = () => {
     imageUrl: ''
   });
 
-  const [successMessage, setSuccessMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
   // Check authentication on component mount
@@ -206,13 +205,10 @@ const ManageResults = () => {
         console.log('Create response:', response.data);
       }
 
-      setSuccessMessage('Data saved successfully');
       fetchResults();
-      setTimeout(() => {
-        setSuccessMessage('');
-        setIsEditing(false);
-        resetForm();
-      }, 1200);
+      notify('Data saved successfully', { type: 'success', position: 'top-center' });
+      setIsEditing(false);
+      resetForm();
     } catch (error) {
       console.error('Save error:', error);
 
@@ -347,14 +343,11 @@ const ManageResults = () => {
         console.log('Group create response:', response.data);
       }
 
-      setSuccessMessage('Data saved successfully');
       fetchGroupResults();
-      setTimeout(() => {
-        setSuccessMessage('');
-        setIsGroupEditing(false);
-        setEditingGroupId(null);
-        setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: [{ name: '', branch: '', year: '' }], medal: '', imageUrl: '' });
-      }, 1200);
+      notify('Data saved successfully', { type: 'success', position: 'top-center' });
+      setIsGroupEditing(false);
+      setEditingGroupId(null);
+      setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: [{ name: '', branch: '', year: '' }], medal: '', imageUrl: '' });
     } catch (error) {
       console.error('Group save error:', error);
 
@@ -730,11 +723,6 @@ const ManageResults = () => {
         {/* INDIVIDUAL EDIT MODE */}
         {isEditing && !isGroupEditing && (
           <form onSubmit={handleSubmit}>
-            {successMessage && (
-              <div style={{ color: '#00ff99', marginBottom: 12, fontWeight: 600, textAlign: 'center' }}>
-                {successMessage}
-              </div>
-            )}
             <table style={styles.table}>
               <thead>
                 <tr style={styles.headerRow}>
@@ -881,11 +869,6 @@ const ManageResults = () => {
         {/* GROUP EDIT MODE */}
         {isGroupEditing && (
           <form onSubmit={handleGroupSubmit}>
-            {successMessage && (
-              <div style={{ color: '#00ff99', marginBottom: 12, fontWeight: 600, textAlign: 'center' }}>
-                {successMessage}
-              </div>
-            )}
             <table style={styles.table}>
               <thead>
                 <tr style={styles.headerRow}>

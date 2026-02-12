@@ -12,6 +12,7 @@ const NotificationHost = () => {
         title: payload.title || 'KPT Sports Results',
         message: payload.message || '',
         type: payload.type || 'info',
+        position: payload.position || 'center',
         mode: payload.mode || 'alert',
         resolve: payload.resolve || null,
       });
@@ -48,7 +49,7 @@ const NotificationHost = () => {
   };
 
   return (
-    <div className="kpt-notify-overlay" role="dialog" aria-modal="true" aria-live="assertive">
+    <div className={`kpt-notify-overlay ${active.position === 'top-center' ? 'kpt-notify-overlay-top-center' : ''}`} role="dialog" aria-modal="true" aria-live="assertive">
       <div className="kpt-notify-modal">
         <h3 className="kpt-notify-title">{active.title}</h3>
         <p className={`kpt-notify-message kpt-notify-${active.type}`}>{active.message}</p>
