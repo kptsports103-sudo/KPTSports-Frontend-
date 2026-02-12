@@ -8,12 +8,26 @@ const medalPriority = {
   Bronze: 3
 };
 
+const INDIVIDUAL_POINTS = {
+  Gold: 5,
+  Silver: 3,
+  Bronze: 1
+};
+
+const GROUP_POINTS = {
+  Gold: 10,
+  Silver: 7,
+  Bronze: 4
+};
+
 const Results = () => {
 
+  const currentYear = String(new Date().getFullYear());
   const [results, setResults] = useState([]);
   const [groupResults, setGroupResults] = useState([]);
   const [activeImage, setActiveImage] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedYear, setSelectedYear] = useState(currentYear);
 
   useEffect(() => {
 
@@ -27,9 +41,18 @@ const Results = () => {
 
   }, []);
 
-  // Combine and group all results by year
+  // Combine and group results by selected year
   const allResults = [...results, ...groupResults];
-  const groupedResults = allResults.reduce((acc, result) => {
+  const availableYears = Array.from(
+    new Set([
+      ...allResults.map((r) => Number(r.year)).filter(Boolean),
+      Number(currentYear)
+    ])
+  ).sort((a, b) => b - a);
+
+  const filteredResults = allResults.filter((result) => String(result.year) === String(selectedYear));
+
+  const groupedResults = filteredResults.reduce((acc, result) => {
     const year = result.year || 'Unknown';
     if (!acc[year]) {
       acc[year] = {
@@ -65,6 +88,34 @@ const Results = () => {
       }}>
         🏆 Sports Results
       </h1>
+
+      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <label htmlFor="results-year-filter" style={{ marginRight: '10px', fontWeight: 600, color: '#2c3e50' }}>
+          Select Year:
+        </label>
+        <select
+          id="results-year-filter"
+          name="results-year-filter"
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(e.target.value)}
+          style={{
+            padding: '10px 14px',
+            borderRadius: 8,
+            border: '1px solid #ced4da',
+            background: '#fff',
+            color: '#111827',
+            minWidth: '140px',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+        >
+          {availableYears.map((year) => (
+            <option key={year} value={String(year)}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {Object.keys(groupedResults).length === 0 ? (
         <div style={{
@@ -387,10 +438,11 @@ const Results = () => {
           <div
             style={{
               position: 'relative',
-              maxWidth: '90%',
-              maxHeight: '90%',
-              background: '#000',
-              padding: '1rem',
+              width: 'min(760px, 90vw)',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              background: '#0f172a',
+              padding: '1rem 1rem 1.25rem',
               borderRadius: '12px'
             }}
             onClick={e => e.stopPropagation()}
@@ -400,18 +452,41 @@ const Results = () => {
               alt=""
               style={{
                 width: '100%',
-                maxHeight: '80vh',
+                maxHeight: '52vh',
                 objectFit: 'contain'
               }}
             />
+            <div style={{ marginTop: '14px', background: '#fff', borderRadius: '10px', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: '#f3f4f6' }}>
+                    <th style={{ padding: '10px', textAlign: 'left', color: '#111827', borderBottom: '1px solid #e5e7eb' }}>Medal</th>
+                    <th style={{ padding: '10px', textAlign: 'left', color: '#111827', borderBottom: '1px solid #e5e7eb' }}>Points</th>
+                    <th style={{ padding: '10px', textAlign: 'left', color: '#111827', borderBottom: '1px solid #e5e7eb' }}>Year</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9', color: '#111827' }}>{activeImage.medal || '-'}</td>
+                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9', color: '#111827' }}>
+                      {activeImage.teamName
+                        ? (GROUP_POINTS[activeImage.medal] || 0)
+                        : (INDIVIDUAL_POINTS[activeImage.medal] || 0)}
+                    </td>
+                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9', color: '#111827' }}>{activeImage.year || '-'}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
             <button
               onClick={() => setActiveImage(null)}
               style={{
                 position: 'absolute',
                 top: '10px',
                 right: '10px',
-                background: '#fff',
-                border: 'none',
+                background: '#fee2e2',
+                color: '#b91c1c',
+                border: '1px solid #ef4444',
                 borderRadius: '50%',
                 width: '36px',
                 height: '36px',
@@ -420,7 +495,7 @@ const Results = () => {
                 fontWeight: 'bold'
               }}
             >
-              ✖
+              �
             </button>
           </div>
         </div>
@@ -433,3 +508,4 @@ const Results = () => {
 };
 
 export default Results;
+
