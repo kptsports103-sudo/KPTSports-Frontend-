@@ -24,14 +24,27 @@ const normalizeName = (name) => {
 const normalizeMedal = (medal) =>
   medal ? medal.charAt(0).toUpperCase() + medal.slice(1).toLowerCase() : '';
 
-// Get academic year from result data with fallback calculation
+// Get academic year bucket (1/2/3) for a result.
+// Priority:
+// 1) Player's saved year-wise diplomaYear from Players section
+// 2) diplomaYear present on result payload
+// 3) fallback calculation using player's base year mapping
 const getAcademicYear = (player, resultYear, resultDiplomaYear) => {
+  const ry = Number(resultYear);
+
+  // 1) Exact year mapping from Players data
+  const mappedYear = Number(player?.yearDetails?.[ry]?.diplomaYear);
+  if ([1, 2, 3].includes(mappedYear)) {
+    return mappedYear;
+  }
+
+  // 2) Use diplomaYear coming from the result
   const directYear = Number(resultDiplomaYear);
   if ([1, 2, 3].includes(directYear)) {
     return directYear;
   }
 
-  const ry = Number(resultYear);
+  // 3) Fallback to base-year progression calculation
   const baseYear = Number(player?.baseYear);
   const baseDiplomaYear = Number(player?.baseDiplomaYear);
 
