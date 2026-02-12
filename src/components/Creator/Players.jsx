@@ -291,6 +291,7 @@ const Players = ({ isStudent = false }) => {
       setDirtyRows(new Set());
     } catch (error) {
       console.error("Save failed:", error);
+      const backendMessage = error?.response?.data?.message;
 
       if (isOffline) {
         queueOfflineSave(validData);
@@ -301,7 +302,7 @@ const Players = ({ isStudent = false }) => {
           setData(lastSavedData);
         }
 
-        alert("Save failed. Changes were reverted.");
+        alert(backendMessage || "Save failed. Changes were reverted.");
       }
     } finally {
       setIsSaving(false);
