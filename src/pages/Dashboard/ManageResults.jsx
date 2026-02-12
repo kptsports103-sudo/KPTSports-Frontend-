@@ -28,7 +28,9 @@ const ManageResults = () => {
   const [editingGroupId, setEditingGroupId] = useState(null);
 
   const [form, setForm] = useState({
+    name: '',
     playerId: '',
+    branch: '',
     event: '',
     year: '',
     medal: '',
@@ -171,14 +173,17 @@ const ManageResults = () => {
       console.log('Submitting form:', form);
 
       const selectedPlayer = form.playerId ? playersById[form.playerId] : null;
-      if (!selectedPlayer) {
-        alert('Please select a player from the list.');
-        return;
-      }
+      const manualName = (form.name || '').trim();
+      const manualBranch = (form.branch || '').trim();
 
       const finalDiplomaYear = form.diplomaYear || selectedPlayer?.diplomaYear || '';
       if (!finalDiplomaYear) {
         alert('Diploma Year is required. Please select 1, 2, or 3.');
+        return;
+      }
+
+      if (!selectedPlayer && !manualName) {
+        alert('Enter Name (manual) or select a player.');
         return;
       }
       
@@ -187,10 +192,10 @@ const ManageResults = () => {
         year: form.year,
         medal: form.medal,
         imageUrl: form.imageUrl,
-        name: selectedPlayer.name,
-        branch: selectedPlayer.branch || '',
+        name: selectedPlayer?.name || manualName,
+        branch: selectedPlayer?.branch || manualBranch,
         diplomaYear: finalDiplomaYear,
-        playerId: selectedPlayer.id
+        playerId: selectedPlayer?.id || ''
       };
 
       if (editingId) {
@@ -245,7 +250,9 @@ const ManageResults = () => {
       : players.find(p => normalizeName(p.name) === normalizeName(item.name));
 
     setForm({
+      name: item.name || '',
       playerId: item.playerId || matchedPlayer?.id || '',
+      branch: item.branch || matchedPlayer?.branch || '',
       event: item.event || '',
       year: item.year || '',
       medal: item.medal || '',
@@ -445,7 +452,7 @@ const ManageResults = () => {
   };
 
   const resetForm = () => {
-    setForm({ playerId: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
+    setForm({ name: '', playerId: '', branch: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
     setEditingId(null);
   };
 
@@ -545,6 +552,7 @@ const ManageResults = () => {
                   <thead>
                     <tr style={styles.headerRow}>
                       <th style={styles.headerCell}>Name</th>
+                      <th style={styles.headerCell}>Branch</th>
                       <th style={styles.headerCell}>Event</th>
                       <th style={styles.headerCell}>Medal</th>
                       <th style={styles.headerCell}>Image</th>
@@ -575,6 +583,7 @@ const ManageResults = () => {
                         }}
                       >
                         <td style={{...styles.cell, ...styles.nameCell}}>{item.name}</td>
+                        <td style={styles.cell}>{item.branch || '-'}</td>
                         <td style={styles.cell}>
                           <span style={styles.eventBadge}>{item.event}</span>
                         </td>
@@ -730,6 +739,8 @@ const ManageResults = () => {
               <thead>
                 <tr style={styles.headerRow}>
                   <th style={styles.headerCell}>Player</th>
+                  <th style={styles.headerCell}>Name (manual)</th>
+                  <th style={styles.headerCell}>Branch</th>
                   <th style={styles.headerCell}>Event</th>
                   <th style={styles.headerCell}>Year</th>
                   <th style={styles.headerCell}>Diploma Year</th>
@@ -751,18 +762,41 @@ const ManageResults = () => {
                         setForm({
                           ...form,
                           playerId: selectedId,
+                          name: selectedPlayer?.name || form.name,
+                          branch: selectedPlayer?.branch || form.branch,
                           diplomaYear: selectedPlayer?.diplomaYear || form.diplomaYear
                         });
                       }}
-                      required
                     >
-                      <option value="">Select Player</option>
+                      <option value="">Manual entry</option>
                       {players.map(p => (
                         <option key={p.id} value={p.id}>
                           {p.name} - {p.branch} (Y{p.diplomaYear}, {p.participationYear})
                         </option>
                       ))}
                     </select>
+                  </td>
+                  <td style={styles.cell}>
+                    <input
+                      id="result-name"
+                      name="result-name"
+                      style={styles.input}
+                      value={form.name}
+                      onChange={e => setForm({ ...form, name: e.target.value })}
+                      readOnly={!!form.playerId}
+                      required={!form.playerId}
+                    />
+                  </td>
+                  <td style={styles.cell}>
+                    <input
+                      id="result-branch"
+                      name="result-branch"
+                      style={styles.input}
+                      value={form.branch}
+                      onChange={e => setForm({ ...form, branch: e.target.value })}
+                      readOnly={!!form.playerId}
+                      placeholder="Branch"
+                    />
                   </td>
                   <td style={styles.cell}>
                     <input
@@ -1051,9 +1085,9 @@ const Field = ({ label, htmlFor, children }) => {
 const styles = {
   page: {
     minHeight: '100vh',
-    background: '#c0c0c0',
+    background: 'linear-gradient(180deg, #e6e9ed 0%, #d9dde2 100%)',
     padding: 20,
-    color: '#000'
+    color: '#1f2937'
   },
 
   title: {
@@ -1079,18 +1113,18 @@ const styles = {
 
   yearBar: {
     height: 6,
-    background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
+    background: 'linear-gradient(90deg, #d6dbe2 0%, #b8c0ca 100%)',
     borderRadius: 3,
     marginBottom: 16,
-    boxShadow: '0 2px 8px rgba(102, 126, 234, 0.4)'
+    boxShadow: '0 2px 8px rgba(71, 85, 105, 0.22)'
   },
 
   yearTitle: {
     fontSize: 22,
     fontWeight: 600,
     marginBottom: 16,
-    color: '#fff',
-    textShadow: '0 1px 3px rgba(0,0,0,0.3)',
+    color: '#1f2937',
+    textShadow: 'none',
     display: 'flex',
     alignItems: 'center',
     gap: '10px'
@@ -1102,27 +1136,28 @@ const styles = {
     background: '#fff',
     borderRadius: 16,
     overflow: 'hidden',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+    boxShadow: '0 8px 24px rgba(71, 85, 105, 0.12)',
     marginBottom: 32,
-    border: '1px solid rgba(255,255,255,0.1)'
+    border: '1px solid #cfd6df'
   },
 
   table: {
     width: '100%',
     background: '#ffffff',
-    color: '#2c3e50',
+    color: '#1f2937',
     borderCollapse: 'collapse',
     fontSize: 14,
     lineHeight: 1.5
   },
 
   headerRow: {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: '#ffffff',
+    background: 'linear-gradient(135deg, #eef2f6 0%, #d6dde5 100%)',
+    color: '#111827',
     textTransform: 'uppercase',
     letterSpacing: '0.8px',
     fontWeight: 600,
-    fontSize: 12
+    fontSize: 12,
+    borderBottom: '1px solid #c0c8d2'
   },
 
   headerCell: {
@@ -1136,13 +1171,13 @@ const styles = {
   },
 
   bodyRow: {
-    borderBottom: '1px solid #f1f3f4',
+    borderBottom: '1px solid #e5e7eb',
     transition: 'all 0.2s ease',
     backgroundColor: '#ffffff'
   },
 
   bodyRowHover: {
-    backgroundColor: '#f8f9ff',
+    backgroundColor: '#f5f7fa',
     transform: 'scale(1.001)',
     boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
   },
@@ -1150,12 +1185,12 @@ const styles = {
   cell: {
     padding: '16px 20px',
     verticalAlign: 'middle',
-    borderBottom: '1px solid #f1f3f4'
+    borderBottom: '1px solid #e5e7eb'
   },
 
   nameCell: {
     fontWeight: 600,
-    color: '#2c3e50',
+    color: '#111827',
     fontSize: 15
   },
 
