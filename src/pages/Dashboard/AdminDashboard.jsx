@@ -7,6 +7,9 @@ import DailyVisitorsChart from "../../admin/components/DailyVisitorsChart";
 import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonChart";
 import { jsPDF } from "jspdf";
 import api from "../../services/api";
+import logoLeft from "/college-logo-left.png";
+import logoRight from "/college-logo-right.png";
+import emblem from "/karnataka-emblem.png";
 
 const normalizeMedalKey = (medal = "") => {
   const value = medal.trim().toLowerCase();
@@ -126,9 +129,10 @@ const AdminDashboard = () => {
 
   const buildCertificateNode = (row) => {
     const wrapper = document.createElement("div");
-    wrapper.style.position = "fixed";
-    wrapper.style.left = "-10000px";
+    wrapper.style.position = "absolute";
+    wrapper.style.left = "-9999px";
     wrapper.style.top = "0";
+    wrapper.style.visibility = "hidden";
     wrapper.style.width = "980px";
     wrapper.style.background = "#f2f2f2";
     wrapper.style.padding = "20px";
@@ -198,9 +202,9 @@ const AdminDashboard = () => {
       <div class="cert-wrap">
         <div class="cert">
           <div class="cert-header">
-            <img src="/images/college-logo-left.png" class="cert-logo" alt="College Logo Left" />
-            <img src="/images/karnataka-emblem.png" class="cert-logo center" alt="Karnataka Emblem" />
-            <img src="/images/college-logo-right.png" class="cert-logo" alt="College Logo Right" />
+            <img src="${logoLeft}" class="cert-logo" alt="College Logo Left" />
+            <img src="${emblem}" class="cert-logo center" alt="Karnataka Emblem" />
+            <img src="${logoRight}" class="cert-logo" alt="College Logo Right" />
           </div>
           <p class="cert-text-center cert-gov">GOVERNMENT OF KARNATAKA</p>
           <p class="cert-text-center cert-dept">DEPARTMENT OF COLLEGIATE AND TECHNICAL EDUCATION</p>
@@ -250,22 +254,24 @@ const AdminDashboard = () => {
     try {
       certificateNode = buildCertificateNode(row);
       document.body.appendChild(certificateNode);
+      const cert = certificateNode.querySelector(".cert");
 
       const pdf = new jsPDF({
         orientation: "landscape",
         unit: "px",
-        format: [980, 700],
+        format: [900, 650],
       });
 
-      await pdf.html(certificateNode, {
+      await pdf.html(cert, {
         x: 0,
         y: 0,
-        width: 980,
-        windowWidth: 980,
+        width: 900,
+        windowWidth: 900,
         html2canvas: {
-          scale: 1.5,
+          scale: 2,
           useCORS: true,
-          backgroundColor: "#f2f2f2",
+          allowTaint: true,
+          backgroundColor: "#fffaf0",
         },
       });
 
@@ -703,3 +709,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

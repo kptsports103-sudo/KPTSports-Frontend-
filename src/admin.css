@@ -794,6 +794,30 @@
   padding: 16px;
   border: 1px solid var(--card-border);
   box-shadow: var(--card-shadow);
+  color: #000000;
+}
+
+/* Ensure readable text in Admin Dashboard Players List + Certificates blocks */
+.table-card .iam-empty {
+  color: #000000;
+}
+
+.table-card .iam-search,
+.table-card .quick-stats-select,
+.table-filters .iam-search,
+.table-filters .quick-stats-select {
+  color: #000000;
+  background: #ffffff;
+}
+
+.table-card .iam-table th,
+.table-card .iam-table td {
+  color: #000000;
+}
+
+.table-card .iam-table th {
+  background: #f1f5f9;
+  color: #000000;
 }
 
 .top-year-card-animated {
