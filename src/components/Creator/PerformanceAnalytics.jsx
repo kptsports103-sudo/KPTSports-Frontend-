@@ -151,33 +151,34 @@ export default function PerformanceAnalytics() {
         console.log('🔍 DIAGNOSTIC: Player-to-Result Matching Process');
         console.log('='.repeat(60));
         
-        // Group players by id (merge same player across years)
+        // Deduplicate players across years and id drift:
+        // canonical key = exact name + branch; ids are treated as aliases.
         const playersMap = {};
-        const playersByName = {};
-        allPlayers.forEach(player => {
-          if (!player.id) return;
-          const key = player.id;
-          
+        const playerIdToKey = {};
+        const nameBranchToKey = {};
+
+        allPlayers.forEach((player) => {
+          const safeName = normalizeName(player.name);
+          const safeBranch = normalizeName(player.branch);
+          if (!safeName) return;
+
+          const nameBranchKey = `${safeName}|${safeBranch}`;
+          const playerId = player.id ? String(player.id).trim() : '';
+
+          let key = playerId ? playerIdToKey[playerId] : null;
+          if (!key && nameBranchToKey[nameBranchKey]) key = nameBranchToKey[nameBranchKey];
+          if (!key) key = nameBranchKey;
+
           if (!playersMap[key]) {
-            // CORRECTED: Store baseYear and baseDiplomaYear for proper academic calculation
-            // baseYear = first participation year
-            // baseDiplomaYear = diplomaYear at first participation
-            const sortedYears = allPlayers
-              .filter(p => p.id === player.id)
-              .map(p => p.participationYear)
-              .sort((a, b) => a - b);
-            
-            const baseYearEntry = allPlayers.find(p => p.id === player.id && p.participationYear === sortedYears[0]);
-            
             playersMap[key] = {
-              id: player.id,
-              originalName: player.name,
+              id: playerId || key,
+              aliasIds: new Set(),
               name: player.name,
               branch: player.branch,
-              years: [],
-              baseYear: sortedYears[0] || player.participationYear,
-              baseDiplomaYear: Number(baseYearEntry?.diplomaYear) || Number(player.diplomaYear) || 1,
+              years: new Set(),
               yearDetails: {},
+              baseYear: Number(player.participationYear) || null,
+              baseDiplomaYear: Number(player.diplomaYear) || 1,
               firstYearPoints: 0,
               secondYearPoints: 0,
               thirdYearPoints: 0,
@@ -187,239 +188,136 @@ export default function PerformanceAnalytics() {
               groupResults: []
             };
           }
-          playersMap[key].years.push(player.participationYear);
-          playersMap[key].yearDetails[player.participationYear] = {
-            branch: player.branch,
-            diplomaYear: player.diplomaYear
-          };
 
-          const nameKey = normalizeName(player.name);
-          if (nameKey && !playersByName[nameKey]) {
-            playersByName[nameKey] = player.id;
+          const entry = playersMap[key];
+          if (playerId) {
+            entry.aliasIds.add(playerId);
+            playerIdToKey[playerId] = key;
+            if (!entry.id || entry.id === key) entry.id = playerId;
+          }
+          nameBranchToKey[nameBranchKey] = key;
+
+          const py = Number(player.participationYear);
+          if (Number.isFinite(py)) {
+            entry.years.add(py);
+            entry.yearDetails[py] = {
+              branch: player.branch,
+              diplomaYear: player.diplomaYear
+            };
+          }
+
+          if (Number.isFinite(py) && (entry.baseYear === null || py < entry.baseYear)) {
+            entry.baseYear = py;
+            entry.baseDiplomaYear = Number(player.diplomaYear) || 1;
           }
         });
-        
-        const addPoints = (player, diplomaYear, points) => {
-          const year = Number(diplomaYear);
-          if (year === 1) player.firstYearPoints += points;
-          if (year === 2) player.secondYearPoints += points;
-          if (year === 3) player.thirdYearPoints += points;
+
+        const resolveByName = (name, year) => {
+          const nameKey = normalizeName(name);
+          if (!nameKey) return null;
+
+          const candidates = Object.keys(playersMap).filter((k) => normalizeName(playersMap[k].name) === nameKey);
+          if (candidates.length === 1) return candidates[0];
+          if (candidates.length > 1 && Number.isFinite(year)) {
+            const byYear = candidates.filter((k) => playersMap[k].yearDetails[year]);
+            if (byYear.length === 1) return byYear[0];
+          }
+          return null;
         };
 
-        // Calculate points for each player
-        Object.keys(playersMap).forEach(key => {
+        const addPointsToBucket = (player, academicYear, points) => {
+          if (academicYear === 1) player.firstYearPoints += points;
+          if (academicYear === 2) player.secondYearPoints += points;
+          if (academicYear === 3) player.thirdYearPoints += points;
+          player.totalPoints += points;
+        };
+
+        // Individual results: assign each result to one canonical player only.
+        resultsData.forEach((result) => {
+          const resultYear = Number(result.year);
+          const resultPlayerId = result.playerId ? String(result.playerId).trim() : '';
+
+          let key = resultPlayerId && playerIdToKey[resultPlayerId] ? playerIdToKey[resultPlayerId] : null;
+          if (!key) key = resolveByName(result.name, resultYear);
+          if (!key || !playersMap[key]) return;
+
           const player = playersMap[key];
-          
-          // Debug: log player data
-          console.log('Processing player:', player.name, 'ID:', player.id);
-          console.log('  baseYear:', player.baseYear, '| baseDiplomaYear:', player.baseDiplomaYear);
-          console.log('  years participated:', player.years.join(', '));
-          
-          // Debug: log yearDetails structure
-          console.log('  yearDetails keys:', Object.keys(player.yearDetails));
-          
-          // 🔴 RESET per-player accumulators (ensures no stale values)
-          player.firstYearPoints = 0;
-          player.secondYearPoints = 0;
-          player.thirdYearPoints = 0;
-          player.totalPoints = 0;
-          player.individualResults = [];
-          player.groupResults = [];
-          
-          const years = player.years.sort((a, b) => a - b);
-          player.totalMeets = Array.from(new Set(years)).length;
-          
-          // Initialize totalPoints accumulator
-          let playerTotalPoints = 0;
-          
-          // Debug: log results count
-          console.log('Processing ' + resultsData.length + ' results for player:', player.name);
-          
-          // Individual results points
-          resultsData.forEach(result => {
-            // FIXED: Prioritize playerId match, use name as fallback only
-            const resultPlayerId = result.playerId ? String(result.playerId).trim() : null;
-            const playerIdStr = player.id ? String(player.id).trim() : null;
-            
-            // Try ID match FIRST (most reliable)
-            const idMatch = resultPlayerId && playerIdStr && resultPlayerId === playerIdStr;
-            
-            // Fuzzy name matching as LAST RESORT only
-            let nameMatch = false;
-            if (!idMatch && result.name && player.name) {
-              const resultNameKey = normalizeName(result.name);
-              const playerNameKey = normalizeName(player.name);
-              
-              // Exact match or close match
-              nameMatch = (
-                resultNameKey === playerNameKey ||
-                resultNameKey.includes(playerNameKey) ||
-                playerNameKey.includes(resultNameKey)
-              );
-              
-              // Log warning for admin (shows data quality issue)
-              if (result.name && player.name && resultNameKey !== playerNameKey) {
-                console.warn(`  ⚠️  NAME MATCH FALLBACK: "${result.name}" matched to "${player.name}" - consider adding playerId`);
-              }
-            }
-            
-            // Debug: log matching
-            console.log('  Result:', result.name, '| playerId:', result.playerId, '| ID match:', idMatch, '| Name match:', nameMatch);
-            
-            if (!idMatch && !nameMatch) {
-              // FIXED: Log warning instead of silent skip
-              console.warn(`  ⚠️  SKIPPED: Result "${result.name}" (playerId: ${result.playerId || 'N/A'}) did not match player "${player.name}" (id: ${player.id})`);
-              return;
-            }
+          const medalKey = normalizeMedal(result.medal);
+          const medalPoints = INDIVIDUAL_POINTS[medalKey] || 0;
+          const academicYear = getAcademicYear(player, resultYear, result.diplomaYear);
+          if (!academicYear) return;
 
-            const medalKey = normalizeMedal(result.medal);
-            const medalPoints = INDIVIDUAL_POINTS[medalKey] || 0;
-            const resultYear = parseInt(result.year);
-            
-            // Debug: log academic year lookup
-            console.log('    ✅ MATCHED! Looking up academic year...');
-            console.log('      resultYear:', resultYear);
-            console.log('      player.baseYear:', player.baseYear, '| baseDiplomaYear:', player.baseDiplomaYear);
-            console.log('      Calculation: baseDiplomaYear + (resultYear - baseYear) =', player.baseDiplomaYear, '+ (', resultYear, '-', player.baseYear, ') =', player.baseDiplomaYear + (resultYear - player.baseYear));
-            console.log('      result.diplomaYear:', result.diplomaYear, '(type:', typeof result.diplomaYear + ')');
-            
-            const academicYear = getAcademicYear(player, resultYear, result.diplomaYear);
-            
-            // Debug: log academic year result
-            console.log('    🎓 Academic year result:', academicYear, '| (1=1st, 2=2nd, 3=3rd, null=invalid)');
-            
-            // Skip if academic year is invalid
-            if (!academicYear) {
-              console.log('    Skipping - invalid academic year');
-              return;
-            }
-
-            // Store individual result
-            player.individualResults.push({
-              year: resultYear,
-              event: result.event,
-              medal: result.medal,
-              points: medalPoints,
-              imageUrl: result.imageUrl
-            });
-
-            // Add points to academic year bucket (1, 2, or 3)
-            if (academicYear === 1) {
-              player.firstYearPoints += medalPoints;
-              playerTotalPoints += medalPoints;
-            } else if (academicYear === 2) {
-              player.secondYearPoints += medalPoints;
-              playerTotalPoints += medalPoints;
-            } else if (academicYear === 3) {
-              player.thirdYearPoints += medalPoints;
-              playerTotalPoints += medalPoints;
-            }
+          player.individualResults.push({
+            year: resultYear,
+            event: result.event,
+            medal: result.medal,
+            points: medalPoints,
+            imageUrl: result.imageUrl
           });
-          
-          // Group results points (split among members)
-          // Use memberIds when available, otherwise fallback to names
-          groupResultsData.forEach(group => {
-            let memberIds = Array.isArray(group.memberIds) ? group.memberIds.filter(Boolean) : [];
-            const rawMembers = Array.isArray(group.members) ? group.members : [];
-            const memberNames = rawMembers
-              .map(m => (typeof m === 'string' ? m : m?.name))
+          addPointsToBucket(player, academicYear, medalPoints);
+        });
+
+        // Group results: assign members to unique canonical keys only.
+        groupResultsData.forEach((group) => {
+          const resultYear = Number(group.year);
+          const medalKey = normalizeMedal(group.medal);
+          const medalPoints = GROUP_POINTS[medalKey] || 0;
+
+          let memberIds = Array.isArray(group.memberIds) ? group.memberIds.filter(Boolean) : [];
+          const rawMembers = Array.isArray(group.members) ? group.members : [];
+          const memberNames = rawMembers
+            .map((m) => (typeof m === 'string' ? m : m?.name))
+            .filter(Boolean);
+
+          if (!memberIds.length && rawMembers.length) {
+            memberIds = rawMembers
+              .map((m) => (typeof m === 'object' ? m?.playerId : null))
               .filter(Boolean);
+          }
 
-            // If memberIds missing, try to derive from member objects
-            if (!memberIds.length && rawMembers.length) {
-              memberIds = rawMembers
-                .map(m => (typeof m === 'object' ? m?.playerId : null))
-                .filter(Boolean);
-            }
-
-            // If still no memberIds, build from names (legacy/manual data)
-            if (!memberIds.length && memberNames.length) {
-              memberIds = [];
-              memberNames.forEach(memberName => {
-                const memberNameKey = normalizeName(memberName);
-                
-                // Find matching player by name similarity
-                const matchingPlayer = Object.values(playersMap).find(p => {
-                  const playerNameKey = normalizeName(p.name);
-                  return (
-                    memberNameKey === playerNameKey ||
-                    memberNameKey.includes(playerNameKey) ||
-                    playerNameKey.includes(memberNameKey)
-                  );
-                });
-                
-                if (matchingPlayer) {
-                  memberIds.push(matchingPlayer.id);
-                  console.warn(`  ⚠️  GROUP NAME MATCH: "${memberName}" matched to "${matchingPlayer.name}" (id: ${matchingPlayer.id}) - consider storing memberIds`);
-                } else {
-                  console.warn(`  ⚠️  GROUP MEMBER NOT FOUND: "${memberName}" has no matching player`);
-                }
-              });
-            }
-
-            if (!memberIds.length) {
-              console.warn(`  ⚠️  GROUP SKIPPED: Team "${group.teamName}" has no matching members`);
-              return;
-            }
-
-            memberIds.forEach(memberId => {
-              if (String(memberId) !== String(player.id)) return;
-
-              const medalKey = normalizeMedal(group.medal);
-              const medalPoints = GROUP_POINTS[medalKey] || 0;
-              const resultYear = parseInt(group.year);
-              
-              // FIXED: Pass result's diplomaYear to getAcademicYear
-              // Group results may not have diplomaYear stored, use player's stored year
-              const academicYear = getAcademicYear(player, resultYear, group.diplomaYear || null);
-              
-              if (!academicYear) {
-                console.warn(`  ⚠️  GROUP YEAR INVALID: Player "${player.name}" has no valid academic year for result year ${resultYear}`);
-                return;
-              }
-
-              // Store group result
-              player.groupResults.push({
-                year: resultYear,
-                event: group.event,
-                medal: group.medal,
-                points: medalPoints,
-                teamName: group.teamName,
-                members: group.members
-              });
-
-              // Add points to academic year bucket (1, 2, or 3)
-              if (academicYear === 1) {
-                player.firstYearPoints += medalPoints;
-                playerTotalPoints += medalPoints;
-              } else if (academicYear === 2) {
-                player.secondYearPoints += medalPoints;
-                playerTotalPoints += medalPoints;
-              } else if (academicYear === 3) {
-                player.thirdYearPoints += medalPoints;
-                playerTotalPoints += medalPoints;
-              }
-            });
+          const memberKeys = new Set();
+          memberIds.forEach((memberId) => {
+            const id = String(memberId).trim();
+            if (playerIdToKey[id]) memberKeys.add(playerIdToKey[id]);
           });
-          
-          // Sort results by year
+
+          if (!memberKeys.size) {
+            memberNames.forEach((memberName) => {
+              const key = resolveByName(memberName, resultYear);
+              if (key) memberKeys.add(key);
+            });
+          }
+
+          memberKeys.forEach((key) => {
+            const player = playersMap[key];
+            if (!player) return;
+            const academicYear = getAcademicYear(player, resultYear, group.diplomaYear || null);
+            if (!academicYear) return;
+
+            player.groupResults.push({
+              year: resultYear,
+              event: group.event,
+              medal: group.medal,
+              points: medalPoints,
+              teamName: group.teamName,
+              members: group.members
+            });
+            addPointsToBucket(player, academicYear, medalPoints);
+          });
+        });
+
+        // Finalize & normalize player aggregates
+        Object.keys(playersMap).forEach((key) => {
+          const player = playersMap[key];
+          player.years = Array.from(player.years).sort((a, b) => a - b);
+          player.totalMeets = player.years.length;
           player.individualResults.sort((a, b) => a.year - b.year);
           player.groupResults.sort((a, b) => a.year - b.year);
-          
-          // Round points after accumulation and set total
           player.firstYearPoints = Number(player.firstYearPoints.toFixed(2));
           player.secondYearPoints = Number(player.secondYearPoints.toFixed(2));
           player.thirdYearPoints = Number(player.thirdYearPoints.toFixed(2));
-          player.totalPoints = Number(playerTotalPoints.toFixed(2));
-          
-          // Debug: log final points
-          console.log('  📊 FINAL for', player.name + ':');
-          console.log('     1st Year:', player.firstYearPoints, '| 2nd Year:', player.secondYearPoints, '| 3rd Year:', player.thirdYearPoints, '| TOTAL:', player.totalPoints);
-          console.log('     Individual results matched:', player.individualResults.length);
-          console.log('     Group results matched:', player.groupResults.length);
-          if (player.individualResults.length === 0 && player.groupResults.length === 0) {
-            console.log('     ⚠️  ZERO POINTS - No results matched this player!');
-          }
+          player.totalPoints = Number(player.totalPoints.toFixed(2));
+          player.aliasIds = Array.from(player.aliasIds);
         });
         
         // Get available years from players
