@@ -1,6 +1,7 @@
-import React, { useEffect, useState, cloneElement } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
 import AdminLayout from '../../components/AdminLayout';
+import { confirmAction } from '../../utils/notify';
 
 const MEDALS = ['Gold', 'Silver', 'Bronze'];
 
@@ -27,9 +28,7 @@ const ManageResults = () => {
   const [editingGroupId, setEditingGroupId] = useState(null);
 
   const [form, setForm] = useState({
-    name: '',
     playerId: '',
-    branch: '',
     event: '',
     year: '',
     medal: '',
@@ -172,20 +171,26 @@ const ManageResults = () => {
       console.log('Submitting form:', form);
 
       const selectedPlayer = form.playerId ? playersById[form.playerId] : null;
-      
-      // FIXED: Validate diplomaYear is mandatory
+      if (!selectedPlayer) {
+        alert('Please select a player from the list.');
+        return;
+      }
+
       const finalDiplomaYear = form.diplomaYear || selectedPlayer?.diplomaYear || '';
       if (!finalDiplomaYear) {
-        alert('❌ Diploma Year is required. Please select 1, 2, or 3.');
+        alert('Diploma Year is required. Please select 1, 2, or 3.');
         return;
       }
       
       const payload = {
-        ...form,
-        name: selectedPlayer?.name || form.name,
-        branch: selectedPlayer?.branch || form.branch,
+        event: form.event,
+        year: form.year,
+        medal: form.medal,
+        imageUrl: form.imageUrl,
+        name: selectedPlayer.name,
+        branch: selectedPlayer.branch || '',
         diplomaYear: finalDiplomaYear,
-        playerId: selectedPlayer?.id || form.playerId || ''
+        playerId: selectedPlayer.id
       };
 
       if (editingId) {
@@ -240,10 +245,12 @@ const ManageResults = () => {
       : players.find(p => normalizeName(p.name) === normalizeName(item.name));
 
     setForm({
-      ...item,
       playerId: item.playerId || matchedPlayer?.id || '',
+      event: item.event || '',
+      year: item.year || '',
+      medal: item.medal || '',
       diplomaYear: item.diplomaYear || matchedPlayer?.diplomaYear || '',
-      branch: item.branch || matchedPlayer?.branch || ''
+      imageUrl: item.imageUrl || ''
     });
     setEditingId(item._id);
     setIsEditing(true);
@@ -370,7 +377,8 @@ const ManageResults = () => {
   };
 
   const handleGroupDelete = async (id) => {
-    if (!window.confirm('Delete team result?')) return;
+    const shouldDelete = await confirmAction('Delete team result?');
+    if (!shouldDelete) return;
     try {
       console.log('Deleting group result:', id);
       const response = await api.delete(`/group-results/${id}`);
@@ -403,7 +411,8 @@ const ManageResults = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this record?')) return;
+    const shouldDelete = await confirmAction('Delete this record?');
+    if (!shouldDelete) return;
     try {
       console.log('Deleting result:', id);
       const response = await api.delete(`/results/${id}`);
@@ -436,7 +445,7 @@ const ManageResults = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: '', playerId: '', branch: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
+    setForm({ playerId: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
     setEditingId(null);
   };
 
@@ -721,8 +730,6 @@ const ManageResults = () => {
               <thead>
                 <tr style={styles.headerRow}>
                   <th style={styles.headerCell}>Player</th>
-                  <th style={styles.headerCell}>Name (manual)</th>
-                  <th style={styles.headerCell}>Branch</th>
                   <th style={styles.headerCell}>Event</th>
                   <th style={styles.headerCell}>Year</th>
                   <th style={styles.headerCell}>Diploma Year</th>
@@ -744,41 +751,18 @@ const ManageResults = () => {
                         setForm({
                           ...form,
                           playerId: selectedId,
-                          name: selectedPlayer?.name || form.name,
-                          branch: selectedPlayer?.branch || form.branch,
                           diplomaYear: selectedPlayer?.diplomaYear || form.diplomaYear
                         });
                       }}
+                      required
                     >
-                      <option value="">Manual entry</option>
+                      <option value="">Select Player</option>
                       {players.map(p => (
                         <option key={p.id} value={p.id}>
                           {p.name} - {p.branch} (Y{p.diplomaYear}, {p.participationYear})
                         </option>
                       ))}
                     </select>
-                  </td>
-                  <td style={styles.cell}>
-                    <input
-                      id="result-name"
-                      name="result-name"
-                      style={styles.input}
-                      value={form.name}
-                      onChange={e => setForm({ ...form, name: e.target.value })}
-                      readOnly={!!form.playerId}
-                      required={!form.playerId}
-                    />
-                  </td>
-                  <td style={styles.cell}>
-                    <input
-                      id="result-branch"
-                      name="result-branch"
-                      style={styles.input}
-                      value={form.branch}
-                      onChange={e => setForm({ ...form, branch: e.target.value })}
-                      readOnly={!!form.playerId}
-                      placeholder="Branch"
-                    />
                   </td>
                   <td style={styles.cell}>
                     <input
@@ -1394,3 +1378,4 @@ const styles = {
 };
 
 export default ManageResults;
+

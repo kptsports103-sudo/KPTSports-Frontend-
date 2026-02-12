@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import AdminLayout from '../../components/AdminLayout';
+import { confirmAction } from '../../utils/notify';
 
 const ManageGallery = () => {
   const [galleries, setGalleries] = useState([]);
@@ -55,14 +56,15 @@ const ManageGallery = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Delete this gallery?')) {
-      try {
-        await api.delete(`/galleries/${id}`);
-        fetchGalleries();
-      } catch (error) {
-        console.error('Error deleting gallery:', error);
-        alert('Failed to delete gallery.');
-      }
+    const shouldDelete = await confirmAction('Delete this gallery?');
+    if (!shouldDelete) return;
+
+    try {
+      await api.delete(`/galleries/${id}`);
+      fetchGalleries();
+    } catch (error) {
+      console.error('Error deleting gallery:', error);
+      alert('Failed to delete gallery.');
     }
   };
 

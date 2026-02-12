@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import AdminLayout from "../../components/AdminLayout";
 import { IAMService } from "../../services/iam.service";
 import { useAuth } from "../../context/AuthContext";
+import { confirmAction } from "../../utils/notify";
 
 const UsersManage = () => {
   const { user } = useAuth();
@@ -46,7 +47,8 @@ const UsersManage = () => {
   };
 
   const handleDeleteUser = async (userId) => {
-    if (!window.confirm("Are you sure?")) return;
+    const shouldDelete = await confirmAction("Are you sure?");
+    if (!shouldDelete) return;
     try {
       await IAMService.deleteUser(userId);
       setUsers(users.filter((u) => u._id !== userId));

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import AdminLayout from "../../components/AdminLayout";
+import { confirmAction } from "../../utils/notify";
 
 const Media = () => {
   const [media, setMedia] = useState([]);
@@ -45,7 +46,8 @@ const Media = () => {
   }, []);
 
   const remove = async (id) => {
-    if (!window.confirm("Delete permanently?")) return;
+    const shouldDelete = await confirmAction("Delete permanently?");
+    if (!shouldDelete) return;
 
     const item = media.find(m => m.id === id);
     if (!item) return;
