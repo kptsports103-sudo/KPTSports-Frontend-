@@ -142,13 +142,14 @@ const AdminDashboard = () => {
         .cert-wrap { font-family: "Times New Roman", serif; }
         .cert {
           width: 900px;
-          min-height: 650px;
+          height: 650px;
           margin: 0 auto;
           padding: 30px 40px;
           background: #fffaf0;
           border: 10px solid #7b2d2d;
           position: relative;
           box-sizing: border-box;
+          overflow: hidden;
         }
         .cert-header {
           display: flex;
@@ -191,7 +192,7 @@ const AdminDashboard = () => {
           display: flex;
           justify-content: space-between;
           position: absolute;
-          bottom: 30px;
+          bottom: 20px;
           left: 40px;
           right: 40px;
           font-weight: bold;
@@ -260,6 +261,7 @@ const AdminDashboard = () => {
         orientation: "landscape",
         unit: "px",
         format: [900, 650],
+        compress: true,
       });
 
       await pdf.html(cert, {
@@ -267,6 +269,8 @@ const AdminDashboard = () => {
         y: 0,
         width: 900,
         windowWidth: 900,
+        margin: [0, 0, 0, 0],
+        pagebreak: { mode: ["avoid-all", "css"] },
         html2canvas: {
           scale: 2,
           useCORS: true,
@@ -709,4 +713,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-

@@ -164,8 +164,11 @@ const Results = () => {
                         padding: '10px 14px',
                         width: '280px',
                         borderRadius: 8,
-                        border: '2px solid #ddd',
-                        fontSize: 14
+                        border: '2px solid #000000',
+                        fontSize: 14,
+                        color: '#000000',
+                        backgroundColor: '#ffffff',
+                        outline: 'none'
                       }}
                     />
                   </div>
@@ -508,4 +511,5 @@ const Results = () => {
 };
 
 export default Results;
+
 
