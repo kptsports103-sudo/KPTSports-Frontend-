@@ -172,16 +172,8 @@ const AdminDashboard = () => {
           position: absolute;
           color: #243a8c;
           font-weight: 700;
-          line-height: 1;
           text-align: center;
           white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          height: 48px;
-          display: flex;
-          align-items: flex-end;
-          justify-content: center;
-          transform: translateY(-62%);
           text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
         }
         .field-kpm {
@@ -199,36 +191,45 @@ const AdminDashboard = () => {
           left: 450px;
           width: 550px;
           font-size: 40px;
+          line-height: 1.2;
         }
         .field-semester {
-          top: 1018px;
+          top: 1030px;
           left: 430px;
           width: 165px;
           font-size: 30px;
         }
         .field-department {
-          top: 1018px;
+          top: 1030px;
           left: 700px;
           width: 270px;
           font-size: 30px;
         }
         .field-competition {
-          top: 1106px;
+          top: 1118px;
           left: 600px;
           width: 250px;
           font-size: 30px;
         }
         .field-year {
-          top: 1192px;
+          top: 1205px;
           left: 905px;
           width: 150px;
           font-size: 30px;
         }
         .field-position {
-          top: 1280px;
+          top: 1292px;
           left: 740px;
           width: 190px;
           font-size: 30px;
+        }
+        .field-semester,
+        .field-department,
+        .field-competition,
+        .field-year,
+        .field-position {
+          line-height: 30px;
+          padding-bottom: 4px;
         }
       </style>
       <div class="cert-wrap">
