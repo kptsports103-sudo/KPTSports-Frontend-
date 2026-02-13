@@ -11,7 +11,7 @@ import api from "../../services/api";
 
 const CERT_WIDTH = 1235;
 const CERT_HEIGHT = 1600;
-const CERT_BG = (import.meta.env.VITE_CERTIFICATE_BG_URL || "").trim();
+const CERT_BG_CANDIDATES = ["/certificate.png", "/certificate.jpg", "/certificate.jpeg"];
 
 const normalizeMedalKey = (medal = "") => {
   const value = medal.trim().toLowerCase();
@@ -142,35 +142,9 @@ const AdminDashboard = () => {
       .replace(/'/g, "&#039;");
 
   const preloadCertificateBackground = async () => {
-    const seen = new Set();
-    const candidates = [];
-    const addCandidate = (url) => {
-      const value = String(url || "").trim();
-      if (!value || seen.has(value)) return;
-      seen.add(value);
-      candidates.push(value);
-    };
-
-    const addExtensionVariants = (url) => {
-      addCandidate(url);
-      addCandidate(url.replace(/\.jpg$/i, ".jpeg"));
-      addCandidate(url.replace(/\.jpg$/i, ".png"));
-      addCandidate(url.replace(/\.jpeg$/i, ".jpg"));
-      addCandidate(url.replace(/\.jpeg$/i, ".png"));
-      addCandidate(url.replace(/\.png$/i, ".jpg"));
-      addCandidate(url.replace(/\.png$/i, ".jpeg"));
-    };
-
-    addExtensionVariants(CERT_BG);
-    if (CERT_BG) {
-      const withoutVersion = CERT_BG.replace(/\/v\d+\//i, "/");
-      addExtensionVariants(withoutVersion);
-    }
-
-    for (const candidate of candidates) {
+    for (const candidate of CERT_BG_CANDIDATES) {
       const loaded = await new Promise((resolve) => {
         const image = new Image();
-        image.crossOrigin = "anonymous";
         image.onload = () => resolve(true);
         image.onerror = () => resolve(false);
         image.src = candidate;
@@ -293,7 +267,7 @@ const AdminDashboard = () => {
       </style>
       <div class="cert-wrap">
         <div class="cert">
-          <img class="cert-bg" src="${backgroundUrl}" crossorigin="anonymous" alt="Certificate background" />
+          <img class="cert-bg" src="${backgroundUrl}" alt="Certificate background" />
           <div class="field field-kpm">${escapeHtml(safeLineField(row.kpmNo))}</div>
           <div class="field field-name">${escapeHtml(safeLineField(row.name))}</div>
           <div class="field field-semester">${escapeHtml(safeLineField(row.semester))}</div>
@@ -313,17 +287,12 @@ const AdminDashboard = () => {
       alert("Invalid certificate data");
       return;
     }
-    if (!CERT_BG) {
-      alert("Certificate background URL is missing. Set VITE_CERTIFICATE_BG_URL.");
-      return;
-    }
-    
     setIsGeneratingId(row.id);
     let certificateNode = null;
     try {
       const backgroundUrl = await preloadCertificateBackground();
       if (!backgroundUrl) {
-        throw new Error("Certificate background could not be loaded. Check VITE_CERTIFICATE_BG_URL/public ID and Cloudinary access.");
+        throw new Error("Certificate background could not be loaded. Add certificate.png (or .jpg/.jpeg) in frontend/public.");
       }
       if (document.fonts?.ready) {
         await document.fonts.ready;
@@ -370,17 +339,7 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Failed to generate certificate PDF:", error);
       const reason = error?.message || "Unknown error";
-      const isCorsError =
-        reason.toLowerCase().includes("tainted") ||
-        reason.toLowerCase().includes("cross-origin") ||
-        reason.toLowerCase().includes("security");
-      if (isCorsError) {
-        alert(
-          "Failed to generate certificate: Canvas blocked by CORS. Verify Cloudinary URL is public and allows cross-origin access."
-        );
-      } else {
-        alert(`Failed to generate certificate: ${reason}`);
-      }
+      alert(`Failed to generate certificate: ${reason}`);
     } finally {
       if (certificateNode) certificateNode.remove();
       setIsGeneratingId(null);
