@@ -152,6 +152,16 @@ const AdminDashboard = () => {
     });
   };
 
+  const waitForImage = async (img) => {
+    if (!img) return false;
+    if (img.complete && img.naturalWidth > 0) return true;
+    return new Promise((resolve) => {
+      const done = () => resolve(img.naturalWidth > 0);
+      img.onload = done;
+      img.onerror = () => resolve(false);
+    });
+  };
+
   const buildCertificateNode = (row) => {
     const wrapper = document.createElement("div");
     wrapper.style.position = "absolute";
@@ -173,11 +183,18 @@ const AdminDashboard = () => {
         .cert {
           width: ${CERT_WIDTH}px;
           height: ${CERT_HEIGHT}px;
-          background-image: url("${CERT_BG}");
-          background-repeat: no-repeat;
-          background-position: center;
-          background-size: cover;
           position: relative;
+        }
+        .cert-bg {
+          position: absolute;
+          inset: 0;
+          width: ${CERT_WIDTH}px;
+          height: ${CERT_HEIGHT}px;
+          object-fit: cover;
+          object-position: center;
+          z-index: 1;
+          user-select: none;
+          pointer-events: none;
         }
         .field {
           position: absolute;
@@ -189,6 +206,7 @@ const AdminDashboard = () => {
           min-height: 36px;
           line-height: 1.2;
           text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+          z-index: 2;
         }
         .field-kpm {
           top: 665px;
@@ -246,6 +264,7 @@ const AdminDashboard = () => {
       </style>
       <div class="cert-wrap">
         <div class="cert">
+          <img class="cert-bg" src="${CERT_BG}" crossorigin="anonymous" alt="Certificate background" />
           <div class="field field-kpm">${escapeHtml(safeLineField(row.kpmNo))}</div>
           <div class="field field-name">${escapeHtml(safeLineField(row.name))}</div>
           <div class="field field-semester">${escapeHtml(safeLineField(row.semester))}</div>
@@ -275,7 +294,7 @@ const AdminDashboard = () => {
     try {
       const backgroundLoaded = await preloadCertificateBackground();
       if (!backgroundLoaded) {
-        console.warn("Certificate background did not preload. Continuing render attempt.");
+        throw new Error("Certificate background could not be loaded. Check VITE_CERTIFICATE_BG_URL and Cloudinary public/CORS access.");
       }
       if (document.fonts?.ready) {
         await document.fonts.ready;
@@ -285,6 +304,11 @@ const AdminDashboard = () => {
       document.body.appendChild(certificateNode);
       certificateNode.style.visibility = "visible";
       const cert = certificateNode.querySelector(".cert");
+      const certBg = certificateNode.querySelector(".cert-bg");
+      const certBgLoaded = await waitForImage(certBg);
+      if (!certBgLoaded) {
+        throw new Error("Certificate background image failed to render.");
+      }
 
       await new Promise((resolve) => requestAnimationFrame(resolve));
       await new Promise((resolve) => setTimeout(resolve, 50));
