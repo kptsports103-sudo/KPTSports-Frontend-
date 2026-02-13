@@ -233,13 +233,15 @@ const table = {
   maxWidth: '1100px',
   margin: '0 auto',
   borderCollapse: 'collapse',
-  background: '#fff',
-  borderRadius: '12px',
-  overflow: 'hidden'
+  background: '#ffffff',
+  borderRadius: '16px',
+  overflow: 'hidden',
+  boxShadow: '0 8px 24px rgba(71, 85, 105, 0.12)',
+  border: '1px solid #cfd6df'
 };
 
 const thead = {
-  background: 'linear-gradient(90deg,#c7ddff,#dffcff)'
+  background: 'linear-gradient(135deg, #eef2f6 0%, #d6dde5 100%)'
 };
 
 const th = {
@@ -264,8 +266,8 @@ const tdCenter = {
 const tdHost = { ...td };
 const tdVenue = { ...td };
 
-const rowEven = { background: '#f7fcff' };
-const rowOdd = { background: '#fff4f8' };
+const rowEven = { background: '#ffffff' };
+const rowOdd = { background: '#f5f7fa' };
 
 /* 🔥 FIXED INPUT STYLE 🔥 */
 const input = {
