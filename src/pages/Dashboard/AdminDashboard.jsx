@@ -142,14 +142,43 @@ const AdminDashboard = () => {
       .replace(/'/g, "&#039;");
 
   const preloadCertificateBackground = async () => {
-    if (!CERT_BG) return false;
-    return new Promise((resolve) => {
-      const image = new Image();
-      image.crossOrigin = "anonymous";
-      image.onload = () => resolve(true);
-      image.onerror = () => resolve(false);
-      image.src = CERT_BG;
-    });
+    const seen = new Set();
+    const candidates = [];
+    const addCandidate = (url) => {
+      const value = String(url || "").trim();
+      if (!value || seen.has(value)) return;
+      seen.add(value);
+      candidates.push(value);
+    };
+
+    const addExtensionVariants = (url) => {
+      addCandidate(url);
+      addCandidate(url.replace(/\.jpg$/i, ".jpeg"));
+      addCandidate(url.replace(/\.jpg$/i, ".png"));
+      addCandidate(url.replace(/\.jpeg$/i, ".jpg"));
+      addCandidate(url.replace(/\.jpeg$/i, ".png"));
+      addCandidate(url.replace(/\.png$/i, ".jpg"));
+      addCandidate(url.replace(/\.png$/i, ".jpeg"));
+    };
+
+    addExtensionVariants(CERT_BG);
+    if (CERT_BG) {
+      const withoutVersion = CERT_BG.replace(/\/v\d+\//i, "/");
+      addExtensionVariants(withoutVersion);
+    }
+
+    for (const candidate of candidates) {
+      const loaded = await new Promise((resolve) => {
+        const image = new Image();
+        image.crossOrigin = "anonymous";
+        image.onload = () => resolve(true);
+        image.onerror = () => resolve(false);
+        image.src = candidate;
+      });
+      if (loaded) return candidate;
+    }
+
+    return null;
   };
 
   const waitForImage = async (img) => {
@@ -162,7 +191,7 @@ const AdminDashboard = () => {
     });
   };
 
-  const buildCertificateNode = (row) => {
+  const buildCertificateNode = (row, backgroundUrl) => {
     const wrapper = document.createElement("div");
     wrapper.style.position = "absolute";
     wrapper.style.left = "0";
@@ -264,7 +293,7 @@ const AdminDashboard = () => {
       </style>
       <div class="cert-wrap">
         <div class="cert">
-          <img class="cert-bg" src="${CERT_BG}" crossorigin="anonymous" alt="Certificate background" />
+          <img class="cert-bg" src="${backgroundUrl}" crossorigin="anonymous" alt="Certificate background" />
           <div class="field field-kpm">${escapeHtml(safeLineField(row.kpmNo))}</div>
           <div class="field field-name">${escapeHtml(safeLineField(row.name))}</div>
           <div class="field field-semester">${escapeHtml(safeLineField(row.semester))}</div>
@@ -292,15 +321,15 @@ const AdminDashboard = () => {
     setIsGeneratingId(row.id);
     let certificateNode = null;
     try {
-      const backgroundLoaded = await preloadCertificateBackground();
-      if (!backgroundLoaded) {
-        throw new Error("Certificate background could not be loaded. Check VITE_CERTIFICATE_BG_URL and Cloudinary public/CORS access.");
+      const backgroundUrl = await preloadCertificateBackground();
+      if (!backgroundUrl) {
+        throw new Error("Certificate background could not be loaded. Check VITE_CERTIFICATE_BG_URL/public ID and Cloudinary access.");
       }
       if (document.fonts?.ready) {
         await document.fonts.ready;
       }
 
-      certificateNode = buildCertificateNode(row);
+      certificateNode = buildCertificateNode(row, backgroundUrl);
       document.body.appendChild(certificateNode);
       certificateNode.style.visibility = "visible";
       const cert = certificateNode.querySelector(".cert");
