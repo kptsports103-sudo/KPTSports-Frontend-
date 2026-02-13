@@ -8,9 +8,10 @@ import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonCh
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import api from "../../services/api";
-import logoLeft from "/college-logo-left.png";
-import logoRight from "/college-logo-right.png";
-import emblem from "/karnataka-emblem.png";
+import certificateTemplate from "/certificate.jpeg";
+
+const CERT_WIDTH = 1235;
+const CERT_HEIGHT = 1600;
 
 const normalizeMedalKey = (medal = "") => {
   const value = medal.trim().toLowerCase();
@@ -130,117 +131,115 @@ const AdminDashboard = () => {
     return text || fallback;
   };
 
+  const safeLineField = (value) => safeField(value, "");
+
+  const escapeHtml = (value) =>
+    String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
   const buildCertificateNode = (row) => {
     const wrapper = document.createElement("div");
     wrapper.style.position = "absolute";
-    wrapper.style.left = "-9999px";
+    wrapper.style.left = "-10000px";
     wrapper.style.top = "0";
-    wrapper.style.opacity = "0";
+    wrapper.style.opacity = "1";
     wrapper.style.pointerEvents = "none";
-    wrapper.style.width = "980px";
-    wrapper.style.background = "#f2f2f2";
-    wrapper.style.padding = "20px";
+    wrapper.style.width = `${CERT_WIDTH}px`;
+    wrapper.style.height = `${CERT_HEIGHT}px`;
+    wrapper.style.zIndex = "-1";
 
     wrapper.innerHTML = `
       <style>
-        .cert-wrap { font-family: "Times New Roman", serif; }
+        .cert-wrap {
+          width: ${CERT_WIDTH}px;
+          height: ${CERT_HEIGHT}px;
+          font-family: "Times New Roman", serif;
+        }
         .cert {
-          width: 900px;
-          height: 650px;
-          margin: 0 auto;
-          padding: 30px 40px;
-          background: #fffaf0;
-          border: 10px solid #7b2d2d;
+          width: ${CERT_WIDTH}px;
+          height: ${CERT_HEIGHT}px;
+          background-image: url("${certificateTemplate}");
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: cover;
           position: relative;
-          box-sizing: border-box;
-          overflow: hidden;
         }
-        .cert-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 4px;
-        }
-        .cert-logo { height: 80px; width: 80px; object-fit: contain; }
-        .cert-logo.center { height: 90px; width: 90px; }
-        .cert-text-center { text-align: center; margin: 0; color: #111827; }
-        .cert-gov, .cert-dept { font-size: 14px; margin: 6px 0; font-weight: 700; }
-        .cert-college {
-          text-align: center;
-          font-size: 30px;
-          color: #2b2b7f;
-          margin: 10px 0 6px;
-          font-weight: 800;
-          letter-spacing: 0.3px;
-        }
-        .cert-subtitle { text-align: center; font-size: 14px; margin: 0 0 16px; color: #374151; }
-        .cert-kpm { font-size: 14px; margin: 4px 0 8px; color: #111827; font-weight: 700; }
-        .cert-title {
-          text-align: center;
-          font-size: 42px;
-          color: darkred;
-          margin: 12px 0 16px;
-          font-family: "Old English Text MT", "Times New Roman", serif;
-          font-weight: 700;
-        }
-        .cert-content { text-align: center; font-size: 18px; line-height: 1.9; color: #111827; }
-        .cert-field { font-size: 20px; margin: 8px 0; }
-        .cert-line {
-          border-bottom: 1px solid #000;
-          padding: 0 10px;
-          display: inline-block;
-          min-width: 200px;
-          font-weight: 700;
-        }
-        .cert-footer {
-          display: flex;
-          justify-content: space-between;
+        .field {
           position: absolute;
-          bottom: 20px;
-          left: 40px;
-          right: 40px;
-          font-weight: bold;
-          color: darkred;
-          font-size: 16px;
+          color: #243a8c;
+          font-weight: 700;
+          line-height: 1;
+          text-align: center;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          height: 48px;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          transform: translateY(-62%);
+          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+        }
+        .field-kpm {
+          top: 665px;
+          left: 260px;
+          width: 300px;
+          font-size: 32px;
+          text-align: left;
+          justify-content: flex-start;
+          transform: none;
+          height: 40px;
+        }
+        .field-name {
+          top: 930px;
+          left: 450px;
+          width: 550px;
+          font-size: 40px;
+        }
+        .field-semester {
+          top: 1018px;
+          left: 430px;
+          width: 165px;
+          font-size: 30px;
+        }
+        .field-department {
+          top: 1018px;
+          left: 700px;
+          width: 270px;
+          font-size: 30px;
+        }
+        .field-competition {
+          top: 1106px;
+          left: 600px;
+          width: 250px;
+          font-size: 30px;
+        }
+        .field-year {
+          top: 1192px;
+          left: 905px;
+          width: 150px;
+          font-size: 30px;
+        }
+        .field-position {
+          top: 1280px;
+          left: 740px;
+          width: 190px;
+          font-size: 30px;
         }
       </style>
       <div class="cert-wrap">
         <div class="cert">
-          <div class="cert-header">
-            <img src="${logoLeft}" class="cert-logo" alt="College Logo Left" />
-            <img src="${emblem}" class="cert-logo center" alt="Karnataka Emblem" />
-            <img src="${logoRight}" class="cert-logo" alt="College Logo Right" />
-          </div>
-          <p class="cert-text-center cert-gov">GOVERNMENT OF KARNATAKA</p>
-          <p class="cert-text-center cert-dept">DEPARTMENT OF COLLEGIATE AND TECHNICAL EDUCATION</p>
-          <h1 class="cert-college">KARNATAKA (GOVT.) POLYTECHNIC, MANGALURU</h1>
-          <p class="cert-subtitle">(First Autonomous Polytechnic in India under AICTE, New Delhi)</p>
-          <div class="cert-kpm">KPM No.: ${safeField(row.kpmNo)}</div>
-          <h2 class="cert-title">Certificate of Merit</h2>
-          <div class="cert-content">
-            <p>This award certificate is proudly presented to</p>
-            <p class="cert-field">Mr./Ms. <span class="cert-line">${safeField(row.name)}</span></p>
-            <p>
-              studying in the <span class="cert-line">${safeField(row.semester)}</span> semester of the
-              <span class="cert-line">${safeField(row.department)}</span> Department,
-            </p>
-            <p>
-              for participating in the <span class="cert-line">${safeField(row.competition)}</span>
-              sports/cultural competition
-            </p>
-            <p>
-              organized by the Sports and Students Union in the year
-              <span class="cert-line">${safeField(row.year)}</span>
-            </p>
-            <p>
-              and securing the <span class="cert-line">${safeField(row.position)}</span> position.
-            </p>
-          </div>
-          <div class="cert-footer">
-            <div>Student Welfare Officer</div>
-            <div>Sports Officer</div>
-            <div>Principal</div>
-          </div>
+          <div class="field field-kpm">${escapeHtml(safeLineField(row.kpmNo))}</div>
+          <div class="field field-name">${escapeHtml(safeLineField(row.name))}</div>
+          <div class="field field-semester">${escapeHtml(safeLineField(row.semester))}</div>
+          <div class="field field-department">${escapeHtml(safeLineField(row.department))}</div>
+          <div class="field field-competition">${escapeHtml(safeLineField(row.competition))}</div>
+          <div class="field field-year">${escapeHtml(safeLineField(row.year))}</div>
+          <div class="field field-position">${escapeHtml(safeLineField(row.position))}</div>
         </div>
       </div>
     `;
@@ -262,22 +261,24 @@ const AdminDashboard = () => {
       const cert = certificateNode.querySelector(".cert");
 
       const canvas = await html2canvas(cert, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#fffaf0",
+        allowTaint: false,
+        backgroundColor: null,
+        width: CERT_WIDTH,
+        height: CERT_HEIGHT,
       });
 
       const imgData = canvas.toDataURL("image/png");
 
       const pdf = new jsPDF({
-        orientation: "landscape",
+        orientation: "portrait",
         unit: "px",
-        format: [900, 650],
+        format: [CERT_WIDTH, CERT_HEIGHT],
         compress: true,
       });
 
-      pdf.addImage(imgData, "PNG", 0, 0, 900, 650);
+      pdf.addImage(imgData, "PNG", 0, 0, CERT_WIDTH, CERT_HEIGHT);
 
       const safeName = (row.name || "student")
         .toLowerCase()
