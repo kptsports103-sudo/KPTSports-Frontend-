@@ -9,9 +9,16 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import api from "../../services/api";
 
-const CERT_WIDTH = 1235;
-const CERT_HEIGHT = 1600;
-const CERT_BG_CANDIDATES = ["/certificate.png", "/certificate.jpg", "/certificate.jpeg"];
+const CERT_WIDTH = 1394;
+const CERT_HEIGHT = 2048;
+const CERT_BG_CANDIDATES = [
+  "/certificate-template.png",
+  "/certificate-template.jpg",
+  "/certificate-template.jpeg",
+  "/certificate.png",
+  "/certificate.jpg",
+  "/certificate.jpeg",
+];
 
 const normalizeMedalKey = (medal = "") => {
   const value = medal.trim().toLowerCase();
@@ -204,65 +211,66 @@ const AdminDashboard = () => {
           color: #243a8c;
           font-weight: 700;
           text-align: center;
-          white-space: normal;
-          overflow: visible;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
           min-height: 36px;
           line-height: 1.2;
           text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
           z-index: 2;
         }
         .field-kpm {
-          top: 665px;
-          left: 260px;
-          width: 300px;
-          font-size: 32px;
+          top: 850px;
+          left: 290px;
+          width: 360px;
+          font-size: 34px;
           text-align: left;
-          height: 40px;
+          min-height: 44px;
         }
         .field-name {
-          top: 930px;
-          left: 450px;
-          width: 550px;
-          font-size: 40px;
+          top: 1190px;
+          left: 505px;
+          width: 625px;
+          font-size: 46px;
           line-height: 1.2;
         }
         .field-semester {
-          top: 1030px;
-          left: 430px;
-          width: 165px;
-          font-size: 30px;
+          top: 1318px;
+          left: 482px;
+          width: 190px;
+          font-size: 34px;
         }
         .field-department {
-          top: 1030px;
-          left: 700px;
-          width: 270px;
-          font-size: 30px;
+          top: 1318px;
+          left: 785px;
+          width: 310px;
+          font-size: 34px;
         }
         .field-competition {
-          top: 1118px;
-          left: 600px;
-          width: 250px;
-          font-size: 30px;
+          top: 1432px;
+          left: 675px;
+          width: 285px;
+          font-size: 34px;
         }
         .field-year {
-          top: 1205px;
-          left: 905px;
-          width: 150px;
-          font-size: 30px;
+          top: 1543px;
+          left: 1018px;
+          width: 172px;
+          font-size: 34px;
         }
         .field-position {
-          top: 1292px;
-          left: 740px;
-          width: 190px;
-          font-size: 30px;
+          top: 1652px;
+          left: 832px;
+          width: 218px;
+          font-size: 34px;
         }
         .field-semester,
         .field-department,
         .field-competition,
         .field-year,
         .field-position {
-          line-height: 30px;
-          padding-bottom: 4px;
+          line-height: 34px;
+          padding-bottom: 5px;
         }
       </style>
       <div class="cert-wrap">
@@ -292,7 +300,7 @@ const AdminDashboard = () => {
     try {
       const backgroundUrl = await preloadCertificateBackground();
       if (!backgroundUrl) {
-        throw new Error("Certificate background could not be loaded. Add certificate.png (or .jpg/.jpeg) in frontend/public.");
+        throw new Error("Certificate background could not be loaded. Add certificate-template.png in frontend/public.");
       }
       if (document.fonts?.ready) {
         await document.fonts.ready;
