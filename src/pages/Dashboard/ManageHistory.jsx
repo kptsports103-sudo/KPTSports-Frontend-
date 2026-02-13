@@ -210,7 +210,7 @@ const ManageHistory = () => {
 /* ===================== STYLES ===================== */
 
 const page = {
-  background: '#fffbe6',
+  background: '#f4f6f8',
   minHeight: '100vh',
   padding: '20px'
 };
