@@ -4,6 +4,10 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import "./CertificateGenerator.css";
 
+// Certificate dimensions (matches template)
+const CERT_WIDTH = 1123;
+const CERT_HEIGHT = 794;
+
 const CertificateGenerator = () => {
   const [students, setStudents] = useState([
     {
@@ -38,6 +42,7 @@ const CertificateGenerator = () => {
     position: "",
     kpmNo: "",
   });
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -64,45 +69,89 @@ const CertificateGenerator = () => {
   };
 
   const downloadSinglePDF = async (student) => {
-    const input = document.getElementById("certificate");
+    const element = document.getElementById("certificate");
+    if (!element) return;
 
-    const canvas = await html2canvas(input, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-    });
+    setIsGenerating(true);
 
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("landscape", "px", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`${student.name.replace(/\s+/g, "_")}_certificate.pdf`);
+      const canvas = await html2canvas(element, {
+        scale: 1,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+        width: CERT_WIDTH,
+        height: CERT_HEIGHT,
+        windowWidth: CERT_WIDTH,
+        windowHeight: CERT_HEIGHT,
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
+      });
+
+      const imgData = canvas.toDataURL("image/png", 1.0);
+
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "px",
+        format: [CERT_WIDTH, CERT_HEIGHT],
+        compress: true,
+      });
+
+      pdf.addImage(imgData, "PNG", 0, 0, CERT_WIDTH, CERT_HEIGHT);
+      pdf.save(`${student.name.replace(/\s+/g, "_")}_certificate.pdf`);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const downloadAllPDFs = async () => {
-    for (const student of students) {
-      // Temporarily set current student
-      setCurrentStudent(student);
+    setIsGenerating(true);
 
-      // Wait for render
-      await new Promise((resolve) => setTimeout(resolve, 100));
+    try {
+      for (const student of students) {
+        setCurrentStudent(student);
+        await new Promise(resolve => setTimeout(resolve, 200));
 
-      const input = document.getElementById("certificate");
-      const canvas = await html2canvas(input, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-      });
+        const element = document.getElementById("certificate");
+        if (!element) continue;
 
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("landscape", "px", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvas = await html2canvas(element, {
+          scale: 1,
+          useCORS: true,
+          logging: false,
+          backgroundColor: "#ffffff",
+          width: CERT_WIDTH,
+          height: CERT_HEIGHT,
+          windowWidth: CERT_WIDTH,
+          windowHeight: CERT_HEIGHT,
+          scrollX: 0,
+          scrollY: 0,
+          x: 0,
+          y: 0,
+        });
 
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`${student.name.replace(/\s+/g, "_")}_certificate.pdf`);
+        const imgData = canvas.toDataURL("image/png", 1.0);
+
+        const pdf = new jsPDF({
+          orientation: "landscape",
+          unit: "px",
+          format: [CERT_WIDTH, CERT_HEIGHT],
+          compress: true,
+        });
+
+        pdf.addImage(imgData, "PNG", 0, 0, CERT_WIDTH, CERT_HEIGHT);
+        pdf.save(`${student.name.replace(/\s+/g, "_")}_certificate.pdf`);
+      }
+    } catch (error) {
+      console.error("Error generating PDFs:", error);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -132,11 +181,6 @@ const CertificateGenerator = () => {
         {/* Certificate Preview */}
         <div className="certificate-preview">
           <Certificate
-            ref={(node) => {
-              if (node) {
-                // Force re-render when currentStudent changes
-              }
-            }}
             name={currentStudent.name}
             semester={currentStudent.semester}
             department={currentStudent.department}
@@ -201,12 +245,18 @@ const CertificateGenerator = () => {
               onChange={handleInputChange}
             />
           </div>
-          <button className="add-btn" onClick={addStudent}>
-            Add Student
-          </button>
-          <button className="download-all-btn" onClick={downloadAllPDFs}>
-            Download All Certificates
-          </button>
+          <div className="button-group">
+            <button className="add-btn" onClick={addStudent}>
+              Add Student
+            </button>
+            <button 
+              className="download-all-btn" 
+              onClick={downloadAllPDFs}
+              disabled={isGenerating}
+            >
+              {isGenerating ? "Generating..." : "Download All Certificates"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

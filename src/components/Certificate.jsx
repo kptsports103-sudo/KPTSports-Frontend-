@@ -3,6 +3,10 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import "./Certificate.css";
 
+// Certificate dimensions (matches template)
+const CERT_WIDTH = 1123;
+const CERT_HEIGHT = 794;
+
 const Certificate = forwardRef(({
   name,
   semester,
@@ -13,28 +17,52 @@ const Certificate = forwardRef(({
   kpmNo
 }, ref) => {
   const downloadPDF = async () => {
-    const input = document.getElementById("certificate");
+    const element = document.getElementById("certificate");
+    if (!element) return;
 
-    const canvas = await html2canvas(input, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-    });
+    try {
+      // Wait a bit to ensure rendering is complete
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-    const imgData = canvas.toDataURL("image/png");
+      const canvas = await html2canvas(element, {
+        scale: 1, // Use scale 1 to match exact dimensions
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+        width: CERT_WIDTH,
+        height: CERT_HEIGHT,
+        windowWidth: CERT_WIDTH,
+        windowHeight: CERT_HEIGHT,
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
+      });
 
-    // A4 landscape dimensions in pixels (at 96 DPI)
-    const pdf = new jsPDF("landscape", "px", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgData = canvas.toDataURL("image/png", 1.0);
 
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`${name.replace(/\s+/g, "_")}_certificate.pdf`);
+      // Create PDF with exact certificate dimensions
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "px",
+        format: [CERT_WIDTH, CERT_HEIGHT],
+        compress: true,
+      });
+
+      pdf.addImage(imgData, "PNG", 0, 0, CERT_WIDTH, CERT_HEIGHT);
+      pdf.save(`${name?.replace(/\s+/g, "_") || "certificate"}.pdf`);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
   };
 
   return (
     <div className="certificate-wrapper">
-      <div className="certificate-container" id="certificate" ref={ref}>
+      <div 
+        className="certificate-container" 
+        id="certificate"
+        style={{ width: CERT_WIDTH, height: CERT_HEIGHT }}
+      >
         <img
           src="/certificate-template.jpeg"
           alt="certificate template"
