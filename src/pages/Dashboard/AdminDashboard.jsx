@@ -8,10 +8,10 @@ import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonCh
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import api from "../../services/api";
-import certificateTemplate from "/certificate.jpeg";
 
 const CERT_WIDTH = 1235;
 const CERT_HEIGHT = 1600;
+const CERT_BG = (import.meta.env.VITE_CERTIFICATE_BG_URL || "").trim();
 
 const normalizeMedalKey = (medal = "") => {
   const value = medal.trim().toLowerCase();
@@ -141,12 +141,24 @@ const AdminDashboard = () => {
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
 
+  const preloadCertificateBackground = async () => {
+    if (!CERT_BG) return;
+    await new Promise((resolve, reject) => {
+      const image = new Image();
+      image.crossOrigin = "anonymous";
+      image.onload = () => resolve();
+      image.onerror = () =>
+        reject(new Error("Failed to load certificate background image."));
+      image.src = CERT_BG;
+    });
+  };
+
   const buildCertificateNode = (row) => {
     const wrapper = document.createElement("div");
     wrapper.style.position = "absolute";
-    wrapper.style.left = "-10000px";
+    wrapper.style.left = "0";
     wrapper.style.top = "0";
-    wrapper.style.opacity = "1";
+    wrapper.style.visibility = "hidden";
     wrapper.style.pointerEvents = "none";
     wrapper.style.width = `${CERT_WIDTH}px`;
     wrapper.style.height = `${CERT_HEIGHT}px`;
@@ -162,7 +174,7 @@ const AdminDashboard = () => {
         .cert {
           width: ${CERT_WIDTH}px;
           height: ${CERT_HEIGHT}px;
-          background-image: url("${certificateTemplate}");
+          background-image: url("${CERT_BG}");
           background-repeat: no-repeat;
           background-position: center;
           background-size: cover;
@@ -173,7 +185,10 @@ const AdminDashboard = () => {
           color: #243a8c;
           font-weight: 700;
           text-align: center;
-          white-space: nowrap;
+          white-space: normal;
+          overflow: visible;
+          min-height: 36px;
+          line-height: 1.2;
           text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
         }
         .field-kpm {
@@ -182,8 +197,6 @@ const AdminDashboard = () => {
           width: 300px;
           font-size: 32px;
           text-align: left;
-          justify-content: flex-start;
-          transform: none;
           height: 40px;
         }
         .field-name {
@@ -253,13 +266,26 @@ const AdminDashboard = () => {
       alert("Invalid certificate data");
       return;
     }
+    if (!CERT_BG) {
+      alert("Certificate background URL is missing. Set VITE_CERTIFICATE_BG_URL.");
+      return;
+    }
     
     setIsGeneratingId(row.id);
     let certificateNode = null;
     try {
+      await preloadCertificateBackground();
+      if (document.fonts?.ready) {
+        await document.fonts.ready;
+      }
+
       certificateNode = buildCertificateNode(row);
       document.body.appendChild(certificateNode);
+      certificateNode.style.visibility = "visible";
       const cert = certificateNode.querySelector(".cert");
+
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       const canvas = await html2canvas(cert, {
         scale: 3,
