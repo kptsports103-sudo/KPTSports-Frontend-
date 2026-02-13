@@ -22,7 +22,7 @@ const ManageAbout = () => {
     try {
       setLoading(true);
       const { data } = await api.get('/home');
-      const normalizedBannerImages = (data.bannerImages || []).map(b => ({
+      const normalizedBannerImages = (data.bannerImages || []).map((b) => ({
         image: b.image || '',
         year: b.year || '',
         fixed: true
@@ -49,8 +49,8 @@ const ManageAbout = () => {
     try {
       setLoading(true);
       const processedBannerImages = content.bannerImages
-        .filter(b => b.fixed && b.image.trim() && b.year)
-        .map(b => ({
+        .filter((b) => b.fixed && b.image.trim() && b.year)
+        .map((b) => ({
           image: b.image.startsWith('http')
             ? b.image
             : b.image.startsWith('/')
@@ -108,13 +108,12 @@ const ManageAbout = () => {
     });
   };
 
-
   return (
     <AdminLayout>
       <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
         <h2 style={{ color: '#000', fontSize: '36px', fontWeight: 700, marginBottom: '12px' }}>Manage About Page</h2>
         <button
-          onClick={() => setIsEditing(p => !p)}
+          onClick={() => setIsEditing((p) => !p)}
           style={{
             padding: '8px 14px',
             background: '#dee2e6',
@@ -142,9 +141,10 @@ const ManageAbout = () => {
         </button>
 
         {!isEditing ? (
-          <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', color: '#000' }}>
+          <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', color: '#000', border: '1px solid #cfd6df', boxShadow: '0 8px 24px rgba(71, 85, 105, 0.12)' }}>
+            <h4 style={{ marginTop: 0, marginBottom: 10 }}>Banner Images</h4>
             {content.bannerImages.map((b, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                 {b.image && (
                   <img
                     src={b.image}
@@ -152,25 +152,39 @@ const ManageAbout = () => {
                     style={{ width: '50px', height: '30px', objectFit: 'cover', borderRadius: '4px' }}
                   />
                 )}
-                <span>📅 {b.year}</span>
+                <span>{b.year}</span>
               </div>
             ))}
+
+            <div style={{ marginTop: '18px' }}>
+              <h4 style={{ marginBottom: 10 }}>Box Content</h4>
+              {content.boxes.map((box, i) => (
+                <div key={i} style={{ padding: '10px 12px', marginBottom: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                  {box || `Box ${i + 1} is empty`}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: '18px' }}>
+              <h4 style={{ marginBottom: 10 }}>{content.bigHeader || 'Our Story'}</h4>
+              <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6, color: '#1f2937' }}>
+                {content.bigText || 'No story content added yet.'}
+              </div>
+            </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={{ background: '#fff', padding: '20px', borderRadius: '8px', color: '#000' }}>
-
-            {/* BANNERS */}
+          <form onSubmit={handleSubmit} style={{ background: '#fff', padding: '20px', borderRadius: '12px', color: '#000', border: '1px solid #cfd6df', boxShadow: '0 8px 24px rgba(71, 85, 105, 0.12)' }}>
             <div style={{ marginBottom: '20px' }}>
               <h4 style={{ marginBottom: '10px' }}>Banner Images</h4>
               {content.bannerImages.map((b, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 120px auto', gap: '10px', alignItems: 'center' }}>
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 120px auto', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
                   <input
                     id={`banner-image-${i}`}
                     name={`banner-image-${i}`}
                     value={b.image}
                     disabled={b.fixed}
                     placeholder="Image URL"
-                    onChange={e => updateBannerImages(i, 'image', e.target.value)}
+                    onChange={(e) => updateBannerImages(i, 'image', e.target.value)}
                     style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
                   />
 
@@ -180,7 +194,7 @@ const ManageAbout = () => {
                     value={b.year}
                     disabled={b.fixed}
                     placeholder="Year"
-                    onChange={e => updateBannerImages(i, 'year', e.target.value)}
+                    onChange={(e) => updateBannerImages(i, 'year', e.target.value)}
                     style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
                   />
 
@@ -197,11 +211,6 @@ const ManageAbout = () => {
                 </div>
               ))}
 
-              <button type="button" onClick={addBanner}>
-                Add Banner
-              </button>
-
-              {/* SAME STYLE AS ManageHome */}
               <div style={{ marginTop: '15px', padding: '15px', background: '#f0f8ff', borderRadius: '6px', border: '2px dashed #007bff' }}>
                 <button
                   type="button"
@@ -220,7 +229,7 @@ const ManageAbout = () => {
                     gap: '8px'
                   }}
                 >
-                  ➕ Add Banner
+                  + Add Banner
                 </button>
                 <p style={{ margin: '8px 0 0', color: '#666', fontSize: '14px' }}>
                   Click to add a new banner image
@@ -228,7 +237,6 @@ const ManageAbout = () => {
               </div>
             </div>
 
-            {/* BOXES */}
             {content.boxes.map((box, i) => (
               <div key={i} style={{ marginBottom: '15px' }}>
                 <label htmlFor={`box-${i}`}>Box {i + 1}</label>
@@ -236,34 +244,57 @@ const ManageAbout = () => {
                   id={`box-${i}`}
                   name={`box-${i}`}
                   value={box}
-                  onChange={e => updateBox(i, e.target.value)}
+                  onChange={(e) => updateBox(i, e.target.value)}
                   style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
                 />
               </div>
             ))}
 
-            {/* BIG SECTION */}
             <input
               id="big-header"
               name="big-header"
               value={content.bigHeader}
-              onChange={e => setContent({ ...content, bigHeader: e.target.value })}
-              placeholder="Big Header"
+              onChange={(e) => setContent({ ...content, bigHeader: e.target.value })}
+              placeholder="Our Story Heading"
               style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
             />
 
             <textarea
               value={content.bigText}
-              onChange={e => setContent({ ...content, bigText: e.target.value })}
+              onChange={(e) => setContent({ ...content, bigText: e.target.value })}
+              placeholder="Our Story text"
               style={{ width: '100%', height: '150px', padding: '8px' }}
             />
 
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
-              <button type="submit" disabled={loading} style={{ padding: '12px 24px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '4px' }}>
-                {loading ? 'Saving...' : 'Save'}
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  padding: '12px 24px',
+                  background: '#28a745',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                {loading ? (
+                  'Saving...'
+                ) : (
+                  <>
+                    <img
+                      src="/Save button.png"
+                      alt="Save"
+                      style={{ width: '18px', height: '18px' }}
+                    />
+                    Save
+                  </>
+                )}
               </button>
             </div>
-
           </form>
         )}
       </div>
