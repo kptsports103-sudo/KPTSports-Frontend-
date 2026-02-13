@@ -167,7 +167,24 @@ const ManageHome = () => {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
           {!isEditing ? (
-            <button onClick={() => setIsEditing(true)} style={{ padding: '8px 14px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px' }}>
+            <button
+              onClick={() => setIsEditing(true)}
+              style={{
+                padding: '8px 14px',
+                background: '#007bff',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '5px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <img
+                src="/Edit button.png"
+                alt="Edit"
+                style={{ width: '16px', height: '16px' }}
+              />
               Edit
             </button>
           ) : (
@@ -214,25 +231,6 @@ const ManageHome = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{ background: '#fff', padding: '20px', borderRadius: '12px', color: '#000', border: '1px solid #cfd6df', boxShadow: '0 8px 24px rgba(71, 85, 105, 0.12)' }}>
-            <div style={{ marginBottom: '20px' }}>
-              <label htmlFor="welcomeText" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Welcome Text</label>
-              <textarea
-                id="welcomeText"
-                name="welcomeText"
-                value={content.welcomeText}
-                onChange={e => setContent({ ...content, welcomeText: e.target.value })}
-                style={{
-                  width: '100%',
-                  height: '100px',
-                  padding: '10px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  fontFamily: 'inherit',
-                  resize: 'vertical'
-                }}
-              />
-            </div>
-
             <div style={{ marginBottom: '20px' }}>
               <h4 style={{ marginBottom: '10px', color: '#333' }}>Banners</h4>
               {content.banners.map((b, i) => (
