@@ -197,20 +197,20 @@ const ManageEvents = () => {
         </div>
 
         {/* TABLE */}
-        <div style={boxStyle}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div style={tableContainerStyle}>
+          <table style={eventsTableStyle}>
             <thead>
-              <tr style={{ background: '#e6f2ff' }}>
-                <th style={thStyle}>Title</th>
-                <th style={thStyle}>Overview</th>
-                <th style={thStyle}>URL</th>
-                {isEditing && <th style={thStyle}>Action</th>}
+              <tr style={headerRowStyle}>
+                <th style={headerCellStyle}>Title</th>
+                <th style={headerCellStyle}>Overview</th>
+                <th style={headerCellStyle}>URL</th>
+                {isEditing && <th style={headerCellStyle}>Action</th>}
               </tr>
             </thead>
 
             <tbody>
               {rows.map((row, index) => (
-                <tr key={index}>
+                <tr key={index} style={index % 2 ? bodyRowAltStyle : bodyRowStyle}>
                   <td style={tdStyle}>
                     <input
                       id={`title-${index}`}
@@ -314,8 +314,57 @@ const boxStyle = {
 };
 
 const boxTitle = { marginBottom: '15px', color: '#000' };
-const thStyle = { padding: '12px', fontWeight: '700', textAlign: 'left', color: '#000' };
-const tdStyle = { padding: '10px', verticalAlign: 'top', color: '#000' };
+const tableContainerStyle = {
+  background: '#fff',
+  borderRadius: 16,
+  overflow: 'hidden',
+  boxShadow: '0 8px 24px rgba(71, 85, 105, 0.12)',
+  marginBottom: 24,
+  border: '1px solid #cfd6df',
+  padding: '0 0 16px 0'
+};
+
+const eventsTableStyle = {
+  width: '100%',
+  background: '#ffffff',
+  color: '#1f2937',
+  borderCollapse: 'collapse',
+  fontSize: 14,
+  lineHeight: 1.5
+};
+
+const headerRowStyle = {
+  background: 'linear-gradient(135deg, #eef2f6 0%, #d6dde5 100%)',
+  color: '#111827',
+  borderBottom: '1px solid #c0c8d2'
+};
+
+const headerCellStyle = {
+  padding: '16px 20px',
+  textAlign: 'left',
+  fontWeight: 600,
+  fontSize: 12,
+  textTransform: 'uppercase',
+  letterSpacing: '0.8px'
+};
+
+const bodyRowStyle = {
+  borderBottom: '1px solid #e5e7eb',
+  backgroundColor: '#ffffff'
+};
+
+const bodyRowAltStyle = {
+  borderBottom: '1px solid #e5e7eb',
+  backgroundColor: '#f5f7fa'
+};
+
+const tdStyle = {
+  padding: '16px 20px',
+  verticalAlign: 'top',
+  color: '#1f2937',
+  borderBottom: '1px solid #e5e7eb',
+  fontSize: 14
+};
 
 const inputStyle = (enabled) => ({
   width: '100%',
