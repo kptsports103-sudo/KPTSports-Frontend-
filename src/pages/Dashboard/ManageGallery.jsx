@@ -257,14 +257,28 @@ const ManageGallery = () => {
                   <td style={{ ...tableStyles.cell, textAlign: 'center' }}>{g.visibility ? 'Yes' : 'No'}</td>
                   <td style={{ ...tableStyles.cell, textAlign: 'right' }}>
                     <button
-                      style={{ background: 'none', border: 'none', fontSize: 14, marginRight: '10px' }}
+                      style={{ background: 'none', border: 'none', fontSize: 14, marginRight: '10px', cursor: 'pointer' }}
                       onClick={() => openImagePreview(g)}
                       disabled={!getGalleryImages(g).length}
                     >
                       View Images
                     </button>
-                    <button style={{ background: 'none', border: 'none', fontSize: 14 }} onClick={() => handleEdit(g)}>Edit</button>
-                    <button style={{ background: 'none', border: 'none', marginLeft: '10px', fontSize: 14 }} onClick={() => handleDelete(g._id)}>Delete</button>
+                    <button
+                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', verticalAlign: 'middle' }}
+                      onClick={() => handleEdit(g)}
+                      title="Edit"
+                      aria-label="Edit"
+                    >
+                      <img src="/Edit button.png" alt="Edit" style={{ width: '28px', height: '28px' }} />
+                    </button>
+                    <button
+                      style={{ background: 'none', border: 'none', padding: 0, marginLeft: '10px', cursor: 'pointer', verticalAlign: 'middle' }}
+                      onClick={() => handleDelete(g._id)}
+                      title="Delete"
+                      aria-label="Delete"
+                    >
+                      <img src="/Delete button.png" alt="Delete" style={{ width: '28px', height: '28px' }} />
+                    </button>
                   </td>
                 </tr>
               ))}
