@@ -1,0 +1,150 @@
+/* Certificate Component Styles */
+
+/* Wrapper for the certificate and download button */
+.certificate-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Main certificate container - maintains aspect ratio */
+.certificate-container {
+  position: relative;
+  width: 1123px;
+  height: 794px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Background image */
+.certificate-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Common field styles */
+.certificate-field {
+  position: absolute;
+  font-family: "Times New Roman", Times, serif;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* KPM Number - Top left section */
+.kpm {
+  top: 240px;
+  left: 140px;
+  font-size: 18px;
+  font-weight: normal;
+  width: 200px;
+}
+
+/* Student Name - Center of certificate */
+.name {
+  top: 380px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 36px;
+  font-weight: bold;
+  text-align: center;
+  width: 800px;
+  letter-spacing: 3px;
+}
+
+/* Semester - Below name, left side */
+.semester {
+  top: 460px;
+  left: 380px;
+  font-size: 22px;
+  width: 150px;
+  text-align: center;
+}
+
+/* Department - Below name, right side */
+.department {
+  top: 460px;
+  left: 530px;
+  font-size: 22px;
+  width: 280px;
+  text-align: center;
+}
+
+/* Competition Name - Below department */
+.competition {
+  top: 520px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  font-weight: bold;
+  width: 900px;
+  text-align: center;
+}
+
+/* Year - Bottom section */
+.year {
+  top: 600px;
+  left: 780px;
+  font-size: 20px;
+  width: 100px;
+  text-align: center;
+}
+
+/* Position - Bottom section, right side */
+.position {
+  top: 700px;
+  left: 800px;
+  font-size: 28px;
+  font-weight: bold;
+  width: 200px;
+  text-align: center;
+}
+
+/* Download button styles */
+.certificate-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.download-btn {
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.download-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .certificate-container {
+    transform: scale(0.8);
+    transform-origin: top center;
+  }
+}
+
+@media (max-width: 900px) {
+  .certificate-container {
+    transform: scale(0.6);
+    transform-origin: top center;
+  }
+}
