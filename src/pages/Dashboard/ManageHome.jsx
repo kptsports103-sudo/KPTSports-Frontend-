@@ -162,7 +162,7 @@ const ManageHome = () => {
   ========================== */
   return (
     <AdminLayout>
-      <div style={{ background: '#c0c0c0', minHeight: '100vh', padding: '15px', color: '#000' }}>
+      <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
         <h3 style={{ fontSize: '34px', fontWeight: '700', color: '#000' }}>Manage Home</h3>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
@@ -178,7 +178,7 @@ const ManageHome = () => {
         </div>
 
         {!isEditing ? (
-          <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', color: '#000' }}>
+          <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', color: '#000', border: '1px solid #cfd6df', boxShadow: '0 8px 24px rgba(71, 85, 105, 0.12)' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <tbody>
                 <tr style={{ borderBottom: '1px solid #ddd' }}>
@@ -213,7 +213,7 @@ const ManageHome = () => {
             </table>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={{ background: '#fff', padding: '20px', borderRadius: '8px', color: '#000' }}>
+          <form onSubmit={handleSubmit} style={{ background: '#fff', padding: '20px', borderRadius: '12px', color: '#000', border: '1px solid #cfd6df', boxShadow: '0 8px 24px rgba(71, 85, 105, 0.12)' }}>
             <div style={{ marginBottom: '20px' }}>
               <label htmlFor="welcomeText" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Welcome Text</label>
               <textarea
