@@ -12,6 +12,8 @@ const ManageGallery = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [previewGallery, setPreviewGallery] = useState(null);
+  const [previewIndex, setPreviewIndex] = useState(0);
   const tableStyles = {
     tableContainer: {
       background: '#fff',
@@ -117,6 +119,27 @@ const ManageGallery = () => {
     }
   };
 
+  const getGalleryImages = (gallery) => {
+    if (!gallery?.media?.length) return [];
+    return gallery.media
+      .map((item) => (typeof item === 'string'
+        ? { url: item, overview: '' }
+        : { url: item.url || '', overview: item.overview || '' }))
+      .filter((item) => item.url.trim());
+  };
+
+  const openImagePreview = (gallery) => {
+    const images = getGalleryImages(gallery);
+    if (!images.length) return;
+    setPreviewGallery(gallery);
+    setPreviewIndex(0);
+  };
+
+  const closeImagePreview = () => {
+    setPreviewGallery(null);
+    setPreviewIndex(0);
+  };
+
   const updateRow = (index, field, value) => {
     const images = [...form.images];
     images[index][field] = value;
@@ -151,7 +174,7 @@ const ManageGallery = () => {
       title: form.title,
       visibility: form.visibility,
       media: form.images
-        .filter(img => img.fixed && img.url.trim())
+        .filter(img => img.url.trim())
         .map(img => ({
           url: img.url,
           overview: img.overview
@@ -172,6 +195,11 @@ const ManageGallery = () => {
   };
 
   /* ================= UI ================= */
+  const previewImages = getGalleryImages(previewGallery);
+  const previewItem = previewImages[previewIndex] || null;
+  const canGoPrev = previewIndex > 0;
+  const canGoNext = previewIndex < previewImages.length - 1;
+
   return (
     <AdminLayout>
       <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
@@ -228,6 +256,13 @@ const ManageGallery = () => {
                   <td style={{ ...tableStyles.cell, textAlign: 'center' }}>{g.media?.length || 0}</td>
                   <td style={{ ...tableStyles.cell, textAlign: 'center' }}>{g.visibility ? 'Yes' : 'No'}</td>
                   <td style={{ ...tableStyles.cell, textAlign: 'right' }}>
+                    <button
+                      style={{ background: 'none', border: 'none', fontSize: 14, marginRight: '10px' }}
+                      onClick={() => openImagePreview(g)}
+                      disabled={!getGalleryImages(g).length}
+                    >
+                      View Images
+                    </button>
                     <button style={{ background: 'none', border: 'none', fontSize: 14 }} onClick={() => handleEdit(g)}>Edit</button>
                     <button style={{ background: 'none', border: 'none', marginLeft: '10px', fontSize: 14 }} onClick={() => handleDelete(g._id)}>Delete</button>
                   </td>
@@ -369,6 +404,84 @@ const ManageGallery = () => {
               </button>
             </div>
           </form>
+        )}
+
+        {previewGallery && previewItem && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(15, 23, 42, 0.65)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+              zIndex: 2000
+            }}
+            onClick={closeImagePreview}
+          >
+            <div
+              style={{
+                width: 'min(900px, 100%)',
+                background: '#ffffff',
+                borderRadius: 14,
+                border: '1px solid #cfd6df',
+                boxShadow: '0 20px 40px rgba(15, 23, 42, 0.25)',
+                overflow: 'hidden'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ padding: '14px 16px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#111827' }}>
+                  {previewGallery.title}
+                </div>
+                <button
+                  type="button"
+                  onClick={closeImagePreview}
+                  style={{ border: '1px solid #cbd5e1', background: '#f8fafc', padding: '6px 10px', fontSize: 13 }}
+                >
+                  Close
+                </button>
+              </div>
+
+              <div style={{ padding: '16px' }}>
+                <div style={{ fontSize: 13, color: '#475569', marginBottom: 10 }}>
+                  Image {previewIndex + 1} of {previewImages.length}
+                </div>
+                <img
+                  src={previewItem.url}
+                  alt={`Gallery ${previewIndex + 1}`}
+                  style={{ width: '100%', maxHeight: '520px', objectFit: 'contain', background: '#f8fafc', border: '1px solid #e2e8f0' }}
+                />
+                {previewItem.overview && (
+                  <div style={{ marginTop: '10px', fontSize: 14, color: '#334155' }}>
+                    {previewItem.overview}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ padding: '0 16px 16px', display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
+                <button
+                  type="button"
+                  onClick={() => canGoPrev && setPreviewIndex((idx) => idx - 1)}
+                  disabled={!canGoPrev}
+                  style={{ padding: '8px 12px', border: '1px solid #cbd5e1', background: canGoPrev ? '#eef2f6' : '#f8fafc', fontSize: 14 }}
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => canGoNext && setPreviewIndex((idx) => idx + 1)}
+                  disabled={!canGoNext}
+                  style={{ padding: '8px 12px', border: '1px solid #cbd5e1', background: canGoNext ? '#eef2f6' : '#f8fafc', fontSize: 14 }}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </AdminLayout>
