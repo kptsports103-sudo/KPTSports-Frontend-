@@ -241,6 +241,14 @@ const AddMedia = () => {
                     multiple
                     disabled={media.locked}
                     onChange={(e) => handleFiles(e.target.files)}
+                    style={{
+                      width: "95%",
+                      border: "1px solid #000",
+                      borderRadius: "8px",
+                      padding: "8px",
+                      backgroundColor: "#fff",
+                      color: "#000"
+                    }}
                   />
                   {media.files.length > 0 && (
                     <div style={{ marginTop: "10px" }}>
