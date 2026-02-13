@@ -116,28 +116,36 @@ const AddMedia = () => {
       <div
         style={{
           minHeight: "100vh",
-          backgroundColor: "#0f3b2e",
-          padding: "15px",
-          color: "#fff"
+          backgroundColor: "#f4f6f8",
+          padding: "20px",
+          color: "#000"
         }}
       >
-        <h3 style={{ fontSize: "34px", fontWeight: "700", marginBottom: "10px" }}>
+        <h3 style={{ fontSize: "34px", fontWeight: "700", marginBottom: "10px", color: "#000" }}>
           Add Media
         </h3>
 
         <form onSubmit={handleSubmit}>
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: "16px",
+              overflow: "hidden",
+              boxShadow: "0 8px 24px rgba(71, 85, 105, 0.12)",
+              marginBottom: "24px",
+              border: "1px solid #cfd6df"
+            }}
+          >
           <table
             style={{
               width: "100%",
               borderCollapse: "collapse",
               backgroundColor: "#fff",
-              color: "#000",
-              borderRadius: "8px",
-              overflow: "hidden"
+              color: "#000"
             }}
           >
             <tbody>
-              <tr style={{ backgroundColor: "#007bff", color: "#fff" }}>
+              <tr style={{ background: "linear-gradient(135deg, #eef2f6 0%, #d6dde5 100%)", color: "#111827", borderBottom: "1px solid #c0c8d2" }}>
                 <th style={{ padding: "10px", textAlign: "left" }}>Field</th>
                 <th style={{ padding: "10px", textAlign: "left" }}>Value</th>
               </tr>
@@ -153,8 +161,9 @@ const AddMedia = () => {
                       width: "95%",
                       height: "36px",
                       borderRadius: "8px",
-                      border: "1px solid #ccc",
-                      backgroundColor: media.locked ? "#f0f0f0" : "#fff"
+                      border: "1px solid #000",
+                      backgroundColor: media.locked ? "#f0f0f0" : "#fff",
+                      color: "#000"
                     }}
                   >
                     <option value="">Select</option>
@@ -178,8 +187,9 @@ const AddMedia = () => {
                       width: "95%",
                       height: "36px",
                       borderRadius: "8px",
-                      border: "1px solid #ccc",
-                      backgroundColor: media.locked ? "#f0f0f0" : "#fff"
+                      border: "1px solid #000",
+                      backgroundColor: media.locked ? "#f0f0f0" : "#fff",
+                      color: "#000"
                     }}
                   />
                 </td>
@@ -196,8 +206,9 @@ const AddMedia = () => {
                       width: "95%",
                       height: "36px",
                       borderRadius: "8px",
-                      border: "1px solid #ccc",
-                      backgroundColor: media.locked ? "#f0f0f0" : "#fff"
+                      border: "1px solid #000",
+                      backgroundColor: media.locked ? "#f0f0f0" : "#fff",
+                      color: "#000"
                     }}
                   />
                 </td>
@@ -214,8 +225,9 @@ const AddMedia = () => {
                       width: "95%",
                       height: "36px",
                       borderRadius: "8px",
-                      border: "1px solid #ccc",
-                      backgroundColor: media.locked ? "#f0f0f0" : "#fff"
+                      border: "1px solid #000",
+                      backgroundColor: media.locked ? "#f0f0f0" : "#fff",
+                      color: "#000"
                     }}
                   />
                 </td>
@@ -239,13 +251,14 @@ const AddMedia = () => {
               </tr>
             </tbody>
           </table>
+          </div>
 
           {progress > 0 && (
             <div style={{ width: "100%", background: "#ddd", marginTop: "10px" }}>
               <div
                 style={{
                   width: `${progress}%`,
-                  background: "#28a745",
+                  background: "#1d4ed8",
                   color: "#fff",
                   padding: "4px",
                   textAlign: "center"
@@ -314,7 +327,7 @@ const AddMedia = () => {
               type="submit"
               style={{
                 padding: "10px 20px",
-                backgroundColor: "#28a745",
+                backgroundColor: "#1d4ed8",
                 color: "#fff",
                 border: "none",
                 borderRadius: "5px",

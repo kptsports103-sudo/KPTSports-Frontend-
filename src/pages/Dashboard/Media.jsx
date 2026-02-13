@@ -133,9 +133,9 @@ const Media = () => {
       <div
         style={{
           minHeight: "100vh",
-          backgroundColor: "#b3b7b6ff",
-          padding: "15px",
-          color: "#fff"
+          backgroundColor: "#f4f6f8",
+          padding: "20px",
+          color: "#000"
         }}
       >
         <div
@@ -145,18 +145,23 @@ const Media = () => {
             marginBottom: "15px"
           }}
         >
-          <h3 style={{ fontSize: "34px", fontWeight: "700" }}>Media</h3>
+          <h3 style={{ fontSize: "34px", fontWeight: "700", color: "#000" }}>Media</h3>
           <Link
             to="/admin/add-media"
             style={{
-              backgroundColor: "#0d6efd",
-              color: "#fff",
+              backgroundColor: "#dee2e6",
+              color: "#000",
               padding: "8px 14px",
+              border: "1px solid #adb5bd",
               borderRadius: "5px",
-              textDecoration: "none"
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px"
             }}
           >
-            + Add Media
+            <img src="/Add button.png" alt="Add" style={{ width: "16px", height: "16px" }} />
+            Add Media
           </Link>
         </div>
 
@@ -171,13 +176,16 @@ const Media = () => {
             height: "38px",
             marginBottom: "15px",
             padding: "0 10px",
-            borderRadius: "8px"
+            borderRadius: "8px",
+            border: "2px solid #000000",
+            color: "#000",
+            backgroundColor: "#ffffff"
           }}
         />
 
         <div style={{ marginBottom: "20px" }}>
           {["All", "Images", "Videos", "Audios", "PDF"].map((item) => (
-            <label key={item} htmlFor={`filter-${item.toLowerCase()}`} style={{ marginRight: "15px" }}>
+            <label key={item} htmlFor={`filter-${item.toLowerCase()}`} style={{ marginRight: "15px", color: "#000" }}>
               <input
                 id={`filter-${item.toLowerCase()}`}
                 name="filter"
@@ -215,7 +223,9 @@ const Media = () => {
                   background: "#fff",
                   color: "#000",
                   padding: "15px",
-                  borderRadius: "8px",
+                  borderRadius: "12px",
+                  border: "1px solid #cfd6df",
+                  boxShadow: "0 8px 24px rgba(71, 85, 105, 0.12)",
                   position: "relative",
                   height: "180px"
                 }}
@@ -230,7 +240,7 @@ const Media = () => {
                         setEditData({ ...editData, title: e.target.value })
                       }
                       placeholder="Edit Title"
-                      style={{ width: "100%", marginBottom: "6px" }}
+                      style={{ width: "100%", marginBottom: "6px", border: "1px solid #000", color: "#000", background: "#fff" }}
                     />
 
                     <input
@@ -241,14 +251,14 @@ const Media = () => {
                         setEditData({ ...editData, link: e.target.value })
                       }
                       placeholder="Edit URL"
-                      style={{ width: "100%", marginBottom: "6px" }}
+                      style={{ width: "100%", marginBottom: "6px", border: "1px solid #000", color: "#000", background: "#fff" }}
                     />
 
                     <div style={{ display: "flex", gap: "8px", marginTop: "6px" }}>
                       <button
                         onClick={() => saveEdit(m.id)}
                         style={{
-                          backgroundColor: "#28a745",
+                          backgroundColor: "#1d4ed8",
                           color: "#fff",
                           border: "none",
                           padding: "6px 12px",
@@ -264,7 +274,7 @@ const Media = () => {
                       <button
                         onClick={cancelEdit}
                         style={{
-                          backgroundColor: "#dc3545",
+                          backgroundColor: "#6c757d",
                           color: "#fff",
                           border: "none",
                           padding: "6px 12px",
