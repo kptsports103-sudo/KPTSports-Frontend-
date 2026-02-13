@@ -12,6 +12,55 @@ const ManageGallery = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const tableStyles = {
+    tableContainer: {
+      background: '#fff',
+      borderRadius: 16,
+      overflow: 'hidden',
+      boxShadow: '0 8px 24px rgba(71, 85, 105, 0.12)',
+      marginBottom: 24,
+      border: '1px solid #cfd6df'
+    },
+    table: {
+      width: '100%',
+      background: '#ffffff',
+      color: '#1f2937',
+      borderCollapse: 'collapse',
+      fontSize: 14,
+      lineHeight: 1.5
+    },
+    headerRow: {
+      background: 'linear-gradient(135deg, #eef2f6 0%, #d6dde5 100%)',
+      color: '#111827',
+      borderBottom: '1px solid #c0c8d2'
+    },
+    headerCell: {
+      padding: '15px',
+      fontSize: 12,
+      textTransform: 'uppercase',
+      letterSpacing: '0.8px',
+      fontWeight: 600
+    },
+    row: {
+      borderBottom: '1px solid #e5e7eb',
+      backgroundColor: '#ffffff'
+    },
+    rowAlt: {
+      borderBottom: '1px solid #e5e7eb',
+      backgroundColor: '#f5f7fa'
+    },
+    cell: {
+      padding: '15px',
+      fontSize: 14,
+      color: '#1f2937'
+    },
+    editBox: {
+      background: '#f5f7fa',
+      padding: '10px',
+      borderRadius: '6px',
+      border: '1px solid #dbe2ea'
+    },
+  };
 
   /* ================= FETCH ================= */
   useEffect(() => {
@@ -162,65 +211,66 @@ const ManageGallery = () => {
 
         {/* ================= VIEW MODE ================= */}
         {!isEditing ? (
-          <table style={{ width: '100%', background: '#fff', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
+          <div style={tableStyles.tableContainer}>
+          <table style={tableStyles.table}>
             <thead>
-              <tr style={{ background: '#e9ecef' }}>
-                <th style={{ padding: '15px', textAlign: 'left' }}>Title</th>
-                <th style={{ padding: '15px', textAlign: 'center' }}>Images</th>
-                <th style={{ padding: '15px', textAlign: 'center' }}>Visible</th>
-                <th style={{ padding: '15px', textAlign: 'right' }}>Actions</th>
+              <tr style={tableStyles.headerRow}>
+                <th style={{ ...tableStyles.headerCell, textAlign: 'left' }}>Title</th>
+                <th style={{ ...tableStyles.headerCell, textAlign: 'center' }}>Images</th>
+                <th style={{ ...tableStyles.headerCell, textAlign: 'center' }}>Visible</th>
+                <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {galleries.map((g, i) => (
-                <tr key={g._id} style={{ background: i % 2 ? '#f8f9fa' : '#fff' }}>
-                  <td style={{ padding: '15px' }}>{g.title}</td>
-                  <td style={{ padding: '15px', textAlign: 'center' }}>{g.media?.length || 0}</td>
-                  <td style={{ padding: '15px', textAlign: 'center' }}>{g.visibility ? 'Yes' : 'No'}</td>
-                  <td style={{ padding: '15px', textAlign: 'right' }}>
-                    <button style={{ background: 'none', border: 'none' }} onClick={() => handleEdit(g)}>Edit</button>
-                    <button style={{ background: 'none', border: 'none', marginLeft: '10px' }} onClick={() => handleDelete(g._id)}>Delete</button>
+                <tr key={g._id} style={i % 2 ? tableStyles.rowAlt : tableStyles.row}>
+                  <td style={{ ...tableStyles.cell, fontWeight: 600 }}>{g.title}</td>
+                  <td style={{ ...tableStyles.cell, textAlign: 'center' }}>{g.media?.length || 0}</td>
+                  <td style={{ ...tableStyles.cell, textAlign: 'center' }}>{g.visibility ? 'Yes' : 'No'}</td>
+                  <td style={{ ...tableStyles.cell, textAlign: 'right' }}>
+                    <button style={{ background: 'none', border: 'none', fontSize: 14 }} onClick={() => handleEdit(g)}>Edit</button>
+                    <button style={{ background: 'none', border: 'none', marginLeft: '10px', fontSize: 14 }} onClick={() => handleDelete(g._id)}>Delete</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
         ) : (
           /* ================= EDIT MODE ================= */
           <form onSubmit={handleSubmit}>
-            <table style={{ width: '100%', background: '#fff', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
+            <div style={tableStyles.tableContainer}>
+            <table style={tableStyles.table}>
               <tbody>
-                <tr style={{ background: '#e9ecef' }}>
-                  <th style={{ padding: '15px', width: '25%', textAlign: 'left' }}>Field</th>
-                  <th style={{ padding: '15px', textAlign: 'left' }}>Value</th>
+                <tr style={tableStyles.headerRow}>
+                  <th style={{ ...tableStyles.headerCell, width: '25%', textAlign: 'left' }}>Field</th>
+                  <th style={{ ...tableStyles.headerCell, textAlign: 'left' }}>Value</th>
                 </tr>
 
-                <tr>
-                  <td style={{ padding: '15px', fontWeight: '600' }}>Title</td>
-                  <td style={{ padding: '15px' }}>
+                <tr style={tableStyles.row}>
+                  <td style={{ ...tableStyles.cell, fontWeight: 600 }}>Title</td>
+                  <td style={tableStyles.cell}>
                     <input
                       value={form.title}
                       onChange={e => setForm({ ...form, title: e.target.value })}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ccc', color: '#000' }}
+                      style={{ width: '100%', padding: '8px', border: '1px solid #ccc', color: '#000', fontSize: 14 }}
                       required
                     />
                   </td>
                 </tr>
 
-                <tr>
-                  <td style={{ padding: '15px', fontWeight: '600' }}>Images & Overview</td>
-                  <td style={{ padding: '15px' }}>
+                <tr style={tableStyles.rowAlt}>
+                  <td style={{ ...tableStyles.cell, fontWeight: 600 }}>Images & Overview</td>
+                  <td style={tableStyles.cell}>
                     {form.images.map((img, i) => (
                       <div
                         key={i}
                         style={{
+                          ...tableStyles.editBox,
                           display: 'grid',
                           gridTemplateColumns: '1fr 1fr auto auto',
                           gap: '10px',
-                          marginBottom: '10px',
-                          background: '#f8f9fa',
-                          padding: '10px',
-                          borderRadius: '6px'
+                          marginBottom: '10px'
                         }}
                       >
                         <input
@@ -228,7 +278,7 @@ const ManageGallery = () => {
                           value={img.url}
                           disabled={img.fixed}
                           onChange={e => updateRow(i, 'url', e.target.value)}
-                          style={{ padding: '8px', border: '1px solid #ccc', background: img.fixed ? '#e9ecef' : '#fff' }}
+                          style={{ padding: '8px', border: '1px solid #ccc', background: img.fixed ? '#e9ecef' : '#fff', fontSize: 14 }}
                         />
 
                         <input
@@ -236,13 +286,13 @@ const ManageGallery = () => {
                           value={img.overview}
                           disabled={img.fixed}
                           onChange={e => updateRow(i, 'overview', e.target.value)}
-                          style={{ padding: '8px', border: '1px solid #ccc', background: img.fixed ? '#e9ecef' : '#fff' }}
+                          style={{ padding: '8px', border: '1px solid #ccc', background: img.fixed ? '#e9ecef' : '#fff', fontSize: 14 }}
                         />
 
                         <button
                           type="button"
                           onClick={() => toggleFix(i)}
-                          style={{ padding: '6px 12px', border: '1px solid #adb5bd', background: '#dee2e6' }}
+                          style={{ padding: '6px 12px', border: '1px solid #adb5bd', background: '#dee2e6', fontSize: 14 }}
                         >
                           {img.fixed ? 'Fixed' : 'Fix'}
                         </button>
@@ -251,7 +301,7 @@ const ManageGallery = () => {
                           <button
                             type="button"
                             onClick={() => removeRow(i)}
-                            style={{ padding: '6px 12px', border: '1px solid #adb5bd', background: '#dee2e6' }}
+                            style={{ padding: '6px 12px', border: '1px solid #adb5bd', background: '#dee2e6', fontSize: 14 }}
                           >
                             Remove
                           </button>
@@ -268,7 +318,8 @@ const ManageGallery = () => {
                         background: '#dee2e6',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px'
+                        gap: '8px',
+                        fontSize: 14
                       }}
                     >
                       <img
@@ -281,9 +332,9 @@ const ManageGallery = () => {
                   </td>
                 </tr>
 
-                <tr>
-                  <td style={{ padding: '15px', fontWeight: '600' }}>Visible</td>
-                  <td style={{ padding: '15px' }}>
+                <tr style={tableStyles.row}>
+                  <td style={{ ...tableStyles.cell, fontWeight: 600 }}>Visible</td>
+                  <td style={tableStyles.cell}>
                     <input
                       type="checkbox"
                       checked={form.visibility}
@@ -293,6 +344,7 @@ const ManageGallery = () => {
                 </tr>
               </tbody>
             </table>
+            </div>
 
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
               <button
