@@ -142,13 +142,12 @@ const AdminDashboard = () => {
       .replace(/'/g, "&#039;");
 
   const preloadCertificateBackground = async () => {
-    if (!CERT_BG) return;
-    await new Promise((resolve, reject) => {
+    if (!CERT_BG) return false;
+    return new Promise((resolve) => {
       const image = new Image();
       image.crossOrigin = "anonymous";
-      image.onload = () => resolve();
-      image.onerror = () =>
-        reject(new Error("Failed to load certificate background image."));
+      image.onload = () => resolve(true);
+      image.onerror = () => resolve(false);
       image.src = CERT_BG;
     });
   };
@@ -274,7 +273,10 @@ const AdminDashboard = () => {
     setIsGeneratingId(row.id);
     let certificateNode = null;
     try {
-      await preloadCertificateBackground();
+      const backgroundLoaded = await preloadCertificateBackground();
+      if (!backgroundLoaded) {
+        console.warn("Certificate background did not preload. Continuing render attempt.");
+      }
       if (document.fonts?.ready) {
         await document.fonts.ready;
       }
@@ -314,7 +316,18 @@ const AdminDashboard = () => {
       pdf.save(`certificate-${safeName || "student"}.pdf`);
     } catch (error) {
       console.error("Failed to generate certificate PDF:", error);
-      alert("Failed to generate certificate. Please try again.");
+      const reason = error?.message || "Unknown error";
+      const isCorsError =
+        reason.toLowerCase().includes("tainted") ||
+        reason.toLowerCase().includes("cross-origin") ||
+        reason.toLowerCase().includes("security");
+      if (isCorsError) {
+        alert(
+          "Failed to generate certificate: Canvas blocked by CORS. Verify Cloudinary URL is public and allows cross-origin access."
+        );
+      } else {
+        alert(`Failed to generate certificate: ${reason}`);
+      }
     } finally {
       if (certificateNode) certificateNode.remove();
       setIsGeneratingId(null);
