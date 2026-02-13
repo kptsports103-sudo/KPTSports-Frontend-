@@ -111,10 +111,34 @@ const ManageAbout = () => {
 
   return (
     <AdminLayout>
-      <div style={{ background: '#c0c0c0', minHeight: '100vh', padding: '20px', color: '#000' }}>
-        <h2 style={{ color: '#000' }}>Manage About Page</h2>
-        <button onClick={() => setIsEditing(p => !p)}>
-          {isEditing ? 'Cancel' : 'Edit'}
+      <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
+        <h2 style={{ color: '#000', fontSize: '36px', fontWeight: 700, marginBottom: '12px' }}>Manage About Page</h2>
+        <button
+          onClick={() => setIsEditing(p => !p)}
+          style={{
+            padding: '8px 14px',
+            background: '#dee2e6',
+            color: '#000',
+            border: '1px solid #adb5bd',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '14px',
+            cursor: 'pointer'
+          }}
+        >
+          {isEditing ? (
+            'Cancel'
+          ) : (
+            <>
+              <img
+                src="/Edit button.png"
+                alt="Edit"
+                style={{ width: '16px', height: '16px' }}
+              />
+              Edit
+            </>
+          )}
         </button>
 
         {!isEditing ? (
