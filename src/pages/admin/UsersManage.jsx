@@ -1,23 +1,59 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import AdminLayout from "../../components/AdminLayout";
 import { IAMService } from "../../services/iam.service";
-import { useAuth } from "../../context/AuthContext";
 import { confirmAction } from "../../utils/notify";
 
 const UsersManage = () => {
-  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [profileForm, setProfileForm] = useState({
-    name: "",
-    phone: "",
-    password: "",
-    profileImage: null,
-    profileImagePreview: null
-  });
+
+  const tableStyles = {
+    tableContainer: {
+      background: "#fff",
+      borderRadius: "16px",
+      overflow: "auto",
+      boxShadow: "0 8px 24px rgba(71, 85, 105, 0.12)",
+      border: "1px solid #cfd6df",
+      maxHeight: "600px",
+    },
+    table: {
+      width: "100%",
+      background: "#ffffff",
+      color: "#1f2937",
+      borderCollapse: "collapse",
+      fontSize: 14,
+      lineHeight: 1.5,
+    },
+    headerCell: {
+      padding: "15px",
+      fontSize: 12,
+      textTransform: "uppercase",
+      letterSpacing: "0.8px",
+      fontWeight: 600,
+      position: "sticky",
+      top: 0,
+      zIndex: 2,
+      background: "linear-gradient(135deg, #eef2f6 0%, #d6dde5 100%)",
+      borderBottom: "1px solid #c0c8d2",
+      color: "#111827",
+    },
+    row: {
+      borderBottom: "1px solid #e5e7eb",
+      backgroundColor: "#ffffff",
+    },
+    rowAlt: {
+      borderBottom: "1px solid #e5e7eb",
+      backgroundColor: "#f5f7fa",
+    },
+    cell: {
+      padding: "15px",
+      fontSize: 14,
+      color: "#1f2937",
+    },
+  };
 
   const maskEmail = (email) => {
     if (!email || !email.includes("@")) return email;
@@ -30,21 +66,50 @@ const UsersManage = () => {
     return "******** " + phone.slice(-3);
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const getRoleInfo = (role) => {
+    if (role === "superadmin") {
+      return "This user can access Superadmin and Admin dashboards. They have full system control.";
+    }
+    if (role === "admin") {
+      return "This user can access Admin and Creator dashboards. They can manage creators and content.";
+    }
+    if (role === "creator") {
+      return "This user can access only the Creator dashboard. They manage their own content.";
+    }
+    if (role === "coach") {
+      return "This user can access coach-level functions and manage assigned activities.";
+    }
+    if (role === "student") {
+      return "This user can access student-level functions and participation details.";
+    }
+    return "Role information not available.";
+  };
+
+  const getCreatedDate = (createdAt) => {
+    if (!createdAt) return "N/A";
+    const d = new Date(createdAt);
+    if (Number.isNaN(d.getTime())) return "N/A";
+    return d.toLocaleDateString();
+  };
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const response = await IAMService.getUsers();
       setUsers(response);
+      setError("");
+      return response;
     } catch {
       setError("Failed to fetch users");
+      return [];
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const handleDeleteUser = async (userId) => {
     const shouldDelete = await confirmAction("Are you sure?");
@@ -57,131 +122,98 @@ const UsersManage = () => {
     }
   };
 
-  const handleProfileClick = (user) => {
-    setSelectedUser(user);
-    setProfileForm({
-      name: user.name || "",
-      phone: user.phone || "",
-      password: "",
-      profileImage: null,
-      profileImagePreview: null
-    });
+  const handleProfileClick = async (user) => {
+    const latestUsers = await fetchUsers();
+    const latestSelected = latestUsers.find((u) => u._id === user._id) || user;
+    setSelectedUser(latestSelected);
     setShowProfileModal(true);
   };
 
-  const handleProfileImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProfileForm({
-        ...profileForm,
-        profileImage: reader.result,
-        profileImagePreview: reader.result
-      });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleUpdateProfile = async () => {
-    try {
-      // Here you would call an API to update the user profile
-      // For now, just close the modal
-      setShowProfileModal(false);
-      setSelectedUser(null);
-      // You could refetch users here if needed
-    } catch (err) {
-      console.error("Failed to update profile:", err);
-    }
+  const handleCloseProfileModal = () => {
+    setShowProfileModal(false);
+    setSelectedUser(null);
+    fetchUsers();
   };
 
   return (
     <AdminLayout>
-      <div className="p-8 bg-gray-50 min-h-screen">
-        {/* Center Heading */}
+      <div className="p-8 min-h-screen" style={{ background: "#f4f6f8" }}>
         <div className="flex justify-center mb-8">
-          <h1 className="text-3xl font-bold flex items-center gap-3" style={{ color: '#000' }}>
+          <h1 className="text-3xl font-bold flex items-center gap-3" style={{ color: "#000" }}>
             <img src="/group.png" className="w-8 h-8" />
             Manage Users
           </h1>
         </div>
 
-        {/* Big Box */}
-        <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
-
-          {/* Inner Heading */}
+        <div
+          className="p-6"
+          style={{
+            background: "#fff",
+            borderRadius: "16px",
+            border: "1px solid #cfd6df",
+            boxShadow: "0 8px 24px rgba(71, 85, 105, 0.12)",
+          }}
+        >
           <div className="flex items-center gap-2 border-b pb-4 mb-6">
             <img src="/group.png" className="w-6 h-6" />
-            <h2 className="text-xl font-semibold" style={{ color: '#000' }}>Admin Users</h2>
+            <h2 className="text-xl font-semibold" style={{ color: "#000" }}>Admin Users</h2>
           </div>
 
-          {error && (
-            <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
-              {error}
-            </div>
-          )}
+          {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
 
           {loading ? (
             <div className="text-center py-10">Loading...</div>
+          ) : users.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">No users found</div>
           ) : (
-            users.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                No users found
-              </div>
-            ) : (
-              <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
-                <table style={{ width: '100%', background: '#fff', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
+            <div style={tableStyles.tableContainer}>
+              <table style={tableStyles.table}>
                 <thead>
-                  <tr style={{ background: '#e9ecef' }}>
-                    <th style={{ padding: '15px', textAlign: 'center', color: '#000' }}>Avatar</th>
-                    <th style={{ padding: '15px', textAlign: 'left', color: '#000' }}>Name</th>
-                    <th style={{ padding: '15px', textAlign: 'left', color: '#000' }}>Email</th>
-                    <th style={{ padding: '15px', textAlign: 'left', color: '#000' }}>Phone</th>
-                    <th style={{ padding: '15px', textAlign: 'center', color: '#000' }}>Role</th>
-                    <th style={{ padding: '15px', textAlign: 'center', color: '#000' }}>Verified</th>
-                    <th style={{ padding: '15px', textAlign: 'right', color: '#000' }}>Actions</th>
+                  <tr>
+                    <th style={{ ...tableStyles.headerCell, textAlign: "center" }}>Avatar</th>
+                    <th style={{ ...tableStyles.headerCell, textAlign: "left" }}>Name</th>
+                    <th style={{ ...tableStyles.headerCell, textAlign: "left" }}>Email</th>
+                    <th style={{ ...tableStyles.headerCell, textAlign: "left" }}>Phone</th>
+                    <th style={{ ...tableStyles.headerCell, textAlign: "center" }}>Role</th>
+                    <th style={{ ...tableStyles.headerCell, textAlign: "center" }}>Verified</th>
+                    <th style={{ ...tableStyles.headerCell, textAlign: "right" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((user, i) => (
-                    <tr key={user._id} style={{ background: i % 2 ? '#f8f9fa' : '#fff' }}>
-                      <td style={{ padding: '15px', textAlign: 'center' }}>
+                    <tr key={user._id} style={i % 2 ? tableStyles.rowAlt : tableStyles.row}>
+                      <td style={{ ...tableStyles.cell, textAlign: "center" }}>
                         <img
                           src={user.profileImage || "/avatar.png"}
                           alt="profile"
                           style={{
                             width: 40,
                             height: 40,
-                            borderRadius: '6px',
-                            objectFit: 'cover',
-                            border: '1px solid #ccc'
+                            borderRadius: "6px",
+                            objectFit: "cover",
+                            border: "1px solid #ccc",
                           }}
                         />
                       </td>
-                      <td style={{ padding: '15px', color: '#000' }}>{user.name}</td>
-                      <td style={{ padding: '15px', color: '#000' }}>{maskEmail(user.email)}</td>
-                      <td style={{ padding: '15px', color: '#000' }}>{maskPhone(user.phone)}</td>
-                      <td style={{ padding: '15px', textAlign: 'center', color: '#000' }}>{user.role}</td>
-                      <td style={{ padding: '15px', textAlign: 'center' }}>
-                        <span
-                          className={`text-sm ${
-                            user.is_verified ? "text-green-600" : "text-red-600"
-                          }`}
-                        >
-                          {user.is_verified ? 'Yes' : 'No'}
+                      <td style={tableStyles.cell}>{user.name}</td>
+                      <td style={tableStyles.cell}>{maskEmail(user.email)}</td>
+                      <td style={tableStyles.cell}>{maskPhone(user.phone)}</td>
+                      <td style={{ ...tableStyles.cell, textAlign: "center" }}>{user.role}</td>
+                      <td style={{ ...tableStyles.cell, textAlign: "center" }}>
+                        <span className={`text-sm ${user.is_verified ? "text-green-600" : "text-red-600"}`}>
+                          {user.is_verified ? "Yes" : "No"}
                         </span>
                       </td>
-                      <td style={{ padding: '15px', textAlign: 'right' }}>
+                      <td style={{ ...tableStyles.cell, textAlign: "right" }}>
                         <button
                           onClick={() => handleProfileClick(user)}
                           style={{
-                            padding: '6px 12px',
-                            background: '#dee2e6',
-                            color: '#000',
-                            border: '1px solid #adb5bd',
-                            marginRight: '5px',
-                            cursor: 'pointer'
+                            padding: "6px 12px",
+                            background: "#dee2e6",
+                            color: "#000",
+                            border: "1px solid #adb5bd",
+                            marginRight: "5px",
+                            cursor: "pointer",
                           }}
                         >
                           Profile
@@ -189,10 +221,11 @@ const UsersManage = () => {
                         <button
                           onClick={() => handleDeleteUser(user._id)}
                           style={{
-                            padding: '6px 12px',
-                            background: '#dc3545',
-                            color: '#fff',
-                            border: '1px solid #dc3545'
+                            padding: "6px 12px",
+                            background: "#dc3545",
+                            color: "#fff",
+                            border: "1px solid #dc3545",
+                            cursor: "pointer",
                           }}
                         >
                           Delete
@@ -202,57 +235,88 @@ const UsersManage = () => {
                   ))}
                 </tbody>
               </table>
-              </div>
-            )
+            </div>
           )}
         </div>
       </div>
 
-      {/* Profile Modal */}
       {showProfileModal && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white w-[350px] p-5 rounded-lg text-center relative">
-
-            <button
-              onClick={() => setShowProfileModal(false)}
-              className="absolute top-2 right-3 text-gray-400 hover:text-black text-2xl"
+        <div className="fixed inset-0 bg-black/55 backdrop-blur-[1px] flex items-center justify-center z-50">
+          <div
+            style={{
+              width: "min(460px, 92vw)",
+              background: "#ffffff",
+              borderRadius: "14px",
+              border: "1px solid #cfd6df",
+              boxShadow: "0 20px 40px rgba(15, 23, 42, 0.25)",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                padding: "14px 16px",
+                borderBottom: "1px solid #e5e7eb",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
             >
-              ×
-            </button>
-
-            <h2 className="text-xl font-semibold mb-1" style={{ color: '#000' }}>{selectedUser.name}</h2>
-            <p className="text-gray-500 mb-4" style={{ color: '#000' }}>Profile</p>
-
-            <div className="flex justify-center mb-4">
-              <img
-                src={selectedUser.profileImage || "/avatar.png"}
-                alt="profile"
-                className="w-20 h-20 object-cover rounded-lg border shadow"
-              />
+              <div>
+                <h2 className="text-xl font-semibold mb-1" style={{ color: "#111827", margin: 0 }}>{selectedUser.name}</h2>
+                <p style={{ color: "#4b5563", margin: 0 }}>Profile</p>
+              </div>
+              <button
+                onClick={handleCloseProfileModal}
+                style={{ border: "none", background: "transparent", color: "#94a3b8", fontSize: "30px", lineHeight: 1, cursor: "pointer" }}
+                aria-label="Close profile modal"
+              >
+                ×
+              </button>
             </div>
 
-            <p style={{ color: '#000' }}><b>Email:</b> {selectedUser.email}</p>
-            <p style={{ color: '#000' }}><b>Phone:</b> {selectedUser.phone}</p>
-            <p style={{ color: '#000' }}><b>Role:</b> {selectedUser.role}</p>
+            <div style={{ padding: "16px" }}>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "14px" }}>
+                <img
+                  src={selectedUser.profileImage || "/avatar.png"}
+                  alt="profile"
+                  style={{
+                    width: 84,
+                    height: 84,
+                    objectFit: "cover",
+                    borderRadius: "10px",
+                    border: "1px solid #d1d5db",
+                    boxShadow: "0 4px 10px rgba(0,0,0,0.12)",
+                  }}
+                />
+              </div>
 
-            {(() => {
-              let text = "";
-              if (selectedUser.role === "superadmin") {
-                text = "This user can access the Superadmin and Admin dashboards. They have full control over system settings and users.";
-              } else if (selectedUser.role === "admin") {
-                text = "This user can access the Admin and Creator dashboards. They can manage creators and content.";
-              } else if (selectedUser.role === "creator") {
-                text = "This user can access only the Creator dashboard. They manage their own content only.";
-              }
-              return <p className="text-sm mt-4 leading-relaxed" style={{ color: '#000' }}>{text}</p>;
-            })()}
+              <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "12px" }}>
+                <p style={{ color: "#000", margin: "0 0 8px" }}><b>Email:</b> {selectedUser.email}</p>
+                <p style={{ color: "#000", margin: "0 0 8px" }}><b>Phone:</b> {selectedUser.phone || "N/A"}</p>
+                <p style={{ color: "#000", margin: "0 0 8px" }}><b>Role:</b> {selectedUser.role}</p>
+                <p style={{ color: "#000", margin: 0 }}><b>Created:</b> {getCreatedDate(selectedUser.createdAt)}</p>
+              </div>
 
-            <button
-              onClick={() => setShowProfileModal(false)}
-              className="mt-4 px-5 py-2 bg-gray-800 text-white rounded hover:bg-black"
-            >
-              Close
-            </button>
+              <p className="text-sm mt-4 leading-relaxed" style={{ color: "#000", marginTop: "12px" }}>
+                {getRoleInfo(selectedUser.role)}
+              </p>
+
+              <div style={{ textAlign: "center", marginTop: "12px" }}>
+                <button
+                  onClick={handleCloseProfileModal}
+                  style={{
+                    padding: "8px 18px",
+                    background: "#1f2937",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
