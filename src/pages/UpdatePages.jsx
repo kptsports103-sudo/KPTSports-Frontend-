@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
 import activityLogService from '../services/activityLog.service';
 
@@ -12,6 +13,7 @@ const UPDATE_CARDS = [
 ];
 
 const UpdatePages = () => {
+  const navigate = useNavigate();
   const [dateTime, setDateTime] = useState(new Date());
   const [latestLogsByPage, setLatestLogsByPage] = useState({});
   const [loadingLogs, setLoadingLogs] = useState(false);
@@ -71,13 +73,15 @@ const UpdatePages = () => {
             return (
               <div
                 key={card.pageName}
+                onClick={() => navigate(`/admin/update-details/${encodeURIComponent(card.pageName)}`)}
                 style={{
                   backgroundColor: '#fff',
                   border: '1px solid #ddd',
                   borderRadius: '8px',
                   padding: '20px',
                   boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  color: '#000'
+                  color: '#000',
+                  cursor: 'pointer'
                 }}
               >
                 <h3 style={{ margin: '0 0 10px 0' }}>

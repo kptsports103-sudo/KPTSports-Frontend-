@@ -40,6 +40,7 @@ import ManageResults from '../pages/Dashboard/ManageResults';
 import ManageHome from '../pages/Dashboard/ManageHome';
 
 import UpdatePages from '../pages/UpdatePages';
+import UpdateDetails from '../pages/UpdateDetails';
 
 import ManageAbout from '../pages/Dashboard/ManageAbout';
 
@@ -114,6 +115,7 @@ const AppContent = () => {
           <Route path="/admin/manage-gallery" element={<ProtectedRoute role="admin"><ManageGallery /></ProtectedRoute>} />
           <Route path="/admin/manage-results" element={<ProtectedRoute role="admin"><ManageResults /></ProtectedRoute>} />
           <Route path="/admin/update-pages" element={<ProtectedRoute role="admin"><UpdatePages /></ProtectedRoute>} />
+          <Route path="/admin/update-details/:pageName" element={<ProtectedRoute role="admin"><UpdateDetails /></ProtectedRoute>} />
           <Route path="/admin/iam/users" element={<ProtectedRoute role="admin"><IAMUsers /></ProtectedRoute>} />
           <Route path="/admin/users-manage" element={<ProtectedRoute role="admin"><UsersManage /></ProtectedRoute>} />
           <Route path="/admin/iam/create" element={<ProtectedRoute role="admin"><CreateUser /></ProtectedRoute>} />
