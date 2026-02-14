@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
 import AdminLayout from '../../components/AdminLayout';
+import PageLatestChangeCard from '../../components/PageLatestChangeCard';
 
 const ManageHome = () => {
   const [content, setContent] = useState({
@@ -173,6 +174,7 @@ const ManageHome = () => {
       <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
         <h3 style={{ fontSize: '34px', fontWeight: '700', color: '#000', marginBottom: '6px' }}>🏠 Update Home</h3>
         <p style={{ marginTop: 0, marginBottom: '16px', color: '#000' }}>Manage home page content</p>
+        <PageLatestChangeCard pageName="Home Page" />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
           {!isEditing ? (

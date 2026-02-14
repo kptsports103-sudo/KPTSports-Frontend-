@@ -3,6 +3,7 @@ import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
 import AdminLayout from '../../components/AdminLayout';
 import { confirmAction, notify } from '../../utils/notify';
+import PageLatestChangeCard from '../../components/PageLatestChangeCard';
 
 const MEDALS = ['Gold', 'Silver', 'Bronze'];
 
@@ -505,6 +506,7 @@ const ManageResults = () => {
       <div style={styles.page}>
         <h2 style={styles.title}>🏆 Update Results</h2>
         <p style={styles.activitySubtitle}>Manage results page content</p>
+        <PageLatestChangeCard pageName="Results Page" />
 
         <div style={styles.activitySection}>
           <h3 style={styles.activityTitle}>Recent Results Page Changes</h3>

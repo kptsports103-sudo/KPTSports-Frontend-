@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
 import AdminLayout from '../../components/AdminLayout';
+import PageLatestChangeCard from '../../components/PageLatestChangeCard';
 
 const ManageHistory = () => {
   const [timeline, setTimeline] = useState([]);
@@ -63,6 +64,7 @@ const ManageHistory = () => {
   return (
     <AdminLayout>
       <div style={page}>
+        <PageLatestChangeCard pageName="History Page" />
         <header style={header}>
           <div>
             <h2 style={{ ...title, margin: 0 }}>📜 Update History</h2>

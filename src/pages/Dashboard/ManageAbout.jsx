@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
 import AdminLayout from '../../components/AdminLayout';
+import PageLatestChangeCard from '../../components/PageLatestChangeCard';
 
 const DEFAULT_STATE = {
   bannerImages: [{ image: '', year: '', fixed: false }],
@@ -121,6 +122,7 @@ const ManageAbout = () => {
       <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
         <h2 style={{ color: '#000', fontSize: '36px', fontWeight: 700, marginBottom: '6px' }}>ℹ️ Update About</h2>
         <p style={{ marginTop: 0, marginBottom: '12px', color: '#000' }}>Manage about page content</p>
+        <PageLatestChangeCard pageName="About Page" />
         <button
           onClick={() => setIsEditing((p) => !p)}
           style={{

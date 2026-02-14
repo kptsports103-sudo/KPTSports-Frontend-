@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
+import PageLatestChangeCard from '../../components/PageLatestChangeCard';
 
 const ManageEvents = () => {
   const [boxContent, setBoxContent] = useState('');
@@ -123,6 +124,7 @@ const ManageEvents = () => {
         <div style={pageStyle}>
           <h1 style={pageTitle}>📅 Update Events</h1>
           <p style={{ marginTop: 0, marginBottom: '12px', color: '#000' }}>Manage events page content</p>
+          <PageLatestChangeCard pageName="Events Page" />
           <p style={{ color: '#000' }}>Loading...</p>
         </div>
       </AdminLayout>
@@ -135,6 +137,7 @@ const ManageEvents = () => {
       <div style={pageStyle}>
         <h1 style={pageTitle}>📅 Update Events</h1>
         <p style={{ marginTop: 0, marginBottom: '12px', color: '#000' }}>Manage events page content</p>
+        <PageLatestChangeCard pageName="Events Page" />
 
         {error && <div style={errorBox}>{error}</div>}
         {success && <div style={successBox}>{success}</div>}

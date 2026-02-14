@@ -3,6 +3,7 @@ import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
 import AdminLayout from '../../components/AdminLayout';
 import { confirmAction } from '../../utils/notify';
+import PageLatestChangeCard from '../../components/PageLatestChangeCard';
 
 const ManageGallery = () => {
   const [galleries, setGalleries] = useState([]);
@@ -213,6 +214,7 @@ const ManageGallery = () => {
       <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
         <h3 style={{ fontSize: '34px', fontWeight: '700', marginBottom: '6px' }}>🖼️ Update Gallery</h3>
         <p style={{ marginTop: 0, marginBottom: '12px', color: '#000' }}>Manage gallery page content</p>
+        <PageLatestChangeCard pageName="Gallery Page" />
 
         {/* TOP BUTTON */}
         <div style={{ marginBottom: '12px' }}>

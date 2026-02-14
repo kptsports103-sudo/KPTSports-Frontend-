@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
 import activityLogService from '../services/activityLog.service';
 
 const UPDATE_CARDS = [
-  { title: 'Update Home', icon: '🏠', description: 'Manage home page content', pageName: 'Home Page' },
-  { title: 'Update About', icon: 'ℹ️', description: 'Manage about page content', pageName: 'About Page' },
-  { title: 'Update History', icon: '📜', description: 'Manage history page content', pageName: 'History Page' },
-  { title: 'Update Events', icon: '📅', description: 'Manage events page content', pageName: 'Events Page' },
-  { title: 'Update Gallery', icon: '🖼️', description: 'Manage gallery page content', pageName: 'Gallery Page' },
-  { title: 'Update Results', icon: '🏆', description: 'Manage results page content', pageName: 'Results Page' }
+  { title: 'Update Home', icon: '🏠', description: 'Manage home page content', pageName: 'Home Page', path: '/admin/manage-home' },
+  { title: 'Update About', icon: 'ℹ️', description: 'Manage about page content', pageName: 'About Page', path: '/admin/manage-about' },
+  { title: 'Update History', icon: '📜', description: 'Manage history page content', pageName: 'History Page', path: '/admin/manage-history' },
+  { title: 'Update Events', icon: '📅', description: 'Manage events page content', pageName: 'Events Page', path: '/admin/manage-events' },
+  { title: 'Update Gallery', icon: '🖼️', description: 'Manage gallery page content', pageName: 'Gallery Page', path: '/admin/manage-gallery' },
+  { title: 'Update Results', icon: '🏆', description: 'Manage results page content', pageName: 'Results Page', path: '/admin/manage-results' }
 ];
 
 const UpdatePages = () => {
@@ -69,43 +70,45 @@ const UpdatePages = () => {
           {UPDATE_CARDS.map((card) => {
             const latest = latestLogsByPage[card.pageName];
             return (
-              <div
-                key={card.pageName}
-                style={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  padding: '20px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                }}
-              >
-                <h3 style={{ margin: '0 0 10px 0', color: '#000' }}>
-                  {card.icon} {card.title}
-                </h3>
-                <p style={{ margin: 0, color: '#000' }}>{card.description}</p>
+              <Link key={card.pageName} to={card.path} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div
+                  style={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    padding: '20px',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <h3 style={{ margin: '0 0 10px 0', color: '#000' }}>
+                    {card.icon} {card.title}
+                  </h3>
+                  <p style={{ margin: 0, color: '#000' }}>{card.description}</p>
 
-                <div style={{ marginTop: '12px', fontSize: '13px', color: '#111827' }}>
-                  {loadingLogs ? (
-                    <p style={{ margin: 0 }}>Changes: Loading...</p>
-                  ) : latest ? (
-                    <>
-                      <p style={{ margin: '0 0 6px 0' }}>Changes: {latest.details || latest.action}</p>
-                      <p style={{ margin: '0 0 6px 0' }}>
-                        Updated By: {latest.adminName || 'Admin'} ({latest.adminEmail || 'No email'})
-                      </p>
-                      <p style={{ margin: 0 }}>
-                        Updated At: {latest.createdAt ? new Date(latest.createdAt).toLocaleString() : '-'}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p style={{ margin: '0 0 6px 0' }}>Changes: No changes yet</p>
-                      <p style={{ margin: '0 0 6px 0' }}>Updated By: -</p>
-                      <p style={{ margin: 0 }}>Updated At: -</p>
-                    </>
-                  )}
+                  <div style={{ marginTop: '12px', fontSize: '13px', color: '#111827' }}>
+                    {loadingLogs ? (
+                      <p style={{ margin: 0 }}>Changes: Loading...</p>
+                    ) : latest ? (
+                      <>
+                        <p style={{ margin: '0 0 6px 0' }}>Changes: {latest.details || latest.action}</p>
+                        <p style={{ margin: '0 0 6px 0' }}>
+                          Updated By: {latest.adminName || 'Admin'} ({latest.adminEmail || 'No email'})
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          Updated At: {latest.createdAt ? new Date(latest.createdAt).toLocaleString() : '-'}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p style={{ margin: '0 0 6px 0' }}>Changes: No changes yet</p>
+                        <p style={{ margin: '0 0 6px 0' }}>Updated By: -</p>
+                        <p style={{ margin: 0 }}>Updated At: -</p>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
