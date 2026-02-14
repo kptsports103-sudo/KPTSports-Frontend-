@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
+import activityLogService from '../../services/activityLog.service';
 import AdminLayout from '../../components/AdminLayout';
 import { confirmAction, notify } from '../../utils/notify';
 
@@ -210,6 +211,13 @@ const ManageResults = () => {
       notify('Data saved successfully', { type: 'success', position: 'top-center' });
       setIsEditing(false);
       resetForm();
+      
+      // Log the activity
+      activityLogService.logActivity(
+        'Updated Match Results',
+        'Results Page',
+        editingId ? `Updated result for ${form.event}` : `Created new result for ${form.event}`
+      );
     } catch (error) {
       console.error('Save error:', error);
 
@@ -349,6 +357,13 @@ const ManageResults = () => {
       setIsGroupEditing(false);
       setEditingGroupId(null);
       setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: [{ name: '', branch: '', year: '' }], medal: '', imageUrl: '' });
+      
+      // Log the activity
+      activityLogService.logActivity(
+        'Updated Group Results',
+        'Results Page',
+        editingGroupId ? `Updated group result for ${groupForm.event}` : `Created new group result for ${groupForm.event}`
+      );
     } catch (error) {
       console.error('Group save error:', error);
 

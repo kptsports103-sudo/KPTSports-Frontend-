@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
+import activityLogService from '../../services/activityLog.service';
 import AdminLayout from '../../components/AdminLayout';
 
 const ManageHistory = () => {
@@ -31,6 +32,13 @@ const ManageHistory = () => {
       alert('Timeline updated');
       setIsEditing(false);
       loadTimeline();
+      
+      // Log the activity
+      activityLogService.logActivity(
+        'Updated History Page Content',
+        'History Page',
+        `Updated ${timeline.length} timeline entries`
+      );
     } catch {
       alert('Save failed');
     } finally {

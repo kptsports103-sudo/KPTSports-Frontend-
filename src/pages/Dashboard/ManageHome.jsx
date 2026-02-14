@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
+import activityLogService from '../../services/activityLog.service';
 import AdminLayout from '../../components/AdminLayout';
 
 const ManageHome = () => {
@@ -99,6 +100,13 @@ const ManageHome = () => {
       
       alert('Home page updated successfully');
       setIsEditing(false);
+      
+      // Log the activity
+      activityLogService.logActivity(
+        'Updated Home Page Content',
+        'Home Page',
+        'Updated banners and clubs'
+      );
       
       // Immediately fetch to verify save worked
       console.log('ManageHome - Fetching data immediately after save to verify...');

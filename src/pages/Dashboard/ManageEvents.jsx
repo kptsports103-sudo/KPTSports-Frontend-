@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import api from '../../services/api';
+import activityLogService from '../../services/activityLog.service';
 
 const ManageEvents = () => {
   const [boxContent, setBoxContent] = useState('');
@@ -100,6 +101,13 @@ const ManageEvents = () => {
       setSuccess('Data saved successfully.');
       setIsEditing(false);
       setTimeout(() => setSuccess(''), 3000);
+      
+      // Log the activity
+      activityLogService.logActivity(
+        'Updated Events Page',
+        'Events Page',
+        `Updated ${cleanedHighlights.length} events`
+      );
     } catch (err) {
       console.error('Save error:', err.response?.data || err);
       setError(err.response?.data?.message || 'Server error while saving data.');

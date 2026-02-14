@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import activityLogService from '../services/activityLog.service';
 import '../admin.css';
 
 const CreatorLayout = ({ children }) => {
@@ -8,6 +9,31 @@ const CreatorLayout = ({ children }) => {
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showActivityHistory, setShowActivityHistory] = useState(false);
+  const [activityLogs, setActivityLogs] = useState([]);
+  const [loadingActivity, setLoadingActivity] = useState(false);
+
+  // Fetch activity logs when profile is clicked
+  const fetchActivityLogs = async () => {
+    try {
+      setLoadingActivity(true);
+      const response = await activityLogService.getMyActivityLogs(10, 1);
+      if (response.success) {
+        setActivityLogs(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching activity logs:', error);
+    } finally {
+      setLoadingActivity(false);
+    }
+  };
+
+  const handleProfileClick = () => {
+    if (!showActivityHistory) {
+      fetchActivityLogs();
+    }
+    setShowActivityHistory(!showActivityHistory);
+  };
 
   useEffect(() => {
     // Refresh user data to get latest profileImage from Cloudinary
@@ -50,7 +76,27 @@ const CreatorLayout = ({ children }) => {
         background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
       }}>
         {/* Profile Section */}
-        <div className="profile">
+        <div 
+          className="profile"
+          onClick={handleProfileClick}
+          style={{ 
+            cursor: 'pointer',
+            background: showActivityHistory ? 'rgba(255,255,255,0.1)' : 'transparent'
+          }}
+        >
+          {/* Toggle indicator */}
+          <div style={{ 
+            fontSize: '12px', 
+            color: 'rgba(255,255,255,0.8)', 
+            marginBottom: '8px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '5px'
+          }}>
+            {showActivityHistory ? '▼' : '▶'} {showActivityHistory ? 'Hide Activity' : 'View Activity'}
+          </div>
+          
           <img
             src={user?.profileImage || "/avatar.png"}
             alt="Profile"
@@ -94,6 +140,60 @@ const CreatorLayout = ({ children }) => {
               </tbody>
             </table>
           </div>
+
+          {/* Activity History Section */}
+          {showActivityHistory && (
+            <div style={{
+              marginTop: '15px',
+              paddingTop: '15px',
+              borderTop: '1px solid rgba(255,255,255,0.2)'
+            }}>
+              <h4 style={{ 
+                margin: '0 0 10px 0', 
+                fontSize: '13px', 
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                📋 Activity History
+              </h4>
+              
+              {loadingActivity ? (
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>Loading...</div>
+              ) : activityLogs.length > 0 ? (
+                <div style={{ 
+                  maxHeight: '200px', 
+                  overflowY: 'auto',
+                  fontSize: '11px' 
+                }}>
+                  {activityLogs.map((log, index) => (
+                    <div key={index} style={{
+                      padding: '8px',
+                      marginBottom: '6px',
+                      background: 'rgba(255,255,255,0.1)',
+                      borderRadius: '4px',
+                      borderLeft: '3px solid #f5576c'
+                    }}>
+                      <div style={{ fontWeight: 600, color: '#fff' }}>
+                        🔹 {log.action}
+                      </div>
+                      <div style={{ color: 'rgba(255,255,255,0.8)', marginTop: '2px' }}>
+                        Page: {log.pageName}
+                      </div>
+                      <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '10px', marginTop: '2px' }}>
+                        {log.createdAt ? new Date(log.createdAt).toLocaleString() : 'Just now'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', fontStyle: 'italic' }}>
+                  No activity yet
+                </div>
+              )}
+            </div>
+          )}
 
         </div>
 

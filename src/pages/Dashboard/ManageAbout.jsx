@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
+import activityLogService from '../../services/activityLog.service';
 import AdminLayout from '../../components/AdminLayout';
 
 const DEFAULT_STATE = {
@@ -68,6 +69,13 @@ const ManageAbout = () => {
       alert('Content updated successfully');
       setIsEditing(false);
       loadContent();
+      
+      // Log the activity
+      activityLogService.logActivity(
+        'Updated About Page Content',
+        'About Page',
+        'Updated banner images, boxes, header and text'
+      );
     } catch (err) {
       console.error('Save failed:', err);
       alert('Failed to save content');

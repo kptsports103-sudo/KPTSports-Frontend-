@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
+import activityLogService from '../../services/activityLog.service';
 import AdminLayout from '../../components/AdminLayout';
 import { confirmAction } from '../../utils/notify';
 
@@ -188,6 +189,13 @@ const ManageGallery = () => {
 
       resetForm();
       fetchGalleries();
+      
+      // Log the activity
+      activityLogService.logActivity(
+        'Updated Gallery',
+        'Gallery Page',
+        editingId ? `Updated gallery: ${form.title}` : `Created new gallery: ${form.title}`
+      );
     } catch (error) {
       console.error('Error saving gallery:', error);
       alert('Failed to save gallery. Please try again.');
