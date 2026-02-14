@@ -9,6 +9,15 @@ const getUser = () => {
   return null;
 };
 
+const ALLOWED_PAGE_ACTIONS = {
+  'Home Page': 'Updated Home Page Content',
+  'About Page': 'Updated About Page Content',
+  'History Page': 'Updated History Page Content',
+  'Events Page': 'Updated Events Page',
+  'Gallery Page': 'Updated Gallery',
+  'Results Page': 'Updated Match Results'
+};
+
 // Log admin activity
 const logActivity = async (action, pageName, details = '') => {
   try {
@@ -18,10 +27,15 @@ const logActivity = async (action, pageName, details = '') => {
       return null;
     }
 
+    if (user.role !== 'admin') {
+      return null;
+    }
+
+    if (ALLOWED_PAGE_ACTIONS[pageName] !== action) {
+      return null;
+    }
+
     const payload = {
-      adminId: user._id || user.id,
-      adminName: user.name || user.email || 'Unknown',
-      role: user.role || 'admin',
       action,
       pageName,
       details
@@ -68,10 +82,22 @@ const getAllActivityLogs = async (limit = 50, page = 1, filters = {}) => {
   }
 };
 
+// Get activity logs for a specific page
+const getPageActivityLogs = async (pageName, limit = 20) => {
+  try {
+    const response = await api.get(`/admin-activity/page/${encodeURIComponent(pageName)}?limit=${limit}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching page activity logs:', error);
+    throw error;
+  }
+};
+
 export const activityLogService = {
   logActivity,
   getMyActivityLogs,
-  getAllActivityLogs
+  getAllActivityLogs,
+  getPageActivityLogs
 };
 
 export default activityLogService;

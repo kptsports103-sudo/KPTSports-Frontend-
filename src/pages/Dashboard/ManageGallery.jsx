@@ -211,7 +211,8 @@ const ManageGallery = () => {
   return (
     <AdminLayout>
       <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
-        <h3 style={{ fontSize: '34px', fontWeight: '700' }}>Manage Gallery</h3>
+        <h3 style={{ fontSize: '34px', fontWeight: '700', marginBottom: '6px' }}>🖼️ Update Gallery</h3>
+        <p style={{ marginTop: 0, marginBottom: '12px', color: '#000' }}>Manage gallery page content</p>
 
         {/* TOP BUTTON */}
         <div style={{ marginBottom: '12px' }}>

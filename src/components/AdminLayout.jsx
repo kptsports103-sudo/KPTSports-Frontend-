@@ -197,6 +197,11 @@ const AdminLayout = ({ children }) => {
                       <div style={{ color: '#6b7280', marginTop: '2px' }}>
                         Page: {log.pageName}
                       </div>
+                      {log.details ? (
+                        <div style={{ color: '#4b5563', marginTop: '2px' }}>
+                          Changes: {log.details}
+                        </div>
+                      ) : null}
                       <div style={{ color: '#9ca3af', fontSize: '10px', marginTop: '2px' }}>
                         {log.createdAt ? new Date(log.createdAt).toLocaleString() : 'Just now'}
                       </div>

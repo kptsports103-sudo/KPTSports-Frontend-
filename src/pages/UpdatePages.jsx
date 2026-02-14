@@ -1,72 +1,99 @@
-import React, { useEffect, useState } from "react";
-import AdminLayout from "../components/AdminLayout";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import AdminLayout from '../components/AdminLayout';
 
-// Get user
-const getUser = () => {
-  return JSON.parse(localStorage.getItem("user"));
-};
+const UPDATE_CARDS = [
+  {
+    title: 'Update Home',
+    icon: '🏠',
+    description: 'Manage home page content',
+    path: '/admin/manage-home'
+  },
+  {
+    title: 'Update About',
+    icon: 'ℹ️',
+    description: 'Manage about page content',
+    path: '/admin/manage-about'
+  },
+  {
+    title: 'Update History',
+    icon: '📜',
+    description: 'Manage history page content',
+    path: '/admin/manage-history'
+  },
+  {
+    title: 'Update Events',
+    icon: '📅',
+    description: 'Manage events page content',
+    path: '/admin/manage-events'
+  },
+  {
+    title: 'Update Gallery',
+    icon: '🖼️',
+    description: 'Manage gallery page content',
+    path: '/admin/manage-gallery'
+  },
+  {
+    title: 'Update Results',
+    icon: '🏆',
+    description: 'Manage results page content',
+    path: '/admin/manage-results'
+  }
+];
 
 const UpdatePages = () => {
-  const user = getUser();
   const [dateTime, setDateTime] = useState(new Date());
 
-  // Update time every second
   useEffect(() => {
     const timer = setInterval(() => {
       setDateTime(new Date());
     }, 1000);
-
     return () => clearInterval(timer);
   }, []);
 
-  if (!user || user.role !== "admin") {
-    return (
-      <AdminLayout>
-        <div style={{ padding: "20px" }}>
-          <h1>Access Denied</h1>
-          <p>You are not allowed to view this page.</p>
-        </div>
-      </AdminLayout>
-    );
-  }
-
   return (
     <AdminLayout>
-      <div style={{ padding: "20px" }}>
-        <h1 style={{ color: '#000' }}>Update Pages</h1>
-        <p style={{ color: '#000' }}>This is the Update Pages page.</p>
+      <div style={{ padding: '20px', color: '#000' }}>
+        <h1 style={{ marginBottom: 6 }}>Update Pages</h1>
+        <p style={{ marginTop: 0 }}>Only Admin update actions from these pages are logged.</p>
 
-        {/* Date & Time */}
-        <div style={{ margin: "10px 0", fontWeight: "bold", color: '#000' }}>
+        <div style={{ margin: '10px 0', fontWeight: 700 }}>
           Date: {dateTime.toLocaleDateString()} <br />
           Time: {dateTime.toLocaleTimeString()}
         </div>
 
-        <div style={{ marginTop: "20px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px" }}>
-          <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: "8px", padding: "20px", textAlign: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", transition: "transform 0.2s", cursor: "pointer" }} onMouseEnter={(e) => e.target.style.transform = "scale(1.05)"} onMouseLeave={(e) => e.target.style.transform = "scale(1)"}>
-            <h3 style={{ margin: "0 0 10px 0", color: "#000" }}>🏠 Update Home</h3>
-            <p style={{ margin: "0", color: "#000" }}>Manage home page content</p>
-          </div>
-          <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: "8px", padding: "20px", textAlign: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", transition: "transform 0.2s", cursor: "pointer" }} onMouseEnter={(e) => e.target.style.transform = "scale(1.05)"} onMouseLeave={(e) => e.target.style.transform = "scale(1)"}>
-            <h3 style={{ margin: "0 0 10px 0", color: "#000" }}>ℹ️ Update About</h3>
-            <p style={{ margin: "0", color: "#000" }}>Manage about page content</p>
-          </div>
-          <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: "8px", padding: "20px", textAlign: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", transition: "transform 0.2s", cursor: "pointer" }} onMouseEnter={(e) => e.target.style.transform = "scale(1.05)"} onMouseLeave={(e) => e.target.style.transform = "scale(1)"}>
-            <h3 style={{ margin: "0 0 10px 0", color: "#000" }}>📜 Update History</h3>
-            <p style={{ margin: "0", color: "#000" }}>Manage history page content</p>
-          </div>
-          <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: "8px", padding: "20px", textAlign: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", transition: "transform 0.2s", cursor: "pointer" }} onMouseEnter={(e) => e.target.style.transform = "scale(1.05)"} onMouseLeave={(e) => e.target.style.transform = "scale(1)"}>
-            <h3 style={{ margin: "0 0 10px 0", color: "#000" }}>📅 Update Events</h3>
-            <p style={{ margin: "0", color: "#000" }}>Manage events page content</p>
-          </div>
-          <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: "8px", padding: "20px", textAlign: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", transition: "transform 0.2s", cursor: "pointer" }} onMouseEnter={(e) => e.target.style.transform = "scale(1.05)"} onMouseLeave={(e) => e.target.style.transform = "scale(1)"}>
-            <h3 style={{ margin: "0 0 10px 0", color: "#000" }}>🖼️ Update Gallery</h3>
-            <p style={{ margin: "0", color: "#000" }}>Manage gallery page content</p>
-          </div>
-          <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: "8px", padding: "20px", textAlign: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", transition: "transform 0.2s", cursor: "pointer" }} onMouseEnter={(e) => e.target.style.transform = "scale(1.05)"} onMouseLeave={(e) => e.target.style.transform = "scale(1)"}>
-            <h3 style={{ margin: "0 0 10px 0", color: "#000" }}>🏆 Update Results</h3>
-            <p style={{ margin: "0", color: "#000" }}>Manage results page content</p>
-          </div>
+        <div
+          style={{
+            marginTop: '20px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+            gap: '20px'
+          }}
+        >
+          {UPDATE_CARDS.map((card) => (
+            <Link
+              key={card.path}
+              to={card.path}
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              <div
+                style={{
+                  backgroundColor: '#fff',
+                  border: '1px solid #ddd',
+                  borderRadius: '8px',
+                  padding: '20px',
+                  textAlign: 'center',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  cursor: 'pointer'
+                }}
+              >
+                <h3 style={{ margin: '0 0 10px 0', color: '#000' }}>
+                  {card.icon} {card.title}
+                </h3>
+                <p style={{ margin: 0, color: '#000' }}>{card.description}</p>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </AdminLayout>

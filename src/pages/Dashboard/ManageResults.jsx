@@ -52,6 +52,8 @@ const ManageResults = () => {
   });
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [resultsActivityLogs, setResultsActivityLogs] = useState([]);
+  const [loadingResultsActivity, setLoadingResultsActivity] = useState(false);
 
   // Check authentication on component mount
   useEffect(() => {
@@ -73,7 +75,23 @@ const ManageResults = () => {
     fetchResults();
     fetchGroupResults();
     fetchPlayers();
+    fetchResultsActivityLogs();
   }, []);
+
+  const fetchResultsActivityLogs = async () => {
+    try {
+      setLoadingResultsActivity(true);
+      const response = await activityLogService.getPageActivityLogs('Results Page', 15);
+      if (response?.success) {
+        setResultsActivityLogs(response.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch results activity logs:', error);
+      setResultsActivityLogs([]);
+    } finally {
+      setLoadingResultsActivity(false);
+    }
+  };
 
   const fetchResults = async () => {
     try {
@@ -213,11 +231,12 @@ const ManageResults = () => {
       resetForm();
       
       // Log the activity
-      activityLogService.logActivity(
+      await activityLogService.logActivity(
         'Updated Match Results',
         'Results Page',
         editingId ? `Updated result for ${form.event}` : `Created new result for ${form.event}`
       );
+      fetchResultsActivityLogs();
     } catch (error) {
       console.error('Save error:', error);
 
@@ -359,11 +378,12 @@ const ManageResults = () => {
       setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: [{ name: '', branch: '', year: '' }], medal: '', imageUrl: '' });
       
       // Log the activity
-      activityLogService.logActivity(
-        'Updated Group Results',
+      await activityLogService.logActivity(
+        'Updated Match Results',
         'Results Page',
         editingGroupId ? `Updated group result for ${groupForm.event}` : `Created new group result for ${groupForm.event}`
       );
+      fetchResultsActivityLogs();
     } catch (error) {
       console.error('Group save error:', error);
 
@@ -483,7 +503,43 @@ const ManageResults = () => {
   return (
     <AdminLayout>
       <div style={styles.page}>
-        <h2 style={styles.title}>Manage Results</h2>
+        <h2 style={styles.title}>🏆 Update Results</h2>
+        <p style={styles.activitySubtitle}>Manage results page content</p>
+
+        <div style={styles.activitySection}>
+          <h3 style={styles.activityTitle}>Recent Results Page Changes</h3>
+          <p style={styles.activitySubtitle}>Visible details: change, admin name, admin email, and time.</p>
+          {loadingResultsActivity ? (
+            <div style={styles.activityEmpty}>Loading activity...</div>
+          ) : resultsActivityLogs.length === 0 ? (
+            <div style={styles.activityEmpty}>No Results page updates yet.</div>
+          ) : (
+            <div style={styles.tableContainer}>
+              <table style={styles.table}>
+                <thead>
+                  <tr style={styles.headerRow}>
+                    <th style={styles.headerCell}>Change</th>
+                    <th style={styles.headerCell}>Admin Name</th>
+                    <th style={styles.headerCell}>Admin Email</th>
+                    <th style={styles.headerCell}>Updated At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {resultsActivityLogs.map((log) => (
+                    <tr key={log._id} style={styles.bodyRow}>
+                      <td style={styles.cell}>{log.details || log.action}</td>
+                      <td style={styles.cell}>{log.adminName || '-'}</td>
+                      <td style={styles.cell}>{log.adminEmail || '-'}</td>
+                      <td style={styles.cell}>
+                        {log.createdAt ? new Date(log.createdAt).toLocaleString() : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
         {/* YEAR SELECT (TOP CENTER like Players) */}
         <div style={{ textAlign: 'center', marginBottom: 16 }}>
@@ -1089,6 +1145,33 @@ const styles = {
     marginBottom: 20,
     textShadow: 'none',
     letterSpacing: '-0.5px'
+  },
+
+  activitySection: {
+    marginBottom: 24
+  },
+
+  activityTitle: {
+    fontSize: 20,
+    fontWeight: 700,
+    marginBottom: 4,
+    color: '#111827'
+  },
+
+  activitySubtitle: {
+    marginTop: 0,
+    marginBottom: 12,
+    color: '#4b5563',
+    fontSize: 13
+  },
+
+  activityEmpty: {
+    padding: '12px 16px',
+    background: '#ffffff',
+    border: '1px solid #d1d5db',
+    borderRadius: 8,
+    color: '#4b5563',
+    fontSize: 14
   },
 
   yearSelect: {

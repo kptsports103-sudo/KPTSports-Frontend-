@@ -171,7 +171,8 @@ const ManageHome = () => {
   return (
     <AdminLayout>
       <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
-        <h3 style={{ fontSize: '34px', fontWeight: '700', color: '#000' }}>Manage Home</h3>
+        <h3 style={{ fontSize: '34px', fontWeight: '700', color: '#000', marginBottom: '6px' }}>🏠 Update Home</h3>
+        <p style={{ marginTop: 0, marginBottom: '16px', color: '#000' }}>Manage home page content</p>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
           {!isEditing ? (

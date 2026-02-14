@@ -64,7 +64,10 @@ const ManageHistory = () => {
     <AdminLayout>
       <div style={page}>
         <header style={header}>
-          <h2 style={title}>Manage History – Timeline</h2>
+          <div>
+            <h2 style={{ ...title, margin: 0 }}>📜 Update History</h2>
+            <p style={{ margin: '6px 0 0 0', color: '#000' }}>Manage history page content</p>
+          </div>
           <button
             onClick={() => setIsEditing(v => !v)}
             style={{

@@ -121,7 +121,8 @@ const ManageEvents = () => {
     return (
       <AdminLayout>
         <div style={pageStyle}>
-          <h1 style={pageTitle}>Manage Events Highlights</h1>
+          <h1 style={pageTitle}>📅 Update Events</h1>
+          <p style={{ marginTop: 0, marginBottom: '12px', color: '#000' }}>Manage events page content</p>
           <p style={{ color: '#000' }}>Loading...</p>
         </div>
       </AdminLayout>
@@ -132,7 +133,8 @@ const ManageEvents = () => {
   return (
     <AdminLayout>
       <div style={pageStyle}>
-        <h1 style={pageTitle}>Manage Events Highlights</h1>
+        <h1 style={pageTitle}>📅 Update Events</h1>
+        <p style={{ marginTop: 0, marginBottom: '12px', color: '#000' }}>Manage events page content</p>
 
         {error && <div style={errorBox}>{error}</div>}
         {success && <div style={successBox}>{success}</div>}

@@ -173,6 +173,11 @@ const SuperAdminLayout = ({ children }) => {
                       <div style={{ color: 'rgba(255,255,255,0.8)', marginTop: '2px' }}>
                         Page: {log.pageName}
                       </div>
+                      {log.details ? (
+                        <div style={{ color: 'rgba(255,255,255,0.9)', marginTop: '2px' }}>
+                          Changes: {log.details}
+                        </div>
+                      ) : null}
                       <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '10px', marginTop: '2px' }}>
                         {log.createdAt ? new Date(log.createdAt).toLocaleString() : 'Just now'}
                       </div>

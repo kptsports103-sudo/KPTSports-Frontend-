@@ -119,7 +119,8 @@ const ManageAbout = () => {
   return (
     <AdminLayout>
       <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
-        <h2 style={{ color: '#000', fontSize: '36px', fontWeight: 700, marginBottom: '12px' }}>Manage About Page</h2>
+        <h2 style={{ color: '#000', fontSize: '36px', fontWeight: 700, marginBottom: '6px' }}>ℹ️ Update About</h2>
+        <p style={{ marginTop: 0, marginBottom: '12px', color: '#000' }}>Manage about page content</p>
         <button
           onClick={() => setIsEditing((p) => !p)}
           style={{
