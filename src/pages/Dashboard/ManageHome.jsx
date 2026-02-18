@@ -85,27 +85,38 @@ const ManageHome = () => {
   };
 
   const generateAIContent = () => {
+    if (!content) return;
+
+    const achievementsText = (content.achievements || [])
+      .filter((a) => (a?.value ?? '').toString().trim() && (a?.title ?? '').toString().trim())
+      .map((a) => `${a.value} ${a.title}`)
+      .join(', ');
+
+    const bannerCount = content.banners?.length || 0;
+    const eventCount = content.upcomingEvents?.length || 0;
+    const achievementCount = content.achievements?.length || 0;
+    const sportsCount = content.sportsCategories?.length || 0;
+
+    const aiHeroSubtitle = achievementsText
+      ? `KPT Mangaluru Sports Portal showcases outstanding performance with ${achievementsText}. The platform highlights ${bannerCount} active sports campaigns and ${eventCount} upcoming competitive events.`
+      : `KPT Mangaluru Sports Portal highlights ${bannerCount} active sports campaigns and ${eventCount} upcoming competitive events.`;
+
+    const aiAnnouncement = [
+      `Our institution proudly maintains excellence across ${achievementCount} major performance indicators.`,
+      `The sports department continues to expand its reach with ${sportsCount} active sports disciplines.`,
+      `Upcoming competitions and training sessions are scheduled to strengthen athletic development.`
+    ];
+
     setContent((prev) => ({
-      ...(prev || createEmptyContent()),
-      heroTitle: 'Building Champions, Inspiring Excellence',
-      heroSubtitle: 'KPT Mangaluru Sports Portal - Empowering Athletes for State and National Success',
-      announcements: [
-        'Registrations open for the Annual Inter-Department Sports Championship.',
-        'New training schedule released for track and field athletes.',
-        'Congratulations to our state-level medal winners.'
-      ],
-      achievements: [
-        { title: 'Total Prizes Won', value: '110+' },
-        { title: 'Active Players', value: '21' },
-        { title: 'Sports Meets Conducted', value: '45' },
-        { title: 'Years of Excellence', value: '12' }
-      ],
-      upcomingEvents: [
-        { name: 'Annual Sports Meet', date: 'March 15, 2026', venue: 'Main Stadium', image: '/Gallery10.jpg' },
-        { name: 'Inter Polytechnic Championship', date: 'April 10, 2026', venue: 'Indoor Complex', image: '/Gallery16.jpg' }
-      ]
+      ...prev,
+      heroSubtitle: aiHeroSubtitle,
+      announcements: aiAnnouncement
     }));
-    openToast('KPT Sports CMS', 'AI content generated successfully. Review and save to publish.');
+
+    openToast(
+      'AI Content Generated',
+      'Professional text has been generated from existing CMS data. Numeric and media values were not changed.'
+    );
   };
 
   const handleSubmit = async (e) => {
