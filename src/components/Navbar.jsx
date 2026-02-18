@@ -123,6 +123,10 @@ const Navbar = () => {
             )}
           </div>
 
+          <div className="kpt-navbar__avatar-slot" aria-hidden="true">
+            <img src="/img1.png" alt="Profile" />
+          </div>
+
           <button type="button" className="kpt-navbar__cta" onClick={goToLogin}>
             Login
           </button>

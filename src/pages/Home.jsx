@@ -258,8 +258,15 @@ export default function Home() {
       </section>
 
       <section className="home-gallery-preview section-shell">
-        <div className="section-header">
+        <div className="section-header section-header--with-action">
           <h2>Photo Gallery Preview</h2>
+          <button
+            type="button"
+            className="section-view-more"
+            onClick={() => navigate('/gallery')}
+          >
+            View More
+          </button>
         </div>
         <div className="gallery-grid">
           {homeContent.gallery.map((item) => (
