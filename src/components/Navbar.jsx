@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const NAV_ITEMS = [
@@ -14,13 +13,10 @@ const NAV_ITEMS = [
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const profileRef = useRef(null);
   const notifyRef = useRef(null);
   const isHome = location.pathname === '/' || location.pathname === '/home';
   const isSolid = scrolled || !isHome;
@@ -38,9 +34,6 @@ const Navbar = () => {
 
   useEffect(() => {
     const onClickOutside = (event) => {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setProfileOpen(false);
-      }
       if (notifyRef.current && !notifyRef.current.contains(event.target)) {
         setNotificationsOpen(false);
       }
@@ -53,36 +46,12 @@ const Navbar = () => {
     setMobileOpen(false);
   }, [location.pathname]);
 
-  const goToProfile = () => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    if (user.role === 'admin' || user.role === 'superadmin') {
-      navigate('/admin/dashboard');
-      return;
-    }
-    if (user.role === 'creator') {
-      navigate('/admin/creator-dashboard');
-      return;
-    }
-    if (user.role === 'coach') {
-      navigate('/dashboard/coach');
-      return;
-    }
-    navigate('/sports-dashboard');
-  };
+  const goToLogin = () => navigate('/login');
 
   const toggleDarkMode = () => {
     const next = !darkMode;
     setDarkMode(next);
     document.body.classList.toggle('dark-mode', next);
-  };
-
-  const onLogout = async () => {
-    await logout();
-    setProfileOpen(false);
-    navigate('/');
   };
 
   return (
@@ -154,25 +123,8 @@ const Navbar = () => {
             )}
           </div>
 
-          <div className="kpt-navbar__profile" ref={profileRef}>
-            <button type="button" className="kpt-navbar__avatar" onClick={() => setProfileOpen((v) => !v)}>
-              <img src={user?.avatar || '/img1.png'} alt="Profile" />
-            </button>
-            {profileOpen && (
-              <div className="kpt-navbar__panel kpt-navbar__panel--profile">
-                <button type="button" onClick={goToProfile}>Dashboard</button>
-                <button type="button" onClick={() => navigate('/admin/login-activity')}>Settings</button>
-                {user ? (
-                  <button type="button" onClick={onLogout}>Logout</button>
-                ) : (
-                  <button type="button" onClick={() => navigate('/login')}>Login</button>
-                )}
-              </div>
-            )}
-          </div>
-
-          <button type="button" className="kpt-navbar__cta" onClick={goToProfile}>
-            {user ? 'Profile' : 'Login'}
+          <button type="button" className="kpt-navbar__cta" onClick={goToLogin}>
+            Login
           </button>
           <button
             type="button"

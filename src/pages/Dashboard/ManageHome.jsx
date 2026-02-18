@@ -6,79 +6,21 @@ import PageLatestChangeCard from '../../components/PageLatestChangeCard';
 import { emitPageUpdate } from '../../utils/eventBus';
 import './ManageHome.css';
 
-const createDefaultContent = () => ({
-  heroTitle: 'Champions in Spirit, Champions in Action',
-  heroSubtitle: 'Karnataka Government Polytechnic, Mangaluru Sports Portal',
-  heroButtons: [
-    { text: 'View Results', link: '/results' },
-    { text: 'Explore Events', link: '/events' }
-  ],
-  banners: [{ image: '/Gallery1.jpg', year: String(new Date().getFullYear()) }],
-  achievements: [
-    { title: 'Total Prizes', value: '110+' },
-    { title: 'Active Players', value: '21' },
-    { title: 'Sports Meets', value: '45' },
-    { title: 'Years Excellence', value: '12' }
-  ],
-  sportsCategories: [
-    { name: 'Football', image: '/Gallery3.jpg' },
-    { name: 'Cricket', image: '/Gallery7.jpg' }
-  ],
-  gallery: [{ image: '/Gallery2.jpg', caption: 'Track Sprint Final' }],
-  upcomingEvents: [{ name: 'Annual Sports Meet', date: 'March 15, 2026', venue: 'Main Ground', image: '/Gallery10.jpg' }],
-  clubs: [{ name: 'KPT College', url: '/college', description: 'Excellence in technical education and sports.', image: '/KPT 2.png', theme: 'college' }],
-  announcements: [
-    'Inter-department athletics trials are open for all first-year students.',
-    'Team registration for the annual sports meet closes on March 8, 2026.'
-  ]
+const createEmptyContent = () => ({
+  heroTitle: '',
+  heroSubtitle: '',
+  heroButtons: [],
+  banners: [],
+  achievements: [],
+  sportsCategories: [],
+  gallery: [],
+  upcomingEvents: [],
+  clubs: [],
+  announcements: []
 });
 
-const normalize = (raw) => {
-  const defaults = createDefaultContent();
-  if (!raw || Object.keys(raw).length === 0) return defaults;
-
-  return {
-    heroTitle: raw.heroTitle ?? defaults.heroTitle,
-    heroSubtitle: raw.heroSubtitle ?? defaults.heroSubtitle,
-    heroButtons: (raw.heroButtons ?? defaults.heroButtons).map((x, i) => ({
-      text: x?.text ?? defaults.heroButtons[i]?.text ?? 'Action',
-      link: x?.link ?? defaults.heroButtons[i]?.link ?? '/'
-    })),
-    banners: (raw.banners ?? defaults.banners).map((x) => ({
-      image: x?.image ?? x?.video ?? '',
-      year: String(x?.year ?? '')
-    })),
-    achievements: (raw.achievements ?? defaults.achievements).map((x) => ({
-      title: x?.title ?? '',
-      value: x?.value ?? ''
-    })),
-    sportsCategories: (raw.sportsCategories ?? defaults.sportsCategories).map((x) => ({
-      name: x?.name ?? '',
-      image: x?.image ?? ''
-    })),
-    gallery: (raw.gallery ?? defaults.gallery).map((x) => ({
-      image: x?.image ?? '',
-      caption: x?.caption ?? ''
-    })),
-    upcomingEvents: (raw.upcomingEvents ?? defaults.upcomingEvents).map((x) => ({
-      name: x?.name ?? '',
-      date: x?.date ?? '',
-      venue: x?.venue ?? '',
-      image: x?.image ?? ''
-    })),
-    clubs: (raw.clubs ?? defaults.clubs).map((x) => ({
-      name: x?.name ?? '',
-      url: x?.url ?? '',
-      description: x?.description ?? '',
-      image: x?.image ?? '',
-      theme: x?.theme ?? 'blue'
-    })),
-    announcements: (raw.announcements ?? defaults.announcements).map((x) => String(x ?? ''))
-  };
-};
-
 const ManageHome = () => {
-  const [content, setContent] = useState(createDefaultContent());
+  const [content, setContent] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -92,10 +34,25 @@ const ManageHome = () => {
   const fetchContent = async () => {
     try {
       const res = await api.get('/home');
-      setContent(normalize(res.data));
+      if (!res.data || Object.keys(res.data).length === 0) {
+        setContent(createEmptyContent());
+        return;
+      }
+      setContent({
+        heroTitle: res.data.heroTitle ?? '',
+        heroSubtitle: res.data.heroSubtitle ?? '',
+        heroButtons: Array.isArray(res.data.heroButtons) ? res.data.heroButtons : [],
+        banners: Array.isArray(res.data.banners) ? res.data.banners : [],
+        achievements: Array.isArray(res.data.achievements) ? res.data.achievements : [],
+        sportsCategories: Array.isArray(res.data.sportsCategories) ? res.data.sportsCategories : [],
+        gallery: Array.isArray(res.data.gallery) ? res.data.gallery : [],
+        upcomingEvents: Array.isArray(res.data.upcomingEvents) ? res.data.upcomingEvents : [],
+        clubs: Array.isArray(res.data.clubs) ? res.data.clubs : [],
+        announcements: Array.isArray(res.data.announcements) ? res.data.announcements : []
+      });
     } catch (error) {
       console.error('ManageHome - Failed to load home content:', error);
-      setContent(createDefaultContent());
+      setContent(createEmptyContent());
     }
   };
 
@@ -129,7 +86,7 @@ const ManageHome = () => {
 
   const generateAIContent = () => {
     setContent((prev) => ({
-      ...prev,
+      ...(prev || createEmptyContent()),
       heroTitle: 'Building Champions, Inspiring Excellence',
       heroSubtitle: 'KPT Mangaluru Sports Portal - Empowering Athletes for State and National Success',
       announcements: [
@@ -153,6 +110,7 @@ const ManageHome = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!content) return;
     setIsSaving(true);
 
     try {
@@ -215,6 +173,14 @@ const ManageHome = () => {
       setIsSaving(false);
     }
   };
+
+  if (!content) {
+    return (
+      <AdminLayout>
+        <div className="manage-home">Loading...</div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
