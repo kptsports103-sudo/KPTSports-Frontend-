@@ -84,41 +84,6 @@ const ManageHome = () => {
     setTimeout(() => setShowSuccess(false), 3000);
   };
 
-  const generateAIContent = () => {
-    if (!content) return;
-
-    const achievementsText = (content.achievements || [])
-      .filter((a) => (a?.value ?? '').toString().trim() && (a?.title ?? '').toString().trim())
-      .map((a) => `${a.value} ${a.title}`)
-      .join(', ');
-
-    const bannerCount = content.banners?.length || 0;
-    const eventCount = content.upcomingEvents?.length || 0;
-    const achievementCount = content.achievements?.length || 0;
-    const sportsCount = content.sportsCategories?.length || 0;
-
-    const aiHeroSubtitle = achievementsText
-      ? `KPT Mangaluru Sports Portal showcases outstanding performance with ${achievementsText}. The platform highlights ${bannerCount} active sports campaigns and ${eventCount} upcoming competitive events.`
-      : `KPT Mangaluru Sports Portal highlights ${bannerCount} active sports campaigns and ${eventCount} upcoming competitive events.`;
-
-    const aiAnnouncement = [
-      `Our institution proudly maintains excellence across ${achievementCount} major performance indicators.`,
-      `The sports department continues to expand its reach with ${sportsCount} active sports disciplines.`,
-      `Upcoming competitions and training sessions are scheduled to strengthen athletic development.`
-    ];
-
-    setContent((prev) => ({
-      ...prev,
-      heroSubtitle: aiHeroSubtitle,
-      announcements: aiAnnouncement
-    }));
-
-    openToast(
-      'AI Content Generated',
-      'Professional text has been generated from existing CMS data. Numeric and media values were not changed.'
-    );
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!content) return;
@@ -317,10 +282,6 @@ const ManageHome = () => {
         ) : (
           <div className="cms-layout">
             <div className="cms-editor">
-              <button type="button" className="ai-btn" onClick={generateAIContent}>
-                Generate AI Content
-              </button>
-
               <form className="admin-form" onSubmit={handleSubmit}>
                 <section className="admin-card">
                   <h3>Hero Section</h3>
