@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaTrophy, FaUsers, FaCalendarCheck, FaMedal } from 'react-icons/fa';
 import api from '../services/api';
 import './Home.css';
 
@@ -12,10 +13,10 @@ const defaultHomeContent = {
   ],
   banners: [{ image: '/Gallery1.jpg', year: String(new Date().getFullYear()) }],
   achievements: [
-    { title: 'Total Prizes', value: '110+' },
-    { title: 'Active Players', value: '21' },
-    { title: 'Sports Meets', value: '45' },
-    { title: 'Years Excellence', value: '12' }
+    { title: 'Total Prizes Won', value: '110+', icon: 'trophy' },
+    { title: 'Active Players', value: '21', icon: 'users' },
+    { title: 'Sports Meets Conducted', value: '45', icon: 'calendar' },
+    { title: 'Years of Excellence', value: '12', icon: 'medal' }
   ],
   sportsCategories: [
     { name: 'Football', image: '/Gallery3.jpg' },
@@ -77,7 +78,8 @@ const normalizeHomeContent = (raw) => {
     banners: banners.length ? banners : defaultHomeContent.banners,
     achievements: (raw.achievements ?? defaultHomeContent.achievements).map((x) => ({
       title: x?.title ?? 'Metric',
-      value: x?.value ?? '0'
+      value: x?.value ?? '0',
+      icon: x?.icon ?? 'trophy'
     })),
     sportsCategories: (raw.sportsCategories ?? defaultHomeContent.sportsCategories).map((x) => ({
       name: x?.name ?? 'Sport',
@@ -108,6 +110,12 @@ export default function Home() {
   const heroImage = activeBanner?.image || '/Gallery1.jpg';
   const visibleYear = activeBanner?.year || String(new Date().getFullYear());
   const heroButtons = homeContent.heroButtons.slice(0, 2);
+  const statIconMap = {
+    trophy: FaTrophy,
+    users: FaUsers,
+    calendar: FaCalendarCheck,
+    medal: FaMedal
+  };
 
   useEffect(() => {
     fetchHomeContent();
@@ -171,8 +179,15 @@ export default function Home() {
         </div>
 
         <div className="home-hero__stats">
-          {homeContent.achievements.map((item) => (
+          {homeContent.achievements.map((item, index) => (
             <article key={item.title} className="home-hero__stats-card">
+              <div className="stat-icon">
+                {(() => {
+                  const fallbackKeys = ['trophy', 'users', 'calendar', 'medal'];
+                  const Icon = statIconMap[item.icon] || statIconMap[fallbackKeys[index % fallbackKeys.length]] || FaTrophy;
+                  return <Icon />;
+                })()}
+              </div>
               <h2>{item.value}</h2>
               <p>{item.title}</p>
             </article>
