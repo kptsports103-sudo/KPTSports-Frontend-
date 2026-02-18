@@ -58,7 +58,7 @@
 .home-hero {
   position: relative;
   min-height: 100vh;
-  padding: 120px 20px 80px;
+  padding: 120px 20px 140px;
   background: radial-gradient(circle at 65% 22%, rgba(253, 200, 86, 0.2), transparent 35%), #091d41;
   overflow: hidden;
 }
@@ -170,19 +170,21 @@
 }
 
 .home-hero__stats {
-  margin-top: 40px;
-  width: min(1040px, calc(100% - 40px));
+  position: relative;
+  margin-top: 50px;
+  width: 100%;
+  max-width: 1040px;
   margin-left: auto;
   margin-right: auto;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 16px;
-  background: rgba(14, 37, 74, 0.6);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  padding: 22px;
+  border-radius: 18px;
+  background: rgba(14, 37, 74, 0.75);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
 }
 
 .home-hero__stats-card {
