@@ -170,7 +170,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="home-hero__stats home-hero__stats--floating">
+        <div className="home-hero__stats">
           {homeContent.achievements.map((item) => (
             <article key={item.title} className="home-hero__stats-card">
               <h2>{item.value}</h2>
