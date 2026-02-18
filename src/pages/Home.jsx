@@ -1,277 +1,256 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaTrophy, FaUsers, FaCalendarCheck, FaMedal } from 'react-icons/fa';
+import { FaCalendarCheck, FaMedal, FaTrophy, FaUsers } from 'react-icons/fa';
 import api from '../services/api';
 import './Home.css';
 
-const defaultHomeContent = {
-  heroTitle: 'Champions in Spirit, Champions in Action',
-  heroSubtitle: 'Karnataka Government Polytechnic, Mangaluru Sports Portal',
-  heroButtons: [
-    { text: 'View Results', link: '/results' },
-    { text: 'Explore Events', link: '/events' }
-  ],
-  banners: [{ image: '/Gallery1.jpg', year: String(new Date().getFullYear()) }],
-  achievements: [
-    { title: 'Total Prizes Won', value: '110+', icon: 'trophy' },
-    { title: 'Active Players', value: '21', icon: 'users' },
-    { title: 'Sports Meets Conducted', value: '45', icon: 'calendar' },
-    { title: 'Years of Excellence', value: '12', icon: 'medal' }
-  ],
-  sportsCategories: [
-    { name: 'Football', image: '/Gallery3.jpg' },
-    { name: 'Cricket', image: '/Gallery7.jpg' },
-    { name: 'Athletics', image: '/Track1.jpg' },
-    { name: 'Volleyball', image: '/Gallery13.jpg' },
-    { name: 'Indoor Games', image: '/Chess1.jpg' },
-    { name: 'Throw Events', image: '/Throws1.jpg' }
-  ],
-  gallery: [
-    { image: '/Gallery2.jpg', caption: 'Track Sprint Final' },
-    { image: '/Gallery6.jpg', caption: 'Championship Relay' },
-    { image: '/Gallery11.jpg', caption: 'Team Celebration' },
-    { image: '/Gallery14.jpg', caption: 'Victory Moments' }
-  ],
-  upcomingEvents: [
-    { name: 'Annual Sports Meet', date: 'March 15, 2026', venue: 'Main Ground', image: '/Gallery10.jpg' },
-    { name: 'Inter-Polytechnic Volleyball', date: 'April 3, 2026', venue: 'Indoor Court', image: '/Gallery16.jpg' }
-  ],
-  clubs: [
-    { name: 'KPT College', url: '/college', description: 'Excellence in technical education and sports.', theme: 'college', image: '/KPT 2.png' },
-    { name: 'Eco Club', url: '/clubs/eco-club', description: 'Environmental awareness and sustainable practices.', theme: 'purple', image: '/Gallery5.jpg' },
-    { name: 'NCC', url: '/clubs/ncc', description: 'Discipline, service, and leadership training.', theme: 'pink', image: '/Gallery8.jpg' },
-    { name: 'Yoga Club', url: '/clubs/yoga-club', description: 'Physical and mental well-being through yoga.', theme: 'blue', image: '/Yoga1.jpg' }
-  ],
-  announcements: [
-    'Inter-department athletics trials are open for all first-year students.',
-    'Team registration for the annual sports meet closes on March 8, 2026.',
-    'Updated result sheets are available in the Results section.'
-  ]
+const createEmptyHomeContent = () => ({
+  heroTitle: '',
+  heroSubtitle: '',
+  heroButtons: [],
+  banners: [],
+  achievements: [],
+  sportsCategories: [],
+  gallery: [],
+  upcomingEvents: [],
+  clubs: [],
+  announcements: []
+});
+
+const iconMap = {
+  trophy: FaTrophy,
+  users: FaUsers,
+  calendar: FaCalendarCheck,
+  medal: FaMedal
 };
 
+const fallbackIcons = [FaTrophy, FaUsers, FaCalendarCheck, FaMedal];
 
-export default function Home() {
+function Home() {
   const navigate = useNavigate();
-  const clubsScrollRef = useRef(null);
-  const [homeContent, setHomeContent] = useState(defaultHomeContent);
+  const clubsTrackRef = useRef(null);
+  const [content, setContent] = useState(createEmptyHomeContent());
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
-  const activeBanner = homeContent.banners[currentBannerIndex] || homeContent.banners[0];
-  const heroImage = activeBanner?.image || '/Gallery1.jpg';
-  const visibleYear = activeBanner?.year || String(new Date().getFullYear());
-  const heroButtons = homeContent.heroButtons.slice(0, 2);
-  const statIconMap = {
-    trophy: FaTrophy,
-    users: FaUsers,
-    calendar: FaCalendarCheck,
-    medal: FaMedal
-  };
-
   useEffect(() => {
+    const fetchHomeContent = async () => {
+      try {
+        const response = await api.get('/home');
+        const data = response?.data ?? {};
+        setContent({
+          heroTitle: data.heroTitle ?? '',
+          heroSubtitle: data.heroSubtitle ?? '',
+          heroButtons: Array.isArray(data.heroButtons) ? data.heroButtons : [],
+          banners: Array.isArray(data.banners) ? data.banners : [],
+          achievements: Array.isArray(data.achievements) ? data.achievements : [],
+          sportsCategories: Array.isArray(data.sportsCategories) ? data.sportsCategories : [],
+          gallery: Array.isArray(data.gallery) ? data.gallery : [],
+          upcomingEvents: Array.isArray(data.upcomingEvents) ? data.upcomingEvents : [],
+          clubs: Array.isArray(data.clubs) ? data.clubs : [],
+          announcements: Array.isArray(data.announcements) ? data.announcements : []
+        });
+      } catch (error) {
+        console.error('Failed to fetch home content:', error);
+        setContent(createEmptyHomeContent());
+      }
+    };
+
     fetchHomeContent();
   }, []);
 
-  const fetchHomeContent = async () => {
-    try {
-      const res = await api.get('/home');
-      setHomeContent(normalizeHomeContent(res.data));
-    } catch (error) {
-      console.error('Error fetching home content:', error);
-      setHomeContent(defaultHomeContent);
+  useEffect(() => {
+    if (!Array.isArray(content.banners) || content.banners.length <= 1) {
+      setCurrentBannerIndex(0);
+      return undefined;
     }
+
+    const id = window.setInterval(() => {
+      setCurrentBannerIndex((prev) => (prev + 1) % content.banners.length);
+    }, 5000);
+
+    return () => window.clearInterval(id);
+  }, [content.banners]);
+
+  const activeBanner = content.banners[currentBannerIndex] ?? null;
+  const heroImage = activeBanner?.image || content.gallery[0]?.image || '';
+
+  const routeTo = (link) => {
+    if (!link) return;
+    if (link.startsWith('/')) {
+      navigate(link);
+      return;
+    }
+    window.location.href = link;
   };
 
-  useEffect(() => {
-    if (homeContent.banners.length > 1) {
-      const interval = setInterval(() => {
-        setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % homeContent.banners.length);
-      }, 3000);
-      return () => clearInterval(interval);
-    }
-    setCurrentBannerIndex(0);
-    return undefined;
-  }, [homeContent.banners]);
-
   const scrollClubs = (direction) => {
-    if (!clubsScrollRef.current) return;
-    clubsScrollRef.current.scrollBy({
-      left: direction * 340,
-      behavior: 'smooth'
-    });
+    if (!clubsTrackRef.current) return;
+    clubsTrackRef.current.scrollBy({ left: direction * 320, behavior: 'smooth' });
   };
 
   return (
-    <div className="home-page">
+    <main className="home-page">
       <section className="home-hero">
         <div className="home-hero__overlay" />
         <div className="home-hero__lights" />
+        {activeBanner?.year ? <span className="banner-year">{activeBanner.year}</span> : null}
 
         <div className="home-hero__layout">
           <div className="home-hero__content">
-            <h1>{homeContent.heroTitle}</h1>
-            <p>{homeContent.heroSubtitle}</p>
-            <div className="home-hero__actions">
-              {heroButtons.map((button) => (
-                <button
-                  key={`${button.text}-${button.link}`}
-                  type="button"
-                  className={`hero-btn ${button === heroButtons[0] ? 'hero-btn--primary' : 'hero-btn--outline'}`}
-                  onClick={() => navigate(button.link || '/')}
-                >
-                  {button.text}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="home-hero__media" aria-hidden="true">
-            <img src={heroImage} alt="" />
-          </div>
-        </div>
+            <h1>{content.heroTitle}</h1>
+            <p>{content.heroSubtitle}</p>
 
-        <div className="home-hero__stats">
-          {homeContent.achievements.map((item, index) => (
-            <article key={item.title} className="home-hero__stats-card">
-              <div className="stat-icon">
-                {(() => {
-                  const fallbackKeys = ['trophy', 'users', 'calendar', 'medal'];
-                  const Icon = statIconMap[item.icon] || statIconMap[fallbackKeys[index % fallbackKeys.length]] || FaTrophy;
-                  return <Icon />;
-                })()}
+            {content.heroButtons.length > 0 ? (
+              <div className="home-hero__actions">
+                {content.heroButtons.slice(0, 2).map((button, index) => (
+                  <button
+                    key={`${button.text}-${index}`}
+                    className={`hero-btn ${index === 0 ? 'hero-btn--primary' : 'hero-btn--outline'}`}
+                    type="button"
+                    onClick={() => routeTo(button.link)}
+                  >
+                    {button.text}
+                  </button>
+                ))}
               </div>
-              <h2>{item.value}</h2>
-              <p>{item.title}</p>
-            </article>
-          ))}
+            ) : null}
+          </div>
+
+          {heroImage ? (
+            <div className="home-hero__media">
+              <img src={heroImage} alt="Sports highlight" />
+            </div>
+          ) : null}
         </div>
 
-        <div className="banner-year">{visibleYear}</div>
+        {content.achievements.length > 0 ? (
+          <div className="home-hero__stats">
+            {content.achievements.map((item, index) => {
+              const Icon = iconMap[item?.icon] || fallbackIcons[index % fallbackIcons.length];
+              return (
+                <article key={`${item.title}-${index}`} className="home-hero__stats-card">
+                  <div className="stat-icon">
+                    <Icon />
+                  </div>
+                  <h2>{item.value}</h2>
+                  <p>{item.title}</p>
+                </article>
+              );
+            })}
+          </div>
+        ) : null}
 
-        <div className="home-hero__scroll-indicator" aria-hidden="true">
+        <div className="home-hero__scroll-indicator">
           <span>Scroll</span>
           <span className="home-hero__scroll-arrow">v</span>
         </div>
       </section>
 
-      <section className="home-announcements section-shell">
-        <div className="section-header">
-          <h2>Latest Announcements</h2>
-        </div>
-        <div className="announcement-list">
-          {homeContent.announcements.map((announcement) => (
-            <article key={announcement} className="announcement-item">
-              <span className="announcement-dot" />
-              <p>{announcement}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      {content.announcements.length > 0 ? (
+        <section className="section-shell">
+          <header className="section-header">
+            <h2>Latest Announcements</h2>
+          </header>
+          <div className="announcement-list">
+            {content.announcements.map((announcement, index) => (
+              <article key={`${announcement}-${index}`} className="announcement-item">
+                <span className="announcement-dot" />
+                <p>{announcement}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
-      <section className="home-sports-categories section-shell">
-        <div className="section-header">
-          <h2>Sports Categories</h2>
-        </div>
-        <div className="sports-grid">
-          {homeContent.sportsCategories.map((sport) => (
-            <article key={sport.name} className="sports-grid__item">
-              <img src={sport.image} alt={sport.name} />
-              <div className="sports-grid__overlay" />
-              <h3>{sport.name}</h3>
-            </article>
-          ))}
-        </div>
-      </section>
+      {content.sportsCategories.length > 0 ? (
+        <section className="section-shell">
+          <header className="section-header">
+            <h2>Sports Categories</h2>
+          </header>
+          <div className="sports-grid">
+            {content.sportsCategories.map((category, index) => (
+              <article key={`${category.name}-${index}`} className="sports-grid__item">
+                <img src={category.image} alt={category.name} />
+                <div className="sports-grid__overlay" />
+                <h3>{category.name}</h3>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
-      <section className="home-story section-shell">
-        <div className="home-story__media">
-          <img src="/KPT 1.png" alt="KPT sports team" />
-        </div>
-        <div className="home-story__content">
-          <h2>Our Story</h2>
-          <p>
-            KPT Mangaluru Sports Department develops disciplined athletes and confident leaders through structured training,
-            tournament exposure, and strong team culture.
-          </p>
-          <button type="button" className="hero-btn hero-btn--primary" onClick={() => navigate('/about')}>
-            Learn More
-          </button>
-        </div>
-      </section>
+      {content.clubs.length > 0 ? (
+        <section className="section-shell club-section">
+          <header className="section-header">
+            <h2>Clubs and Activities</h2>
+          </header>
+          <div className="clubs-carousel-shell">
+            <button className="arrow" type="button" onClick={() => scrollClubs(-1)}>
+              {'<'}
+            </button>
+            <div className="clubs-carousel" ref={clubsTrackRef}>
+              {content.clubs.map((club, index) => (
+                <article key={`${club.name}-${index}`} className="club-card" onClick={() => routeTo(club.url)}>
+                  {club.image ? <img src={club.image} alt={club.name} /> : null}
+                  <div className="club-card__body">
+                    <h3>{club.name}</h3>
+                    <p>{club.description}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <button className="arrow" type="button" onClick={() => scrollClubs(1)}>
+              {'>'}
+            </button>
+          </div>
+        </section>
+      ) : null}
 
-      <section className="club-section section-shell">
-        <div className="section-header">
-          <h2 className="club-title">Our Clubs & Activities</h2>
-        </div>
-        <div className="clubs-carousel-shell">
-          <button className="arrow left" onClick={() => scrollClubs(-1)}>{'<'}</button>
-          <div className="clubs-carousel" ref={clubsScrollRef}>
-            {homeContent.clubs.map((club) => (
-              <article
-                key={club.id || club.name}
-                className={`club-card club-card--glass ${club.theme || 'blue'}`}
-                onClick={() => window.open(club.url, '_blank')}
-              >
-                <img src={club.image} alt={club.name} />
-                <div className="club-card__body">
-                  <h3>{club.name}</h3>
-                  <p>{club.description}</p>
+      {content.gallery.length > 0 ? (
+        <section className="section-shell">
+          <header className="section-header section-header--with-action">
+            <h2>Photo Gallery Preview</h2>
+            <button className="section-view-more" type="button" onClick={() => navigate('/gallery')}>
+              View More
+            </button>
+          </header>
+          <div className="gallery-grid">
+            {content.gallery.slice(0, 8).map((item, index) => (
+              <figure key={`${item.image}-${index}`} className="gallery-card">
+                <img src={item.image} alt={item.caption || `Gallery ${index + 1}`} />
+                {item.caption ? <figcaption>{item.caption}</figcaption> : null}
+              </figure>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.upcomingEvents.length > 0 ? (
+        <section className="section-shell">
+          <header className="section-header">
+            <h2>Upcoming Events</h2>
+          </header>
+          <div className="events-grid">
+            {content.upcomingEvents.map((event, index) => (
+              <article key={`${event.name}-${index}`} className="event-card">
+                {event.image ? <img src={event.image} alt={event.name} /> : null}
+                <div className="event-card__body">
+                  <h3>{event.name}</h3>
+                  {event.date ? (
+                    <p>
+                      <span className="event-icon">DT</span>
+                      {event.date}
+                    </p>
+                  ) : null}
+                  {event.venue ? <span>{event.venue}</span> : null}
                 </div>
               </article>
             ))}
           </div>
-          <button className="arrow right" onClick={() => scrollClubs(1)}>{'>'}</button>
-        </div>
-      </section>
-
-      <section className="home-gallery-preview section-shell">
-        <div className="section-header section-header--with-action">
-          <h2>Photo Gallery Preview</h2>
-          <button
-            type="button"
-            className="section-view-more"
-            onClick={() => navigate('/gallery')}
-          >
-            View More
-          </button>
-        </div>
-        <div className="gallery-grid">
-          {homeContent.gallery.map((item) => (
-            <figure key={`${item.caption}-${item.image}`} className="gallery-card">
-              <img src={item.image} alt={item.caption} />
-              <figcaption>{item.caption}</figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
-
-      <section className="home-events section-shell">
-        <div className="section-header">
-          <h2>Upcoming Events</h2>
-        </div>
-        <div className="events-grid">
-          {homeContent.upcomingEvents.map((eventItem) => (
-            <article key={`${eventItem.name}-${eventItem.date}`} className="event-card">
-              <img src={eventItem.image} alt={eventItem.name} />
-              <div className="event-card__body">
-                <h3>{eventItem.name}</h3>
-                <p>
-                  <span className="event-icon">CAL</span>
-                  {eventItem.date}
-                </p>
-                <span>{eventItem.venue}</span>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="home-testimonials section-shell">
-        <div className="section-header">
-          <h2>Student Achievements</h2>
-        </div>
-        <blockquote>
-          "KPT Sports gave me the confidence to compete at state level and represent our institution with pride."
-        </blockquote>
-      </section>
-    </div>
+        </section>
+      ) : null}
+    </main>
   );
 }
+
+export default Home;
