@@ -13,6 +13,26 @@ export default function Home() {
   const autoPlayRef = useRef(null);
   const startX = useRef(0);
 
+  const announcements = [
+    'Inter-department athletics trials are open for all first-year students.',
+    'Team registration for the annual sports meet closes on March 8, 2026.',
+    'Updated result sheets are available in the Results section.'
+  ];
+
+  const sportsCategories = ['Football', 'Cricket', 'Athletics', 'Volleyball', 'Indoor Games', 'Throwball'];
+
+  const achievements = [
+    { title: 'State-Level Medals', value: '110+' },
+    { title: 'Active Players', value: '21' },
+    { title: 'Hosted Sports Meets', value: '45' },
+    { title: 'Years of Excellence', value: '12' }
+  ];
+
+  const upcomingEvents = [
+    { name: 'Annual Sports Meet', date: 'March 15, 2026', venue: 'Main Ground' },
+    { name: 'Inter-Polytechnic Volleyball', date: 'April 3, 2026', venue: 'Indoor Court' }
+  ];
+
   useEffect(() => {
     fetchHomeContent();
     fetchClubs();
@@ -40,28 +60,26 @@ export default function Home() {
       console.log('Home.jsx - Clubs data from API:', clubsData);
       console.log('Home.jsx - Clubs data type:', typeof clubsData);
       console.log('Home.jsx - Clubs data length:', clubsData.length);
-      
-      // Check if clubs have required fields, add defaults if missing
-      const processedClubs = clubsData.map((club, index) => ({
-        id: club.id || index + 1,
+
+      const processedClubs = clubsData.map((club, i) => ({
+        id: club.id || i + 1,
         name: club.name || 'Unknown Club',
         url: club.url || '#',
         description: club.description || 'Club activities and information',
         theme: club.theme || 'blue'
       }));
-      
+
       console.log('Home.jsx - Processed clubs with defaults:', processedClubs);
       setClubs(processedClubs);
     } catch (error) {
       console.error('Home.jsx - Error fetching clubs:', error);
       console.error('Home.jsx - Error details:', error.response);
-      // Fallback to default clubs if API fails
       const clubData = [
         {
           id: 1,
           name: 'KPT College',
           url: '/college',
-          description: 'Karnataka (Govt.) Polytechnic, Mangalore – Excellence in Technical Education',
+          description: 'Karnataka (Govt.) Polytechnic, Mangalore - Excellence in Technical Education',
           theme: 'college'
         },
         { id: 2, name: 'Eco Club', url: '/clubs/eco-club', description: 'Promoting environmental awareness and sustainable practices', theme: 'purple' },
@@ -83,13 +101,16 @@ export default function Home() {
         setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % homeContent.banners.length);
       }, 2000);
       return () => clearInterval(interval);
-    } else {
-      setCurrentBannerIndex(0);
     }
+    setCurrentBannerIndex(0);
+    return undefined;
   }, [homeContent.banners]);
 
-  /* ---------- AUTO PLAY ---------- */
   useEffect(() => {
+    if (clubs.length === 0) {
+      return undefined;
+    }
+
     autoPlayRef.current = setInterval(() => {
       setIndex((prev) => (prev + 1) % clubs.length);
     }, 3000);
@@ -97,14 +118,12 @@ export default function Home() {
     return () => clearInterval(autoPlayRef.current);
   }, [clubs]);
 
-  /* ---------- SLIDE EFFECT ---------- */
   useEffect(() => {
     if (trackRef.current) {
       trackRef.current.style.transform = `translateX(-${index * 100}%)`;
     }
   }, [index]);
 
-  /* ---------- TOUCH SWIPE ---------- */
   const touchStart = (e) => (startX.current = e.touches[0].clientX);
   const touchEnd = (e) => {
     const diff = startX.current - e.changedTouches[0].clientX;
@@ -113,73 +132,88 @@ export default function Home() {
   };
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', margin: 0, background: '#f5f5f5' }}>
-      {/* Banner */}
-      <div className="banner-container" style={{ position: 'relative', height: '600px', overflow: 'hidden', background: '#ddd' }}>
-        {homeContent.banners.length > 0 && homeContent.banners[currentBannerIndex]?.video ? (
-          <video
-            src={homeContent.banners[currentBannerIndex].video}
-            autoPlay
-            muted
-            loop
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: '18px' }}>
-            Banner Area
+    <div className="home-page">
+      <section className="home-hero">
+        <div className="home-hero__overlay" />
+        <div className="home-hero__content">
+          <h1>Champions in Spirit, Champions in Action</h1>
+          <p>Karnataka Government Polytechnic, Mangaluru Sports Portal</p>
+          <div className="home-hero__actions">
+            <button type="button" className="hero-btn hero-btn--primary" onClick={() => navigate('/results')}>
+              View Results
+            </button>
+            <button type="button" className="hero-btn hero-btn--outline" onClick={() => navigate('/events')}>
+              Explore Events
+            </button>
           </div>
-        )}
-
-        {/* Overlay Text on Video */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          textAlign: 'center',
-          color: '#ffffff',
-          textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)',
-          zIndex: 10
-        }}>
-          <h1 style={{ fontSize: '48px', fontWeight: 'bold', margin: '0 0 10px 0', lineHeight: '1.2' }}>
-            About KPT Mangalore Sports
-          </h1>
-          <p style={{ fontSize: '24px', margin: '0', fontWeight: '300' }}>
-            Champions in Spirit, Champions in Action
-          </p>
         </div>
 
         {homeContent.banners[currentBannerIndex]?.year && (
-          <div className="banner-year" style={{
-            position: 'absolute',
-            top: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            fontSize: '24px',
-            fontWeight: '600',
-            color: '#ffffff',
-            background: 'rgba(0, 0, 0, 0.4)',
-            padding: '6px 16px',
-            borderRadius: '6px',
-            zIndex: 15
-          }}>
-            {homeContent.banners[currentBannerIndex].year}
-          </div>
+          <div className="banner-year">{homeContent.banners[currentBannerIndex].year}</div>
         )}
-      </div>
 
-      {/* CLUB CAROUSEL */}
+        <div className="home-hero__scroll-indicator" aria-hidden="true">
+          <span>Scroll</span>
+          <span className="home-hero__scroll-arrow">v</span>
+        </div>
+      </section>
+
+      <section className="home-stats">
+        {achievements.map((item) => (
+          <article key={item.title} className="home-stats__card">
+            <h2>{item.value}</h2>
+            <p>{item.title}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="home-announcements">
+        <div className="section-header">
+          <h2>Latest Announcements</h2>
+        </div>
+        <div className="announcement-list">
+          {announcements.map((announcement) => (
+            <p key={announcement}>{announcement}</p>
+          ))}
+        </div>
+      </section>
+
+      <section className="home-sports-categories">
+        <div className="section-header">
+          <h2>Sports Categories</h2>
+        </div>
+        <div className="sports-grid">
+          {sportsCategories.map((sport) => (
+            <article key={sport} className="sports-grid__item">
+              <h3>{sport}</h3>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="home-story">
+        <div className="home-story__media">
+          <img src="/KPT 1.png" alt="KPT sports team" />
+        </div>
+        <div className="home-story__content">
+          <h2>Our Story</h2>
+          <p>
+            KPT Mangaluru Sports Department builds disciplined athletes and confident leaders through structured training,
+            competition exposure, and teamwork.
+          </p>
+          <button type="button" className="hero-btn hero-btn--primary" onClick={() => navigate('/about')}>
+            Learn More
+          </button>
+        </div>
+      </section>
+
       <section className="club-section">
         <h2 className="club-title">Our Clubs & Activities</h2>
 
         <div className="carousel-container">
-          <button className="arrow left" onClick={() => setIndex((index + 1) % clubs.length)}>◀</button>
+          <button className="arrow left" onClick={() => setIndex((index + 1) % clubs.length)}>{'<'}</button>
 
-          <div
-            className="carousel-viewport"
-            onTouchStart={touchStart}
-            onTouchEnd={touchEnd}
-          >
+          <div className="carousel-viewport" onTouchStart={touchStart} onTouchEnd={touchEnd}>
             <div className="carousel-track" ref={trackRef}>
               {clubs.map((club) => (
                 <div
@@ -195,19 +229,50 @@ export default function Home() {
             </div>
           </div>
 
-          <button className="arrow right" onClick={() => setIndex((index + 1) % clubs.length)}>▶</button>
+          <button className="arrow right" onClick={() => setIndex((index + 1) % clubs.length)}>{'>'}</button>
         </div>
 
-        {/* DOTS */}
         <div className="dots">
           {clubs.map((_, i) => (
-            <span
-              key={i}
-              className={`dot ${index === i ? 'active' : ''}`}
-              onClick={() => setIndex(i)}
-            />
+            <span key={i} className={`dot ${index === i ? 'active' : ''}`} onClick={() => setIndex(i)} />
           ))}
         </div>
+      </section>
+
+      <section className="home-gallery-preview">
+        <div className="section-header">
+          <h2>Photo Gallery Preview</h2>
+        </div>
+        <div className="gallery-grid">
+          <img src="/Gallery2.jpg" alt="Sports gallery preview 1" />
+          <img src="/Gallery6.jpg" alt="Sports gallery preview 2" />
+          <img src="/Gallery11.jpg" alt="Sports gallery preview 3" />
+          <img src="/Gallery14.jpg" alt="Sports gallery preview 4" />
+        </div>
+      </section>
+
+      <section className="home-events">
+        <div className="section-header">
+          <h2>Upcoming Events</h2>
+        </div>
+        <div className="events-grid">
+          {upcomingEvents.map((eventItem) => (
+            <article key={eventItem.name} className="event-card">
+              <h3>{eventItem.name}</h3>
+              <p>{eventItem.date}</p>
+              <span>{eventItem.venue}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="home-testimonials">
+        <div className="section-header">
+          <h2>Student Achievements</h2>
+        </div>
+        <blockquote>
+          "KPT Sports gave me the confidence to compete at state level and represent our institution with pride."
+        </blockquote>
       </section>
     </div>
   );
