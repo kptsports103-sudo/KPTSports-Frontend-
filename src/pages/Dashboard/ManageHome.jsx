@@ -3,6 +3,7 @@ import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
 import AdminLayout from '../../components/AdminLayout';
 import PageLatestChangeCard from '../../components/PageLatestChangeCard';
+import { emitPageUpdate } from '../../utils/eventBus';
 import './ManageHome.css';
 
 const createDefaultContent = () => ({
@@ -202,7 +203,9 @@ const ManageHome = () => {
         'Home Page',
         'Content was successfully modified'
       );
-      window.dispatchEvent(new CustomEvent('HOME_UPDATED', { detail: { pageName: 'Home Page' } }));
+      emitPageUpdate('Home Page');
+      // Backward-compatible event for older listeners.
+      window.dispatchEvent(new CustomEvent('HOME_UPDATED', { detail: { pageName: 'Home Page', time: Date.now() } }));
 
       await fetchContent();
     } catch (error) {

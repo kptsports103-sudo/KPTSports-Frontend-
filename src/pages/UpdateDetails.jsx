@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
 import activityLogService from '../services/activityLog.service';
+import { CMS_PAGE_UPDATED } from '../utils/eventBus';
 
 const PAGE_META = {
   'Home Page': { title: 'Update Home', description: 'Manage home page content' },
@@ -47,8 +48,12 @@ const UpdateDetails = () => {
       }
     };
 
+    window.addEventListener(CMS_PAGE_UPDATED, onHomeUpdated);
     window.addEventListener('HOME_UPDATED', onHomeUpdated);
-    return () => window.removeEventListener('HOME_UPDATED', onHomeUpdated);
+    return () => {
+      window.removeEventListener(CMS_PAGE_UPDATED, onHomeUpdated);
+      window.removeEventListener('HOME_UPDATED', onHomeUpdated);
+    };
   }, [pageName]);
 
   return (
