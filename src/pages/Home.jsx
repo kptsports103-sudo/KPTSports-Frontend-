@@ -49,52 +49,52 @@ const defaultHomeContent = {
 };
 
 const normalizeHomeContent = (raw) => {
-  if (!raw) return defaultHomeContent;
+  if (!raw || Object.keys(raw).length === 0) return defaultHomeContent;
 
-  const heroButtons = (raw.heroButtons || defaultHomeContent.heroButtons).map((button, i) => ({
-    text: button?.text || defaultHomeContent.heroButtons[i]?.text || 'Action',
-    link: button?.link || defaultHomeContent.heroButtons[i]?.link || '/'
+  const heroButtons = (raw.heroButtons ?? defaultHomeContent.heroButtons).map((button, i) => ({
+    text: button?.text ?? defaultHomeContent.heroButtons[i]?.text ?? 'Action',
+    link: button?.link ?? defaultHomeContent.heroButtons[i]?.link ?? '/'
   }));
 
-  const banners = (raw.banners || []).map((b) => ({
-    image: b?.image || b?.video || '',
-    year: String(b?.year || '')
+  const banners = (raw.banners ?? []).map((b) => ({
+    image: b?.image ?? b?.video ?? '',
+    year: String(b?.year ?? '')
   }));
 
-  const clubs = (raw.clubs || []).map((club, i) => ({
-    id: club.id || i + 1,
-    name: club.name || 'Unknown Club',
-    url: club.url || '#',
-    description: club.description || 'Club activities and information',
-    theme: club.theme || 'blue',
-    image: club.image || '/Gallery1.jpg'
+  const clubs = (raw.clubs ?? []).map((club, i) => ({
+    id: club.id ?? i + 1,
+    name: club.name ?? 'Unknown Club',
+    url: club.url ?? '#',
+    description: club.description ?? 'Club activities and information',
+    theme: club.theme ?? 'blue',
+    image: club.image ?? '/Gallery1.jpg'
   }));
 
   return {
-    heroTitle: raw.heroTitle || defaultHomeContent.heroTitle,
-    heroSubtitle: raw.heroSubtitle || defaultHomeContent.heroSubtitle,
+    heroTitle: raw.heroTitle ?? defaultHomeContent.heroTitle,
+    heroSubtitle: raw.heroSubtitle ?? defaultHomeContent.heroSubtitle,
     heroButtons: heroButtons.length ? heroButtons : defaultHomeContent.heroButtons,
     banners: banners.length ? banners : defaultHomeContent.banners,
-    achievements: (raw.achievements || defaultHomeContent.achievements).map((x) => ({
-      title: x?.title || 'Metric',
-      value: x?.value || '0'
+    achievements: (raw.achievements ?? defaultHomeContent.achievements).map((x) => ({
+      title: x?.title ?? 'Metric',
+      value: x?.value ?? '0'
     })),
-    sportsCategories: (raw.sportsCategories || defaultHomeContent.sportsCategories).map((x) => ({
-      name: x?.name || 'Sport',
-      image: x?.image || '/Gallery1.jpg'
+    sportsCategories: (raw.sportsCategories ?? defaultHomeContent.sportsCategories).map((x) => ({
+      name: x?.name ?? 'Sport',
+      image: x?.image ?? '/Gallery1.jpg'
     })),
-    gallery: (raw.gallery || defaultHomeContent.gallery).map((x) => ({
-      image: x?.image || '/Gallery1.jpg',
-      caption: x?.caption || 'Gallery Item'
+    gallery: (raw.gallery ?? defaultHomeContent.gallery).map((x) => ({
+      image: x?.image ?? '/Gallery1.jpg',
+      caption: x?.caption ?? 'Gallery Item'
     })),
-    upcomingEvents: (raw.upcomingEvents || defaultHomeContent.upcomingEvents).map((x) => ({
-      name: x?.name || 'Event',
-      date: x?.date || '',
-      venue: x?.venue || '',
-      image: x?.image || '/Gallery1.jpg'
+    upcomingEvents: (raw.upcomingEvents ?? defaultHomeContent.upcomingEvents).map((x) => ({
+      name: x?.name ?? 'Event',
+      date: x?.date ?? '',
+      venue: x?.venue ?? '',
+      image: x?.image ?? '/Gallery1.jpg'
     })),
     clubs: clubs.length ? clubs : defaultHomeContent.clubs,
-    announcements: (raw.announcements || defaultHomeContent.announcements).filter(Boolean)
+    announcements: (raw.announcements ?? defaultHomeContent.announcements).filter(Boolean)
   };
 };
 

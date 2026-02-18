@@ -35,45 +35,45 @@ const createDefaultContent = () => ({
 
 const normalize = (raw) => {
   const defaults = createDefaultContent();
-  if (!raw) return defaults;
+  if (!raw || Object.keys(raw).length === 0) return defaults;
 
   return {
-    heroTitle: raw.heroTitle || defaults.heroTitle,
-    heroSubtitle: raw.heroSubtitle || defaults.heroSubtitle,
-    heroButtons: (raw.heroButtons || defaults.heroButtons).map((x, i) => ({
-      text: x?.text || defaults.heroButtons[i]?.text || 'Action',
-      link: x?.link || defaults.heroButtons[i]?.link || '/'
+    heroTitle: raw.heroTitle ?? defaults.heroTitle,
+    heroSubtitle: raw.heroSubtitle ?? defaults.heroSubtitle,
+    heroButtons: (raw.heroButtons ?? defaults.heroButtons).map((x, i) => ({
+      text: x?.text ?? defaults.heroButtons[i]?.text ?? 'Action',
+      link: x?.link ?? defaults.heroButtons[i]?.link ?? '/'
     })),
-    banners: (raw.banners || defaults.banners).map((x) => ({
-      image: x?.image || x?.video || '',
-      year: String(x?.year || '')
+    banners: (raw.banners ?? defaults.banners).map((x) => ({
+      image: x?.image ?? x?.video ?? '',
+      year: String(x?.year ?? '')
     })),
-    achievements: (raw.achievements || defaults.achievements).map((x) => ({
-      title: x?.title || '',
-      value: x?.value || ''
+    achievements: (raw.achievements ?? defaults.achievements).map((x) => ({
+      title: x?.title ?? '',
+      value: x?.value ?? ''
     })),
-    sportsCategories: (raw.sportsCategories || defaults.sportsCategories).map((x) => ({
-      name: x?.name || '',
-      image: x?.image || ''
+    sportsCategories: (raw.sportsCategories ?? defaults.sportsCategories).map((x) => ({
+      name: x?.name ?? '',
+      image: x?.image ?? ''
     })),
-    gallery: (raw.gallery || defaults.gallery).map((x) => ({
-      image: x?.image || '',
-      caption: x?.caption || ''
+    gallery: (raw.gallery ?? defaults.gallery).map((x) => ({
+      image: x?.image ?? '',
+      caption: x?.caption ?? ''
     })),
-    upcomingEvents: (raw.upcomingEvents || defaults.upcomingEvents).map((x) => ({
-      name: x?.name || '',
-      date: x?.date || '',
-      venue: x?.venue || '',
-      image: x?.image || ''
+    upcomingEvents: (raw.upcomingEvents ?? defaults.upcomingEvents).map((x) => ({
+      name: x?.name ?? '',
+      date: x?.date ?? '',
+      venue: x?.venue ?? '',
+      image: x?.image ?? ''
     })),
-    clubs: (raw.clubs || defaults.clubs).map((x) => ({
-      name: x?.name || '',
-      url: x?.url || '',
-      description: x?.description || '',
-      image: x?.image || '',
-      theme: x?.theme || 'blue'
+    clubs: (raw.clubs ?? defaults.clubs).map((x) => ({
+      name: x?.name ?? '',
+      url: x?.url ?? '',
+      description: x?.description ?? '',
+      image: x?.image ?? '',
+      theme: x?.theme ?? 'blue'
     })),
-    announcements: (raw.announcements || defaults.announcements).map((x) => String(x || ''))
+    announcements: (raw.announcements ?? defaults.announcements).map((x) => String(x ?? ''))
   };
 };
 
@@ -307,6 +307,18 @@ const ManageHome = () => {
                     <strong>{x.name}</strong>
                     <p>{x.date}</p>
                     <p>{x.venue}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="admin-card">
+              <h3>Latest Announcements</h3>
+              <div className="simple-grid">
+                {content.announcements.map((x, i) => (
+                  <div key={i} className="mini-card">
+                    <strong>Announcement {i + 1}</strong>
+                    <p>{x}</p>
                   </div>
                 ))}
               </div>
@@ -603,6 +615,15 @@ const ManageHome = () => {
                 <div className="preview-list">
                   {content.upcomingEvents.map((item, i) => (
                     <div key={i}>{item.name || 'Event'} - {item.date || '-'}</div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="preview-section">
+                <h4>Latest Announcements</h4>
+                <div className="preview-list">
+                  {content.announcements.map((item, i) => (
+                    <div key={i}>{item || 'No announcement'}</div>
                   ))}
                 </div>
               </div>
