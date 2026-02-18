@@ -10,7 +10,7 @@ const getUser = () => {
 };
 
 const ALLOWED_PAGE_ACTIONS = {
-  'Home Page': 'Updated Home Page Content',
+  'Home Page': 'Home Page Updated',
   'About Page': 'Updated About Page Content',
   'History Page': 'Updated History Page Content',
   'Events Page': 'Updated Events Page',

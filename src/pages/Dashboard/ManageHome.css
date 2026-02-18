@@ -261,6 +261,126 @@
   min-width: 160px;
 }
 
+.ai-btn {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 14px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ai-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(99, 102, 241, 0.35);
+}
+
+.cms-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.cms-editor,
+.cms-preview {
+  border-radius: 14px;
+  height: 88vh;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.cms-editor {
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.cms-preview {
+  background: #f9fafb;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+}
+
+.preview-hero {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #fff;
+  padding: 26px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+}
+
+.preview-hero h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+}
+
+.preview-hero p {
+  margin: 0;
+  opacity: 0.9;
+}
+
+.preview-buttons {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+}
+
+.preview-btn {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.preview-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.preview-stat {
+  background: #fff;
+  padding: 14px;
+  text-align: center;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.preview-stat h2 {
+  margin: 0;
+  color: #1e3a8a;
+}
+
+.preview-stat span {
+  color: #475569;
+  font-size: 0.86rem;
+}
+
+.preview-section {
+  margin-top: 10px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.preview-section h4 {
+  margin: 0 0 10px;
+  color: #1e3a8a;
+}
+
+.preview-list {
+  display: grid;
+  gap: 8px;
+  color: #334155;
+  font-size: 0.92rem;
+}
+
 .success-overlay {
   position: fixed;
   inset: 0;
@@ -325,5 +445,17 @@
   .manage-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 1200px) {
+  .cms-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cms-editor,
+  .cms-preview {
+    height: auto;
+    max-height: 80vh;
   }
 }

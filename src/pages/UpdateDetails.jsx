@@ -39,6 +39,16 @@ const UpdateDetails = () => {
     if (pageName) {
       loadLogs();
     }
+
+    const onHomeUpdated = (event) => {
+      const updatedPageName = event?.detail?.pageName;
+      if (!updatedPageName || updatedPageName === pageName) {
+        loadLogs();
+      }
+    };
+
+    window.addEventListener('HOME_UPDATED', onHomeUpdated);
+    return () => window.removeEventListener('HOME_UPDATED', onHomeUpdated);
   }, [pageName]);
 
   return (

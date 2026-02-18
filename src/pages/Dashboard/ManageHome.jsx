@@ -81,6 +81,8 @@ const ManageHome = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [toastTitle, setToastTitle] = useState('KPT Sports CMS');
+  const [toastMessage, setToastMessage] = useState('Home page content has been updated successfully. All changes are now live on the website.');
 
   useEffect(() => {
     fetchContent();
@@ -115,6 +117,37 @@ const ManageHome = () => {
 
   const removeItem = (section, index) => {
     setContent((prev) => ({ ...prev, [section]: prev[section].filter((_, i) => i !== index) }));
+  };
+
+  const openToast = (title, message) => {
+    setToastTitle(title);
+    setToastMessage(message);
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+  };
+
+  const generateAIContent = () => {
+    setContent((prev) => ({
+      ...prev,
+      heroTitle: 'Building Champions, Inspiring Excellence',
+      heroSubtitle: 'KPT Mangaluru Sports Portal - Empowering Athletes for State and National Success',
+      announcements: [
+        'Registrations open for the Annual Inter-Department Sports Championship.',
+        'New training schedule released for track and field athletes.',
+        'Congratulations to our state-level medal winners.'
+      ],
+      achievements: [
+        { title: 'Total Prizes Won', value: '110+' },
+        { title: 'Active Players', value: '21' },
+        { title: 'Sports Meets Conducted', value: '45' },
+        { title: 'Years of Excellence', value: '12' }
+      ],
+      upcomingEvents: [
+        { name: 'Annual Sports Meet', date: 'March 15, 2026', venue: 'Main Stadium', image: '/Gallery10.jpg' },
+        { name: 'Inter Polytechnic Championship', date: 'April 10, 2026', venue: 'Indoor Complex', image: '/Gallery16.jpg' }
+      ]
+    }));
+    openToast('KPT Sports CMS', 'AI content generated successfully. Review and save to publish.');
   };
 
   const handleSubmit = async (e) => {
@@ -161,8 +194,7 @@ const ManageHome = () => {
       };
 
       await api.put('/home', payload);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
+      openToast('KPT Sports CMS', 'Home page content has been updated successfully. All changes are now live on the website.');
       setIsEditing(false);
 
       activityLogService.logActivity(
@@ -170,6 +202,7 @@ const ManageHome = () => {
         'Home Page',
         'Content was successfully modified'
       );
+      window.dispatchEvent(new CustomEvent('HOME_UPDATED', { detail: { pageName: 'Home Page' } }));
 
       await fetchContent();
     } catch (error) {
@@ -290,248 +323,295 @@ const ManageHome = () => {
             </section>
           </div>
         ) : (
-          <form className="admin-form" onSubmit={handleSubmit}>
-            <section className="admin-card">
-              <h3>Hero Section</h3>
-              <div className="form-row single-row">
-                <input
-                  placeholder="Hero Title"
-                  value={content.heroTitle}
-                  onChange={(e) => updateRootField('heroTitle', e.target.value)}
-                />
+          <div className="cms-layout">
+            <div className="cms-editor">
+              <button type="button" className="ai-btn" onClick={generateAIContent}>
+                Generate AI Content
+              </button>
+
+              <form className="admin-form" onSubmit={handleSubmit}>
+                <section className="admin-card">
+                  <h3>Hero Section</h3>
+                  <div className="form-row single-row">
+                    <input
+                      placeholder="Hero Title"
+                      value={content.heroTitle}
+                      onChange={(e) => updateRootField('heroTitle', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-row single-row">
+                    <input
+                      placeholder="Hero Subtitle"
+                      value={content.heroSubtitle}
+                      onChange={(e) => updateRootField('heroSubtitle', e.target.value)}
+                    />
+                  </div>
+                  {content.heroButtons.map((button, i) => (
+                    <div key={i} className="form-row hero-button-row">
+                      <input
+                        placeholder="Button Text"
+                        value={button.text}
+                        onChange={(e) => updateField('heroButtons', i, 'text', e.target.value)}
+                      />
+                      <input
+                        placeholder="Button Link"
+                        value={button.link}
+                        onChange={(e) => updateField('heroButtons', i, 'link', e.target.value)}
+                      />
+                      <button type="button" className="danger-btn" onClick={() => removeItem('heroButtons', i)}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" className="add-btn" onClick={() => addItem('heroButtons', { text: '', link: '' })}>
+                    Add Hero Button
+                  </button>
+                </section>
+
+                <section className="admin-card">
+                  <h3>Banner Images</h3>
+                  {content.banners.map((b, i) => (
+                    <div key={i} className="form-row banner-row">
+                      <input
+                        placeholder="Image URL"
+                        value={b.image}
+                        onChange={(e) => updateField('banners', i, 'image', e.target.value)}
+                      />
+                      <input
+                        placeholder="Year"
+                        value={b.year}
+                        onChange={(e) => updateField('banners', i, 'year', e.target.value)}
+                      />
+                      <button type="button" className="danger-btn" onClick={() => removeItem('banners', i)}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" className="add-btn" onClick={() => addItem('banners', { image: '', year: '' })}>
+                    Add Banner
+                  </button>
+                </section>
+
+                <section className="admin-card">
+                  <h3>Achievements</h3>
+                  {content.achievements.map((x, i) => (
+                    <div key={i} className="form-row two-col-row">
+                      <input
+                        placeholder="Title"
+                        value={x.title}
+                        onChange={(e) => updateField('achievements', i, 'title', e.target.value)}
+                      />
+                      <input
+                        placeholder="Value"
+                        value={x.value}
+                        onChange={(e) => updateField('achievements', i, 'value', e.target.value)}
+                      />
+                      <button type="button" className="danger-btn" onClick={() => removeItem('achievements', i)}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" className="add-btn" onClick={() => addItem('achievements', { title: '', value: '' })}>
+                    Add Achievement
+                  </button>
+                </section>
+
+                <section className="admin-card">
+                  <h3>Sports Categories</h3>
+                  {content.sportsCategories.map((x, i) => (
+                    <div key={i} className="form-row two-col-row">
+                      <input
+                        placeholder="Category Name"
+                        value={x.name}
+                        onChange={(e) => updateField('sportsCategories', i, 'name', e.target.value)}
+                      />
+                      <input
+                        placeholder="Image URL"
+                        value={x.image}
+                        onChange={(e) => updateField('sportsCategories', i, 'image', e.target.value)}
+                      />
+                      <button type="button" className="danger-btn" onClick={() => removeItem('sportsCategories', i)}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" className="add-btn" onClick={() => addItem('sportsCategories', { name: '', image: '' })}>
+                    Add Category
+                  </button>
+                </section>
+
+                <section className="admin-card">
+                  <h3>Gallery Preview</h3>
+                  {content.gallery.map((x, i) => (
+                    <div key={i} className="form-row two-col-row">
+                      <input
+                        placeholder="Image URL"
+                        value={x.image}
+                        onChange={(e) => updateField('gallery', i, 'image', e.target.value)}
+                      />
+                      <input
+                        placeholder="Caption"
+                        value={x.caption}
+                        onChange={(e) => updateField('gallery', i, 'caption', e.target.value)}
+                      />
+                      <button type="button" className="danger-btn" onClick={() => removeItem('gallery', i)}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" className="add-btn" onClick={() => addItem('gallery', { image: '', caption: '' })}>
+                    Add Gallery Item
+                  </button>
+                </section>
+
+                <section className="admin-card">
+                  <h3>Upcoming Events</h3>
+                  {content.upcomingEvents.map((x, i) => (
+                    <div key={i} className="form-row event-row">
+                      <input
+                        placeholder="Event Name"
+                        value={x.name}
+                        onChange={(e) => updateField('upcomingEvents', i, 'name', e.target.value)}
+                      />
+                      <input
+                        placeholder="Date"
+                        value={x.date}
+                        onChange={(e) => updateField('upcomingEvents', i, 'date', e.target.value)}
+                      />
+                      <input
+                        placeholder="Venue"
+                        value={x.venue}
+                        onChange={(e) => updateField('upcomingEvents', i, 'venue', e.target.value)}
+                      />
+                      <input
+                        placeholder="Image URL"
+                        value={x.image}
+                        onChange={(e) => updateField('upcomingEvents', i, 'image', e.target.value)}
+                      />
+                      <button type="button" className="danger-btn" onClick={() => removeItem('upcomingEvents', i)}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" className="add-btn" onClick={() => addItem('upcomingEvents', { name: '', date: '', venue: '', image: '' })}>
+                    Add Event
+                  </button>
+                </section>
+
+                <section className="admin-card">
+                  <h3>Announcements</h3>
+                  {content.announcements.map((text, i) => (
+                    <div key={i} className="form-row single-row">
+                      <input
+                        placeholder="Announcement text"
+                        value={text}
+                        onChange={(e) => {
+                          const next = [...content.announcements];
+                          next[i] = e.target.value;
+                          updateRootField('announcements', next);
+                        }}
+                      />
+                      <button type="button" className="danger-btn" onClick={() => removeItem('announcements', i)}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" className="add-btn" onClick={() => addItem('announcements', '')}>
+                    Add Announcement
+                  </button>
+                </section>
+
+                <section className="admin-card">
+                  <h3>Clubs and Activities</h3>
+                  {content.clubs.map((club, i) => (
+                    <div key={i} className="form-row club-row">
+                      <input
+                        placeholder="Club Name"
+                        value={club.name}
+                        onChange={(e) => updateField('clubs', i, 'name', e.target.value)}
+                      />
+                      <input
+                        placeholder="URL"
+                        value={club.url}
+                        onChange={(e) => updateField('clubs', i, 'url', e.target.value)}
+                      />
+                      <input
+                        placeholder="Description"
+                        value={club.description}
+                        onChange={(e) => updateField('clubs', i, 'description', e.target.value)}
+                      />
+                      <input
+                        placeholder="Image URL"
+                        value={club.image}
+                        onChange={(e) => updateField('clubs', i, 'image', e.target.value)}
+                      />
+                      <input
+                        placeholder="Theme (blue, pink...)"
+                        value={club.theme}
+                        onChange={(e) => updateField('clubs', i, 'theme', e.target.value)}
+                      />
+                      <button type="button" className="danger-btn" onClick={() => removeItem('clubs', i)}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" className="add-btn" onClick={() => addItem('clubs', { name: '', url: '', description: '', image: '', theme: 'blue' })}>
+                    Add Club
+                  </button>
+                </section>
+
+                <button type="submit" className="save-btn" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </form>
+            </div>
+
+            <div className="cms-preview">
+              <div className="preview-hero">
+                <h1>{content.heroTitle}</h1>
+                <p>{content.heroSubtitle}</p>
+                <div className="preview-buttons">
+                  {content.heroButtons.slice(0, 2).map((button, i) => (
+                    <span key={`${button.text}-${i}`} className="preview-btn">{button.text}</span>
+                  ))}
+                </div>
               </div>
-              <div className="form-row single-row">
-                <input
-                  placeholder="Hero Subtitle"
-                  value={content.heroSubtitle}
-                  onChange={(e) => updateRootField('heroSubtitle', e.target.value)}
-                />
+
+              <div className="preview-stats">
+                {content.achievements.map((a, i) => (
+                  <div key={i} className="preview-stat">
+                    <h2>{a.value}</h2>
+                    <span>{a.title}</span>
+                  </div>
+                ))}
               </div>
-              {content.heroButtons.map((button, i) => (
-                <div key={i} className="form-row hero-button-row">
-                  <input
-                    placeholder="Button Text"
-                    value={button.text}
-                    onChange={(e) => updateField('heroButtons', i, 'text', e.target.value)}
-                  />
-                  <input
-                    placeholder="Button Link"
-                    value={button.link}
-                    onChange={(e) => updateField('heroButtons', i, 'link', e.target.value)}
-                  />
-                  <button type="button" className="danger-btn" onClick={() => removeItem('heroButtons', i)}>
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button type="button" className="add-btn" onClick={() => addItem('heroButtons', { text: '', link: '' })}>
-                Add Hero Button
-              </button>
-            </section>
 
-            <section className="admin-card">
-              <h3>Banner Images</h3>
-              {content.banners.map((b, i) => (
-                <div key={i} className="form-row banner-row">
-                  <input
-                    placeholder="Image URL"
-                    value={b.image}
-                    onChange={(e) => updateField('banners', i, 'image', e.target.value)}
-                  />
-                  <input
-                    placeholder="Year"
-                    value={b.year}
-                    onChange={(e) => updateField('banners', i, 'year', e.target.value)}
-                  />
-                  <button type="button" className="danger-btn" onClick={() => removeItem('banners', i)}>
-                    Remove
-                  </button>
+              <div className="preview-section">
+                <h4>Sports Categories</h4>
+                <div className="preview-list">
+                  {content.sportsCategories.map((item, i) => (
+                    <div key={i}>{item.name || 'Category'}</div>
+                  ))}
                 </div>
-              ))}
-              <button type="button" className="add-btn" onClick={() => addItem('banners', { image: '', year: '' })}>
-                Add Banner
-              </button>
-            </section>
+              </div>
 
-            <section className="admin-card">
-              <h3>Achievements</h3>
-              {content.achievements.map((x, i) => (
-                <div key={i} className="form-row two-col-row">
-                  <input
-                    placeholder="Title"
-                    value={x.title}
-                    onChange={(e) => updateField('achievements', i, 'title', e.target.value)}
-                  />
-                  <input
-                    placeholder="Value"
-                    value={x.value}
-                    onChange={(e) => updateField('achievements', i, 'value', e.target.value)}
-                  />
-                  <button type="button" className="danger-btn" onClick={() => removeItem('achievements', i)}>
-                    Remove
-                  </button>
+              <div className="preview-section">
+                <h4>Upcoming Events</h4>
+                <div className="preview-list">
+                  {content.upcomingEvents.map((item, i) => (
+                    <div key={i}>{item.name || 'Event'} - {item.date || '-'}</div>
+                  ))}
                 </div>
-              ))}
-              <button type="button" className="add-btn" onClick={() => addItem('achievements', { title: '', value: '' })}>
-                Add Achievement
-              </button>
-            </section>
-
-            <section className="admin-card">
-              <h3>Sports Categories</h3>
-              {content.sportsCategories.map((x, i) => (
-                <div key={i} className="form-row two-col-row">
-                  <input
-                    placeholder="Category Name"
-                    value={x.name}
-                    onChange={(e) => updateField('sportsCategories', i, 'name', e.target.value)}
-                  />
-                  <input
-                    placeholder="Image URL"
-                    value={x.image}
-                    onChange={(e) => updateField('sportsCategories', i, 'image', e.target.value)}
-                  />
-                  <button type="button" className="danger-btn" onClick={() => removeItem('sportsCategories', i)}>
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button type="button" className="add-btn" onClick={() => addItem('sportsCategories', { name: '', image: '' })}>
-                Add Category
-              </button>
-            </section>
-
-            <section className="admin-card">
-              <h3>Gallery Preview</h3>
-              {content.gallery.map((x, i) => (
-                <div key={i} className="form-row two-col-row">
-                  <input
-                    placeholder="Image URL"
-                    value={x.image}
-                    onChange={(e) => updateField('gallery', i, 'image', e.target.value)}
-                  />
-                  <input
-                    placeholder="Caption"
-                    value={x.caption}
-                    onChange={(e) => updateField('gallery', i, 'caption', e.target.value)}
-                  />
-                  <button type="button" className="danger-btn" onClick={() => removeItem('gallery', i)}>
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button type="button" className="add-btn" onClick={() => addItem('gallery', { image: '', caption: '' })}>
-                Add Gallery Item
-              </button>
-            </section>
-
-            <section className="admin-card">
-              <h3>Upcoming Events</h3>
-              {content.upcomingEvents.map((x, i) => (
-                <div key={i} className="form-row event-row">
-                  <input
-                    placeholder="Event Name"
-                    value={x.name}
-                    onChange={(e) => updateField('upcomingEvents', i, 'name', e.target.value)}
-                  />
-                  <input
-                    placeholder="Date"
-                    value={x.date}
-                    onChange={(e) => updateField('upcomingEvents', i, 'date', e.target.value)}
-                  />
-                  <input
-                    placeholder="Venue"
-                    value={x.venue}
-                    onChange={(e) => updateField('upcomingEvents', i, 'venue', e.target.value)}
-                  />
-                  <input
-                    placeholder="Image URL"
-                    value={x.image}
-                    onChange={(e) => updateField('upcomingEvents', i, 'image', e.target.value)}
-                  />
-                  <button type="button" className="danger-btn" onClick={() => removeItem('upcomingEvents', i)}>
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button type="button" className="add-btn" onClick={() => addItem('upcomingEvents', { name: '', date: '', venue: '', image: '' })}>
-                Add Event
-              </button>
-            </section>
-
-            <section className="admin-card">
-              <h3>Announcements</h3>
-              {content.announcements.map((text, i) => (
-                <div key={i} className="form-row single-row">
-                  <input
-                    placeholder="Announcement text"
-                    value={text}
-                    onChange={(e) => {
-                      const next = [...content.announcements];
-                      next[i] = e.target.value;
-                      updateRootField('announcements', next);
-                    }}
-                  />
-                  <button type="button" className="danger-btn" onClick={() => removeItem('announcements', i)}>
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button type="button" className="add-btn" onClick={() => addItem('announcements', '')}>
-                Add Announcement
-              </button>
-            </section>
-
-            <section className="admin-card">
-              <h3>Clubs and Activities</h3>
-              {content.clubs.map((club, i) => (
-                <div key={i} className="form-row club-row">
-                  <input
-                    placeholder="Club Name"
-                    value={club.name}
-                    onChange={(e) => updateField('clubs', i, 'name', e.target.value)}
-                  />
-                  <input
-                    placeholder="URL"
-                    value={club.url}
-                    onChange={(e) => updateField('clubs', i, 'url', e.target.value)}
-                  />
-                  <input
-                    placeholder="Description"
-                    value={club.description}
-                    onChange={(e) => updateField('clubs', i, 'description', e.target.value)}
-                  />
-                  <input
-                    placeholder="Image URL"
-                    value={club.image}
-                    onChange={(e) => updateField('clubs', i, 'image', e.target.value)}
-                  />
-                  <input
-                    placeholder="Theme (blue, pink...)"
-                    value={club.theme}
-                    onChange={(e) => updateField('clubs', i, 'theme', e.target.value)}
-                  />
-                  <button type="button" className="danger-btn" onClick={() => removeItem('clubs', i)}>
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button type="button" className="add-btn" onClick={() => addItem('clubs', { name: '', url: '', description: '', image: '', theme: 'blue' })}>
-                Add Club
-              </button>
-            </section>
-
-            <button type="submit" className="save-btn" disabled={isSaving}>
-              {isSaving ? 'Saving...' : 'Save Changes'}
-            </button>
-          </form>
+              </div>
+            </div>
+          </div>
         )}
       </div>
       {showSuccess && (
         <div className="success-overlay">
           <div className="success-card">
-            <h2>KPT Sports CMS</h2>
-            <p>Home page content has been updated successfully. All changes are now live on the website.</p>
+            <h2>{toastTitle}</h2>
+            <p>{toastMessage}</p>
             <button type="button" onClick={() => setShowSuccess(false)}>OK</button>
           </div>
         </div>

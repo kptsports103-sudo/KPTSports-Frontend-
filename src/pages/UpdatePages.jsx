@@ -43,6 +43,8 @@ const UpdatePages = () => {
     };
 
     loadPageChangeCounts();
+    window.addEventListener('HOME_UPDATED', loadPageChangeCounts);
+    return () => window.removeEventListener('HOME_UPDATED', loadPageChangeCounts);
   }, []);
 
   return (
