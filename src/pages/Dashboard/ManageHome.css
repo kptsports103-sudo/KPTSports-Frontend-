@@ -69,6 +69,45 @@
   font-size: 1.15rem;
 }
 
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  font-size: 0.82rem;
+  color: #23406f;
+  background: #e9f1ff;
+  border: 1px solid #cddcf3;
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+
+.simple-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.mini-card {
+  border: 1px solid #d6e2f6;
+  border-radius: 12px;
+  background: #f5f9ff;
+  padding: 12px;
+}
+
+.mini-card strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.mini-card p {
+  margin: 0;
+  color: #4a638a;
+  font-size: 0.9rem;
+}
+
 .banner-preview {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
@@ -82,13 +121,13 @@
   border: 1px solid #cddaf0;
 }
 
-.banner-item video,
+.banner-item img,
 .banner-placeholder {
   width: 100%;
   height: 128px;
 }
 
-.banner-item video {
+.banner-item img {
   object-fit: cover;
   display: block;
 }
@@ -153,12 +192,25 @@
   margin-bottom: 10px;
 }
 
+.single-row {
+  grid-template-columns: 1fr auto;
+}
+
+.hero-button-row,
+.two-col-row {
+  grid-template-columns: 1fr 1fr auto;
+}
+
 .banner-row {
   grid-template-columns: 1fr 130px auto;
 }
 
+.event-row {
+  grid-template-columns: 1fr 190px 1fr 1fr auto;
+}
+
 .club-row {
-  grid-template-columns: 1fr 1fr 1.3fr auto;
+  grid-template-columns: 1fr 1fr 1.4fr 1fr 170px auto;
 }
 
 .admin-form input {
@@ -196,6 +248,11 @@
   font-size: 1rem;
 }
 
+.save-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .primary-btn:hover,
 .secondary-btn:hover,
 .add-btn:hover,
@@ -205,13 +262,23 @@
   filter: brightness(1.03);
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1280px) {
   .club-row {
+    grid-template-columns: 1fr 1fr 1.4fr 1fr auto;
+  }
+}
+
+@media (max-width: 992px) {
+  .hero-button-row,
+  .two-col-row {
     grid-template-columns: 1fr 1fr;
   }
 
-  .banner-row {
-    grid-template-columns: 1fr 130px;
+  .banner-row,
+  .event-row,
+  .club-row,
+  .single-row {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -223,10 +290,5 @@
   .manage-header {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .banner-row,
-  .club-row {
-    grid-template-columns: 1fr;
   }
 }
