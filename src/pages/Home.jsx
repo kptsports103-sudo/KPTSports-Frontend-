@@ -36,6 +36,7 @@ export default function Home() {
     { name: 'Annual Sports Meet', date: 'March 15, 2026', venue: 'Main Ground', image: '/Gallery10.jpg' },
     { name: 'Inter-Polytechnic Volleyball', date: 'April 3, 2026', venue: 'Indoor Court', image: '/Gallery16.jpg' }
   ];
+  const visibleYear = homeContent.banners[currentBannerIndex]?.year || String(new Date().getFullYear());
   const galleryItems = [
     { image: '/Gallery2.jpg', caption: 'Track Sprint Final' },
     { image: '/Gallery6.jpg', caption: 'Championship Relay' },
@@ -135,9 +136,7 @@ export default function Home() {
           ))}
         </div>
 
-        {homeContent.banners[currentBannerIndex]?.year && (
-          <div className="banner-year">{homeContent.banners[currentBannerIndex].year}</div>
-        )}
+        <div className="banner-year">{visibleYear}</div>
 
         <div className="home-hero__scroll-indicator" aria-hidden="true">
           <span>Scroll</span>

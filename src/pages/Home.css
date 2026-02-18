@@ -187,15 +187,17 @@
 
 .banner-year {
   position: absolute;
-  top: 22px;
+  top: 92px;
   right: 24px;
   z-index: 4;
-  padding: 7px 14px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.45);
+  padding: 9px 16px;
+  border-radius: 12px;
+  background: rgba(5, 20, 46, 0.8);
   color: #fff;
-  font-weight: 700;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-weight: 800;
+  font-size: 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
 }
 
 .home-hero__scroll-indicator {
@@ -582,6 +584,13 @@
 
   .events-grid {
     grid-template-columns: 1fr;
+  }
+
+  .banner-year {
+    top: 82px;
+    right: 14px;
+    font-size: 0.98rem;
+    padding: 8px 12px;
   }
 
   .arrow {

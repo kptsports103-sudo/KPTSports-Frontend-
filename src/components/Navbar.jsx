@@ -156,7 +156,7 @@ const Navbar = () => {
 
           <div className="kpt-navbar__profile" ref={profileRef}>
             <button type="button" className="kpt-navbar__avatar" onClick={() => setProfileOpen((v) => !v)}>
-              <img src={user?.avatar || '/avatar.png'} alt="Profile" />
+              <img src={user?.avatar || '/img1.png'} alt="Profile" />
             </button>
             {profileOpen && (
               <div className="kpt-navbar__panel kpt-navbar__panel--profile">
