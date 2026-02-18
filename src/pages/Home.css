@@ -185,6 +185,7 @@
   backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
+  animation: statsFloat 3.5s ease-in-out infinite;
 }
 
 .home-hero__stats-card {
