@@ -80,6 +80,7 @@ const ManageHome = () => {
   const [content, setContent] = useState(createDefaultContent());
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     fetchContent();
@@ -160,13 +161,14 @@ const ManageHome = () => {
       };
 
       await api.put('/home', payload);
-      alert('Home page updated successfully');
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
       setIsEditing(false);
 
       activityLogService.logActivity(
-        'Updated Home CMS Content',
+        'Home Page Updated',
         'Home Page',
-        'Updated hero, banners, achievements, categories, gallery, events and clubs'
+        'Content was successfully modified'
       );
 
       await fetchContent();
@@ -525,6 +527,15 @@ const ManageHome = () => {
           </form>
         )}
       </div>
+      {showSuccess && (
+        <div className="success-overlay">
+          <div className="success-card">
+            <h2>KPT Sports CMS</h2>
+            <p>Home page content has been updated successfully. All changes are now live on the website.</p>
+            <button type="button" onClick={() => setShowSuccess(false)}>OK</button>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 };

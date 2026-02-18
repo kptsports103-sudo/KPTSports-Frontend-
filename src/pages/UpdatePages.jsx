@@ -48,8 +48,8 @@ const UpdatePages = () => {
   return (
     <AdminLayout>
       <div style={styles.page}>
-        <h1 style={styles.title}>Update Pages</h1>
-        <p style={styles.subtitle}>Track page updates with quick visual alerts.</p>
+        <h1 style={styles.title}>Content Management Dashboard</h1>
+        <p style={styles.subtitle}>Monitor, manage, and track all website content updates in one place.</p>
 
         <div style={styles.clockWrap}>
           <div>Date: {dateTime.toLocaleDateString()}</div>
@@ -100,7 +100,9 @@ const UpdatePages = () => {
 const styles = {
   page: {
     padding: '24px',
-    color: '#111827'
+    color: '#111827',
+    maxWidth: '1400px',
+    margin: '0 auto'
   },
   title: {
     margin: 0,
@@ -132,13 +134,13 @@ const styles = {
   },
   card: {
     position: 'relative',
-    backgroundColor: '#fff',
-    border: '1px solid #d1d5db',
-    borderRadius: '12px',
-    padding: '20px',
-    boxShadow: '0 6px 14px rgba(15, 23, 42, 0.08)',
+    background: '#ffffff',
+    borderRadius: '14px',
+    padding: '22px',
+    boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
+    border: '1px solid #e5e7eb',
     cursor: 'pointer',
-    transition: 'all 0.22s ease'
+    transition: 'all 0.3s ease'
   },
   notifyWrap: {
     position: 'absolute',
@@ -176,7 +178,7 @@ const styles = {
   cardTitle: {
     margin: '0 0 10px 0',
     color: '#111827',
-    fontSize: '34px',
+    fontSize: '22px',
     fontWeight: 700,
     display: 'flex',
     alignItems: 'center',
@@ -188,7 +190,7 @@ const styles = {
   cardDescription: {
     margin: 0,
     color: '#1f2937',
-    fontSize: '31px',
+    fontSize: '15px',
     lineHeight: 1.3,
     fontWeight: 500
   }

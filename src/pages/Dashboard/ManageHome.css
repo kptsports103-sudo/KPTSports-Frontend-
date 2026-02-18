@@ -3,6 +3,7 @@
   padding: 28px;
   background: #f7f9fc;
   color: #102a56;
+  overflow-x: auto;
 }
 
 .manage-header {
@@ -62,6 +63,7 @@
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 10px 26px rgba(12, 43, 95, 0.09);
+  overflow-x: auto;
 }
 
 .admin-card h3 {
@@ -182,38 +184,22 @@
 
 .admin-form {
   margin-top: 18px;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
 
 .form-row {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
   margin-bottom: 10px;
 }
 
-.single-row {
-  grid-template-columns: 1fr auto;
-}
-
-.hero-button-row,
-.two-col-row {
-  grid-template-columns: 1fr 1fr auto;
-}
-
-.banner-row {
-  grid-template-columns: 1fr 130px auto;
-}
-
-.event-row {
-  grid-template-columns: 1fr 190px 1fr 1fr auto;
-}
-
-.club-row {
-  grid-template-columns: 1fr 1fr 1.4fr 1fr 170px auto;
-}
-
 .admin-form input {
+  flex: 1;
+  min-width: 180px;
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid #cdd8eb;
@@ -262,23 +248,72 @@
   filter: brightness(1.03);
 }
 
-@media (max-width: 1280px) {
-  .club-row {
-    grid-template-columns: 1fr 1fr 1.4fr 1fr auto;
-  }
+.single-row input {
+  min-width: 240px;
 }
 
-@media (max-width: 992px) {
-  .hero-button-row,
-  .two-col-row {
-    grid-template-columns: 1fr 1fr;
-  }
+.two-col-row input {
+  min-width: 200px;
+}
 
-  .banner-row,
-  .event-row,
-  .club-row,
-  .single-row {
-    grid-template-columns: 1fr;
+.event-row input,
+.club-row input {
+  min-width: 160px;
+}
+
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 13, 34, 0.46);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.success-card {
+  width: min(420px, 92vw);
+  border-radius: 18px;
+  padding: 28px;
+  text-align: center;
+  background: linear-gradient(145deg, #fff4dd, #ffe4b8);
+  box-shadow: 0 26px 50px rgba(7, 19, 45, 0.3);
+  animation: successPop 220ms ease-out;
+}
+
+.success-card h2 {
+  margin: 0 0 10px;
+  color: #7e4a1d;
+  font-size: 1.7rem;
+}
+
+.success-card p {
+  margin: 0 0 18px;
+  color: #9a5e29;
+}
+
+.success-card button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 20px;
+  background: #0f766e;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.success-card button:hover {
+  filter: brightness(1.04);
+}
+
+@keyframes successPop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
