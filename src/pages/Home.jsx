@@ -57,7 +57,7 @@ export default function Home() {
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   const activeBanner = homeContent.banners[currentBannerIndex] || homeContent.banners[0];
-  
+  const heroImage = activeBanner?.image || '/Gallery1.jpg';
   const visibleYear = activeBanner?.year || String(new Date().getFullYear());
   const heroButtons = homeContent.heroButtons.slice(0, 2);
   const statIconMap = {
