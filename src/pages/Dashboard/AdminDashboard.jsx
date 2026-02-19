@@ -304,9 +304,9 @@ const AdminDashboard = () => {
         }
         .field-name {
           font-family: "Times New Roman", serif;
-          font-size: 18px;
-          text-align: left;
-          padding-left: 24px;
+          font-size: 30px;
+          text-align: center;
+          padding-left: 0;
           line-height: 1.2;
         }
         .field-semester {
