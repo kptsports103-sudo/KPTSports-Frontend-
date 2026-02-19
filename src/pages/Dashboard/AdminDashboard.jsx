@@ -273,94 +273,81 @@ const AdminDashboard = () => {
           font-weight: 700;
           text-align: center;
           white-space: nowrap;
-          overflow: visible;
-          text-overflow: clip;
-          min-height: 72px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-height: 44px;
           display: flex;
-          align-items: flex-end;
+          align-items: center;
           justify-content: center;
-          line-height: 1;
-          padding: 0 8px 6px;
+          line-height: 1.2;
           text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
           z-index: 2;
         }
         .field-kpm {
-          top: 852px;
-          left: 290px;
-          width: 360px;
-          font-size: 34px;
+          top: 830px;
+          left: 260px;
+          width: 380px;
+          font-size: 32px;
           justify-content: flex-start;
-          min-height: 68px;
-          transform: translateY(-50%);
+          text-align: left;
         }
         .field-name {
-          top: 1188px;
-          left: 500px;
-          width: 635px;
-          font-size: 46px;
-          transform: translateY(-50%);
+          top: 1150px;
+          left: 510px;
+          width: 650px;
+          font-size: 48px;
         }
         .field-semester {
-          top: 1318px;
-          left: 482px;
-          width: 190px;
+          top: 1285px;
+          left: 485px;
+          width: 160px;
           font-size: 34px;
-          transform: translateY(-50%);
         }
         .field-department {
-          top: 1318px;
-          left: 785px;
+          top: 1285px;
+          left: 800px;
           width: 320px;
           font-size: 34px;
-          transform: translateY(-50%);
         }
         .field-competition {
-          top: 1432px;
-          left: 672px;
-          width: 300px;
+          top: 1400px;
+          left: 680px;
+          width: 260px;
           font-size: 34px;
-          transform: translateY(-50%);
         }
         .field-year {
-          top: 1546px;
-          left: 1015px;
-          width: 172px;
+          top: 1510px;
+          left: 1030px;
+          width: 150px;
           font-size: 34px;
-          transform: translateY(-50%);
         }
         .field-position {
-          top: 1652px;
-          left: 832px;
-          width: 228px;
+          top: 1620px;
+          left: 840px;
+          width: 200px;
           font-size: 34px;
-          transform: translateY(-50%);
-        }
-        .field-semester,
-        .field-department,
-        .field-competition,
-        .field-year,
-        .field-position {
-          padding-bottom: 0;
         }
         .field-cert-id {
-          bottom: 190px;
-          left: 170px;
-          width: 560px;
+          bottom: 140px;
+          left: 500px;
+          width: 420px;
           font-size: 28px;
-          line-height: 1.25;
+          line-height: 1.1;
           text-align: left;
           letter-spacing: 0.4px;
-          white-space: normal;
+          white-space: nowrap;
           color: #1a2f76;
+          background: transparent;
+          padding: 0;
         }
         .qr-code {
           position: absolute;
-          bottom: 150px;
-          right: 170px;
-          width: 190px;
-          height: 190px;
+          bottom: 130px;
+          right: 220px;
+          width: 170px;
+          height: 170px;
           z-index: 2;
-          border: 6px solid #ffffff;
+          border: 4px solid #ffffff;
           border-radius: 6px;
           box-shadow: 0 8px 24px rgba(10, 20, 65, 0.25);
           background: #fff;
@@ -443,6 +430,7 @@ const AdminDashboard = () => {
 
       const canvas = await html2canvas(cert, {
         scale: safeScale,
+        letterRendering: true,
         useCORS: true,
         allowTaint: false,
         backgroundColor: "#ffffff",
