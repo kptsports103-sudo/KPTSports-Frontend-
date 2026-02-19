@@ -245,6 +245,16 @@ const AdminDashboard = () => {
     field.style.width = marker.style.width || `${marker.offsetWidth}px`;
     field.style.height = marker.style.height || `${marker.offsetHeight || 50}px`;
     certNode.appendChild(field);
+
+    // Auto-fit long values so they stay inside the marker/underline area.
+    let fontSize = className === "field-name" ? 48 : 34;
+    const minFontSize = className === "field-name" ? 22 : 18;
+    field.style.fontSize = `${fontSize}px`;
+
+    while (field.scrollWidth > field.clientWidth && fontSize > minFontSize) {
+      fontSize -= 1;
+      field.style.fontSize = `${fontSize}px`;
+    }
   };
 
   const buildCertificateNode = (row, backgroundUrl, certMeta) => {
@@ -304,30 +314,41 @@ const AdminDashboard = () => {
         }
         .field-name {
           font-family: "Times New Roman", serif;
-          font-size: 36px;
+          font-size: 40px;
           text-align: center;
-          padding-left: 0;
-          line-height: 1.2;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          padding-bottom: 5px;
+          line-height: 1;
         }
         .field-semester {
           font-size: 34px;
           text-align: left;
           padding-left: 10px;
+          display: flex;
+          align-items: flex-end;
         }
         .field-department {
           font-size: 34px;
           text-align: left;
           padding-left: 10px;
+          display: flex;
+          align-items: flex-end;
         }
         .field-competition {
           font-size: 34px;
           text-align: left;
           padding-left: 10px;
+          display: flex;
+          align-items: flex-end;
         }
         .field-year {
           font-size: 34px;
           text-align: left;
           padding-left: 10px;
+          display: flex;
+          align-items: flex-end;
         }
         .field-position {
           font-size: 34px;
