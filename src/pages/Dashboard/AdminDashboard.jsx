@@ -2,11 +2,12 @@
 
 import { Link } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import DailyVisitorsChart from "../../admin/components/DailyVisitorsChart";
 import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonChart";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import QRCode from "qrcode";
 import api from "../../services/api";
 
 const CERT_WIDTH = 1394;
@@ -31,6 +32,7 @@ const normalizeMedalKey = (medal = "") => {
 const AdminDashboard = () => {
   const [totalMedia, setTotalMedia] = useState(0);
   const [certificateRows, setCertificateRows] = useState([]);
+  const [issuedCertificates, setIssuedCertificates] = useState([]);
   const [isGeneratingId, setIsGeneratingId] = useState(null);
   const [yearlyStats, setYearlyStats] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
@@ -140,6 +142,24 @@ const AdminDashboard = () => {
 
   const safeLineField = (value) => safeField(value, "");
 
+  const normalizeKeyPart = (value) => String(value ?? "").trim().toLowerCase();
+
+  const getRowCertificateKey = (row) =>
+    [
+      String(row?.id ?? row?.playerId ?? "").trim(),
+      String(row?.year ?? "").trim(),
+      normalizeKeyPart(row?.competition),
+      normalizeKeyPart(row?.position),
+    ].join("|");
+
+  const getActionKey = (row) =>
+    [
+      String(row?.id ?? row?.playerId ?? "").trim(),
+      String(row?.year ?? "").trim(),
+      normalizeKeyPart(row?.competition),
+      normalizeKeyPart(row?.position),
+    ].join("-");
+
   const escapeHtml = (value) =>
     String(value ?? "")
       .replace(/&/g, "&amp;")
@@ -172,7 +192,47 @@ const AdminDashboard = () => {
     });
   };
 
-  const buildCertificateNode = (row, backgroundUrl) => {
+  const fetchIssuedCertificates = async () => {
+    try {
+      const response = await api.get("/certificates");
+      setIssuedCertificates(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error("Failed to fetch issued certificates:", error);
+      setIssuedCertificates([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchIssuedCertificates();
+  }, []);
+
+  const issueCertificate = async (row) => {
+    const payload = {
+      studentId: row.id || row.playerId,
+      name: row.name,
+      kpmNo: row.kpmNo,
+      semester: row.semester,
+      department: row.department,
+      competition: row.competition,
+      position: row.position,
+      achievement: row.achievement,
+      year: row.year,
+    };
+
+    const response = await api.post("/certificates/issue", payload);
+    return response.data;
+  };
+
+  const generateCertificateQr = async (certificateId) => {
+    const verifyUrl = `${window.location.origin}/verify/${encodeURIComponent(certificateId)}`;
+    return QRCode.toDataURL(verifyUrl, {
+      errorCorrectionLevel: "M",
+      margin: 1,
+      width: 220,
+    });
+  };
+
+  const buildCertificateNode = (row, backgroundUrl, certMeta) => {
     const wrapper = document.createElement("div");
     wrapper.style.position = "absolute";
     wrapper.style.left = "0";
@@ -272,6 +332,29 @@ const AdminDashboard = () => {
           line-height: 34px;
           padding-bottom: 5px;
         }
+        .field-cert-id {
+          bottom: 190px;
+          left: 170px;
+          width: 560px;
+          font-size: 28px;
+          line-height: 1.25;
+          text-align: left;
+          letter-spacing: 0.4px;
+          white-space: normal;
+          color: #1a2f76;
+        }
+        .qr-code {
+          position: absolute;
+          bottom: 150px;
+          right: 170px;
+          width: 190px;
+          height: 190px;
+          z-index: 2;
+          border: 6px solid #ffffff;
+          border-radius: 6px;
+          box-shadow: 0 8px 24px rgba(10, 20, 65, 0.25);
+          background: #fff;
+        }
       </style>
       <div class="cert-wrap">
         <div class="cert">
@@ -283,6 +366,8 @@ const AdminDashboard = () => {
           <div class="field field-competition">${escapeHtml(safeLineField(row.competition))}</div>
           <div class="field field-year">${escapeHtml(safeLineField(row.year))}</div>
           <div class="field field-position">${escapeHtml(safeLineField(row.position))}</div>
+          <div class="field field-cert-id">Certificate ID: ${escapeHtml(safeLineField(certMeta.certificateId))}</div>
+          <img class="qr-code" src="${certMeta.qrImage}" alt="Certificate verification QR" />
         </div>
       </div>
     `;
@@ -290,14 +375,36 @@ const AdminDashboard = () => {
     return wrapper;
   };
 
-  const handleDownloadCertificate = async (row) => {
+  const copyVerifyLink = async (certificateId) => {
+    const verifyUrl = `${window.location.origin}/verify/${encodeURIComponent(certificateId)}`;
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error("Clipboard API unavailable");
+      }
+      await navigator.clipboard.writeText(verifyUrl);
+      alert("Verification link copied.");
+    } catch (error) {
+      window.prompt("Copy this verification URL:", verifyUrl);
+    }
+  };
+
+  const handleDownloadCertificate = async (row, existingCertificate = null) => {
     if (!row || !row.name) {
       alert("Invalid certificate data");
       return;
     }
-    setIsGeneratingId(row.id);
+    const actionKey = getActionKey(row);
+    setIsGeneratingId(actionKey);
     let certificateNode = null;
     try {
+      const issueResult = existingCertificate ? { certificate: existingCertificate } : await issueCertificate(row);
+      const issuedCertificate = issueResult?.certificate;
+      const certificateId = issuedCertificate?.certificateId;
+      if (!certificateId) {
+        throw new Error("Could not issue certificate ID.");
+      }
+      const qrImage = await generateCertificateQr(certificateId);
+
       const backgroundUrl = await preloadCertificateBackground();
       if (!backgroundUrl) {
         throw new Error("Certificate background could not be loaded. Add certificate-template.png in frontend/public.");
@@ -306,7 +413,7 @@ const AdminDashboard = () => {
         await document.fonts.ready;
       }
 
-      certificateNode = buildCertificateNode(row, backgroundUrl);
+      certificateNode = buildCertificateNode(row, backgroundUrl, { certificateId, qrImage });
       document.body.appendChild(certificateNode);
       certificateNode.style.visibility = "visible";
       const cert = certificateNode.querySelector(".cert");
@@ -343,7 +450,9 @@ const AdminDashboard = () => {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
-      pdf.save(`certificate-${safeName || "student"}.pdf`);
+      const safeCertId = String(certificateId).toLowerCase().replace(/[^a-z0-9-]+/g, "");
+      pdf.save(`certificate-${safeName || "student"}-${safeCertId || "cert"}.pdf`);
+      await fetchIssuedCertificates();
     } catch (error) {
       console.error("Failed to generate certificate PDF:", error);
       const reason = error?.message || "Unknown error";
@@ -353,6 +462,22 @@ const AdminDashboard = () => {
       setIsGeneratingId(null);
     }
   };
+
+  const issuedCertificateByRowKey = useMemo(() => {
+    const lookup = new Map();
+    issuedCertificates.forEach((item) => {
+      const key = [
+        String(item?.studentId ?? "").trim(),
+        String(item?.year ?? "").trim(),
+        normalizeKeyPart(item?.competition),
+        normalizeKeyPart(item?.position),
+      ].join("|");
+      if (key && !lookup.has(key)) {
+        lookup.set(key, item);
+      }
+    });
+    return lookup;
+  }, [issuedCertificates]);
 
   const medalData = yearlyStats.map((y) => {
     const individualPoints =
@@ -739,31 +864,65 @@ const AdminDashboard = () => {
                   <th>Year</th>
                   <th>Position</th>
                   <th>Achievement</th>
-                  <th>Download</th>
+                  <th>Certificate ID</th>
+                  <th>Verify Link</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {certificateRows.map((row) => (
-                  <tr key={row.id}>
-                    <td>{row.name || "-"}</td>
-                    <td>{row.kpmNo || "-"}</td>
-                    <td>{row.semester || "-"}</td>
-                    <td>{row.department || "-"}</td>
-                    <td>{row.competition || "-"}</td>
-                    <td>{row.year || "-"}</td>
-                    <td>{row.position || "-"}</td>
-                    <td>{row.achievement || "-"}</td>
-                    <td>
-                      <button
-                        className="download-btn"
-                        onClick={() => handleDownloadCertificate(row)}
-                        disabled={isGeneratingId === row.id}
-                      >
-                        {isGeneratingId === row.id ? "Generating..." : "Download PDF"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {certificateRows.map((row) => {
+                  const rowCertKey = getRowCertificateKey(row);
+                  const existingCertificate = issuedCertificateByRowKey.get(rowCertKey);
+                  const verifyUrl = existingCertificate
+                    ? `${window.location.origin}/verify/${encodeURIComponent(existingCertificate.certificateId)}`
+                    : null;
+                  const rowActionKey = getActionKey(row);
+                  const isBusy = isGeneratingId === rowActionKey;
+
+                  return (
+                    <tr key={rowActionKey}>
+                      <td>{row.name || "-"}</td>
+                      <td>{row.kpmNo || "-"}</td>
+                      <td>{row.semester || "-"}</td>
+                      <td>{row.department || "-"}</td>
+                      <td>{row.competition || "-"}</td>
+                      <td>{row.year || "-"}</td>
+                      <td>{row.position || "-"}</td>
+                      <td>{row.achievement || "-"}</td>
+                      <td>{existingCertificate?.certificateId || "-"}</td>
+                      <td>
+                        {verifyUrl ? (
+                          <button
+                            className="download-btn"
+                            onClick={() => copyVerifyLink(existingCertificate.certificateId)}
+                            style={{ minWidth: 124 }}
+                          >
+                            Copy Link
+                          </button>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <button
+                          className="download-btn"
+                          onClick={() => handleDownloadCertificate(row, existingCertificate || null)}
+                          disabled={isBusy}
+                        >
+                          {isBusy ? "Generating..." : existingCertificate ? "Download PDF" : "Generate PDF"}
+                        </button>
+                        <button
+                          className="download-btn"
+                          onClick={() => handleDownloadCertificate(row, existingCertificate)}
+                          disabled={!existingCertificate || isBusy}
+                          style={{ opacity: !existingCertificate || isBusy ? 0.65 : 1 }}
+                        >
+                          Reissue PDF
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}

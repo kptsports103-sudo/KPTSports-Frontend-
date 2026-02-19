@@ -61,6 +61,7 @@ import Approvals from '../pages/admin/Approvals';
 import AbuseLogs from '../pages/admin/AbuseLogs';
 
 import SportsDashboard from '../pages/SportsDashboard';
+import VerifyCertificate from '../pages/VerifyCertificate';
 
 import ProtectedRoute from '../components/ProtectedRoute';
 
@@ -98,6 +99,7 @@ const AppContent = () => {
           <Route path="/events" element={<Events />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/verify/:id" element={<VerifyCertificate />} />
           <Route path="/login" element={<Login />} />
           <Route path="/otp-verify" element={<OTPVerify />} />
           <Route path="/sports-dashboard" element={<ProtectedRoute role="admin"><SportsDashboard /></ProtectedRoute>} />
