@@ -12,6 +12,7 @@ import api from "../../services/api";
 
 const CERT_WIDTH = 1394;
 const CERT_HEIGHT = 2048;
+const CERT_RENDER_SCALE = 2;
 const CERT_BG_CANDIDATES = [
   "/certificate-template.png",
   "/certificate-template.jpg",
@@ -426,13 +427,23 @@ const AdminDashboard = () => {
       await new Promise((resolve) => requestAnimationFrame(resolve));
       await new Promise((resolve) => setTimeout(resolve, 50));
 
+      const safeScale = Math.min(
+        CERT_RENDER_SCALE,
+        Math.max(1, Number(window.devicePixelRatio) || 1)
+      );
+
       const canvas = await html2canvas(cert, {
-        scale: 3,
+        scale: safeScale,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: null,
+        backgroundColor: "#ffffff",
         width: CERT_WIDTH,
         height: CERT_HEIGHT,
+        windowWidth: CERT_WIDTH,
+        windowHeight: CERT_HEIGHT,
+        imageTimeout: 30000,
+        removeContainer: true,
+        logging: false,
       });
 
       const imgData = canvas.toDataURL("image/png");
