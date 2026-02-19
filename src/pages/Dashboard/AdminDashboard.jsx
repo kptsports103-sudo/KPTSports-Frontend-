@@ -304,7 +304,7 @@ const AdminDashboard = () => {
         }
         .field-name {
           font-family: "Times New Roman", serif;
-          font-size: 30px;
+          font-size: 36px;
           text-align: center;
           padding-left: 0;
           line-height: 1.2;
