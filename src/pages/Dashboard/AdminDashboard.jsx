@@ -233,6 +233,20 @@ const AdminDashboard = () => {
     });
   };
 
+  const placeTextAtMarker = (certNode, markerId, text, className) => {
+    const marker = certNode.querySelector(`#${markerId}`);
+    if (!marker) return;
+
+    const field = document.createElement("div");
+    field.className = `field ${className}`;
+    field.textContent = safeLineField(text);
+    field.style.top = `${marker.offsetTop}px`;
+    field.style.left = `${marker.offsetLeft}px`;
+    field.style.width = `${marker.offsetWidth}px`;
+    field.style.height = `${marker.offsetHeight}px`;
+    certNode.appendChild(field);
+  };
+
   const buildCertificateNode = (row, backgroundUrl, certMeta) => {
     const wrapper = document.createElement("div");
     wrapper.style.position = "absolute";
@@ -271,61 +285,92 @@ const AdminDashboard = () => {
           position: absolute;
           color: #243a8c;
           font-weight: 700;
-          text-align: center;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          min-height: 44px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          line-height: 1.2;
+          line-height: 1.1;
           text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
           z-index: 2;
         }
-        .field-kpm {
+        .marker {
+          position: absolute;
+          opacity: 0;
+          pointer-events: none;
+          z-index: 1;
+        }
+        #marker-kpm {
           top: 830px;
           left: 260px;
           width: 380px;
-          font-size: 32px;
-          justify-content: flex-start;
-          text-align: left;
+          height: 50px;
         }
-        .field-name {
+        #marker-name {
           top: 1150px;
           left: 510px;
           width: 650px;
-          font-size: 48px;
+          height: 60px;
         }
-        .field-semester {
+        #marker-semester {
           top: 1285px;
-          left: 485px;
-          width: 160px;
-          font-size: 34px;
-        }
-        .field-department {
-          top: 1285px;
-          left: 800px;
-          width: 320px;
-          font-size: 34px;
-        }
-        .field-competition {
-          top: 1400px;
-          left: 680px;
-          width: 260px;
-          font-size: 34px;
-        }
-        .field-year {
-          top: 1510px;
-          left: 1030px;
+          left: 520px;
           width: 150px;
-          font-size: 34px;
+          height: 50px;
         }
-        .field-position {
+        #marker-department {
+          top: 1285px;
+          left: 820px;
+          width: 300px;
+          height: 50px;
+        }
+        #marker-competition {
+          top: 1400px;
+          left: 710px;
+          width: 240px;
+          height: 50px;
+        }
+        #marker-year {
+          top: 1510px;
+          left: 1060px;
+          width: 130px;
+          height: 50px;
+        }
+        #marker-position {
           top: 1620px;
           left: 840px;
           width: 200px;
+          height: 50px;
+        }
+        .field-kpm {
+          font-size: 32px;
+          text-align: left;
+        }
+        .field-name {
+          font-size: 48px;
+          text-align: center;
+        }
+        .field-semester {
           font-size: 34px;
+          text-align: left;
+          padding-left: 10px;
+        }
+        .field-department {
+          font-size: 34px;
+          text-align: left;
+          padding-left: 10px;
+        }
+        .field-competition {
+          font-size: 34px;
+          text-align: left;
+          padding-left: 10px;
+        }
+        .field-year {
+          font-size: 34px;
+          text-align: left;
+          padding-left: 10px;
+        }
+        .field-position {
+          font-size: 34px;
+          text-align: center;
         }
         .field-cert-id {
           bottom: 140px;
@@ -356,18 +401,29 @@ const AdminDashboard = () => {
       <div class="cert-wrap">
         <div class="cert">
           <img class="cert-bg" src="${backgroundUrl}" alt="Certificate background" />
-          <div class="field field-kpm">${escapeHtml(safeLineField(row.kpmNo))}</div>
-          <div class="field field-name">${escapeHtml(safeLineField(row.name))}</div>
-          <div class="field field-semester">${escapeHtml(safeLineField(row.semester))}</div>
-          <div class="field field-department">${escapeHtml(safeLineField(row.department))}</div>
-          <div class="field field-competition">${escapeHtml(safeLineField(row.competition))}</div>
-          <div class="field field-year">${escapeHtml(safeLineField(row.year))}</div>
-          <div class="field field-position">${escapeHtml(safeLineField(row.position))}</div>
+          <div id="marker-kpm" class="marker"></div>
+          <div id="marker-name" class="marker"></div>
+          <div id="marker-semester" class="marker"></div>
+          <div id="marker-department" class="marker"></div>
+          <div id="marker-competition" class="marker"></div>
+          <div id="marker-year" class="marker"></div>
+          <div id="marker-position" class="marker"></div>
           <div class="field field-cert-id">Certificate ID: ${escapeHtml(safeLineField(certMeta.certificateId))}</div>
           <img class="qr-code" src="${certMeta.qrImage}" alt="Certificate verification QR" />
         </div>
       </div>
     `;
+
+    const certNode = wrapper.querySelector(".cert");
+    if (certNode) {
+      placeTextAtMarker(certNode, "marker-kpm", row.kpmNo, "field-kpm");
+      placeTextAtMarker(certNode, "marker-name", row.name, "field-name");
+      placeTextAtMarker(certNode, "marker-semester", row.semester, "field-semester");
+      placeTextAtMarker(certNode, "marker-department", row.department, "field-department");
+      placeTextAtMarker(certNode, "marker-competition", row.competition, "field-competition");
+      placeTextAtMarker(certNode, "marker-year", row.year, "field-year");
+      placeTextAtMarker(certNode, "marker-position", row.position, "field-position");
+    }
 
     return wrapper;
   };
