@@ -270,59 +270,61 @@ const AdminDashboard = () => {
         .field {
           position: absolute;
           color: #243a8c;
-          font-weight: 700;
+          font-weight: 600;
           text-align: center;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          min-height: 36px;
-          line-height: 1.2;
+          min-height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          line-height: 1.1;
           text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
           z-index: 2;
         }
         .field-kpm {
-          top: 850px;
+          top: 824px;
           left: 290px;
           width: 360px;
           font-size: 34px;
-          text-align: left;
+          justify-content: flex-start;
           min-height: 44px;
         }
         .field-name {
-          top: 1190px;
-          left: 505px;
-          width: 625px;
-          font-size: 46px;
-          line-height: 1.2;
+          top: 1126px;
+          left: 495px;
+          width: 645px;
+          font-size: 44px;
         }
         .field-semester {
-          top: 1318px;
+          top: 1258px;
           left: 482px;
           width: 190px;
           font-size: 34px;
         }
         .field-department {
-          top: 1318px;
-          left: 785px;
-          width: 310px;
+          top: 1258px;
+          left: 775px;
+          width: 330px;
           font-size: 34px;
         }
         .field-competition {
-          top: 1432px;
-          left: 675px;
-          width: 285px;
+          top: 1372px;
+          left: 665px;
+          width: 305px;
           font-size: 34px;
         }
         .field-year {
-          top: 1543px;
-          left: 1018px;
+          top: 1488px;
+          left: 1008px;
           width: 172px;
           font-size: 34px;
         }
         .field-position {
-          top: 1652px;
-          left: 832px;
-          width: 218px;
+          top: 1598px;
+          left: 822px;
+          width: 238px;
           font-size: 34px;
         }
         .field-semester,
@@ -330,8 +332,7 @@ const AdminDashboard = () => {
         .field-competition,
         .field-year,
         .field-position {
-          line-height: 34px;
-          padding-bottom: 5px;
+          padding-bottom: 0;
         }
         .field-cert-id {
           bottom: 190px;
