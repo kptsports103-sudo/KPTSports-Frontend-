@@ -90,7 +90,7 @@ function Home() {
 
   return (
     <main className="home-page">
-      <section className="home-hero">
+      <section id="hero" className="home-hero">
         <div className="home-hero__overlay" />
         <div className="home-hero__lights" />
         {activeBanner?.year ? <span className="banner-year">{activeBanner.year}</span> : null}
@@ -147,7 +147,7 @@ function Home() {
       </section>
 
       {content.announcements.length > 0 ? (
-        <section className="section-shell">
+        <section id="announcements" className="section-shell">
           <header className="section-header">
             <h2>Latest Announcements</h2>
           </header>
@@ -163,7 +163,7 @@ function Home() {
       ) : null}
 
       {content.sportsCategories.length > 0 ? (
-        <section className="section-shell">
+        <section id="sports-categories" className="section-shell">
           <header className="section-header">
             <h2>Sports Categories</h2>
           </header>
@@ -180,7 +180,7 @@ function Home() {
       ) : null}
 
       {content.clubs.length > 0 ? (
-        <section className="section-shell club-section">
+        <section id="clubs" className="section-shell club-section">
           <header className="section-header">
             <h2>Clubs and Activities</h2>
           </header>
@@ -207,7 +207,7 @@ function Home() {
       ) : null}
 
       {content.gallery.length > 0 ? (
-        <section className="section-shell">
+        <section id="gallery" className="section-shell">
           <header className="section-header section-header--with-action">
             <h2>Photo Gallery Preview</h2>
             <button className="section-view-more" type="button" onClick={() => navigate('/gallery')}>
@@ -226,7 +226,7 @@ function Home() {
       ) : null}
 
       {content.upcomingEvents.length > 0 ? (
-        <section className="section-shell">
+        <section id="events" className="section-shell">
           <header className="section-header">
             <h2>Upcoming Events</h2>
           </header>

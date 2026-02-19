@@ -459,3 +459,118 @@
     max-height: 80vh;
   }
 }
+
+/* View Toggle Buttons */
+.view-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 4px;
+  background: #e8eef7;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+.view-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: transparent;
+  color: #546b8a;
+  transition: all 0.2s ease;
+}
+
+.view-btn:hover {
+  background: rgba(255, 255, 255, 0.5);
+  color: #2a4a70;
+}
+
+.view-btn.active {
+  background: #fff;
+  color: #1a3a5c;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Sections Table */
+.sections-table-wrapper {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.sections-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.sections-table thead {
+  background: linear-gradient(135deg, #f0f4fa, #e5ecf5);
+}
+
+.sections-table th {
+  padding: 16px 20px;
+  text-align: left;
+  font-weight: 700;
+  color: #1e3a5f;
+  border-bottom: 2px solid #d0dce8;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sections-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e8eef4;
+  color: #3d5a7a;
+}
+
+.sections-table tr:last-child td {
+  border-bottom: none;
+}
+
+.sections-table tr:hover {
+  background: #f8faff;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: #e6f7e9;
+  color: #1a5c26;
+}
+
+.status-badge.inactive {
+  background: #fce8e8;
+  color: #8a2c2c;
+}
+
+.table-link {
+  display: inline-block;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #4f6ef7, #6b7ff3);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.table-link:hover {
+  background: linear-gradient(135deg, #3d5ee6, #5a6ee3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 110, 247, 0.35);
+}
+ 

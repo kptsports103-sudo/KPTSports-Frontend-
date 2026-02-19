@@ -26,6 +26,7 @@ const ManageHome = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [toastTitle, setToastTitle] = useState('KPT Sports CMS');
   const [toastMessage, setToastMessage] = useState('Home page content has been updated successfully. All changes are now live on the website.');
+  const [viewMode, setViewMode] = useState('grid');
 
   useEffect(() => {
     fetchContent();
@@ -181,7 +182,101 @@ const ManageHome = () => {
         <PageLatestChangeCard pageName="Home Page" />
 
         {!isEditing ? (
-          <div className="preview-grid">
+          <>
+            <div className="view-toggle">
+              <button 
+                className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`} 
+                onClick={() => setViewMode('grid')}
+              >
+                Grid View
+              </button>
+              <button 
+                className={`view-btn ${viewMode === 'table' ? 'active' : ''}`} 
+                onClick={() => setViewMode('table')}
+              >
+                Table View
+              </button>
+            </div>
+            
+            {viewMode === 'table' ? (
+              <div className="sections-table-wrapper">
+                <table className="sections-table">
+                  <thead>
+                    <tr>
+                      <th>Section</th>
+                      <th>Items</th>
+                      <th>Status</th>
+                      <th>Link to Home</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Hero Section</strong></td>
+                      <td>{content.heroButtons.length} buttons</td>
+                      <td><span className="status-badge active">Active</span></td>
+                      <td><a href="/#hero" className="table-link" target="_self">View on Home</a></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Achievements</strong></td>
+                      <td>{content.achievements.length} items</td>
+                      <td><span className={`status-badge ${content.achievements.length > 0 ? 'active' : 'inactive'}`}>
+                        {content.achievements.length > 0 ? 'Active' : 'Empty'}
+                      </span></td>
+                      <td><a href="/#hero" className="table-link" target="_self">View on Home</a></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Announcements</strong></td>
+                      <td>{content.announcements.length} items</td>
+                      <td><span className={`status-badge ${content.announcements.length > 0 ? 'active' : 'inactive'}`}>
+                        {content.announcements.length > 0 ? 'Active' : 'Empty'}
+                      </span></td>
+                      <td><a href="/#announcements" className="table-link" target="_self">View on Home</a></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Sports Categories</strong></td>
+                      <td>{content.sportsCategories.length} categories</td>
+                      <td><span className={`status-badge ${content.sportsCategories.length > 0 ? 'active' : 'inactive'}`}>
+                        {content.sportsCategories.length > 0 ? 'Active' : 'Empty'}
+                      </span></td>
+                      <td><a href="/#sports-categories" className="table-link" target="_self">View on Home</a></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Clubs and Activities</strong></td>
+                      <td>{content.clubs.length} clubs</td>
+                      <td><span className={`status-badge ${content.clubs.length > 0 ? 'active' : 'inactive'}`}>
+                        {content.clubs.length > 0 ? 'Active' : 'Empty'}
+                      </span></td>
+                      <td><a href="/#clubs" className="table-link" target="_self">View on Home</a></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Gallery</strong></td>
+                      <td>{content.gallery.length} images</td>
+                      <td><span className={`status-badge ${content.gallery.length > 0 ? 'active' : 'inactive'}`}>
+                        {content.gallery.length > 0 ? 'Active' : 'Empty'}
+                      </span></td>
+                      <td><a href="/#gallery" className="table-link" target="_self">View on Home</a></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Upcoming Events</strong></td>
+                      <td>{content.upcomingEvents.length} events</td>
+                      <td><span className={`status-badge ${content.upcomingEvents.length > 0 ? 'active' : 'inactive'}`}>
+                        {content.upcomingEvents.length > 0 ? 'Active' : 'Empty'}
+                      </span></td>
+                      <td><a href="/#events" className="table-link" target="_self">View on Home</a></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Banners</strong></td>
+                      <td>{content.banners.length} banners</td>
+                      <td><span className={`status-badge ${content.banners.length > 0 ? 'active' : 'inactive'}`}>
+                        {content.banners.length > 0 ? 'Active' : 'Empty'}
+                      </span></td>
+                      <td><a href="/#hero" className="table-link" target="_self">View on Home</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="preview-grid">
             <section className="admin-card">
               <h3>Hero Section</h3>
               <p><strong>Title:</strong> {content.heroTitle}</p>
@@ -278,7 +373,9 @@ const ManageHome = () => {
                 ))}
               </div>
             </section>
-          </div>
+            </div>
+            )}
+          </>
         ) : (
           <div className="cms-layout">
             <div className="cms-editor">
