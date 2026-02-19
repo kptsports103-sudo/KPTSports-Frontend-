@@ -240,10 +240,10 @@ const AdminDashboard = () => {
     const field = document.createElement("div");
     field.className = `field ${className}`;
     field.textContent = safeLineField(text);
-    field.style.top = `${marker.offsetTop}px`;
-    field.style.left = `${marker.offsetLeft}px`;
-    field.style.width = `${marker.offsetWidth}px`;
-    field.style.height = `${marker.offsetHeight}px`;
+    field.style.top = marker.style.top || `${marker.offsetTop}px`;
+    field.style.left = marker.style.left || `${marker.offsetLeft}px`;
+    field.style.width = marker.style.width || `${marker.offsetWidth}px`;
+    field.style.height = marker.style.height || `${marker.offsetHeight || 50}px`;
     certNode.appendChild(field);
   };
 
@@ -297,48 +297,6 @@ const AdminDashboard = () => {
           opacity: 0;
           pointer-events: none;
           z-index: 1;
-        }
-        #marker-kpm {
-          top: 830px;
-          left: 260px;
-          width: 380px;
-          height: 50px;
-        }
-        #marker-name {
-          top: 1150px;
-          left: 510px;
-          width: 650px;
-          height: 60px;
-        }
-        #marker-semester {
-          top: 1285px;
-          left: 520px;
-          width: 150px;
-          height: 50px;
-        }
-        #marker-department {
-          top: 1285px;
-          left: 820px;
-          width: 300px;
-          height: 50px;
-        }
-        #marker-competition {
-          top: 1400px;
-          left: 710px;
-          width: 240px;
-          height: 50px;
-        }
-        #marker-year {
-          top: 1510px;
-          left: 1060px;
-          width: 130px;
-          height: 50px;
-        }
-        #marker-position {
-          top: 1620px;
-          left: 840px;
-          width: 200px;
-          height: 50px;
         }
         .field-kpm {
           font-size: 32px;
@@ -401,13 +359,13 @@ const AdminDashboard = () => {
       <div class="cert-wrap">
         <div class="cert">
           <img class="cert-bg" src="${backgroundUrl}" alt="Certificate background" />
-          <div id="marker-kpm" class="marker"></div>
-          <div id="marker-name" class="marker"></div>
-          <div id="marker-semester" class="marker"></div>
-          <div id="marker-department" class="marker"></div>
-          <div id="marker-competition" class="marker"></div>
-          <div id="marker-year" class="marker"></div>
-          <div id="marker-position" class="marker"></div>
+          <div id="marker-kpm" class="marker" style="top:830px;left:260px;width:380px;height:50px;"></div>
+          <div id="marker-name" class="marker" style="top:1150px;left:510px;width:650px;height:60px;"></div>
+          <div id="marker-semester" class="marker" style="top:1285px;left:520px;width:150px;height:50px;"></div>
+          <div id="marker-department" class="marker" style="top:1285px;left:820px;width:300px;height:50px;"></div>
+          <div id="marker-competition" class="marker" style="top:1400px;left:710px;width:240px;height:50px;"></div>
+          <div id="marker-year" class="marker" style="top:1510px;left:1060px;width:130px;height:50px;"></div>
+          <div id="marker-position" class="marker" style="top:1620px;left:840px;width:200px;height:50px;"></div>
           <div class="field field-cert-id">Certificate ID: ${escapeHtml(safeLineField(certMeta.certificateId))}</div>
           <img class="qr-code" src="${certMeta.qrImage}" alt="Certificate verification QR" />
         </div>
