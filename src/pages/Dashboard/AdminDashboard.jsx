@@ -270,62 +270,70 @@ const AdminDashboard = () => {
         .field {
           position: absolute;
           color: #243a8c;
-          font-weight: 600;
+          font-weight: 700;
           text-align: center;
           white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          min-height: 44px;
+          overflow: visible;
+          text-overflow: clip;
+          min-height: 72px;
           display: flex;
-          align-items: center;
+          align-items: flex-end;
           justify-content: center;
-          line-height: 1.1;
+          line-height: 1;
+          padding: 0 8px 6px;
           text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
           z-index: 2;
         }
         .field-kpm {
-          top: 824px;
+          top: 852px;
           left: 290px;
           width: 360px;
           font-size: 34px;
           justify-content: flex-start;
-          min-height: 44px;
+          min-height: 68px;
+          transform: translateY(-50%);
         }
         .field-name {
-          top: 1126px;
-          left: 495px;
-          width: 645px;
-          font-size: 44px;
+          top: 1188px;
+          left: 500px;
+          width: 635px;
+          font-size: 46px;
+          transform: translateY(-50%);
         }
         .field-semester {
-          top: 1258px;
+          top: 1318px;
           left: 482px;
           width: 190px;
           font-size: 34px;
+          transform: translateY(-50%);
         }
         .field-department {
-          top: 1258px;
-          left: 775px;
-          width: 330px;
+          top: 1318px;
+          left: 785px;
+          width: 320px;
           font-size: 34px;
+          transform: translateY(-50%);
         }
         .field-competition {
-          top: 1372px;
-          left: 665px;
-          width: 305px;
+          top: 1432px;
+          left: 672px;
+          width: 300px;
           font-size: 34px;
+          transform: translateY(-50%);
         }
         .field-year {
-          top: 1488px;
-          left: 1008px;
+          top: 1546px;
+          left: 1015px;
           width: 172px;
           font-size: 34px;
+          transform: translateY(-50%);
         }
         .field-position {
-          top: 1598px;
-          left: 822px;
-          width: 238px;
+          top: 1652px;
+          left: 832px;
+          width: 228px;
           font-size: 34px;
+          transform: translateY(-50%);
         }
         .field-semester,
         .field-department,
