@@ -305,6 +305,7 @@ const Players = ({ isStudent = false }) => {
 
     // Backup last known good state
     setLastSavedData(JSON.parse(JSON.stringify(data)));
+    setData(validData);
     setIsSaving(true);
 
     try {

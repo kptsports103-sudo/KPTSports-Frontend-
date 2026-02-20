@@ -665,7 +665,7 @@ export default function PerformanceAnalytics() {
                 <div className="player-header">
                   <h2>{player.name}</h2>
                   <div style={{ fontSize: "12px", color: "#6c757d" }}>
-                    {player.kpmNo || "No KPM"}
+                    KPM: {player.kpmNo || "Not Assigned"}
                   </div>
                   <span className="dept">{player.branch}</span>
                 </div>
