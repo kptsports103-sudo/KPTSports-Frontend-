@@ -2,7 +2,7 @@
 
 import { Link } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import DailyVisitorsChart from "../../admin/components/DailyVisitorsChart";
 import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonChart";
 import { jsPDF } from "jspdf";
@@ -277,11 +277,11 @@ const AdminDashboard = () => {
   // ============================================
   // ENTERPRISE V5 - BACKGROUND IMAGE CACHE
   // ============================================
-  let cachedBackground = null;
+  const cachedBackgroundRef = useRef(null);
 
   const preloadCertificateBackground = async () => {
     // Return cached background if available
-    if (cachedBackground) return cachedBackground;
+    if (cachedBackgroundRef.current) return cachedBackgroundRef.current;
     
     for (const candidate of CERT_BG_CANDIDATES) {
       const loaded = await new Promise((resolve) => {
@@ -291,7 +291,7 @@ const AdminDashboard = () => {
         image.src = candidate;
       });
       if (loaded) {
-        cachedBackground = candidate; // Cache for subsequent calls
+        cachedBackgroundRef.current = candidate; // Cache for subsequent calls
         return candidate;
       }
     }
@@ -507,6 +507,87 @@ const AdminDashboard = () => {
     }
   };
 
+  // ============================================
+  // ENTERPRISE V5 - BACKEND PDF GENERATION
+  // ============================================
+  // Uses server-side Puppeteer for better performance
+  // and unlimited batch generation
+
+  const handleDownloadCertificateBackend = async (row, existingCertificate = null) => {
+    if (!row || !row.name) {
+      alert("Invalid certificate data");
+      return;
+    }
+
+    const actionKey = getActionKey(row);
+    setIsGeneratingId(actionKey);
+
+    try {
+      // Issue certificate if not exists
+      const issueResult = existingCertificate 
+        ? { certificate: existingCertificate } 
+        : await issueCertificate(row);
+      
+      const issuedCertificate = issueResult?.certificate;
+      const certificateId = issuedCertificate?.certificateId;
+
+      if (!certificateId) {
+        throw new Error("Could not issue certificate ID.");
+      }
+
+      // Generate QR code
+      const qrImage = await generateCertificateQr(certificateId);
+
+      // Get background URL
+      const backgroundUrl = await preloadCertificateBackground();
+      const absoluteBackgroundUrl = backgroundUrl
+        ? new URL(backgroundUrl, window.location.origin).toString()
+        : "";
+
+      // Call backend to generate PDF
+      const response = await api.post("/certificates/generate-pdf", {
+        certificateData: {
+          name: row.name,
+          kpmNo: row.kpmNo,
+          semester: row.semester,
+          department: row.department,
+          competition: row.competition,
+          position: row.position,
+          year: row.year,
+          certificateId: certificateId,
+          qrImage: qrImage,
+          backgroundUrl: absoluteBackgroundUrl,
+        },
+      }, {
+        responseType: 'blob',
+      });
+
+      // Download the PDF
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const safeName = (row.name || "student")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+      const safeCertId = String(certificateId).toLowerCase().replace(/[^a-z0-9-]+/g, "");
+      link.download = `certificate-${safeName || "student"}-${safeCertId || "cert"}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      await fetchIssuedCertificates();
+    } catch (error) {
+      console.error("Failed to generate certificate PDF (backend):", error);
+      const reason = error?.response?.data?.message || error?.message || "Unknown error";
+      alert(`Failed to generate certificate: ${reason}`);
+    } finally {
+      setIsGeneratingId(null);
+    }
+  };
+
   const handleDownloadCertificate = async (row, existingCertificate = null) => {
     if (!row || !row.name) {
       alert("Invalid certificate data");
@@ -549,8 +630,11 @@ const AdminDashboard = () => {
       // ENTERPRISE V5 - PERFORMANCE FIX
       // ============================================
       // Reset transform to prevent blurry PDF and font distortion
-      certNode.style.transform = "scale(1)";
-      certNode.style.transformOrigin = "top left";
+      // Note: Use 'cert' variable, not 'certNode'
+      if (cert) {
+        cert.style.transform = "scale(1)";
+        cert.style.transformOrigin = "top left";
+      }
 
       const safeScale = Math.min(
         CERT_RENDER_SCALE,
@@ -614,15 +698,23 @@ const AdminDashboard = () => {
 
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
   const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0 });
+  
+  // ============================================
+  // ENTERPRISE V5 - RENDERING MODE SELECTOR
+  // ============================================
+  // 'frontend' = html2canvas (original)
+  // 'backend' = Puppeteer server-side (recommended for batch)
+  const [renderingMode, setRenderingMode] = useState('frontend');
 
-  const generateBatchCertificates = async (rows) => {
+  const generateBatchCertificates = async (rows, useBackend = false) => {
     if (!rows || rows.length === 0) {
       alert("No certificates to generate");
       return;
     }
 
+    const modeText = useBackend ? "backend (server-side)" : "frontend (browser)";
     const confirmed = window.confirm(
-      `Generate ${rows.length} certificates? This may take a while.`
+      `Generate ${rows.length} certificates using ${modeText}?`
     );
     if (!confirmed) return;
 
@@ -631,26 +723,58 @@ const AdminDashboard = () => {
 
     let successCount = 0;
     let failCount = 0;
+    const useBackendMode = useBackend || renderingMode === 'backend';
 
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      setBatchProgress({ current: i + 1, total: rows.length });
-      setIsGeneratingId(getActionKey(row));
+    if (useBackendMode) {
+      // Limited concurrency for server-side rendering to improve batch speed
+      // while avoiding unbounded request spikes.
+      const maxConcurrent = 3;
+      let nextIndex = 0;
+      let completed = 0;
 
-      try {
-        // Check if already issued
-        const rowKey = getRowCertificateKey(row);
-        const existingCert = issuedCertificateByRowKey.get(rowKey);
+      const runWorker = async () => {
+        while (true) {
+          const currentIndex = nextIndex;
+          nextIndex += 1;
+          if (currentIndex >= rows.length) return;
 
-        await handleDownloadCertificate(row, existingCert || null);
-        successCount++;
-      } catch (error) {
-        console.error(`Failed to generate certificate for ${row.name}:`, error);
-        failCount++;
+          const row = rows[currentIndex];
+          try {
+            const rowKey = getRowCertificateKey(row);
+            const existingCert = issuedCertificateByRowKey.get(rowKey);
+            await handleDownloadCertificateBackend(row, existingCert || null);
+            successCount++;
+          } catch (error) {
+            console.error(`Failed to generate certificate for ${row.name}:`, error);
+            failCount++;
+          } finally {
+            completed += 1;
+            setBatchProgress({ current: completed, total: rows.length });
+          }
+        }
+      };
+
+      const workerCount = Math.min(maxConcurrent, rows.length);
+      await Promise.all(Array.from({ length: workerCount }, () => runWorker()));
+    } else {
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        setBatchProgress({ current: i + 1, total: rows.length });
+        setIsGeneratingId(getActionKey(row));
+
+        try {
+          const rowKey = getRowCertificateKey(row);
+          const existingCert = issuedCertificateByRowKey.get(rowKey);
+          await handleDownloadCertificate(row, existingCert || null);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to generate certificate for ${row.name}:`, error);
+          failCount++;
+        }
+
+        // Small delay between frontend generations to prevent browser freeze.
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
-
-      // Small delay between generations to prevent browser freeze
-      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     setIsBatchGenerating(false);
@@ -662,6 +786,11 @@ const AdminDashboard = () => {
     // ============================================
     // Force garbage collection after batch processing
     window.gc && window.gc();
+    
+    alert(
+      `Batch generation complete!\nSuccess: ${successCount}\nFailed: ${failCount}`
+    );
+    
     await fetchIssuedCertificates();
   };
 
@@ -1084,6 +1213,22 @@ const AdminDashboard = () => {
               {showBatchControls ? '👁️ Hide' : '☑️ Batch Select'} ({selectedCertificates.size})
             </button>
             
+            {/* Rendering Mode Selector */}
+            <select
+              value={renderingMode}
+              onChange={(e) => setRenderingMode(e.target.value)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '6px',
+                border: '1px solid #ccc',
+                fontSize: '14px',
+                cursor: 'pointer',
+              }}
+            >
+              <option value="frontend">🌐 Frontend (Browser)</option>
+              <option value="backend">⚡ Backend (Server)</option>
+            </select>
+            
             {showBatchControls && (
               <>
                 <button
@@ -1100,7 +1245,7 @@ const AdminDashboard = () => {
                 </button>
                 <button
                   className="download-btn"
-                  onClick={() => handleGenerateSelectedCertificates(getSelectedRows())}
+                  onClick={() => generateBatchCertificates(getSelectedRows(), renderingMode === 'backend')}
                   disabled={selectedCertificates.size === 0 || isBatchGenerating}
                   style={{ background: '#10b981' }}
                 >
@@ -1110,7 +1255,7 @@ const AdminDashboard = () => {
                 </button>
                 <button
                   className="download-btn"
-                  onClick={handleGenerateAllCertificates}
+                  onClick={() => generateBatchCertificates(certificateRows, renderingMode === 'backend')}
                   disabled={isBatchGenerating}
                   style={{ background: '#3b82f6' }}
                 >
