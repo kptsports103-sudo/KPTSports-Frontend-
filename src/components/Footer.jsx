@@ -18,9 +18,43 @@ import {
 const Footer = () => {
   return (
     <footer className="footer">
-      {/* Top Section */}
-      <div className="footer-container">
+      {/* Info Bar */}
+      <div className="footer-info">
+        <span>Last Updated: 2026</span>
+        <VisitorCounter />
+        <span>Version: KPT Sports Website 1.0</span>
+      </div>
 
+      {/* Institute + Developer Section */}
+      <div className="footer-institute-grid">
+        {/* LEFT */}
+        <div className="footer-meta">
+          <p className="footer-heading">
+            <FaUniversity /> KARNATAKA (GOVT.) POLYTECHNIC, MANGALORE
+          </p>
+          <p className="footer-sub">
+            (An Autonomous Institution Under AICTE, New Delhi)
+          </p>
+
+          <p><strong>Project:</strong> KPT Sports Website</p>
+          <p><strong>Department:</strong> Computer Science & Engineering (CSE)</p>
+          <p><strong>Semester:</strong> Diploma - 6th Semester</p>
+        </div>
+
+        {/* RIGHT */}
+        <div className="footer-developer">
+          <p className="footer-heading">
+            <FaUserGraduate /> Developed By: <strong>D. Yashawantha Reddy</strong>
+          </p>
+          <p>Diploma CSE Student</p>
+          <p><FaPhoneAlt /> Mobile: +91 XXXXX XX195</p>
+          <p><FaEnvelope /> yashwanth@kpt.edu</p>
+          <p><strong>Website Launch:</strong> 2026</p>
+        </div>
+      </div>
+
+      {/* Lower Section */}
+      <div className="footer-container">
         {/* Disclaimer */}
         <div className="footer-box">
           <h4 className="footer-title">Disclaimer</h4>
@@ -71,43 +105,6 @@ const Footer = () => {
             <li><FaClipboardList /> <button className="footer-link">Guidelines</button></li>
           </ul>
         </div>
-      </div>
-
-      {/* Info Bar */}
-      <div className="footer-info">
-        <span>Last Updated: 2026</span>
-        <VisitorCounter />
-        <span>Version: KPT Sports Website 1.0</span>
-      </div>
-
-      {/* Institute + Developer Section */}
-      <div className="footer-institute-grid">
-
-        {/* LEFT */}
-        <div className="footer-meta">
-          <p className="footer-heading">
-            <FaUniversity /> KARNATAKA (GOVT.) POLYTECHNIC, MANGALORE
-          </p>
-          <p className="footer-sub">
-            (An Autonomous Institution Under AICTE, New Delhi)
-          </p>
-
-          <p><strong>Project:</strong> KPT Sports Website</p>
-          <p><strong>Department:</strong> Computer Science & Engineering (CSE)</p>
-          <p><strong>Semester:</strong> Diploma – 6th Semester</p>
-        </div>
-
-        {/* RIGHT */}
-        <div className="footer-developer">
-          <p className="footer-heading">
-            <FaUserGraduate /> Developed By: <strong>D. Yashawantha Reddy</strong>
-          </p>
-          <p>Diploma CSE Student</p>
-          <p><FaPhoneAlt /> Mobile: +91 XXXXX XX195</p>
-          <p><FaEnvelope /> yashwanth@kpt.edu</p>
-          <p><strong>Website Launch:</strong> 2026</p>
-        </div>
-
       </div>
 
       {/* Bottom Bar */}
