@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import api from '../../services/api';
 import { useAutoSave } from '../../hooks/useAutoSave';
+import { FaPlusCircle } from 'react-icons/fa';
 
 const Players = ({ isStudent = false }) => {
   const [data, setData] = useState([]);
@@ -577,7 +578,7 @@ const Players = ({ isStudent = false }) => {
       
 
       {/* Section Title */}
-      <div style={styles.sectionTitle}>Players List</div>
+      <div style={styles.sectionTitle}>KPT Sports Players List</div>
 
       {/* Year Selector */}
       <div style={{ textAlign: 'center', marginBottom: '15px' }}>
@@ -1025,11 +1026,7 @@ const Players = ({ isStudent = false }) => {
                     gap: "6px",
                   }}
                 >
-                  <img
-                    src="/Add button.png"
-                    alt="Add"
-                    style={{ width: 16, height: 16 }}
-                  />
+                  <FaPlusCircle size={16} color="#16a34a" aria-hidden="true" />
                   Add Player
                 </button>
               </div>
@@ -1061,9 +1058,14 @@ const styles = {
 
   sectionTitle: {
     textAlign: "center",
-    fontSize: "18px",
-    fontWeight: "600",
+    fontSize: "20px",
+    fontWeight: "700",
     marginBottom: "15px",
+    color: "#0f172a",
+    background: "linear-gradient(90deg, #dbeafe, #e0f2fe)",
+    border: "1px solid #bfdbfe",
+    borderRadius: "8px",
+    padding: "10px 14px",
   },
 
   yearCard: {

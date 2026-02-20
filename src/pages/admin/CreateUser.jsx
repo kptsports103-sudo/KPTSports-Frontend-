@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IAMService } from "../../services/iam.service";
 import { useAuth } from "../../context/AuthContext";
@@ -59,9 +59,9 @@ const CreateUser = () => {
               onClick={() => navigate("/admin/iam/users")}
               className="text-gray-600 hover:text-gray-800"
             >
-              ← Back
+              â† Back
             </button>
-            <h1 className="text-xl font-semibold text-gray-900">Create User</h1>
+            <h1 className="text-xl font-semibold text-gray-900">KPT Sports Account Created</h1>
           </div>
 
           <p className="text-sm text-gray-500 mb-6">

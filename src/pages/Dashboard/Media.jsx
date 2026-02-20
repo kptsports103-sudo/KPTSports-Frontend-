@@ -1,4 +1,4 @@
-
+﻿
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -145,7 +145,7 @@ const Media = () => {
             marginBottom: "15px"
           }}
         >
-          <h3 style={{ fontSize: "34px", fontWeight: "700", color: "#000" }}>Media</h3>
+          <h3 style={{ fontSize: "34px", fontWeight: "700", color: "#000" }}>KPT Sports Media</h3>
           <Link
             to="/admin/add-media"
             style={{
@@ -268,7 +268,7 @@ const Media = () => {
                           fontSize: "14px"
                         }}
                       >
-                        ✔ Save
+                        âœ” Save
                       </button>
 
                       <button
@@ -284,7 +284,7 @@ const Media = () => {
                           fontSize: "14px"
                         }}
                       >
-                        ✖ Cancel
+                        âœ– Cancel
                       </button>
                     </div>
                   </div>
@@ -328,7 +328,7 @@ const Media = () => {
                         onMouseLeave={handleHoverOut}
                         title={copiedId === m.id ? "Copied!" : "Copy URL"}
                       >
-                        {copiedId === m.id ? "✅ Copied" : <img src="/Copy button.png" alt="Copy" style={{ width: '16px', height: '16px' }} />}
+                        {copiedId === m.id ? "âœ… Copied" : <img src="/Copy button.png" alt="Copy" style={{ width: '16px', height: '16px' }} />}
                       </button>
                       <button
                         onClick={() => enableEdit(m.id)}
@@ -367,3 +367,4 @@ const Media = () => {
 };
 
 export default Media;
+

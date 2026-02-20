@@ -50,6 +50,9 @@ const About = () => {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+      <div style={{ textAlign: 'center', padding: '1.25rem 1rem 0', fontSize: '1.8rem', fontWeight: 700, color: '#1f2937' }}>
+        KPT Sports About
+      </div>
       {/* Banner Images */}
       {content.bannerImages.length > 0 && (
         <div style={{ position: 'relative', height: '70vh', overflow: 'hidden' }}>

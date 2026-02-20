@@ -97,6 +97,9 @@ function Home() {
 
         <div className="home-hero__layout">
           <div className="home-hero__content">
+            <p style={{ margin: 0, fontSize: '14px', letterSpacing: '1px', fontWeight: 700, opacity: 0.9 }}>
+              KPT Sports Home
+            </p>
             <h1>{content.heroTitle}</h1>
             <p>{content.heroSubtitle}</p>
 

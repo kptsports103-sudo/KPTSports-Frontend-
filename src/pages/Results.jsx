@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 
 import api from '../services/api';
 
@@ -86,7 +86,7 @@ const Results = () => {
         textAlign: 'center',
         fontWeight: 'bold'
       }}>
-        🏆 Sports Results
+        ðŸ† KPT Sports Results
       </h1>
 
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
@@ -152,7 +152,7 @@ const Results = () => {
                     color: '#2c3e50',
                     fontWeight: '600'
                   }}>
-                    🏅 Individual Results
+                    ðŸ… Individual Results
                   </h3>
                   <div style={{ textAlign: 'center', marginBottom: 20 }}>
                     <input
@@ -213,7 +213,7 @@ const Results = () => {
                             fontSize: '2rem',
                             marginRight: '1rem'
                           }}>
-                            {result.medal === 'Gold' ? '🥇' : result.medal === 'Silver' ? '🥈' : '🥉'}
+                            {result.medal === 'Gold' ? 'ðŸ¥‡' : result.medal === 'Silver' ? 'ðŸ¥ˆ' : 'ðŸ¥‰'}
                           </span>
                           <div>
                             <h3 style={{
@@ -266,7 +266,7 @@ const Results = () => {
                                 fontWeight: '500'
                               }}
                             >
-                              📷 View Photo
+                              ðŸ“· View Photo
                             </button>
                           )}
                         </div>
@@ -285,7 +285,7 @@ const Results = () => {
                     color: '#2c3e50',
                     fontWeight: '600'
                   }}>
-                    🧑‍🤝‍🧑 Team Results
+                    ðŸ§‘â€ðŸ¤â€ðŸ§‘ Team Results
                   </h3>
                   <div style={{
                     display: 'grid',
@@ -321,7 +321,7 @@ const Results = () => {
                             fontSize: '2rem',
                             marginRight: '1rem'
                           }}>
-                            {result.medal === 'Gold' ? '🥇' : result.medal === 'Silver' ? '🥈' : '🥉'}
+                            {result.medal === 'Gold' ? 'ðŸ¥‡' : result.medal === 'Silver' ? 'ðŸ¥ˆ' : 'ðŸ¥‰'}
                           </span>
                           <div>
                             <h3 style={{
@@ -330,7 +330,7 @@ const Results = () => {
                               fontWeight: 'bold',
                               color: '#2c3e50'
                             }}>
-                              🏆 {result.teamName}
+                              ðŸ† {result.teamName}
                             </h3>
                             <p style={{
                               margin: '0.25rem 0',
@@ -412,7 +412,7 @@ const Results = () => {
                                 fontWeight: '500'
                               }}
                             >
-                              📷 View Photo
+                              ðŸ“· View Photo
                             </button>
                           )}
                         </div>
@@ -498,7 +498,7 @@ const Results = () => {
                 fontWeight: 'bold'
               }}
             >
-              �
+              ×
             </button>
           </div>
         </div>
@@ -511,5 +511,6 @@ const Results = () => {
 };
 
 export default Results;
+
 
 

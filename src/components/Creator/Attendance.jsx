@@ -136,7 +136,7 @@ const Attendance = ({ isStudent = false }) => {
       .filter(Boolean);
 
   const addYear = () => {
-    const yearInput = prompt("Enter year (e.g. 2026):");
+    const yearInput = prompt("Enter Attendance Year (e.g. 2026):");
     if (!yearInput) return;
 
     const year = Number(yearInput);
@@ -153,7 +153,7 @@ const Attendance = ({ isStudent = false }) => {
    
 
       {/* Section Title */}
-      <div style={styles.sectionTitle}>Attendance List</div>
+      <div style={styles.sectionTitle}>KPT Sports Attendance List</div>
 
       {/* White Card Container */}
       <div style={styles.card}>
@@ -397,14 +397,19 @@ const styles = {
 
   sectionTitle: {
     textAlign: "center",
-    fontSize: "18px",
-    fontWeight: 600,
+    fontSize: "20px",
+    fontWeight: 700,
     marginBottom: "20px",
-    opacity: 0.95,
+    opacity: 0.98,
+    color: "#0f172a",
+    background: "linear-gradient(90deg, #dbeafe, #e0f2fe)",
+    border: "1px solid #bfdbfe",
+    borderRadius: "8px",
+    padding: "10px 14px",
   },
 
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f8fbff",
     borderRadius: "6px",
     padding: "16px",
     boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
@@ -493,8 +498,8 @@ const styles = {
   },
 
   headerRow: {
-    backgroundColor: "#f3f4f6",
-    color: "#111827",
+    background: "linear-gradient(90deg, #0d6efd, #0a58ca)",
+    color: "#ffffff",
     height: "52px",
     fontSize: "13px",
     letterSpacing: "0.5px",

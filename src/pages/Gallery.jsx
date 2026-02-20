@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import api from "../services/api";
 
 const Gallery = () => {
@@ -25,7 +25,7 @@ const Gallery = () => {
     <div style={styles.page}>
       {/* Header */}
       <div style={styles.headerBox}>
-        <h1 style={styles.headerTitle}>🏅 Sports Gallery</h1>
+        <h1 style={styles.headerTitle}>ðŸ… KPT Sports Gallery</h1>
         <p style={styles.headerSub}>
           Athletic moments, victories & memories
         </p>
@@ -34,7 +34,7 @@ const Gallery = () => {
       {/* Empty */}
       {allMedia.length === 0 ? (
         <div style={styles.emptyBox}>
-          <span style={styles.emptyIcon}>📷</span>
+          <span style={styles.emptyIcon}>ðŸ“·</span>
           <p style={styles.emptyText}>More images coming soon</p>
         </div>
       ) : (
@@ -77,7 +77,7 @@ const Gallery = () => {
               <p style={styles.lightboxText}>{activeImage.overview}</p>
             )}
             <button style={styles.closeBtn} onClick={() => setActiveImage(null)}>
-              ✖
+              âœ–
             </button>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import api from '../services/api';
 
 const History = () => {
@@ -30,8 +30,8 @@ const History = () => {
 
   return (
     <div style={page}>
-      <h1 style={title}>45 Years of Sports Meets</h1>
-      <p style={subtitle}>Karnataka State Inter‑Polytechnic Timeline</p>
+      <h1 style={title}>KPT Sports History</h1>
+      <p style={subtitle}>Karnataka State Interâ€‘Polytechnic Timeline</p>
 
       <table style={table}>
         <thead>

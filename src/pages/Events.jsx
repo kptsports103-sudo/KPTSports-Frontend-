@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import api from '../services/api';
 
 const Events = () => {
@@ -47,7 +47,7 @@ const Events = () => {
 
   return (
     <div style={page}>
-      <h1 style={mainTitle}>Our Sports Details</h1>
+      <h1 style={mainTitle}>KPT Sports Events</h1>
 
       {/* ABOUT */}
       {about && (
@@ -242,7 +242,7 @@ const overviewText = {
   color: '#000'
 };
 
-/* 🔒 IMAGE BOX (FIXED) */
+/* ðŸ”’ IMAGE BOX (FIXED) */
 const imageBox = {
   width: '100%',
   height: '340px',
@@ -401,3 +401,4 @@ const eventDetails = {
 };
 
 export default Events;
+
