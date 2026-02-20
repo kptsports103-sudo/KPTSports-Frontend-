@@ -362,7 +362,7 @@ export default function PerformanceAnalysis() {
           player.aliasIds = Array.from(player.aliasIds);
         });
         
-        // Get available years from players
+        // Get available years from players + results for full year coverage.
         const allYears = [];
         Object.values(playersMap).forEach(player => {
           player.years.forEach(year => {
@@ -371,8 +371,31 @@ export default function PerformanceAnalysis() {
             }
           });
         });
+        resultsData.forEach((result) => {
+          const year = Number(result?.year);
+          if (Number.isFinite(year) && !allYears.includes(year)) {
+            allYears.push(year);
+          }
+        });
+        groupResultsData.forEach((result) => {
+          const year = Number(result?.year);
+          if (Number.isFinite(year) && !allYears.includes(year)) {
+            allYears.push(year);
+          }
+        });
         const sortedYears = Array.from(new Set(allYears)).sort((a, b) => b - a);
         setAvailableYears(sortedYears);
+
+        if (sortedYears.length > 0) {
+          const currentYear = new Date().getFullYear();
+          if (sortedYears.includes(currentYear)) {
+            setSelectedYear(String(currentYear));
+          } else {
+            setSelectedYear(String(sortedYears[0]));
+          }
+        } else {
+          setSelectedYear('all');
+        }
         
         setPlayers(Object.values(playersMap));
         setAllPlayers(Object.values(playersMap));

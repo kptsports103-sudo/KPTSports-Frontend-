@@ -4,6 +4,7 @@ import CreatorLayout from "../../components/CreatorLayout";
 import Players from '../../components/Creator/Players';
 import Attendance from '../../components/Creator/Attendance';
 import PerformanceAnalysis from '../../components/Creator/PerformanceAnalysis';
+import PlayerIntelligence from '../../components/Creator/PlayerIntelligence';
 import CreatorDashboardUI from '../../components/Creator/CreatorDashboard';
 
 const CreatorDashboard = () => {
@@ -30,6 +31,8 @@ const CreatorDashboard = () => {
         return <Attendance />;
       case 'performance':
         return <PerformanceAnalysis />;
+      case 'player-intelligence':
+        return <PlayerIntelligence />;
       default:
         return <CreatorDashboardUI onNavigate={handleTabChange} />;
     }
@@ -82,8 +85,9 @@ const CreatorDashboard = () => {
               {[
                 { key: 'overview', label: 'Overview' },
                 { key: 'players', label: 'Players' },
+                { key: 'player-intelligence', label: 'Player Intelligence' },
                 { key: 'attendance', label: 'Attendance' },
-                { key: 'performance', label: 'Performance Analytics' },
+                { key: 'performance', label: 'Performance Analysis' },
               ].map((tab) => (
                 <button
                   key={tab.key}
