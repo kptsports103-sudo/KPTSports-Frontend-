@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import api from '../../services/api';
 import { FaEye } from 'react-icons/fa';
+import { MdInsights } from 'react-icons/md';
 import PlayerIntelligencePanel from './PlayerIntelligencePanel';
 
 const PlayerIntelligence = () => {
@@ -12,6 +13,17 @@ const PlayerIntelligence = () => {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const currentYear = new Date().getFullYear();
   const ITEMS_PER_PAGE = 10;
+  const srOnlyStyle = {
+    position: 'absolute',
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: 'hidden',
+    clip: 'rect(0, 0, 0, 0)',
+    whiteSpace: 'nowrap',
+    border: 0,
+  };
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -178,10 +190,26 @@ const PlayerIntelligence = () => {
     <div className="player-intelligence">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-          ðŸŽ¯ Player Intelligence
+        <div
+          style={{
+            textAlign: "center",
+            fontSize: "20px",
+            fontWeight: 700,
+            marginBottom: "10px",
+            color: "#0f172a",
+            background: "linear-gradient(90deg, #dbeafe, #e0f2fe)",
+            border: "1px solid #bfdbfe",
+            borderRadius: "8px",
+            padding: "10px 14px",
+          }}
+        >
+          KPT Sports Player Intelligence
+        </div>
+        <h2 className="text-3xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
+          <MdInsights size={30} color="#0d6efd" />
+          Player Intelligence
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-lg">
           View and analyze player data across all years
         </p>
       </div>
@@ -189,7 +217,12 @@ const PlayerIntelligence = () => {
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-6">
         {/* Year Filter */}
+        <label htmlFor="player-intelligence-year" style={srOnlyStyle}>
+          Filter players by year
+        </label>
         <select
+          id="player-intelligence-year"
+          name="player-intelligence-year"
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -201,7 +234,12 @@ const PlayerIntelligence = () => {
         </select>
 
         {/* Search */}
+        <label htmlFor="player-intelligence-search" style={srOnlyStyle}>
+          Search players by name, KPM, or department
+        </label>
         <input
+          id="player-intelligence-search"
+          name="player-intelligence-search"
           type="text"
           placeholder="Search by name, KPM No, department..."
           value={searchInput}

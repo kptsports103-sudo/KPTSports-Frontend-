@@ -1144,8 +1144,8 @@ const styles = {
   },
 
   headerRow: {
-    backgroundColor: "#f3f4f6",
-    color: "#111827",
+    background: "linear-gradient(90deg, #0d6efd, #0a58ca)",
+    color: "#ffffff",
     height: "52px",
     fontSize: "13px",
     textTransform: "uppercase",
