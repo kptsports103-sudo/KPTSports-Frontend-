@@ -97,6 +97,7 @@ const AdminDashboard = () => {
   const [selectedYear, setSelectedYear] = useState("");
   const [playerSearch, setPlayerSearch] = useState("");
   const [playerYear, setPlayerYear] = useState("all");
+  const [certificateYear, setCertificateYear] = useState("all");
   
   // ============================================
   // ENTERPRISE V5 - TEMPLATE STATE
@@ -261,8 +262,8 @@ const AdminDashboard = () => {
     return selectedCertificates.has(getActionKey(row));
   };
 
-  const selectAllCertificates = () => {
-    const allKeys = new Set(certificateRows.map((row) => getActionKey(row)));
+  const selectAllCertificates = (rows = certificateRows) => {
+    const allKeys = new Set(rows.map((row) => getActionKey(row)));
     setSelectedCertificates(allKeys);
   };
 
@@ -270,8 +271,8 @@ const AdminDashboard = () => {
     setSelectedCertificates(new Set());
   };
 
-  const getSelectedRows = () => {
-    return certificateRows.filter((row) => selectedCertificates.has(getActionKey(row)));
+  const getSelectedRows = (rows = certificateRows) => {
+    return rows.filter((row) => selectedCertificates.has(getActionKey(row)));
   };
 
   // ============================================
@@ -699,23 +700,13 @@ const AdminDashboard = () => {
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
   const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0 });
   
-  // ============================================
-  // ENTERPRISE V5 - RENDERING MODE SELECTOR
-  // ============================================
-  // 'frontend' = html2canvas (original)
-  // 'backend' = Puppeteer server-side (recommended for batch)
-  const [renderingMode, setRenderingMode] = useState('frontend');
-
   const generateBatchCertificates = async (rows, useBackend = false) => {
     if (!rows || rows.length === 0) {
       alert("No certificates to generate");
       return;
     }
 
-    const modeText = useBackend ? "backend (server-side)" : "frontend (browser)";
-    const confirmed = window.confirm(
-      `Generate ${rows.length} certificates using ${modeText}?`
-    );
+    const confirmed = window.confirm(`Generate ${rows.length} certificates?`);
     if (!confirmed) return;
 
     setIsBatchGenerating(true);
@@ -723,7 +714,7 @@ const AdminDashboard = () => {
 
     let successCount = 0;
     let failCount = 0;
-    const useBackendMode = useBackend || renderingMode === 'backend';
+    const useBackendMode = useBackend;
 
     if (useBackendMode) {
       // Limited concurrency for server-side rendering to improve batch speed
@@ -888,6 +879,51 @@ const AdminDashboard = () => {
     )
   ).sort((a, b) => Number(b) - Number(a));
 
+  const availableCertificateYears = Array.from(
+    new Set(
+      certificateRows
+        .map((row) => String(row.year || "").trim())
+        .filter(Boolean)
+    )
+  ).sort((a, b) => Number(b) - Number(a));
+
+  // Default Players List year filter to current year when available.
+  useEffect(() => {
+    const currentYear = String(new Date().getFullYear());
+
+    if (availablePlayerYears.length === 0) {
+      if (playerYear !== "all") setPlayerYear("all");
+      return;
+    }
+
+    if (playerYear === "all" && availablePlayerYears.includes(currentYear)) {
+      setPlayerYear(currentYear);
+      return;
+    }
+
+    if (playerYear !== "all" && !availablePlayerYears.includes(String(playerYear))) {
+      setPlayerYear(availablePlayerYears.includes(currentYear) ? currentYear : "all");
+    }
+  }, [availablePlayerYears, playerYear]);
+
+  useEffect(() => {
+    const currentYear = String(new Date().getFullYear());
+
+    if (availableCertificateYears.length === 0) {
+      if (certificateYear !== "all") setCertificateYear("all");
+      return;
+    }
+
+    if (certificateYear === "all" && availableCertificateYears.includes(currentYear)) {
+      setCertificateYear(currentYear);
+      return;
+    }
+
+    if (certificateYear !== "all" && !availableCertificateYears.includes(String(certificateYear))) {
+      setCertificateYear(availableCertificateYears.includes(currentYear) ? currentYear : "all");
+    }
+  }, [availableCertificateYears, certificateYear]);
+
   // Filter players based on search and year
   const filteredPlayers = certificateRows.filter((row) => {
     const matchesYear =
@@ -900,6 +936,10 @@ const AdminDashboard = () => {
     const branch = (row.department || "").toLowerCase();
 
     return matchesYear && (name.includes(term) || branch.includes(term));
+  });
+
+  const filteredCertificateRows = certificateRows.filter((row) => {
+    return certificateYear === "all" || String(row.year) === String(certificateYear);
   });
 
   // Scroll to visitor charts
@@ -1187,8 +1227,26 @@ const AdminDashboard = () => {
             CERTIFICATE DOWNLOADS
         ====================== */}
         <div className="section-header compact">
-          <div className="section-title">🏅 Certificates</div>
-          <div className="section-subtitle">Generate and download student certificates</div>
+          <div className="section-header-left">
+            <div className="section-title">🏅 Certificates</div>
+            <div className="section-subtitle">Generate and download student certificates</div>
+          </div>
+          <div className="table-filters">
+            <label htmlFor="certificate-year-filter" style={srOnlyStyle}>Filter certificates by year</label>
+            <select
+              id="certificate-year-filter"
+              name="certificate-year-filter"
+              className="quick-stats-select"
+              value={certificateYear}
+              onChange={(e) => setCertificateYear(e.target.value)}
+              disabled={availableCertificateYears.length === 0}
+            >
+              <option value="all">All Years</option>
+              {availableCertificateYears.map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
         </div>
         
         {/* ============================================
@@ -1212,28 +1270,11 @@ const AdminDashboard = () => {
             >
               {showBatchControls ? '👁️ Hide' : '☑️ Batch Select'} ({selectedCertificates.size})
             </button>
-            
-            {/* Rendering Mode Selector */}
-            <select
-              value={renderingMode}
-              onChange={(e) => setRenderingMode(e.target.value)}
-              style={{
-                padding: '8px 12px',
-                borderRadius: '6px',
-                border: '1px solid #ccc',
-                fontSize: '14px',
-                cursor: 'pointer',
-              }}
-            >
-              <option value="frontend">🌐 Frontend (Browser)</option>
-              <option value="backend">⚡ Backend (Server)</option>
-            </select>
-            
             {showBatchControls && (
               <>
                 <button
                   className="download-btn"
-                  onClick={selectAllCertificates}
+                  onClick={() => selectAllCertificates(filteredCertificateRows)}
                 >
                   Select All
                 </button>
@@ -1245,7 +1286,7 @@ const AdminDashboard = () => {
                 </button>
                 <button
                   className="download-btn"
-                  onClick={() => generateBatchCertificates(getSelectedRows(), renderingMode === 'backend')}
+                  onClick={() => generateBatchCertificates(getSelectedRows(filteredCertificateRows))}
                   disabled={selectedCertificates.size === 0 || isBatchGenerating}
                   style={{ background: '#10b981' }}
                 >
@@ -1255,13 +1296,13 @@ const AdminDashboard = () => {
                 </button>
                 <button
                   className="download-btn"
-                  onClick={() => generateBatchCertificates(certificateRows, renderingMode === 'backend')}
+                  onClick={() => generateBatchCertificates(filteredCertificateRows)}
                   disabled={isBatchGenerating}
                   style={{ background: '#3b82f6' }}
                 >
                   {isBatchGenerating 
                     ? `Generating ${batchProgress.current}/${batchProgress.total}...` 
-                    : `Generate All (${certificateRows.length})`}
+                    : `Generate All (${filteredCertificateRows.length})`}
                 </button>
               </>
             )}
@@ -1269,7 +1310,7 @@ const AdminDashboard = () => {
         )}
         
         <div className="table-card">
-          {certificateRows.length === 0 ? (
+          {filteredCertificateRows.length === 0 ? (
             <div className="iam-empty">No student records available for certificates.</div>
           ) : (
             <table className="iam-table">
@@ -1290,7 +1331,7 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {certificateRows.map((row) => {
+                {filteredCertificateRows.map((row) => {
                   const rowCertKey = getRowCertificateKey(row);
                   const existingCertificate = issuedCertificateByRowKey.get(rowCertKey);
                   const verifyUrl = existingCertificate
