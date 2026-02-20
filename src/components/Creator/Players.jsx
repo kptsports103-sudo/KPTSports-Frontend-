@@ -41,6 +41,7 @@ const Players = ({ isStudent = false }) => {
             masterId: p.masterId || crypto.randomUUID(),
             semester: p.semester || '1',
             kpmNo: p.kpmNo || '',
+            events: Array.isArray(p.events) ? p.events : [],
           })),
         }));
         const cleaned = mergeDuplicatePlayers(dataArray);
@@ -68,6 +69,7 @@ const Players = ({ isStudent = false }) => {
               masterId: p.masterId || crypto.randomUUID(),
               semester: p.semester || '1',
               kpmNo: p.kpmNo || '',
+              events: Array.isArray(p.events) ? p.events : [],
             })),
           }));
           const cleaned = mergeDuplicatePlayers(withIds);
@@ -155,6 +157,7 @@ const Players = ({ isStudent = false }) => {
                 diplomaYear: '1',
                 semester: '1',
                 kpmNo: '',
+                events: [],
               },
             ],
           }

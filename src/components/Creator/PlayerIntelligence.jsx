@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import api from '../../services/api';
 import { FaEye } from 'react-icons/fa';
+import PlayerIntelligencePanel from './PlayerIntelligencePanel';
 
 const PlayerIntelligence = () => {
   const [data, setData] = useState([]);
@@ -22,8 +23,10 @@ const PlayerIntelligence = () => {
           players: grouped[year].map(p => ({
             ...p,
             id: p.id || p.playerId || crypto.randomUUID(),
+            masterId: p.masterId || '',
             semester: p.semester || '1',
             kpmNo: p.kpmNo || '',
+            events: Array.isArray(p.events) ? p.events : [],
           })),
         }));
         
@@ -118,7 +121,7 @@ const PlayerIntelligence = () => {
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-          🎯 Player Intelligence
+          ðŸŽ¯ Player Intelligence
         </h2>
         <p className="text-gray-600">
           View and analyze player data across all years
@@ -246,107 +249,17 @@ const PlayerIntelligence = () => {
         </div>
       )}
 
-      {/* View Modal */}
+      {/* Intelligence Panel */}
       {selectedPlayer && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-6">
-                <h3 className="text-xl font-semibold text-gray-900">
-                  Player Details
-                </h3>
-                <button
-                  onClick={closeModal}
-                  className="text-gray-400 hover:text-gray-600 text-2xl"
-                >
-                  ×
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">
-                      Year
-                    </label>
-                    <p className="text-gray-900 font-medium">{selectedPlayer.year}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">
-                      KPM No
-                    </label>
-                    <p className="text-gray-900 font-medium">{selectedPlayer.kpmNo || '-'}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Name
-                  </label>
-                  <p className="text-gray-900 font-medium">{selectedPlayer.name || '-'}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">
-                      Department
-                    </label>
-                    <p className="text-gray-900">{selectedPlayer.branch || selectedPlayer.department || '-'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">
-                      Semester
-                    </label>
-                    <p className="text-gray-900">{selectedPlayer.semester || '-'}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Competition
-                  </label>
-                  <p className="text-gray-900">{selectedPlayer.competition || '-'}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">
-                      Position
-                    </label>
-                    <p className="text-gray-900">{selectedPlayer.position || '-'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">
-                      Achievement
-                    </label>
-                    <p className="text-gray-900">{selectedPlayer.achievement || '-'}</p>
-                  </div>
-                </div>
-
-                {selectedPlayer.diplomaYear && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">
-                      Diploma Year
-                    </label>
-                    <p className="text-gray-900">{selectedPlayer.diplomaYear}</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-6 pt-4 border-t">
-                <button
-                  onClick={closeModal}
-                  className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <PlayerIntelligencePanel
+          player={selectedPlayer}
+          data={data}
+          onClose={closeModal}
+        />
       )}
     </div>
   );
 };
 
 export default PlayerIntelligence;
+
