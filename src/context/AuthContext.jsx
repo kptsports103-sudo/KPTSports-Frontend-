@@ -45,7 +45,8 @@ export const AuthProvider = ({ children }) => {
     console.log('Request data:', { email, password, role });
     
     try {
-      const response = await api.post('/auth/login', { email, password, role });
+      const payload = role ? { email, password, role } : { email, password };
+      const response = await api.post('/auth/login', payload);
       const data = response.data;
       console.log('Response:', data);
       console.log('Response status:', response.status);

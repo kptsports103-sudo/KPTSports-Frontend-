@@ -497,7 +497,7 @@ export default function PerformanceAnalysis() {
   if (loading) {
     return (
       <div className="performance-page">
-        <h1 className="page-title">performance analysis</h1>
+        <h1 className="page-title">Performance Analysis</h1>
         <p className="page-subtitle">Loading performance data...</p>
         <div className="empty-state">
           <div className="empty-icon">⏳</div>
@@ -510,7 +510,7 @@ export default function PerformanceAnalysis() {
   if (error) {
     return (
       <div className="performance-page">
-        <h1 className="page-title">performance analysis</h1>
+        <h1 className="page-title">Performance Analysis</h1>
         <p className="page-subtitle">Player participation & year-wise performance overview</p>
         <div className="empty-state">
           <div className="empty-icon">❌</div>
@@ -523,7 +523,22 @@ export default function PerformanceAnalysis() {
 
   return (
     <div className="performance-page">
-      <h1 className="page-title">performance analysis</h1>
+      <div
+        style={{
+          fontSize: "14px",
+          fontWeight: 700,
+          marginBottom: "10px",
+          color: "#0f172a",
+          background: "linear-gradient(90deg, #dbeafe, #e0f2fe)",
+          border: "1px solid #bfdbfe",
+          borderRadius: "8px",
+          padding: "10px 14px",
+          display: "inline-block"
+        }}
+      >
+        KPT Sports Performance Analysis
+      </div>
+      <h1 className="page-title">Performance Analysis</h1>
       <p className="page-subtitle">Player participation & year-wise performance overview</p>
 
       {/* FILTERS */}

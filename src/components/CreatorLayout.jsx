@@ -43,6 +43,7 @@ const CreatorLayout = ({ children }) => {
   }, []);
 
   const creatorMenuItems = [
+    { path: '/admin/creator-dashboard?tab=overview', label: 'Dashboard', icon: 'D' },
     { path: '/admin/creator-dashboard?tab=players', label: 'Players', icon: '👥' },
     { path: '/admin/creator-dashboard?tab=attendance', label: 'Attendance', icon: '✅' },
     { path: '/admin/creator-dashboard?tab=performance', label: 'Performance Analysis', icon: '📊' },
@@ -253,3 +254,4 @@ const CreatorLayout = ({ children }) => {
 };
 
 export default CreatorLayout;
+

@@ -54,7 +54,7 @@ const CreatorDashboard = ({ onNavigate }) => {
     <div style={styles.page}>
       {/* Header */}
       <div style={styles.header}>
-        <h1 style={styles.pageTitle}>Creator Dashboard</h1>
+        <h1 style={styles.pageTitle}>Dashboard</h1>
         <p style={styles.pageSubtitle}>Manage your sports academy efficiently</p>
       </div>
 

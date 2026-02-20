@@ -9,7 +9,6 @@ export default function Login() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('admin');
   const [err, setErr] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
@@ -22,14 +21,14 @@ export default function Login() {
     setErr(null);
 
     try {
-      const result = await login(email, password, role);
+      const result = await login(email, password);
       
       if (result.requiresOTP) {
         setShowOTP(true);
         setLoginData({ email: result.email, role: result.role });
         setErr('OTP sent to your email');
       } else {
-        handleLoginSuccess(result.user?.role || role);
+        handleLoginSuccess(result.user?.role);
       }
     } catch (e) {
       setErr(e?.response?.data?.message || 'Invalid credentials');
@@ -45,7 +44,7 @@ export default function Login() {
 
     try {
       const result = await verifyOTP(loginData.email, otp);
-      handleLoginSuccess(result.user?.role || loginData.role);
+      handleLoginSuccess(result.role || loginData?.role);
     } catch (e) {
       setErr(e?.response?.data?.message || 'Invalid OTP');
     } finally {
@@ -86,13 +85,6 @@ export default function Login() {
 
           {!showOTP ? (
             <form onSubmit={submitLogin}>
-              <label htmlFor="login-role">User Role *</label>
-              <select id="login-role" name="role" value={role} onChange={(e) => setRole(e.target.value)}>
-                <option value="admin">Admin</option>
-                <option value="creator">Creator</option>
-                <option value="superadmin">Super Admin</option>
-              </select>
-
               <label htmlFor="login-email">Email Address *</label>
               <input
                 id="login-email"

@@ -56,7 +56,7 @@ const CreatorDashboard = () => {
                 {/* Title */}
                 <div>
                   <h1 className="text-3xl font-semibold text-gray-900 leading-tight">
-                    Creator Dashboard
+                    Dashboard
                   </h1>
                   <p className="text-base text-gray-500 mt-1">
                     Manage players, schedules, and performance
