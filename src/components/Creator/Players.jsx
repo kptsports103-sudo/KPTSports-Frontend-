@@ -36,6 +36,8 @@ const Players = ({ isStudent = false }) => {
           players: grouped[year].map(p => ({
             ...p,
             id: p.id || p.playerId || crypto.randomUUID(),
+            semester: p.semester || '1',
+            kpmNo: p.kpmNo || '',
           })),
         }));
         setData(dataArray);
@@ -59,6 +61,8 @@ const Players = ({ isStudent = false }) => {
             players: yearData.players.map(p => ({
               ...p,
               id: p.id || p.playerId || crypto.randomUUID(),
+              semester: p.semester || '1',
+              kpmNo: p.kpmNo || '',
             })),
           }));
           setData(withIds);
@@ -133,7 +137,20 @@ const Players = ({ isStudent = false }) => {
     setCurrentPage(1); // Reset to first page when adding new row
     const newData = data.map(d =>
       d.year === year
-        ? { ...d, players: [...d.players, { id: crypto.randomUUID(), name: '', branch: '', diplomaYear: '1' }] }
+        ? {
+            ...d,
+            players: [
+              ...d.players,
+              {
+                id: crypto.randomUUID(),
+                name: '',
+                branch: '',
+                diplomaYear: '1',
+                semester: '1',
+                kpmNo: '',
+              },
+            ],
+          }
         : d
     );
     setData(newData);
@@ -253,10 +270,25 @@ const Players = ({ isStudent = false }) => {
     const validData = data.map(yearData => ({
       ...yearData,
       players: yearData.players
-        .map(player => ({
-          ...player,
-          id: player.id || player.playerId || crypto.randomUUID(),
-        }))
+        .map(p => ({ ...p }))
+        .map((player, idx, workingPlayers) => {
+          let kpmNo = player.kpmNo;
+          if (!kpmNo && player.name && player.branch) {
+            kpmNo = generateKpmNo(
+              yearData.year,
+              player.diplomaYear,
+              player.semester || '1',
+              workingPlayers
+            );
+          }
+          workingPlayers[idx] = { ...player, kpmNo };
+          return {
+            ...player,
+            semester: player.semester || '1',
+            kpmNo,
+            id: player.id || player.playerId || crypto.randomUUID(),
+          };
+        })
         .filter(player =>
           player.name && player.name.trim() &&
           player.branch && player.branch.trim()
@@ -319,6 +351,22 @@ const Players = ({ isStudent = false }) => {
     clip: 'rect(0, 0, 0, 0)',
     whiteSpace: 'nowrap',
     border: 0
+  };
+
+  const generateKpmNo = (year, diplomaYear, semester, playersList) => {
+    const yy = String(year).slice(-2);
+    const prefix = `${yy}${diplomaYear}${semester}`;
+    const existing = playersList
+      .map(p => p.kpmNo)
+      .filter(k => k && k.startsWith(prefix));
+
+    let nextSeq = 1;
+    if (existing.length > 0) {
+      const max = Math.max(...existing.map(k => parseInt(k.slice(-2), 10)));
+      nextSeq = max + 1;
+    }
+
+    return `${prefix}${String(nextSeq).padStart(2, "0")}`;
   };
 
   return (
@@ -525,6 +573,8 @@ const Players = ({ isStudent = false }) => {
                         <th style={{ padding: "12px 16px", textAlign: "left" }}>PLAYER NAME</th>
                         <th style={{ width: "160px", padding: "12px 16px", textAlign: "left" }}>BRANCH</th>
                         <th style={{ width: "140px", padding: "12px 16px", textAlign: "left" }}>DIPLOMA YEAR</th>
+                        <th style={{ width: "120px", padding: "12px 16px", textAlign: "left" }}>SEM</th>
+                        <th style={{ width: "140px", padding: "12px 16px", textAlign: "left" }}>KPM NO</th>
                         {!isStudent && <th style={{ width: "100px", padding: "12px 16px", textAlign: "left" }}>ACTIONS</th>}
                       </tr>
                     </thead>
@@ -532,7 +582,7 @@ const Players = ({ isStudent = false }) => {
                     <tbody>
                       {paginatedPlayers.length === 0 ? (
                         <tr>
-                          <td colSpan="6" style={styles.emptyState}>
+                          <td colSpan={isStudent ? 7 : 8} style={styles.emptyState}>
                             No players found
                           </td>
                         </tr>
@@ -604,6 +654,26 @@ const Players = ({ isStudent = false }) => {
                                   <option>2</option>
                                   <option>3</option>
                                 </select>
+                              </td>
+                              <td style={{ padding: "10px 16px" }}>
+                                <select
+                                  value={playerAtIndex?.semester || '1'}
+                                  onChange={(e) => updatePlayer(yearData.year, originalIndex, 'semester', e.target.value)}
+                                  disabled={!isEditable}
+                                  style={{ ...styles.select, backgroundColor: !isEditable ? '#f8f9fa' : '#fff' }}
+                                  onFocus={(e) => e.target.style.boxShadow = "0 0 0 2px rgba(13,110,253,.25)"}
+                                  onBlur={(e) => e.target.style.boxShadow = "none"}
+                                >
+                                  <option value="1">1</option>
+                                  <option value="2">2</option>
+                                  <option value="3">3</option>
+                                  <option value="4">4</option>
+                                  <option value="5">5</option>
+                                  <option value="6">6</option>
+                                </select>
+                              </td>
+                              <td style={{ padding: "10px 16px", fontWeight: "bold", color: "#0d6efd" }}>
+                                {playerAtIndex?.kpmNo || "Auto"}
                               </td>
                               {!isStudent && (
                                 <td style={styles.actionCell}>

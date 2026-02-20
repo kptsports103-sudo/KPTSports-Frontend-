@@ -399,7 +399,7 @@ const AdminDashboard = () => {
       const mid = Math.floor((low + high) / 2);
       div.style.fontSize = mid + "px";
       
-      const fits = div.scrollWidth <= div.clientWidth;
+      const fits = div.scrollWidth <= div.clientWidth && div.scrollHeight <= div.clientHeight;
       
       if (fits) {
         optimalSize = mid; // This size fits, try larger
@@ -452,10 +452,9 @@ const AdminDashboard = () => {
           font-weight: 700;
           white-space: nowrap;
           display: flex;
-          align-items: flex-end;
+          align-items: center;
           justify-content: center;
           line-height: 1;
-          padding-bottom: 6px;
           z-index: 2;
         }
         .qr-code {
