@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import CreatorLayout from "../../components/CreatorLayout";
 import Players from '../../components/Creator/Players';
 import Attendance from '../../components/Creator/Attendance';
-import PerformanceAnalytics from '../../components/Creator/PerformanceAnalytics';
+import PerformanceAnalysis from '../../components/Creator/PerformanceAnalysis';
 import CreatorDashboardUI from '../../components/Creator/CreatorDashboard';
 
 const CreatorDashboard = () => {
@@ -29,7 +29,7 @@ const CreatorDashboard = () => {
       case 'attendance':
         return <Attendance />;
       case 'performance':
-        return <PerformanceAnalytics />;
+        return <PerformanceAnalysis />;
       default:
         return <CreatorDashboardUI onNavigate={handleTabChange} />;
     }

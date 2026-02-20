@@ -56,7 +56,7 @@ const getAcademicYear = (player, resultYear, resultDiplomaYear) => {
   return [1, 2, 3].includes(calculated) ? calculated : null;
 };
 
-export default function PerformanceAnalytics() {
+export default function PerformanceAnalysis() {
   const [players, setPlayers] = useState([]);
   const [allPlayers, setAllPlayers] = useState([]);
   const [results, setResults] = useState([]);
