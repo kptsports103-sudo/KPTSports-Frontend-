@@ -110,6 +110,7 @@ export default function PerformanceAnalytics() {
           yearData.players.forEach(player => {
             allPlayers.push({
               id: player.id || player.playerId,
+              masterId: player.masterId || "",
               kpmNo: player.kpmNo || "",
               name: player.name,
               branch: player.branch,
@@ -153,9 +154,10 @@ export default function PerformanceAnalytics() {
         console.log('='.repeat(60));
         
         // Deduplicate players across years and id drift:
-        // canonical key = exact name + branch; ids are treated as aliases.
+        // canonical key priority: masterId -> playerId -> name+branch.
         const kpmToKey = {};
         const playersMap = {};
+        const masterIdToKey = {};
         const playerIdToKey = {};
         const nameBranchToKey = {};
 
@@ -166,14 +168,17 @@ export default function PerformanceAnalytics() {
 
           const nameBranchKey = `${safeName}|${safeBranch}`;
           const playerId = player.id ? String(player.id).trim() : '';
+          const masterId = player.masterId ? String(player.masterId).trim() : '';
 
-          let key = playerId ? playerIdToKey[playerId] : null;
+          let key = masterId ? (masterIdToKey[masterId] || masterId) : null;
+          if (!key && playerId) key = playerIdToKey[playerId] || null;
           if (!key && nameBranchToKey[nameBranchKey]) key = nameBranchToKey[nameBranchKey];
           if (!key) key = nameBranchKey;
 
           if (!playersMap[key]) {
             playersMap[key] = {
               id: playerId || key,
+              masterId: masterId || key,
               kpmNo: player.kpmNo || "",
               aliasIds: new Set(),
               name: player.name,
@@ -193,6 +198,10 @@ export default function PerformanceAnalytics() {
           }
 
           const entry = playersMap[key];
+          if (masterId) {
+            masterIdToKey[masterId] = key;
+            if (!entry.masterId || entry.masterId === key) entry.masterId = masterId;
+          }
           if (playerId) {
             entry.aliasIds.add(playerId);
             playerIdToKey[playerId] = key;
@@ -411,6 +420,20 @@ export default function PerformanceAnalytics() {
   const handleCloseModal = () => {
     setSelectedPlayer(null);
     setPlayerDetails(null);
+  };
+
+  const getPlayerStatusBadge = (player) => {
+    const years = Array.isArray(player?.years) ? player.years.length : 0;
+
+    if (years >= 3) {
+      return { text: "Senior Player", color: "#28a745" };
+    }
+
+    if (years === 2) {
+      return { text: "Returning", color: "#0d6efd" };
+    }
+
+    return { text: "New", color: "#6c757d" };
   };
 
   const selectedYearNumber = selectedYear === 'all' ? null : parseInt(selectedYear);
@@ -666,6 +689,15 @@ export default function PerformanceAnalytics() {
                   <h2>{player.name}</h2>
                   <div style={{ fontSize: "12px", color: "#6c757d" }}>
                     KPM: {player.kpmNo || "Not Assigned"}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      color: getPlayerStatusBadge(player).color,
+                    }}
+                  >
+                    {getPlayerStatusBadge(player).text}
                   </div>
                   <span className="dept">{player.branch}</span>
                 </div>

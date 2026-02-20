@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import api from '../../services/api';
 import { useAutoSave } from '../../hooks/useAutoSave';
 
@@ -36,15 +36,17 @@ const Players = ({ isStudent = false }) => {
           players: grouped[year].map(p => ({
             ...p,
             id: p.id || p.playerId || crypto.randomUUID(),
+            masterId: p.masterId || crypto.randomUUID(),
             semester: p.semester || '1',
             kpmNo: p.kpmNo || '',
           })),
         }));
-        setData(dataArray);
+        const cleaned = mergeDuplicatePlayers(dataArray);
+        setData(cleaned);
         setDirtyRows(new Set());
 
         // Auto-select current year or latest
-        const years = dataArray.map(d => d.year);
+        const years = cleaned.map(d => d.year);
         if (years.includes(currentYear)) {
           setSelectedYear(String(currentYear));
         } else if (years.length > 0) {
@@ -61,14 +63,16 @@ const Players = ({ isStudent = false }) => {
             players: yearData.players.map(p => ({
               ...p,
               id: p.id || p.playerId || crypto.randomUUID(),
+              masterId: p.masterId || crypto.randomUUID(),
               semester: p.semester || '1',
               kpmNo: p.kpmNo || '',
             })),
           }));
-          setData(withIds);
+          const cleaned = mergeDuplicatePlayers(withIds);
+          setData(cleaned);
           setDirtyRows(new Set());
 
-          const years = withIds.map(d => d.year);
+          const years = cleaned.map(d => d.year);
           if (years.includes(currentYear)) {
             setSelectedYear(String(currentYear));
           } else if (years.length > 0) {
@@ -143,6 +147,7 @@ const Players = ({ isStudent = false }) => {
               ...d.players,
               {
                 id: crypto.randomUUID(),
+                masterId: crypto.randomUUID(),
                 name: '',
                 branch: '',
                 diplomaYear: '1',
@@ -161,16 +166,120 @@ const Players = ({ isStudent = false }) => {
     });
   };
 
+  const normalize = (str) =>
+    String(str || '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+  // One-click cleanup for existing duplicate identities across years.
+  const mergeDuplicatePlayers = (inputData) => {
+    const masterMap = {};
+
+    // First pass: build stable identity -> masterId map globally.
+    inputData.forEach((yearBlock) => {
+      yearBlock.players.forEach((player) => {
+        const name = normalize(player.name);
+        const branch = normalize(player.branch);
+        if (!name || !branch) return;
+
+        const key = `${name}|${branch}`;
+        if (!masterMap[key]) {
+          masterMap[key] = player.masterId || crypto.randomUUID();
+        }
+      });
+    });
+
+    // Second pass: apply the resolved masterId to each matching row.
+    return inputData.map((yearBlock) => ({
+      ...yearBlock,
+      players: yearBlock.players.map((player) => {
+        const name = normalize(player.name);
+        const branch = normalize(player.branch);
+        if (!name || !branch) return player;
+
+        const key = `${name}|${branch}`;
+        return {
+          ...player,
+          masterId: masterMap[key],
+        };
+      }),
+    }));
+  };
+
+  const getSemOptions = (diplomaYear) => {
+    const year = String(diplomaYear);
+
+    if (year === "1") return ["1", "2"];
+    if (year === "2") return ["3", "4"];
+    if (year === "3") return ["5", "6"];
+
+    return ["1"];
+  };
+
   const updatePlayer = (year, playerIndex, field, value) => {
     setData(prev =>
       prev.map(d =>
         d.year === year
-          ? {
-              ...d,
-              players: d.players.map((p, i) =>
-                i === playerIndex ? { ...p, [field]: value } : p
-              ),
-            }
+          ? (() => {
+              const updatedPlayers = d.players.map((p, i) => {
+                if (i !== playerIndex) return p;
+
+                let updated = { ...p, [field]: value };
+                if (!updated.masterId) {
+                  updated.masterId = crypto.randomUUID();
+                }
+
+                // Keep one permanent identity across years by matching name+branch.
+                if (updated.name?.trim() && updated.branch?.trim()) {
+                  const normalizedName = normalize(updated.name);
+                  const normalizedBranch = normalize(updated.branch);
+                  let existingMasterId = null;
+
+                  prev.forEach((yearBlock) => {
+                    yearBlock.players.forEach((existing) => {
+                      if (
+                        existing.id !== updated.id &&
+                        normalize(existing.name) === normalizedName &&
+                        normalize(existing.branch) === normalizedBranch &&
+                        existing.masterId
+                      ) {
+                        existingMasterId = existing.masterId;
+                      }
+                    });
+                  });
+
+                  if (existingMasterId) {
+                    updated.masterId = existingMasterId;
+                  }
+                }
+
+                // Keep semester aligned with diploma year rules.
+                if (field === "diplomaYear") {
+                  const allowed = getSemOptions(value);
+                  updated.semester = allowed[0];
+                }
+
+                // Live KPM generation as soon as required fields are present.
+                if (
+                  updated.name?.trim() &&
+                  updated.branch?.trim() &&
+                  updated.diplomaYear &&
+                  updated.semester
+                ) {
+                  updated.kpmNo = generateKpmNoLive(
+                    year,
+                    updated.diplomaYear,
+                    updated.semester,
+                    prev,
+                    updated.id
+                  );
+                } else {
+                  updated.kpmNo = '';
+                }
+
+                return updated;
+              });
+
+              return { ...d, players: updatedPlayers };
+            })()
           : d
       )
     );
@@ -266,12 +375,31 @@ const Players = ({ isStudent = false }) => {
   const saveAll = async (showFeedback = true) => {
     if (isSaving) return;
 
+    const normalizeIdentity = (name, branch) =>
+      `${normalize(name)}|${normalize(branch)}`;
+    const masterIdByIdentity = {};
+    data.forEach((yearData) => {
+      (yearData.players || []).forEach((player) => {
+        const key = normalizeIdentity(player?.name, player?.branch);
+        if (!key || key === '|') return;
+        if (player?.masterId && !masterIdByIdentity[key]) {
+          masterIdByIdentity[key] = player.masterId;
+        }
+      });
+    });
+
     // Filter out invalid players (missing name or branch)
     const validData = data.map(yearData => ({
       ...yearData,
       players: yearData.players
         .map(p => ({ ...p }))
         .map((player, idx, workingPlayers) => {
+          const identityKey = normalizeIdentity(player?.name, player?.branch);
+          let masterId = player.masterId || masterIdByIdentity[identityKey] || crypto.randomUUID();
+          if (identityKey && identityKey !== '|') {
+            masterIdByIdentity[identityKey] = masterId;
+          }
+
           let kpmNo = player.kpmNo;
           if (!kpmNo && player.name && player.branch) {
             kpmNo = generateKpmNo(
@@ -284,6 +412,7 @@ const Players = ({ isStudent = false }) => {
           workingPlayers[idx] = { ...player, kpmNo };
           return {
             ...player,
+            masterId,
             semester: player.semester || '1',
             kpmNo,
             id: player.id || player.playerId || crypto.randomUUID(),
@@ -303,8 +432,9 @@ const Players = ({ isStudent = false }) => {
       return;
     }
 
-    // Backup last known good state
-    setLastSavedData(JSON.parse(JSON.stringify(data)));
+    // Backup last known good state for reliable rollback on this save attempt.
+    const previousSnapshot = JSON.parse(JSON.stringify(data));
+    setLastSavedData(previousSnapshot);
     setData(validData);
     setIsSaving(true);
 
@@ -331,9 +461,7 @@ const Players = ({ isStudent = false }) => {
         console.warn("Offline: changes queued");
       } else {
         // Rollback UI
-        if (lastSavedData) {
-          setData(lastSavedData);
-        }
+        setData(previousSnapshot);
 
         alert(backendMessage || "Save failed. Changes were reverted.");
       }
@@ -368,6 +496,61 @@ const Players = ({ isStudent = false }) => {
     }
 
     return `${prefix}${String(nextSeq).padStart(2, "0")}`;
+  };
+
+  const generateKpmNoLive = (year, diplomaYear, semester, allData, currentId) => {
+    if (!year || !diplomaYear || !semester) return "";
+
+    const yy = String(year).slice(-2);
+    const prefix = `${yy}${diplomaYear}${semester}`;
+    const allPlayers = (allData || []).flatMap((d) => d.players || []);
+
+    const existing = allPlayers
+      .filter((p) => p.id !== currentId)
+      .map((p) => p.kpmNo)
+      .filter((k) => k && k.startsWith(prefix));
+
+    let nextSeq = 1;
+    if (existing.length > 0) {
+      const max = Math.max(...existing.map((k) => parseInt(k.slice(-2), 10)));
+      nextSeq = max + 1;
+    }
+
+    return `${prefix}${String(nextSeq).padStart(2, "0")}`;
+  };
+
+  const getParticipationMap = () => {
+    const map = {};
+
+    data.forEach((yearBlock) => {
+      yearBlock.players.forEach((player) => {
+        if (!player.masterId) return;
+
+        if (!map[player.masterId]) {
+          map[player.masterId] = new Set();
+        }
+
+        map[player.masterId].add(yearBlock.year);
+      });
+    });
+
+    return map;
+  };
+
+  const participationMap = useMemo(() => getParticipationMap(), [data]);
+
+  const getPlayerStatusBadge = (masterId) => {
+    const years = participationMap[masterId]?.size || 0;
+
+    if (years >= 3) {
+      return { text: "Senior Player", color: "#28a745" };
+    }
+
+    if (years === 2) {
+      return { text: "Returning", color: "#0d6efd" };
+    }
+
+    return { text: "New", color: "#6c757d" };
   };
 
   return (
@@ -446,6 +629,24 @@ const Players = ({ isStudent = false }) => {
                 style={{ width: 20, height: 20, marginRight: 6 }}
               />
               {isSaving ? "Saving..." : "Save Changes"}
+            </button>
+          )}
+
+          {isEditMode && (
+            <button
+              onClick={() => {
+                const merged = mergeDuplicatePlayers(data);
+                setData(merged);
+                setDirtyRows(prev => {
+                  const next = new Set(prev);
+                  next.add('structure');
+                  return next;
+                });
+                alert("Duplicate students merged successfully!");
+              }}
+              style={styles.addBtn}
+            >
+              Merge Duplicate Students
             </button>
           )}
 
@@ -609,17 +810,30 @@ const Players = ({ isStudent = false }) => {
                                 <label htmlFor={`player-name-${yearData.year}-${originalIndex}`} style={srOnlyStyle}>
                                   Player Name for {yearData.year} Row {playerIndex + 1}
                                 </label>
-                                <input
-                                  id={`player-name-${yearData.year}-${originalIndex}`}
-                                  name={`player-name-${yearData.year}-${originalIndex}`}
-                                  type="text"
-                                  value={playerAtIndex?.name || ''}
-                                  onChange={(e) => updatePlayer(yearData.year, originalIndex, 'name', e.target.value)}
-                                  readOnly={!isEditable}
-                                  style={{ ...styles.input, backgroundColor: !isEditable ? '#f8f9fa' : '#fff' }}
-                                  onFocus={(e) => e.target.style.boxShadow = "0 0 0 2px rgba(13,110,253,.25)"}
-                                  onBlur={(e) => e.target.style.boxShadow = "none"}
-                                />
+                                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                                  <input
+                                    id={`player-name-${yearData.year}-${originalIndex}`}
+                                    name={`player-name-${yearData.year}-${originalIndex}`}
+                                    type="text"
+                                    value={playerAtIndex?.name || ''}
+                                    onChange={(e) => updatePlayer(yearData.year, originalIndex, 'name', e.target.value)}
+                                    readOnly={!isEditable}
+                                    style={{ ...styles.input, backgroundColor: !isEditable ? '#f8f9fa' : '#fff' }}
+                                    onFocus={(e) => e.target.style.boxShadow = "0 0 0 2px rgba(13,110,253,.25)"}
+                                    onBlur={(e) => e.target.style.boxShadow = "none"}
+                                  />
+                                  {playerAtIndex?.masterId && (
+                                    <span
+                                      style={{
+                                        fontSize: "11px",
+                                        fontWeight: "600",
+                                        color: getPlayerStatusBadge(playerAtIndex.masterId).color,
+                                      }}
+                                    >
+                                      {getPlayerStatusBadge(playerAtIndex.masterId).text}
+                                    </span>
+                                  )}
+                                </div>
                               </td>
                               <td style={{ padding: "10px 16px" }}>
                                 <label htmlFor={`player-branch-${yearData.year}-${originalIndex}`} style={srOnlyStyle}>
@@ -658,19 +872,16 @@ const Players = ({ isStudent = false }) => {
                               </td>
                               <td style={{ padding: "10px 16px" }}>
                                 <select
-                                  value={playerAtIndex?.semester || '1'}
+                                  value={playerAtIndex?.semester || getSemOptions(playerAtIndex?.diplomaYear)[0]}
                                   onChange={(e) => updatePlayer(yearData.year, originalIndex, 'semester', e.target.value)}
                                   disabled={!isEditable}
                                   style={{ ...styles.select, backgroundColor: !isEditable ? '#f8f9fa' : '#fff' }}
                                   onFocus={(e) => e.target.style.boxShadow = "0 0 0 2px rgba(13,110,253,.25)"}
                                   onBlur={(e) => e.target.style.boxShadow = "none"}
                                 >
-                                  <option value="1">1</option>
-                                  <option value="2">2</option>
-                                  <option value="3">3</option>
-                                  <option value="4">4</option>
-                                  <option value="5">5</option>
-                                  <option value="6">6</option>
+                                  {getSemOptions(playerAtIndex?.diplomaYear).map((sem) => (
+                                    <option key={sem} value={sem}>{sem}</option>
+                                  ))}
                                 </select>
                               </td>
                               <td style={{ padding: "10px 16px", fontWeight: "bold", color: "#0d6efd" }}>
