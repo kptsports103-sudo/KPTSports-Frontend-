@@ -161,14 +161,6 @@ const AdminDashboard = () => {
       normalizeKeyPart(row?.position),
     ].join("-");
 
-  const escapeHtml = (value) =>
-    String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-
   const preloadCertificateBackground = async () => {
     for (const candidate of CERT_BG_CANDIDATES) {
       const loaded = await new Promise((resolve) => {
@@ -248,7 +240,7 @@ const AdminDashboard = () => {
 
     // Auto-fit long values so they stay inside the marker/underline area.
     let fontSize = className === "field-name" ? 48 : 34;
-    const minFontSize = className === "field-name" ? 22 : 18;
+    const minFontSize = className === "field-name" ? 14 : 18;
     field.style.fontSize = `${fontSize}px`;
 
     while (field.scrollWidth > field.clientWidth && fontSize > minFontSize) {
@@ -354,19 +346,6 @@ const AdminDashboard = () => {
           font-size: 34px;
           text-align: center;
         }
-        .field-cert-id {
-          bottom: 140px;
-          left: 500px;
-          width: 420px;
-          font-size: 28px;
-          line-height: 1.1;
-          text-align: left;
-          letter-spacing: 0.4px;
-          white-space: nowrap;
-          color: #1a2f76;
-          background: transparent;
-          padding: 0;
-        }
         .qr-code {
           position: absolute;
           bottom: 130px;
@@ -390,7 +369,6 @@ const AdminDashboard = () => {
           <div id="marker-competition" class="marker" style="top:1400px;left:710px;width:240px;height:50px;"></div>
           <div id="marker-year" class="marker" style="top:1510px;left:1115px;width:95px;height:50px;"></div>
           <div id="marker-position" class="marker" style="top:1620px;left:840px;width:200px;height:50px;"></div>
-          <div class="field field-cert-id">Certificate ID: ${escapeHtml(safeLineField(certMeta.certificateId))}</div>
           <img class="qr-code" src="${certMeta.qrImage}" alt="Certificate verification QR" />
         </div>
       </div>
