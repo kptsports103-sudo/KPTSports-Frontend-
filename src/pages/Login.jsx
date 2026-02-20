@@ -86,15 +86,17 @@ export default function Login() {
 
           {!showOTP ? (
             <form onSubmit={submitLogin}>
-              <label>User Role *</label>
-              <select value={role} onChange={(e) => setRole(e.target.value)}>
+              <label htmlFor="login-role">User Role *</label>
+              <select id="login-role" name="role" value={role} onChange={(e) => setRole(e.target.value)}>
                 <option value="admin">Admin</option>
                 <option value="creator">Creator</option>
                 <option value="superadmin">Super Admin</option>
               </select>
 
-              <label>Email Address *</label>
+              <label htmlFor="login-email">Email Address *</label>
               <input
+                id="login-email"
+                name="email"
                 type="email"
                 placeholder="Enter your email address"
                 value={email}
@@ -102,8 +104,10 @@ export default function Login() {
                 required
               />
 
-              <label>Password *</label>
+              <label htmlFor="login-password">Password *</label>
               <input
+                id="login-password"
+                name="password"
                 type="password"
                 placeholder="Enter your password"
                 value={password}
@@ -119,8 +123,10 @@ export default function Login() {
             </form>
           ) : (
             <form onSubmit={submitOTP}>
-              <label>OTP *</label>
+              <label htmlFor="login-otp">OTP *</label>
               <input
+                id="login-otp"
+                name="otp"
                 type="text"
                 placeholder="Enter OTP"
                 value={otp}

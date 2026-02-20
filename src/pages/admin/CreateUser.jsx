@@ -4,9 +4,9 @@ import { IAMService } from "../../services/iam.service";
 import { useAuth } from "../../context/AuthContext";
 import { can } from "../../auth/permissions";
 
-const FormField = ({ label, children }) => (
+const FormField = ({ label, htmlFor, children }) => (
   <div>
-    <label className="mb-1 block text-sm font-medium text-gray-700">
+    <label htmlFor={htmlFor} className="mb-1 block text-sm font-medium text-gray-700">
       {label}
     </label>
     {children}
@@ -73,26 +73,26 @@ const CreateUser = () => {
               <div className="bg-red-100 text-red-700 p-3 rounded">{error}</div>
             )}
 
-            <FormField label="Name">
-              <input className="input" placeholder="Full name"
+            <FormField label="Name" htmlFor="create-user-name">
+              <input id="create-user-name" name="name" className="input" placeholder="Full name"
                 value={form.name}
                 onChange={e => setForm({ ...form, name: e.target.value })} />
             </FormField>
 
-            <FormField label="Email">
-              <input className="input" type="email" placeholder="Email address"
+            <FormField label="Email" htmlFor="create-user-email">
+              <input id="create-user-email" name="email" className="input" type="email" placeholder="Email address"
                 value={form.email}
                 onChange={e => setForm({ ...form, email: e.target.value })} />
             </FormField>
 
-            <FormField label="Password">
-              <input className="input" type="password" placeholder="Temporary password"
+            <FormField label="Password" htmlFor="create-user-password">
+              <input id="create-user-password" name="password" className="input" type="password" placeholder="Temporary password"
                 value={form.password}
                 onChange={e => setForm({ ...form, password: e.target.value })} />
             </FormField>
 
-            <FormField label="Role">
-              <select className="input"
+            <FormField label="Role" htmlFor="create-user-role">
+              <select id="create-user-role" name="role" className="input"
                 value={form.role}
                 onChange={e => setForm({ ...form, role: e.target.value })}>
                 <option value="student">Student</option>

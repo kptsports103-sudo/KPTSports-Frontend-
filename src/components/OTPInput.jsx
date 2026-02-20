@@ -27,6 +27,8 @@ const OTPInput = ({ value, onChange }) => {
       {Array.from({ length: 6 }, (_, index) => (
         <input
           key={index}
+          id={`otp-digit-${index + 1}`}
+          name={`otp-digit-${index + 1}`}
           type="text"
           maxLength="1"
           value={value[index] || ''}

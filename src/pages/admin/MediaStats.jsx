@@ -152,10 +152,12 @@ const MediaStats = () => {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#495057' }}>
+              <label htmlFor="media-calc-file-size" style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#495057' }}>
                 File Size (MB)
               </label>
               <input
+                id="media-calc-file-size"
+                name="fileSize"
                 type="number"
                 value={calculator.fileSize}
                 onChange={handleFileSizeChange}
@@ -172,10 +174,12 @@ const MediaStats = () => {
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#495057' }}>
+              <label htmlFor="media-calc-format" style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#495057' }}>
                 Format
               </label>
               <select
+                id="media-calc-format"
+                name="format"
                 value={calculator.format}
                 onChange={handleFormatChange}
                 style={{

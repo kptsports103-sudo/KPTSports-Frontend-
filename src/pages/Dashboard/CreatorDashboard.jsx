@@ -83,7 +83,6 @@ const CreatorDashboard = () => {
             {/* Tabs */}
             <div className="flex gap-10 pb-4">
               {[
-                { key: 'overview', label: 'Overview' },
                 { key: 'players', label: 'Players' },
                 { key: 'player-intelligence', label: 'Player Intelligence' },
                 { key: 'attendance', label: 'Attendance' },

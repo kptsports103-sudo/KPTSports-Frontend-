@@ -43,9 +43,10 @@ const CreatorLayout = ({ children }) => {
   }, []);
 
   const creatorMenuItems = [
-    { path: '/admin/creator-dashboard', label: 'Creator Dashboard', icon: '🎨' },
-    { path: '/admin/creator-dashboard?tab=players', label: ' Players', icon: '👥' },
+    { path: '/admin/creator-dashboard?tab=players', label: 'Players', icon: '👥' },
     { path: '/admin/creator-dashboard?tab=attendance', label: 'Attendance', icon: '✅' },
+    { path: '/admin/creator-dashboard?tab=performance', label: 'Performance Analysis', icon: '📊' },
+    { path: '/admin/creator-dashboard?tab=player-intelligence', label: 'Player Intelligence', icon: '🧠' },
   ];
 
   const isActive = (itemPath) => {

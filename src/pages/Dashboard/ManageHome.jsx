@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
 import AdminLayout from '../../components/AdminLayout';
@@ -18,6 +18,18 @@ const createEmptyContent = () => ({
   clubs: [],
   announcements: []
 });
+
+const ManagedInput = ({ id, name, placeholder, ...props }) => {
+  const autoId = useId().replace(/:/g, '');
+  const normalizedBase = (name || id || placeholder || 'field')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+  const fieldName = name || `${normalizedBase}-${autoId}`;
+  const fieldId = id || fieldName;
+
+  return <input id={fieldId} name={fieldName} placeholder={placeholder} {...props} />;
+};
 
 const ManageHome = () => {
   const [content, setContent] = useState(null);
@@ -383,14 +395,14 @@ const ManageHome = () => {
                 <section className="admin-card">
                   <h3>Hero Section</h3>
                   <div className="form-row single-row">
-                    <input
+                    <ManagedInput
                       placeholder="Hero Title"
                       value={content.heroTitle}
                       onChange={(e) => updateRootField('heroTitle', e.target.value)}
                     />
                   </div>
                   <div className="form-row single-row">
-                    <input
+                    <ManagedInput
                       placeholder="Hero Subtitle"
                       value={content.heroSubtitle}
                       onChange={(e) => updateRootField('heroSubtitle', e.target.value)}
@@ -398,12 +410,12 @@ const ManageHome = () => {
                   </div>
                   {content.heroButtons.map((button, i) => (
                     <div key={i} className="form-row hero-button-row">
-                      <input
+                      <ManagedInput
                         placeholder="Button Text"
                         value={button.text}
                         onChange={(e) => updateField('heroButtons', i, 'text', e.target.value)}
                       />
-                      <input
+                      <ManagedInput
                         placeholder="Button Link"
                         value={button.link}
                         onChange={(e) => updateField('heroButtons', i, 'link', e.target.value)}
@@ -422,12 +434,12 @@ const ManageHome = () => {
                   <h3>Banner Images</h3>
                   {content.banners.map((b, i) => (
                     <div key={i} className="form-row banner-row">
-                      <input
+                      <ManagedInput
                         placeholder="Image URL"
                         value={b.image}
                         onChange={(e) => updateField('banners', i, 'image', e.target.value)}
                       />
-                      <input
+                      <ManagedInput
                         placeholder="Year"
                         value={b.year}
                         onChange={(e) => updateField('banners', i, 'year', e.target.value)}
@@ -446,12 +458,12 @@ const ManageHome = () => {
                   <h3>Achievements</h3>
                   {content.achievements.map((x, i) => (
                     <div key={i} className="form-row two-col-row">
-                      <input
+                      <ManagedInput
                         placeholder="Title"
                         value={x.title}
                         onChange={(e) => updateField('achievements', i, 'title', e.target.value)}
                       />
-                      <input
+                      <ManagedInput
                         placeholder="Value"
                         value={x.value}
                         onChange={(e) => updateField('achievements', i, 'value', e.target.value)}
@@ -470,12 +482,12 @@ const ManageHome = () => {
                   <h3>Sports Categories</h3>
                   {content.sportsCategories.map((x, i) => (
                     <div key={i} className="form-row two-col-row">
-                      <input
+                      <ManagedInput
                         placeholder="Category Name"
                         value={x.name}
                         onChange={(e) => updateField('sportsCategories', i, 'name', e.target.value)}
                       />
-                      <input
+                      <ManagedInput
                         placeholder="Image URL"
                         value={x.image}
                         onChange={(e) => updateField('sportsCategories', i, 'image', e.target.value)}
@@ -494,12 +506,12 @@ const ManageHome = () => {
                   <h3>Gallery Preview</h3>
                   {content.gallery.map((x, i) => (
                     <div key={i} className="form-row two-col-row">
-                      <input
+                      <ManagedInput
                         placeholder="Image URL"
                         value={x.image}
                         onChange={(e) => updateField('gallery', i, 'image', e.target.value)}
                       />
-                      <input
+                      <ManagedInput
                         placeholder="Caption"
                         value={x.caption}
                         onChange={(e) => updateField('gallery', i, 'caption', e.target.value)}
@@ -518,22 +530,22 @@ const ManageHome = () => {
                   <h3>Upcoming Events</h3>
                   {content.upcomingEvents.map((x, i) => (
                     <div key={i} className="form-row event-row">
-                      <input
+                      <ManagedInput
                         placeholder="Event Name"
                         value={x.name}
                         onChange={(e) => updateField('upcomingEvents', i, 'name', e.target.value)}
                       />
-                      <input
+                      <ManagedInput
                         placeholder="Date"
                         value={x.date}
                         onChange={(e) => updateField('upcomingEvents', i, 'date', e.target.value)}
                       />
-                      <input
+                      <ManagedInput
                         placeholder="Venue"
                         value={x.venue}
                         onChange={(e) => updateField('upcomingEvents', i, 'venue', e.target.value)}
                       />
-                      <input
+                      <ManagedInput
                         placeholder="Image URL"
                         value={x.image}
                         onChange={(e) => updateField('upcomingEvents', i, 'image', e.target.value)}
@@ -552,7 +564,7 @@ const ManageHome = () => {
                   <h3>Announcements</h3>
                   {content.announcements.map((text, i) => (
                     <div key={i} className="form-row single-row">
-                      <input
+                      <ManagedInput
                         placeholder="Announcement text"
                         value={text}
                         onChange={(e) => {
@@ -575,27 +587,27 @@ const ManageHome = () => {
                   <h3>Clubs and Activities</h3>
                   {content.clubs.map((club, i) => (
                     <div key={i} className="form-row club-row">
-                      <input
+                      <ManagedInput
                         placeholder="Club Name"
                         value={club.name}
                         onChange={(e) => updateField('clubs', i, 'name', e.target.value)}
                       />
-                      <input
+                      <ManagedInput
                         placeholder="URL"
                         value={club.url}
                         onChange={(e) => updateField('clubs', i, 'url', e.target.value)}
                       />
-                      <input
+                      <ManagedInput
                         placeholder="Description"
                         value={club.description}
                         onChange={(e) => updateField('clubs', i, 'description', e.target.value)}
                       />
-                      <input
+                      <ManagedInput
                         placeholder="Image URL"
                         value={club.image}
                         onChange={(e) => updateField('clubs', i, 'image', e.target.value)}
                       />
-                      <input
+                      <ManagedInput
                         placeholder="Theme (blue, pink...)"
                         value={club.theme}
                         onChange={(e) => updateField('clubs', i, 'theme', e.target.value)}
@@ -680,3 +692,4 @@ const ManageHome = () => {
 };
 
 export default ManageHome;
+
