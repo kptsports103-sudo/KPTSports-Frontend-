@@ -474,7 +474,7 @@ export default function PerformanceAnalytics() {
   if (loading) {
     return (
       <div className="performance-page">
-        <h1 className="page-title">📊 Performance Analytics</h1>
+        <h1 className="page-title">performance analysis</h1>
         <p className="page-subtitle">Loading performance data...</p>
         <div className="empty-state">
           <div className="empty-icon">⏳</div>
@@ -487,7 +487,7 @@ export default function PerformanceAnalytics() {
   if (error) {
     return (
       <div className="performance-page">
-        <h1 className="page-title">📊 Performance Analytics</h1>
+        <h1 className="page-title">performance analysis</h1>
         <p className="page-subtitle">Player participation & year-wise performance overview</p>
         <div className="empty-state">
           <div className="empty-icon">❌</div>
@@ -500,7 +500,7 @@ export default function PerformanceAnalytics() {
 
   return (
     <div className="performance-page">
-      <h1 className="page-title">📊 Performance Analytics</h1>
+      <h1 className="page-title">performance analysis</h1>
       <p className="page-subtitle">Player participation & year-wise performance overview</p>
 
       {/* FILTERS */}
@@ -561,91 +561,6 @@ export default function PerformanceAnalytics() {
         </div>
       </div>
 
-      {/* PLAYERS LIST TABLE - Commented out for card-only view */}
-      {/*
-      {allPlayers.length > 0 && (
-        <div className="analytics-table" style={{ marginBottom: '28px' }}>
-          <h2 style={{ marginBottom: '12px' }}>Players List</h2>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>YEAR</th>
-                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>PLAYER NAME</th>
-                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>BRANCH</th>
-                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>DIPLOMA YEAR</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visiblePlayerRows.length === 0 ? (
-                <tr>
-                  <td colSpan="4" style={{ padding: '12px', textAlign: 'center', color: '#6b7280' }}>
-                    No player data available
-                  </td>
-                </tr>
-              ) : (
-                visiblePlayerRows.map((row, idx) => (
-                  <tr key={`${row.year}-${row.name}-${idx}`}>
-                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.year}</td>
-                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.name}</td>
-                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.branch}</td>
-                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.diplomaYear}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-      */}
-
-      {/* MEDAL ANALYTICS TABLE - Commented out for card-only view */}
-      {/*
-      {(results.length > 0 || groupResults.length > 0) && (
-        <div className="analytics-table" style={{ marginBottom: '28px' }}>
-          <h2 style={{ marginBottom: '12px' }}>Medal Performance</h2>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>YEAR</th>
-                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>PLAYER / TEAM</th>
-                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>MEDAL</th>
-                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>TYPE</th>
-                <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #e5e7eb' }}>POINTS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {medalRows.length === 0 ? (
-                <tr>
-                  <td colSpan="5" style={{ padding: '12px', textAlign: 'center', color: '#6b7280' }}>
-                    No medal data available
-                  </td>
-                </tr>
-              ) : (
-                medalRows.map((row, idx) => {
-                  const medalKey = normalizeMedal(row.medal);
-                  const points = row.type === 'Group'
-                    ? GROUP_POINTS[medalKey] || 0
-                    : INDIVIDUAL_POINTS[medalKey] || 0;
-                  return (
-                    <tr key={`${row.type}-${row.year}-${idx}`}>
-                      <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.year}</td>
-                      <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.playerName || row.teamName || row.name || '-'}</td>
-                      <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>
-                        <span className={`medal-badge medal-${row.medal?.toLowerCase() || 'gold'}`}>
-                          {row.medal}
-                        </span>
-                      </td>
-                      <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{row.type}</td>
-                      <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9' }}>{points} pts</td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-      */}
 
       {/* EMPTY STATE */}
       {allPlayers.length === 0 ? (
