@@ -23,13 +23,13 @@ const CERT_TEMPLATES = {
     width: 1394,
     height: 2048,
     slots: {
-      kpm: { x: 260, y: 830, w: 380, h: 50, align: "left" },
-      name: { x: 480, y: 1135, w: 750, h: 70, align: "center" },
-      semester: { x: 520, y: 1280, w: 200, h: 60, align: "left" },
-      department: { x: 880, y: 1280, w: 320, h: 60, align: "left" },
-      competition: { x: 650, y: 1400, w: 420, h: 60, align: "left" },
-      year: { x: 1050, y: 1510, w: 160, h: 60, align: "left" },
-      position: { x: 780, y: 1620, w: 320, h: 60, align: "center" },
+      kpm: { x: 250, y: 820, w: 380, h: 50, align: "left" },
+      name: { x: 470, y: 1115, w: 760, h: 80, align: "center" },
+      semester: { x: 515, y: 1265, w: 200, h: 60, align: "center" },
+      department: { x: 760, y: 1265, w: 360, h: 60, align: "center" },
+      competition: { x: 640, y: 1385, w: 460, h: 60, align: "center" },
+      year: { x: 1020, y: 1500, w: 220, h: 60, align: "center" },
+      position: { x: 740, y: 1610, w: 360, h: 60, align: "center" },
     },
   },
 };
@@ -399,7 +399,7 @@ const AdminDashboard = () => {
       const mid = Math.floor((low + high) / 2);
       div.style.fontSize = mid + "px";
       
-      const fits = div.scrollWidth <= div.clientWidth && div.scrollHeight <= div.clientHeight;
+      const fits = div.scrollWidth <= div.clientWidth;
       
       if (fits) {
         optimalSize = mid; // This size fits, try larger
@@ -455,6 +455,7 @@ const AdminDashboard = () => {
           align-items: flex-end;
           justify-content: center;
           line-height: 1;
+          padding-bottom: 6px;
           z-index: 2;
         }
         .qr-code {
