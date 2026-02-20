@@ -14,6 +14,7 @@ const Players = ({ isStudent = false }) => {
   const [lastSavedData, setLastSavedData] = useState(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState("idle");
   const [dirtyRows, setDirtyRows] = useState(new Set());
+  const [fixedRows, setFixedRows] = useState(new Set());
   const [lastSavedAt, setLastSavedAt] = useState(null);
   const currentYear = new Date().getFullYear();
   const ITEMS_PER_PAGE = 5;
@@ -293,12 +294,22 @@ const Players = ({ isStudent = false }) => {
 
   const deleteRow = (year, playerIndex) => {
     setCurrentPage(1); // Reset to first page when deleting row
+    const yearData = data.find((d) => d.year === year);
+    const targetPlayer = yearData?.players?.[playerIndex];
+    const targetKey = targetPlayer ? `${year}-${targetPlayer.id || playerIndex}` : null;
     const newData = data.map(d =>
       d.year === year
         ? { ...d, players: d.players.filter((_, i) => i !== playerIndex) }
         : d
     );
     setData(newData);
+    if (targetKey) {
+      setFixedRows((prev) => {
+        const next = new Set(prev);
+        next.delete(targetKey);
+        return next;
+      });
+    }
     setDirtyRows(prev => {
       const next = new Set(prev);
       next.add('structure');
@@ -357,7 +368,7 @@ const Players = ({ isStudent = false }) => {
     });
   };
 
-  const savePlayerRow = (year, index) => {
+  const savePlayerRow = (year, index, rowKey) => {
     const yearData = data.find(d => d.year === year);
     const player = yearData?.players[index];
 
@@ -370,6 +381,13 @@ const Players = ({ isStudent = false }) => {
     console.log("Saved player row:", { year, player });
 
     alert(`Saved Row ${index + 1}`);
+    if (rowKey) {
+      setFixedRows((prev) => {
+        const next = new Set(prev);
+        next.add(rowKey);
+        return next;
+      });
+    }
   };
 
   const saveAll = async (showFeedback = true) => {
@@ -794,6 +812,8 @@ const Players = ({ isStudent = false }) => {
                           const originalIndex = row.idx;
                           const playerAtIndex = yearData.players[originalIndex];
                           const isEditable = !isStudent && isEditMode;
+                          const actionRowKey = `${yearData.year}-${playerAtIndex?.id || originalIndex}`;
+                          const isRowFixed = fixedRows.has(actionRowKey);
                           return (
                             <tr
                               key={`${yearData.year}-${originalIndex}`}
@@ -890,35 +910,52 @@ const Players = ({ isStudent = false }) => {
                               {!isStudent && (
                                 <td style={styles.actionCell}>
                                   {isEditable && (
-                                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                      <button
-                                        onClick={() => savePlayerRow(yearData.year, originalIndex)}
-                                        style={styles.actionBtn}
-                                        title="Save Row"
-                                      >
-                                        <img
-                                          src="/Save button.png"
-                                          width={20}
-                                          height={20}
-                                          alt="Save Row"
-                                        />
-                                      </button>
+                                    isRowFixed ? (
                                       <button
                                         onClick={() => {
-                                          deleteRow(yearData.year, originalIndex);
-                                          alert(`Deleted Row ${playerIndex + 1}`);
+                                          setFixedRows((prev) => {
+                                            const next = new Set(prev);
+                                            next.delete(actionRowKey);
+                                            return next;
+                                          });
+                                          alert(`Row ${playerIndex + 1} is editable again`);
                                         }}
-                                        style={styles.actionBtn}
-                                        title="Delete Row"
+                                        style={styles.fixedBtn}
+                                        title="Unfix Row"
                                       >
-                                        <img
-                                          src="/Delete button.png"
-                                          width={20}
-                                          height={20}
-                                          alt="Delete Row"
-                                        />
+                                        Fixed
                                       </button>
-                                    </div>
+                                    ) : (
+                                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                        <button
+                                          onClick={() => savePlayerRow(yearData.year, originalIndex, actionRowKey)}
+                                          style={styles.actionBtn}
+                                          title="Save Row"
+                                        >
+                                          <img
+                                            src="/Save button.png"
+                                            width={20}
+                                            height={20}
+                                            alt="Save Row"
+                                          />
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            deleteRow(yearData.year, originalIndex);
+                                            alert(`Deleted Row ${playerIndex + 1}`);
+                                          }}
+                                          style={styles.actionBtn}
+                                          title="Delete Row"
+                                        >
+                                          <img
+                                            src="/Delete button.png"
+                                            width={20}
+                                            height={20}
+                                            alt="Delete Row"
+                                          />
+                                        </button>
+                                      </div>
+                                    )
                                   )}
                                 </td>
                               )}
@@ -1156,6 +1193,17 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     transition: "transform 0.15s ease",
+  },
+
+  fixedBtn: {
+    border: "1px solid #198754",
+    background: "#e8f7ee",
+    color: "#198754",
+    padding: "4px 10px",
+    borderRadius: "999px",
+    fontSize: "12px",
+    fontWeight: "600",
+    cursor: "pointer",
   },
 
   editBtn: {

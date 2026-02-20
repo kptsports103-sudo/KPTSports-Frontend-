@@ -2,12 +2,18 @@ import { useState, useEffect } from 'react';
 
 const Attendance = ({ isStudent = false }) => {
   const currentYear = new Date().getFullYear();
+  const createRow = (slNo = 1) => ({
+    rowId: crypto.randomUUID(),
+    slNo,
+    playerName: '',
+    morning: 'Present',
+    evening: 'Present'
+  });
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [date, setDate] = useState('');
   const [isEditMode, setIsEditMode] = useState(false);
-  const [rows, setRows] = useState([
-    { slNo: 1, playerName: '', morning: 'Present', evening: 'Present' }
-  ]);
+  const [rows, setRows] = useState([createRow(1)]);
+  const [fixedRows, setFixedRows] = useState(new Set());
   const [playerNames, setPlayerNames] = useState([]);
   const srOnlyStyle = {
     position: 'absolute',
@@ -46,29 +52,43 @@ const Attendance = ({ isStudent = false }) => {
   }, [selectedYear]);
 
   useEffect(() => {
-    setRows([
-      { slNo: 1, playerName: '', morning: 'Present', evening: 'Present' }
-    ]);
+    setRows([createRow(1)]);
+    setFixedRows(new Set());
   }, [selectedYear]);
 
   useEffect(() => {
     const saved = localStorage.getItem("attendanceData");
     if (saved) {
-      setRows(JSON.parse(saved));
+      const parsed = JSON.parse(saved);
+      const withIds = Array.isArray(parsed)
+        ? parsed.map((row, i) => ({
+            ...row,
+            rowId: row.rowId || crypto.randomUUID(),
+            slNo: i + 1
+          }))
+        : [createRow(1)];
+      setRows(withIds);
     } else {
-      setRows([{ slNo: 1, playerName: '', morning: 'Present', evening: 'Present' }]);
+      setRows([createRow(1)]);
     }
   }, []);
 
   const addRow = () => {
     const newSlNo = rows.length + 1;
-    setRows([...rows, { slNo: newSlNo, playerName: '', morning: 'Present', evening: 'Present' }]);
+    setRows([...rows, createRow(newSlNo)]);
   };
 
   const deleteRow = (index) => {
+    const target = rows[index];
+    const targetKey = target?.rowId || `row-${index}`;
     const newRows = rows.filter((_, i) => i !== index);
     const updated = newRows.map((row, i) => ({ ...row, slNo: i + 1 }));
     setRows(updated);
+    setFixedRows((prev) => {
+      const next = new Set(prev);
+      next.delete(targetKey);
+      return next;
+    });
   };
 
   const updateField = (index, field, value) => {
@@ -88,7 +108,7 @@ const Attendance = ({ isStudent = false }) => {
     setIsEditMode(false);
   };
 
-  const saveRow = (index) => {
+  const saveRow = (index, rowKey) => {
     const row = rows[index];
 
     if (!row.playerName) {
@@ -100,6 +120,13 @@ const Attendance = ({ isStudent = false }) => {
     console.log("Saved row:", row);
 
     alert(`Saved Row ${row.slNo}`);
+    if (rowKey) {
+      setFixedRows((prev) => {
+        const next = new Set(prev);
+        next.add(rowKey);
+        return next;
+      });
+    }
   };
 
   const getSelectedPlayers = (currentIndex) =>
@@ -227,8 +254,11 @@ const Attendance = ({ isStudent = false }) => {
           </thead>
 
           <tbody>
-            {rows.map((row, index) => (
-              <tr key={index} style={styles.bodyRow}>
+            {rows.map((row, index) => {
+              const actionRowKey = row.rowId || `row-${index}`;
+              const isRowFixed = fixedRows.has(actionRowKey);
+              return (
+              <tr key={actionRowKey} style={styles.bodyRow}>
                 <td style={{ textAlign: 'center' }}>{row.slNo}</td>
 
                 <td style={{ textAlign: 'left' }}>
@@ -299,29 +329,46 @@ const Attendance = ({ isStudent = false }) => {
 
                 <td style={styles.actionCell}>
                   {isEditMode && (
-                    <>
-                      <button
-                        onClick={() => saveRow(index)}
-                        style={styles.iconBtn}
-                        title="Save Row"
-                      >
-                        <img src="/Save button.png" width={20} height={20} alt="Save Row" />
-                      </button>
+                    isRowFixed ? (
                       <button
                         onClick={() => {
-                          deleteRow(index);
-                          alert(`Deleted Row ${rows[index].slNo}`);
+                          setFixedRows((prev) => {
+                            const next = new Set(prev);
+                            next.delete(actionRowKey);
+                            return next;
+                          });
+                          alert(`Row ${row.slNo} is editable again`);
                         }}
-                        style={styles.iconBtn}
-                        title="Delete Row"
+                        style={styles.fixedBtn}
+                        title="Unfix Row"
                       >
-                        <img src="/Delete button.png" width={20} height={20} alt="Delete Row" />
+                        Fixed
                       </button>
-                    </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => saveRow(index, actionRowKey)}
+                          style={styles.iconBtn}
+                          title="Save Row"
+                        >
+                          <img src="/Save button.png" width={20} height={20} alt="Save Row" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            deleteRow(index);
+                            alert(`Deleted Row ${rows[index].slNo}`);
+                          }}
+                          style={styles.iconBtn}
+                          title="Delete Row"
+                        >
+                          <img src="/Delete button.png" width={20} height={20} alt="Delete Row" />
+                        </button>
+                      </>
+                    )
                   )}
                 </td>
               </tr>
-            ))}
+            )})}
           </tbody>
         </table>
       </div>
@@ -470,6 +517,17 @@ const styles = {
     padding: "6px",
     cursor: "pointer",
     transition: "transform 0.15s ease",
+  },
+
+  fixedBtn: {
+    border: "1px solid #198754",
+    background: "#e8f7ee",
+    color: "#198754",
+    padding: "4px 10px",
+    borderRadius: "999px",
+    fontSize: "12px",
+    fontWeight: "600",
+    cursor: "pointer",
   },
 
   footer: {
