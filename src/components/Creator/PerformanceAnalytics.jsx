@@ -110,6 +110,7 @@ export default function PerformanceAnalytics() {
           yearData.players.forEach(player => {
             allPlayers.push({
               id: player.id || player.playerId,
+              kpmNo: player.kpmNo || "",
               name: player.name,
               branch: player.branch,
               diplomaYear: player.diplomaYear,
@@ -153,6 +154,7 @@ export default function PerformanceAnalytics() {
         
         // Deduplicate players across years and id drift:
         // canonical key = exact name + branch; ids are treated as aliases.
+        const kpmToKey = {};
         const playersMap = {};
         const playerIdToKey = {};
         const nameBranchToKey = {};
@@ -172,6 +174,7 @@ export default function PerformanceAnalytics() {
           if (!playersMap[key]) {
             playersMap[key] = {
               id: playerId || key,
+              kpmNo: player.kpmNo || "",
               aliasIds: new Set(),
               name: player.name,
               branch: player.branch,
@@ -195,7 +198,13 @@ export default function PerformanceAnalytics() {
             playerIdToKey[playerId] = key;
             if (!entry.id || entry.id === key) entry.id = playerId;
           }
+          if (!entry.kpmNo && player.kpmNo) {
+            entry.kpmNo = player.kpmNo;
+          }
           nameBranchToKey[nameBranchKey] = key;
+          if (player.kpmNo) {
+            kpmToKey[player.kpmNo] = key;
+          }
 
           const py = Number(player.participationYear);
           if (Number.isFinite(py)) {
@@ -236,8 +245,21 @@ export default function PerformanceAnalytics() {
         resultsData.forEach((result) => {
           const resultYear = Number(result.year);
           const resultPlayerId = result.playerId ? String(result.playerId).trim() : '';
+          const resultKpmNo = result.kpmNo ? String(result.kpmNo).trim() : '';
 
-          let key = resultPlayerId && playerIdToKey[resultPlayerId] ? playerIdToKey[resultPlayerId] : null;
+          let key = null;
+
+          // 1) Match by KPM NO (highest priority)
+          if (resultKpmNo && kpmToKey[resultKpmNo]) {
+            key = kpmToKey[resultKpmNo];
+          }
+
+          // 2) Match by playerId
+          if (!key && resultPlayerId && playerIdToKey[resultPlayerId]) {
+            key = playerIdToKey[resultPlayerId];
+          }
+
+          // 3) Fallback to name match
           if (!key) key = resolveByName(result.name, resultYear);
           if (!key || !playersMap[key]) return;
 
@@ -276,6 +298,17 @@ export default function PerformanceAnalytics() {
           }
 
           const memberKeys = new Set();
+
+          // Match group members by KPM first
+          if (Array.isArray(group.memberKpmNos)) {
+            group.memberKpmNos.forEach((kpm) => {
+              const trimmedKpm = String(kpm || '').trim();
+              if (trimmedKpm && kpmToKey[trimmedKpm]) {
+                memberKeys.add(kpmToKey[trimmedKpm]);
+              }
+            });
+          }
+
           memberIds.forEach((memberId) => {
             const id = String(memberId).trim();
             if (playerIdToKey[id]) memberKeys.add(playerIdToKey[id]);
@@ -362,7 +395,8 @@ export default function PerformanceAnalytics() {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(player =>
         player.name.toLowerCase().includes(term) ||
-        player.branch.toLowerCase().includes(term)
+        player.branch.toLowerCase().includes(term) ||
+        (player.kpmNo && player.kpmNo.includes(term))
       );
     }
     
@@ -481,7 +515,7 @@ export default function PerformanceAnalytics() {
             id="analytics-search"
             name="analytics-search"
             type="text"
-            placeholder="Search by name or branch..."
+            placeholder="Search by name, branch, or KPM..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
@@ -630,6 +664,9 @@ export default function PerformanceAnalytics() {
               >
                 <div className="player-header">
                   <h2>{player.name}</h2>
+                  <div style={{ fontSize: "12px", color: "#6c757d" }}>
+                    {player.kpmNo || "No KPM"}
+                  </div>
                   <span className="dept">{player.branch}</span>
                 </div>
 
