@@ -81,8 +81,7 @@ const PlayerIntelligence = () => {
         players: yearData.players.filter(p => 
           (p.name && p.name.toLowerCase().includes(searchLower)) ||
           (p.kpmNo && p.kpmNo.toLowerCase().includes(searchLower)) ||
-          (p.branch && p.branch.toLowerCase().includes(searchLower)) ||
-          (p.competition && p.competition.toLowerCase().includes(searchLower))
+          (p.branch && p.branch.toLowerCase().includes(searchLower))
         )
       })).filter(yearData => yearData.players.length > 0);
     }
@@ -116,6 +115,65 @@ const PlayerIntelligence = () => {
     setSelectedPlayer(null);
   };
 
+  const tableStyles = {
+    table: {
+      width: "100%",
+      backgroundColor: "#ffffff",
+      color: "#000",
+      borderCollapse: "separate",
+      borderSpacing: "0",
+      borderRadius: "0px",
+      overflow: "hidden",
+      marginBottom: "30px",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+    },
+    stickyHeader: {
+      position: "sticky",
+      top: 0,
+      zIndex: 2,
+      background: "linear-gradient(90deg, #0d6efd, #0a58ca)",
+    },
+    headerRow: {
+      color: "#ffffff",
+      height: "52px",
+      fontSize: "13px",
+      textTransform: "uppercase",
+      letterSpacing: "0.5px",
+    },
+    bodyRow: {
+      height: "56px",
+      fontSize: "15px",
+      borderBottom: "1px solid #eee",
+      transition: "background-color 0.2s ease",
+      display: "table-row",
+    },
+    actionCell: {
+      padding: "10px 16px",
+      verticalAlign: "middle",
+      textAlign: "center",
+    },
+    actionBtn: {
+      background: "transparent",
+      border: "none",
+      padding: "4px 8px",
+      cursor: "pointer",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "#0d6efd",
+      fontSize: "13px",
+      fontWeight: 600,
+      gap: "6px",
+      borderRadius: "6px",
+    },
+    emptyState: {
+      textAlign: "center",
+      padding: "20px",
+      fontSize: "14px",
+      color: "#6c757d",
+    },
+  };
+
   return (
     <div className="player-intelligence">
       {/* Header */}
@@ -145,7 +203,7 @@ const PlayerIntelligence = () => {
         {/* Search */}
         <input
           type="text"
-          placeholder="Search by name, KPM No, department, competition..."
+          placeholder="Search by name, KPM No, department..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           className="flex-1 min-w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -162,60 +220,65 @@ const PlayerIntelligence = () => {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Sl No</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Year</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">KPM No</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Name</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Department</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Semester</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Competition</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Position</th>
-              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b">Actions</th>
+        <table style={tableStyles.table}>
+          <thead style={tableStyles.stickyHeader}>
+            <tr style={tableStyles.headerRow}>
+              <th style={{ width: "70px", padding: "12px 16px", textAlign: "left" }}>Sl No</th>
+              <th style={{ width: "90px", padding: "12px 16px", textAlign: "left" }}>Year</th>
+              <th style={{ width: "140px", padding: "12px 16px", textAlign: "left" }}>KPM No</th>
+              <th style={{ padding: "12px 16px", textAlign: "left" }}>Name</th>
+              <th style={{ width: "160px", padding: "12px 16px", textAlign: "left" }}>Department</th>
+              <th style={{ width: "130px", padding: "12px 16px", textAlign: "left" }}>Diploma Year</th>
+              <th style={{ width: "110px", padding: "12px 16px", textAlign: "left" }}>Semester</th>
+              <th style={{ width: "120px", padding: "12px 16px", textAlign: "left" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {paginatedPlayers.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={8} style={tableStyles.emptyState}>
                   No players found
                 </td>
               </tr>
             ) : (
               paginatedPlayers.map((player, index) => (
-                <tr key={`${player.year}-${player.id}-${index}`} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm text-gray-600 border-b">
+                <tr
+                  key={`${player.year}-${player.id}-${index}`}
+                  style={{
+                    ...tableStyles.bodyRow,
+                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f8f9fb",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#f5faff")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = index % 2 === 0 ? "#ffffff" : "#f8f9fb")}
+                >
+                  <td style={{ padding: "10px 16px", color: "#374151" }}>
                     {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600 border-b">
+                  <td style={{ padding: "10px 16px", color: "#374151" }}>
                     {player.year}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600 border-b">
+                  <td style={{ padding: "10px 16px", fontWeight: 600, color: "#0d6efd" }}>
                     {player.kpmNo || '-'}
                   </td>
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900 border-b">
+                  <td style={{ padding: "10px 16px", color: "#111827", fontWeight: 500 }}>
                     {player.name || '-'}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600 border-b">
+                  <td style={{ padding: "10px 16px", color: "#374151" }}>
                     {player.branch || player.department || '-'}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600 border-b">
+                  <td style={{ padding: "10px 16px", color: "#374151" }}>
+                    {player.diplomaYear || '-'}
+                  </td>
+                  <td style={{ padding: "10px 16px", color: "#374151" }}>
                     {player.semester || '-'}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600 border-b">
-                    {player.competition || '-'}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600 border-b">
-                    {player.position || '-'}
-                  </td>
-                  <td className="px-4 py-3 text-center border-b">
+                  <td style={tableStyles.actionCell}>
                     <button
                       onClick={() => handleViewPlayer(player)}
-                      className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                      style={tableStyles.actionBtn}
+                      title="View Player Intelligence"
                     >
-                      <FaEye size={12} />
+                      <FaEye size={14} />
                       View
                     </button>
                   </td>
