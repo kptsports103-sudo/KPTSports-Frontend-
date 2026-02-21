@@ -90,6 +90,7 @@ export default function Login() {
                 id="login-email"
                 name="email"
                 type="email"
+                autoComplete="username"
                 placeholder="Enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -101,6 +102,7 @@ export default function Login() {
                 id="login-password"
                 name="password"
                 type="password"
+                autoComplete="current-password"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -120,6 +122,8 @@ export default function Login() {
                 id="login-otp"
                 name="otp"
                 type="text"
+                autoComplete="one-time-code"
+                inputMode="numeric"
                 placeholder="Enter OTP"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}

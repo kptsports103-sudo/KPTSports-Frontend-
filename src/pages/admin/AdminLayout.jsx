@@ -46,7 +46,6 @@ const AdminLayout = ({ children }) => {
 
   const adminMenuItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
-    { path: '/admin/users-manage', label: 'Users Management', icon: '⚙️' },
     { path: '/admin/media', label: 'Media Management', icon: '🖼️' },
     { path: '/admin/manage-home', label: 'Manage Home', icon: '🏠' },
     { path: '/admin/manage-about', label: 'Manage About', icon: 'ℹ️' },
@@ -239,5 +238,6 @@ const AdminLayout = ({ children }) => {
 };
 
 export default AdminLayout;
+
 
 

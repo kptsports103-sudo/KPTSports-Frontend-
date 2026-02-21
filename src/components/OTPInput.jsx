@@ -30,6 +30,8 @@ const OTPInput = ({ value, onChange }) => {
           id={`otp-digit-${index + 1}`}
           name={`otp-digit-${index + 1}`}
           type="text"
+          autoComplete="one-time-code"
+          inputMode="numeric"
           maxLength="1"
           value={value[index] || ''}
           onChange={(e) => handleInput(e, index)}

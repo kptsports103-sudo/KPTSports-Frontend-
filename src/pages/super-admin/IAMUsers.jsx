@@ -282,6 +282,7 @@ const IAMUsers = () => {
                 id="email"
                 name="email"
                 type="email"
+                autoComplete="email"
                 placeholder="Enter your email address"
                 value={form.email}
                 disabled={!!form.email && !!token}
@@ -383,6 +384,8 @@ const IAMUsers = () => {
             <input
               id="otp"
               name="otp"
+              autoComplete="one-time-code"
+              inputMode="numeric"
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               placeholder="000000"
@@ -475,13 +478,13 @@ const IAMUsers = () => {
             )}
 
             <label htmlFor="name" style={{ color: "#000", fontWeight: 600 }}>Full Name *</label>
-            <input id="name" name="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Enter full name" style={{ ...inputStyle, color: "#000" }} />
+            <input id="name" name="name" autoComplete="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Enter full name" style={{ ...inputStyle, color: "#000" }} />
 
             <label htmlFor="phone" style={{ color: "#000", fontWeight: 600 }}>Mobile Number *</label>
-            <input id="phone" name="phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} placeholder="10-digit mobile" style={{ ...inputStyle, color: "#000" }} />
+            <input id="phone" name="phone" autoComplete="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} placeholder="10-digit mobile" style={{ ...inputStyle, color: "#000" }} />
 
             <label htmlFor="password" style={{ color: "#000", fontWeight: 600 }}>Password *</label>
-            <input id="password" name="password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Strong password" style={{ ...inputStyle, color: "#000" }} />
+            <input id="password" name="password" type="password" autoComplete="new-password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Strong password" style={{ ...inputStyle, color: "#000" }} />
 
             <label htmlFor="profileImage" style={{ color: "#000", fontWeight: 600 }}>Profile Image</label>
             <input
@@ -568,6 +571,8 @@ const IAMUsers = () => {
             <input
               id="phone-otp"
               name="phone-otp"
+              autoComplete="one-time-code"
+              inputMode="numeric"
               value={phoneCode}
               onChange={(e) => setPhoneCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               placeholder="000000"

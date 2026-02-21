@@ -75,18 +75,21 @@ const CreateUser = () => {
 
             <FormField label="Name" htmlFor="create-user-name">
               <input id="create-user-name" name="name" className="input" placeholder="Full name"
+                autoComplete="name"
                 value={form.name}
                 onChange={e => setForm({ ...form, name: e.target.value })} />
             </FormField>
 
             <FormField label="Email" htmlFor="create-user-email">
               <input id="create-user-email" name="email" className="input" type="email" placeholder="Email address"
+                autoComplete="email"
                 value={form.email}
                 onChange={e => setForm({ ...form, email: e.target.value })} />
             </FormField>
 
             <FormField label="Password" htmlFor="create-user-password">
               <input id="create-user-password" name="password" className="input" type="password" placeholder="Temporary password"
+                autoComplete="new-password"
                 value={form.password}
                 onChange={e => setForm({ ...form, password: e.target.value })} />
             </FormField>

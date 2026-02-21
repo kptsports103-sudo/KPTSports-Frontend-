@@ -1007,9 +1007,9 @@ const AdminDashboard = () => {
 
   const stats = [
     { title: "Update Pages", value: "Manage", icon: "??", link: "/admin/update-pages" },
-    { title: "Media Files", value: totalMedia, icon: "???", link: "/admin/media-stats" },
+    { title: "Media Files", value: totalMedia, icon: "???", link: "/admin/media" },
     { title: "Visitors", value: "Analytics", icon: "??", action: "scrollToVisitors" },
-    { title: "IAM Users", value: "Manage", icon: "??", link: "/admin/iam/users" },
+    { title: "Manage Results", value: "Manage", icon: "??", link: "/admin/manage-results" },
   ];
 
   return (
@@ -1580,4 +1580,5 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
 
