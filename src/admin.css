@@ -356,6 +356,10 @@
   margin-bottom: 24px;
 }
 
+.analytics-grid.single {
+  grid-template-columns: 1fr;
+}
+
 .alert-panel {
   margin-top: 24px;
 }

@@ -1,7 +1,7 @@
 ﻿
+import { Link } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { useState, useEffect, useMemo, useRef } from "react";
-import DailyVisitorsChart from "../../admin/components/DailyVisitorsChart";
 import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonChart";
 import { useRealtimeAnalytics } from "../../hooks/useRealtimeAnalytics";
 import { useAdminAlerts } from "../../hooks/useAdminAlerts";
@@ -89,6 +89,7 @@ const normalizeMedalKey = (medal = "") => {
 };
 
 const AdminDashboard = () => {
+  const [totalMedia, setTotalMedia] = useState(0);
   const [certificateRows, setCertificateRows] = useState([]);
   const [issuedCertificates, setIssuedCertificates] = useState([]);
   const [isGeneratingId, setIsGeneratingId] = useState(null);
@@ -997,6 +998,20 @@ const AdminDashboard = () => {
 
   useAdminAlerts(certificateStats);
 
+  const scrollToVisitors = () => {
+    const element = document.getElementById("visitor-charts");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const stats = [
+    { title: "Update Pages", value: "Manage", icon: "📄", link: "/admin/update-pages" },
+    { title: "Media Files", value: totalMedia, icon: "🖼️", link: "/admin/media-stats" },
+    { title: "Visitors", value: "Analytics", icon: "📊", action: "scrollToVisitors" },
+    { title: "IAM Users", value: "Manage", icon: "🔐", link: "/admin/iam/users" },
+  ];
+
   return (
     <AdminLayout>
       <div className="admin-dashboard enterprise-dashboard">
@@ -1049,6 +1064,49 @@ const AdminDashboard = () => {
           </div>
         </div>
 
+        <div className="section-header">
+          <div className="section-title">🧭 System Overview</div>
+          <div className="section-subtitle">Quick access to core admin modules</div>
+        </div>
+        <div className="stats-grid">
+          {stats.map((stat, index) => {
+            const card = (
+              <div
+                className="stat-card"
+                style={{
+                  cursor: (stat.link || stat.action) ? "pointer" : "default",
+                  transition: "transform 0.2s, box-shadow 0.2s",
+                }}
+                onClick={stat.action === "scrollToVisitors" ? scrollToVisitors : undefined}
+                onMouseEnter={(e) => {
+                  if (stat.link || stat.action) {
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (stat.link || stat.action) {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
+                  }
+                }}
+              >
+                <div className="stat-icon">{stat.icon}</div>
+                <h3>{stat.value}</h3>
+                <p>{stat.title}</p>
+              </div>
+            );
+
+            return stat.link ? (
+              <Link key={index} to={stat.link} style={{ textDecoration: "none", color: "inherit" }}>
+                {card}
+              </Link>
+            ) : (
+              <div key={index}>{card}</div>
+            );
+          })}
+        </div>
+
         {/* ANALYTICS */}
         <div
           id="visitor-charts"
@@ -1060,10 +1118,7 @@ const AdminDashboard = () => {
               <div className="section-subtitle">Trends, performance, and engagement</div>
             </div>
 
-            <div className="analytics-grid">
-              <div className="panel">
-                <DailyVisitorsChart />
-              </div>
+            <div className="analytics-grid single">
               <div className="panel">
                 <VisitorsComparisonChart />
               </div>
