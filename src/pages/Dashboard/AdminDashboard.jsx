@@ -5,6 +5,7 @@ import AdminLayout from "../../components/AdminLayout";
 import { useState, useEffect, useMemo, useRef } from "react";
 import DailyVisitorsChart from "../../admin/components/DailyVisitorsChart";
 import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonChart";
+import { useRealtimeAnalytics } from "../../hooks/useRealtimeAnalytics";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import QRCode from "qrcode";
@@ -98,6 +99,9 @@ const AdminDashboard = () => {
   const [playerSearch, setPlayerSearch] = useState("");
   const [playerYear, setPlayerYear] = useState("all");
   const [certificateYear, setCertificateYear] = useState("all");
+  const [filterMode, setFilterMode] = useState("total");
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
   
   // ============================================
   // ENTERPRISE V5 - TEMPLATE STATE
@@ -139,90 +143,73 @@ const AdminDashboard = () => {
     border: 0,
   };
 
-  useEffect(() => {
-    const fetchPlayerData = async () => {
-      try {
-        const playersRes = await api.get('/home/players');
-        const playersGrouped = playersRes.data || {};
-        
-        // Flatten players by year
-        const allPlayers = [];
-        Object.keys(playersGrouped).forEach(year => {
-          const yearNum = parseInt(year);
-          playersGrouped[year].forEach(player => {
-            allPlayers.push({
-              id: player.id || player.playerId,
-              name: player.name || '',
-              kpmNo: player.kpmNo || '',
-              semester: player.semester || '',
-              department: player.branch || player.department || player.dept || '',
-              competition: player.competition || player.event || '',
-              position: player.position || player.rank || '',
-              achievement: player.achievement || '',
-              year: yearNum,
-              diplomaYear: player.diplomaYear || ''
-            });
+  useRealtimeAnalytics({
+    onPlayersUpdate: (playersGrouped) => {
+      const grouped = playersGrouped || {};
+      const allPlayers = [];
+
+      Object.keys(grouped).forEach((year) => {
+        const yearNum = Number(year);
+        const playersForYear = Array.isArray(grouped[year]) ? grouped[year] : [];
+        playersForYear.forEach((player) => {
+          allPlayers.push({
+            id: player.id || player.playerId,
+            name: player.name || "",
+            kpmNo: player.kpmNo || "",
+            semester: player.semester || "",
+            department: player.branch || player.department || player.dept || "",
+            competition: player.competition || player.event || "",
+            position: player.position || player.rank || "",
+            achievement: player.achievement || "",
+            year: yearNum,
+            diplomaYear: player.diplomaYear || "",
           });
         });
-        
-        setCertificateRows(allPlayers);
-      } catch (error) {
-        console.error('Failed to fetch player data:', error);
-        setCertificateRows([]);
-      }
-    };
+      });
 
-    fetchPlayerData();
-  }, []);
+      setCertificateRows(allPlayers);
+      setLastUpdateTime(Date.now());
+    },
+    onCertificatesUpdate: (certs) => {
+      setIssuedCertificates(Array.isArray(certs) ? certs : []);
+      setLastUpdateTime(Date.now());
+    },
+    onResultsUpdate: (results, groupResults) => {
+      const statsMap = new Map();
+      const ensureYear = (year) => {
+        if (!statsMap.has(year)) {
+          statsMap.set(year, {
+            year,
+            individual: { gold: 0, silver: 0, bronze: 0 },
+            group: { gold: 0, silver: 0, bronze: 0 },
+          });
+        }
+        return statsMap.get(year);
+      };
 
-  useEffect(() => {
-    const fetchYearlyStats = async () => {
-      try {
-        const [resultsRes, groupRes] = await Promise.all([
-          api.get("/results"),
-          api.get("/group-results"),
-        ]);
+      (Array.isArray(results) ? results : []).forEach((item) => {
+        const year = Number(item?.year);
+        if (!year) return;
+        const medalKey = normalizeMedalKey(item?.medal);
+        if (!medalKey) return;
+        const entry = ensureYear(year);
+        entry.individual[medalKey] += 1;
+      });
 
-        const statsMap = new Map();
-        const ensureYear = (year) => {
-          if (!statsMap.has(year)) {
-            statsMap.set(year, {
-              year,
-              individual: { gold: 0, silver: 0, bronze: 0 },
-              group: { gold: 0, silver: 0, bronze: 0 },
-            });
-          }
-          return statsMap.get(year);
-        };
+      (Array.isArray(groupResults) ? groupResults : []).forEach((item) => {
+        const year = Number(item?.year);
+        if (!year) return;
+        const medalKey = normalizeMedalKey(item?.medal);
+        if (!medalKey) return;
+        const entry = ensureYear(year);
+        entry.group[medalKey] += 1;
+      });
 
-        (resultsRes.data || []).forEach((item) => {
-          const year = Number(item.year);
-          if (!year) return;
-          const medalKey = normalizeMedalKey(item.medal);
-          if (!medalKey) return;
-          const entry = ensureYear(year);
-          entry.individual[medalKey] += 1;
-        });
-
-        (groupRes.data || []).forEach((item) => {
-          const year = Number(item.year);
-          if (!year) return;
-          const medalKey = normalizeMedalKey(item.medal);
-          if (!medalKey) return;
-          const entry = ensureYear(year);
-          entry.group[medalKey] += 1;
-        });
-
-        const stats = Array.from(statsMap.values()).sort((a, b) => b.year - a.year);
-        setYearlyStats(stats);
-      } catch (error) {
-        console.error("Failed to load yearly stats:", error);
-        setYearlyStats([]);
-      }
-    };
-
-    fetchYearlyStats();
-  }, []);
+      const stats = Array.from(statsMap.values()).sort((a, b) => b.year - a.year);
+      setYearlyStats(stats);
+      setLastUpdateTime(Date.now());
+    },
+  });
 
   const normalizeKeyPart = (value) => String(value ?? "").trim().toLowerCase();
 
@@ -314,15 +301,12 @@ const AdminDashboard = () => {
     try {
       const response = await api.get("/certificates");
       setIssuedCertificates(Array.isArray(response.data) ? response.data : []);
+      setLastUpdateTime(Date.now());
     } catch (error) {
       console.error("Failed to fetch issued certificates:", error);
       setIssuedCertificates([]);
     }
   };
-
-  useEffect(() => {
-    fetchIssuedCertificates();
-  }, []);
 
   const issueCertificate = async (row) => {
     // ============================================
@@ -942,6 +926,77 @@ const AdminDashboard = () => {
     return certificateYear === "all" || String(row.year) === String(certificateYear);
   });
 
+  const certificateStats = useMemo(() => {
+    const generated = filteredCertificateRows.reduce((count, row) => {
+      return count + (issuedCertificateByRowKey.has(getRowCertificateKey(row)) ? 1 : 0);
+    }, 0);
+
+    return {
+      total: filteredCertificateRows.length,
+      generated,
+      pending: Math.max(filteredCertificateRows.length - generated, 0),
+    };
+  }, [filteredCertificateRows, issuedCertificateByRowKey]);
+
+  const filteredCertificateRowsByStatus = filteredCertificateRows.filter((row) => {
+    const isGenerated = issuedCertificateByRowKey.has(getRowCertificateKey(row));
+    if (filterMode === "generated") return isGenerated;
+    if (filterMode === "pending") return !isGenerated;
+    return true;
+  });
+
+  const selectedCertificateYearLabel = certificateYear === "all" ? "All Years" : String(certificateYear);
+
+  const advancedCertificateInsights = useMemo(() => {
+    const yearCountMap = certificateRows.reduce((acc, row) => {
+      const key = String(row?.year ?? "").trim();
+      if (!key) return acc;
+      acc.set(key, (acc.get(key) || 0) + 1);
+      return acc;
+    }, new Map());
+
+    const issuedYearCountMap = issuedCertificates.reduce((acc, cert) => {
+      const key = String(cert?.year ?? "").trim();
+      if (!key) return acc;
+      acc.set(key, (acc.get(key) || 0) + 1);
+      return acc;
+    }, new Map());
+
+    const branchCounts = filteredCertificateRows.reduce((acc, row) => {
+      const branch = (row.department || "Unknown").trim() || "Unknown";
+      acc.set(branch, (acc.get(branch) || 0) + 1);
+      return acc;
+    }, new Map());
+
+    const topBranches = Array.from(branchCounts.entries())
+      .map(([branch, count]) => ({ branch, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    const currentYear = Number(certificateYear);
+    const previousYear = Number.isFinite(currentYear) ? String(currentYear - 1) : "";
+    const currentYearTotal = Number.isFinite(currentYear)
+      ? yearCountMap.get(String(currentYear)) || 0
+      : filteredCertificateRows.length;
+    const previousYearTotal = previousYear ? yearCountMap.get(previousYear) || 0 : 0;
+    const growthPercent = previousYearTotal > 0
+      ? (((currentYearTotal - previousYearTotal) / previousYearTotal) * 100).toFixed(1)
+      : null;
+
+    const generationRate = certificateStats.total > 0
+      ? ((certificateStats.generated / certificateStats.total) * 100).toFixed(1)
+      : "0.0";
+
+    return {
+      generationRate,
+      growthPercent,
+      currentYearTotal,
+      previousYearTotal,
+      issuedThisYear: Number.isFinite(currentYear) ? issuedYearCountMap.get(String(currentYear)) || 0 : certificateStats.generated,
+      topBranches,
+    };
+  }, [certificateRows, issuedCertificates, filteredCertificateRows, certificateYear, certificateStats]);
+
   // Scroll to visitor charts
   const scrollToVisitors = () => {
     const element = document.getElementById('visitor-charts');
@@ -962,6 +1017,10 @@ const AdminDashboard = () => {
     <AdminLayout>
       {/* Improved layout wrapper for consistent spacing and readability */}
       <div className="admin-dashboard">
+        <div className="realtime-indicator">🟢 Live Data Sync Active</div>
+        <div className="last-update">
+          Last Updated: {new Date(lastUpdateTime).toLocaleTimeString()}
+        </div>
         <div className="dashboard-title">Admin Dashboard</div>
         <div className="dashboard-subtitle">System Overview & Analytics</div>
 
@@ -1127,11 +1186,77 @@ const AdminDashboard = () => {
                     <h2>{topYears[0]?.year || "-"}</h2>
                     <p>{topYears[0]?.totalPoints || 0} Points</p>
                   </div>
-                  <div className="small-card">
-                    <h4>🎖 Certificates</h4>
-                    <h2>{certificateRows.length}</h2>
-                    <p>Total Certificates</p>
+                  <div
+                    className={`small-card clickable ${filterMode === "total" ? "active" : ""}`}
+                    onClick={() => setFilterMode("total")}
+                  >
+                    <h4>🎖 Certificates ({selectedCertificateYearLabel})</h4>
+                    <h2>{certificateStats.total}</h2>
+                    <p>Filtered by selected year</p>
                   </div>
+                  <div className="small-card">
+                    <h4>📦 Certificates (All)</h4>
+                    <h2>{certificateRows.length}</h2>
+                    <p>All available records</p>
+                  </div>
+                  <div
+                    className={`small-card clickable ${filterMode === "generated" ? "active" : ""}`}
+                    onClick={() => setFilterMode("generated")}
+                  >
+                    <h4>✅ Generated</h4>
+                    <h2>{certificateStats.generated}</h2>
+                    <p>Click to view generated only</p>
+                  </div>
+                  <div
+                    className={`small-card clickable ${filterMode === "pending" ? "active" : ""}`}
+                    onClick={() => setFilterMode("pending")}
+                  >
+                    <h4>⏳ Pending</h4>
+                    <h2>{certificateStats.pending}</h2>
+                    <p>Click to view pending only</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="analytics-actions">
+              <button className="analytics-btn" onClick={() => setShowAdvanced((prev) => !prev)}>
+                {showAdvanced ? "Hide Analytics" : "View More Analytics"}
+              </button>
+            </div>
+
+            {showAdvanced && (
+              <div className="advanced-analytics">
+                <div className="advanced-card">
+                  <h4>Certificate Generation Rate</h4>
+                  <h2>{advancedCertificateInsights.generationRate}%</h2>
+                  <p>{certificateStats.generated} of {certificateStats.total} generated</p>
+                </div>
+                <div className="advanced-card">
+                  <h4>Year-over-Year Growth</h4>
+                  <h2>
+                    {advancedCertificateInsights.growthPercent === null
+                      ? "N/A"
+                      : `${advancedCertificateInsights.growthPercent}%`}
+                  </h2>
+                  <p>
+                    {advancedCertificateInsights.currentYearTotal} vs {advancedCertificateInsights.previousYearTotal} records
+                  </p>
+                </div>
+                <div className="advanced-card">
+                  <h4>Issued in {selectedCertificateYearLabel}</h4>
+                  <h2>{advancedCertificateInsights.issuedThisYear}</h2>
+                  <p>Certificates with generated IDs</p>
+                </div>
+                <div className="advanced-card">
+                  <h4>Top Branches ({selectedCertificateYearLabel})</h4>
+                  <p className="advanced-list">
+                    {advancedCertificateInsights.topBranches.length === 0
+                      ? "No branch data available."
+                      : advancedCertificateInsights.topBranches
+                          .map((item, idx) => `${idx + 1}. ${item.branch} (${item.count})`)
+                          .join(" | ")}
+                  </p>
                 </div>
               </div>
             )}
@@ -1274,7 +1399,7 @@ const AdminDashboard = () => {
               <>
                 <button
                   className="download-btn"
-                  onClick={() => selectAllCertificates(filteredCertificateRows)}
+                  onClick={() => selectAllCertificates(filteredCertificateRowsByStatus)}
                 >
                   Select All
                 </button>
@@ -1286,7 +1411,7 @@ const AdminDashboard = () => {
                 </button>
                 <button
                   className="download-btn"
-                  onClick={() => generateBatchCertificates(getSelectedRows(filteredCertificateRows))}
+                  onClick={() => generateBatchCertificates(getSelectedRows(filteredCertificateRowsByStatus))}
                   disabled={selectedCertificates.size === 0 || isBatchGenerating}
                   style={{ background: '#10b981' }}
                 >
@@ -1296,13 +1421,13 @@ const AdminDashboard = () => {
                 </button>
                 <button
                   className="download-btn"
-                  onClick={() => generateBatchCertificates(filteredCertificateRows)}
+                  onClick={() => generateBatchCertificates(filteredCertificateRowsByStatus)}
                   disabled={isBatchGenerating}
                   style={{ background: '#3b82f6' }}
                 >
                   {isBatchGenerating 
                     ? `Generating ${batchProgress.current}/${batchProgress.total}...` 
-                    : `Generate All (${filteredCertificateRows.length})`}
+                    : `Generate All (${filteredCertificateRowsByStatus.length})`}
                 </button>
               </>
             )}
@@ -1310,7 +1435,7 @@ const AdminDashboard = () => {
         )}
         
         <div className="table-card">
-          {filteredCertificateRows.length === 0 ? (
+          {filteredCertificateRowsByStatus.length === 0 ? (
             <div className="iam-empty">No student records available for certificates.</div>
           ) : (
             <table className="iam-table">
@@ -1331,7 +1456,7 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredCertificateRows.map((row) => {
+                {filteredCertificateRowsByStatus.map((row) => {
                   const rowCertKey = getRowCertificateKey(row);
                   const existingCertificate = issuedCertificateByRowKey.get(rowCertKey);
                   const verifyUrl = existingCertificate
