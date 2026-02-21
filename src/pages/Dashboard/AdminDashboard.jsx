@@ -6,6 +6,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import DailyVisitorsChart from "../../admin/components/DailyVisitorsChart";
 import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonChart";
 import { useRealtimeAnalytics } from "../../hooks/useRealtimeAnalytics";
+import { useAdminAlerts } from "../../hooks/useAdminAlerts";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import QRCode from "qrcode";
@@ -997,6 +998,8 @@ const AdminDashboard = () => {
     };
   }, [certificateRows, issuedCertificates, filteredCertificateRows, certificateYear, certificateStats]);
 
+  useAdminAlerts(certificateStats);
+
   // Scroll to visitor charts
   const scrollToVisitors = () => {
     const element = document.getElementById('visitor-charts');
@@ -1023,6 +1026,11 @@ const AdminDashboard = () => {
         </div>
         <div className="dashboard-title">Admin Dashboard</div>
         <div className="dashboard-subtitle">System Overview & Analytics</div>
+        {certificateStats.pending > 0 && (
+          <div className="alert-banner">
+            ⚠ {certificateStats.pending} certificates pending generation for {selectedCertificateYearLabel}.
+          </div>
+        )}
 
         {/* SYSTEM OVERVIEW */}
         <div className="section-header">
@@ -1117,90 +1125,89 @@ const AdminDashboard = () => {
             {medalData.length === 0 ? (
               <div className="iam-empty">No results yet to calculate points.</div>
             ) : (
-              <div className="stats-main-card">
-                <div className="stats-left">
-                  <div
-                    className="stats-circle-animated"
-                    style={{
-                      background: `conic-gradient(
-                        #f1c40f 0 ${goldPercent}%,
-                        #bdc3c7 ${goldPercent}% ${silverPercent}%,
-                        #cd7f32 ${silverPercent}% 100%
-                      )`,
-                    }}
-                  >
-                    {selectedStats?.totalPoints || 0}
-                  </div>
-                  <div className="stats-legend">
-                    <span><span className="legend-dot gold"></span> Gold</span>
-                    <span><span className="legend-dot silver"></span> Silver</span>
-                    <span><span className="legend-dot bronze"></span> Bronze</span>
+              <div className="enterprise-analytics-layout">
+                <div className="analytics-primary">
+                  <div className="analytics-primary-grid">
+                    <div className="stats-left">
+                      <div
+                        className="stats-circle-animated"
+                        style={{
+                          background: `conic-gradient(
+                            #f1c40f 0 ${goldPercent}%,
+                            #bdc3c7 ${goldPercent}% ${silverPercent}%,
+                            #cd7f32 ${silverPercent}% 100%
+                          )`,
+                        }}
+                      >
+                        {selectedStats?.totalPoints || 0}
+                      </div>
+                      <div className="stats-legend">
+                        <span><span className="legend-dot gold"></span> Gold</span>
+                        <span><span className="legend-dot silver"></span> Silver</span>
+                        <span><span className="legend-dot bronze"></span> Bronze</span>
+                      </div>
+                    </div>
+
+                    <div className="stats-center">
+                      <h3 className="stats-center-title">Total Points</h3>
+                      <h2 className="stats-center-year">{selectedStats?.year || "-"}</h2>
+                      <p className="stats-center-subtitle">Total Points (Individual + Group)</p>
+                      <div className="stats-breakdown">
+                        <div className="stats-mini">
+                          <div
+                            className="stats-mini-ring"
+                            style={{
+                              background: `conic-gradient(#2563eb 0 ${(selectedStats?.individualPoints / (maxIndividualPoints || 1)) * 100}%, #e5e7eb ${(selectedStats?.individualPoints / (maxIndividualPoints || 1)) * 100}% 100%)`,
+                            }}
+                          >
+                            <span>{selectedStats?.individualPoints || 0}</span>
+                          </div>
+                          <span className="stats-mini-label">Individual</span>
+                        </div>
+                        <div className="stats-mini">
+                          <div
+                            className="stats-mini-ring"
+                            style={{
+                              background: `conic-gradient(#16a34a 0 ${(selectedStats?.groupPoints / (maxGroupPoints || 1)) * 100}%, #e5e7eb ${(selectedStats?.groupPoints / (maxGroupPoints || 1)) * 100}% 100%)`,
+                            }}
+                          >
+                            <span>{selectedStats?.groupPoints || 0}</span>
+                          </div>
+                          <span className="stats-mini-label">Group</span>
+                        </div>
+                        <div className="stats-mini">
+                          <div
+                            className="stats-mini-ring"
+                            style={{
+                              background: `conic-gradient(#f97316 0 ${(selectedStats?.totalPoints / (maxTotalPoints || 1)) * 100}%, #e5e7eb ${(selectedStats?.totalPoints / (maxTotalPoints || 1)) * 100}% 100%)`,
+                            }}
+                          >
+                            <span>{selectedStats?.totalPoints || 0}</span>
+                          </div>
+                          <span className="stats-mini-label">Total</span>
+                        </div>
+                      </div>
+                      <div className="stats-note">Weights: Individual 5/3/1 • Group 10/7/4</div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="stats-center">
-                  <h3 className="stats-center-title">Total Points</h3>
-                  <h2 className="stats-center-year">{selectedStats?.year || "-"}</h2>
-                  <p className="stats-center-subtitle">Total Points (Individual + Group)</p>
-                  <div className="stats-breakdown">
-                    <div className="stats-mini">
-                      <div
-                        className="stats-mini-ring"
-                        style={{
-                          background: `conic-gradient(#2563eb 0 ${(selectedStats?.individualPoints / (maxIndividualPoints || 1)) * 100}%, #e5e7eb ${(selectedStats?.individualPoints / (maxIndividualPoints || 1)) * 100}% 100%)`,
-                        }}
-                      >
-                        <span>{selectedStats?.individualPoints || 0}</span>
-                      </div>
-                      <span className="stats-mini-label">Individual</span>
-                    </div>
-                    <div className="stats-mini">
-                      <div
-                        className="stats-mini-ring"
-                        style={{
-                          background: `conic-gradient(#16a34a 0 ${(selectedStats?.groupPoints / (maxGroupPoints || 1)) * 100}%, #e5e7eb ${(selectedStats?.groupPoints / (maxGroupPoints || 1)) * 100}% 100%)`,
-                        }}
-                      >
-                        <span>{selectedStats?.groupPoints || 0}</span>
-                      </div>
-                      <span className="stats-mini-label">Group</span>
-                    </div>
-                    <div className="stats-mini">
-                      <div
-                        className="stats-mini-ring"
-                        style={{
-                          background: `conic-gradient(#f97316 0 ${(selectedStats?.totalPoints / (maxTotalPoints || 1)) * 100}%, #e5e7eb ${(selectedStats?.totalPoints / (maxTotalPoints || 1)) * 100}% 100%)`,
-                        }}
-                      >
-                        <span>{selectedStats?.totalPoints || 0}</span>
-                      </div>
-                      <span className="stats-mini-label">Total</span>
-                    </div>
-                  </div>
-                  <div className="stats-note">Weights: Individual 5/3/1 • Group 10/7/4</div>
-                </div>
-
-                <div className="stats-right-cards">
-                  <div className="small-card">
-                    <h4>🏆 Best Performing Years</h4>
+                <div className="analytics-sidebar">
+                  <div className="kpi-card">
+                    <h4>🏆 Best Performing Year</h4>
                     <h2>{topYears[0]?.year || "-"}</h2>
                     <p>{topYears[0]?.totalPoints || 0} Points</p>
                   </div>
                   <div
-                    className={`small-card clickable ${filterMode === "total" ? "active" : ""}`}
+                    className={`kpi-card clickable ${filterMode === "total" ? "active" : ""}`}
                     onClick={() => setFilterMode("total")}
                   >
                     <h4>🎖 Certificates ({selectedCertificateYearLabel})</h4>
                     <h2>{certificateStats.total}</h2>
-                    <p>Filtered by selected year</p>
-                  </div>
-                  <div className="small-card">
-                    <h4>📦 Certificates (All)</h4>
-                    <h2>{certificateRows.length}</h2>
-                    <p>All available records</p>
+                    <p>Click to view all for selected year</p>
                   </div>
                   <div
-                    className={`small-card clickable ${filterMode === "generated" ? "active" : ""}`}
+                    className={`kpi-card clickable ${filterMode === "generated" ? "active" : ""}`}
                     onClick={() => setFilterMode("generated")}
                   >
                     <h4>✅ Generated</h4>
@@ -1208,12 +1215,17 @@ const AdminDashboard = () => {
                     <p>Click to view generated only</p>
                   </div>
                   <div
-                    className={`small-card clickable ${filterMode === "pending" ? "active" : ""}`}
+                    className={`kpi-card clickable ${filterMode === "pending" ? "active" : ""}`}
                     onClick={() => setFilterMode("pending")}
                   >
                     <h4>⏳ Pending</h4>
                     <h2>{certificateStats.pending}</h2>
                     <p>Click to view pending only</p>
+                  </div>
+                  <div className="kpi-card">
+                    <h4>📦 Certificates (All Years)</h4>
+                    <h2>{certificateRows.length}</h2>
+                    <p>Total records in the system</p>
                   </div>
                 </div>
               </div>
