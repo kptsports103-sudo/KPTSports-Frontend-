@@ -68,19 +68,16 @@ const UsersManage = () => {
 
   const getRoleInfo = (role) => {
     if (role === "superadmin") {
-      return "This user can access Superadmin and Admin dashboards. They have full system control.";
+      return "This user has full system control, including IAM, security, and audit visibility.";
     }
     if (role === "admin") {
-      return "This user can access Admin and Creator dashboards. They can manage creators and content.";
+      return "This user can manage operations, results, and content, but cannot manage system users.";
     }
     if (role === "creator") {
-      return "This user can access only the Creator dashboard. They manage their own content.";
+      return "This user can add and edit players/results and upload media, but cannot delete records.";
     }
-    if (role === "coach") {
-      return "This user can access coach-level functions and manage assigned activities.";
-    }
-    if (role === "student") {
-      return "This user can access student-level functions and participation details.";
+    if (role === "viewer") {
+      return "This user has read-only access to pages permitted by policy.";
     }
     return "Role information not available.";
   };

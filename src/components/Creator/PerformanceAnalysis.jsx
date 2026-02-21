@@ -133,7 +133,7 @@ export default function PerformanceAnalysis() {
         console.log('='.repeat(60));
         console.log('Total results loaded:', resultsData.length);
         resultsData.slice(0, 5).forEach((r, i) => {
-          console.log(`  [${i}] Name: "${r.name}" | playerId: "${r.playerId}" | medal: "${r.medal}" | year: ${r.year} | diplomaYear: "${r.diplomaYear}"`);
+          console.log(`  [${i}] Name: "${r.name}" | playerMasterId: "${r.playerMasterId}" | playerId: "${r.playerId}" | medal: "${r.medal}" | year: ${r.year} | diplomaYear: "${r.diplomaYear}"`);
         });
         
         console.log('\n' + '='.repeat(60));
@@ -253,6 +253,7 @@ export default function PerformanceAnalysis() {
         // Individual results: assign each result to one canonical player only.
         resultsData.forEach((result) => {
           const resultYear = Number(result.year);
+          const resultMasterId = result.playerMasterId ? String(result.playerMasterId).trim() : '';
           const resultPlayerId = result.playerId ? String(result.playerId).trim() : '';
           const resultKpmNo = result.kpmNo ? String(result.kpmNo).trim() : '';
 
@@ -263,12 +264,17 @@ export default function PerformanceAnalysis() {
             key = kpmToKey[resultKpmNo];
           }
 
-          // 2) Match by playerId
+          // 2) Match by playerMasterId
+          if (!key && resultMasterId && masterIdToKey[resultMasterId]) {
+            key = masterIdToKey[resultMasterId];
+          }
+
+          // 3) Match by legacy playerId
           if (!key && resultPlayerId && playerIdToKey[resultPlayerId]) {
             key = playerIdToKey[resultPlayerId];
           }
 
-          // 3) Fallback to name match
+          // 4) Fallback to name match
           if (!key) key = resolveByName(result.name, resultYear);
           if (!key || !playersMap[key]) return;
 
@@ -295,10 +301,17 @@ export default function PerformanceAnalysis() {
           const medalPoints = GROUP_POINTS[medalKey] || 0;
 
           let memberIds = Array.isArray(group.memberIds) ? group.memberIds.filter(Boolean) : [];
+          let memberMasterIds = Array.isArray(group.memberMasterIds) ? group.memberMasterIds.filter(Boolean) : [];
           const rawMembers = Array.isArray(group.members) ? group.members : [];
           const memberNames = rawMembers
             .map((m) => (typeof m === 'string' ? m : m?.name))
             .filter(Boolean);
+
+          if (!memberMasterIds.length && rawMembers.length) {
+            memberMasterIds = rawMembers
+              .map((m) => (typeof m === 'object' ? m?.playerMasterId : null))
+              .filter(Boolean);
+          }
 
           if (!memberIds.length && rawMembers.length) {
             memberIds = rawMembers
@@ -317,6 +330,11 @@ export default function PerformanceAnalysis() {
               }
             });
           }
+
+          memberMasterIds.forEach((memberMasterId) => {
+            const id = String(memberMasterId).trim();
+            if (masterIdToKey[id]) memberKeys.add(masterIdToKey[id]);
+          });
 
           memberIds.forEach((memberId) => {
             const id = String(memberId).trim();

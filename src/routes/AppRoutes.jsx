@@ -102,31 +102,31 @@ const AppContent = () => {
           <Route path="/verify/:id" element={<VerifyCertificate />} />
           <Route path="/login" element={<Login />} />
           <Route path="/otp-verify" element={<OTPVerify />} />
-          <Route path="/sports-dashboard" element={<ProtectedRoute role="admin"><SportsDashboard /></ProtectedRoute>} />
-          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/sports-dashboard" element={<ProtectedRoute roles={["admin", "superadmin"]}><SportsDashboard /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute roles={["creator", "admin", "superadmin"]}><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/superadmin-dashboard" element={<Navigate to="/admin/super-admin-dashboard" replace />} />
           <Route path="/admin/super-admin-dashboard" element={<ProtectedRoute role="superadmin"><SuperAdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/creator-dashboard" element={<ProtectedRoute role="creator"><CreatorDashboard /></ProtectedRoute>} />
-          <Route path="/dashboard/coach" element={<ProtectedRoute role="coach"><CoachDashboard /></ProtectedRoute>} />
-          <Route path="/admin/media" element={<ProtectedRoute role="admin"><Media /></ProtectedRoute>} />
-          <Route path="/admin/add-media" element={<ProtectedRoute role="admin"><AddMedia /></ProtectedRoute>} />
+          <Route path="/admin/creator-dashboard" element={<ProtectedRoute roles={["creator", "admin", "superadmin"]}><CreatorDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/coach" element={<ProtectedRoute roles={["creator", "admin", "superadmin"]}><CoachDashboard /></ProtectedRoute>} />
+          <Route path="/admin/media" element={<ProtectedRoute roles={["creator", "admin", "superadmin"]}><Media /></ProtectedRoute>} />
+          <Route path="/admin/add-media" element={<ProtectedRoute roles={["creator", "admin", "superadmin"]}><AddMedia /></ProtectedRoute>} />
           <Route path="/admin/manage-home" element={<ProtectedRoute role="admin"><ManageHome /></ProtectedRoute>} />
           <Route path="/admin/manage-about" element={<ProtectedRoute role="admin"><ManageAbout /></ProtectedRoute>} />
           <Route path="/admin/manage-history" element={<ProtectedRoute role="admin"><ManageHistory /></ProtectedRoute>} />
           <Route path="/admin/manage-events" element={<ProtectedRoute role="admin"><ManageEvents /></ProtectedRoute>} />
           <Route path="/admin/manage-gallery" element={<ProtectedRoute role="admin"><ManageGallery /></ProtectedRoute>} />
-          <Route path="/admin/manage-results" element={<ProtectedRoute role="admin"><ManageResults /></ProtectedRoute>} />
+          <Route path="/admin/manage-results" element={<ProtectedRoute roles={["creator", "admin", "superadmin"]}><ManageResults /></ProtectedRoute>} />
           <Route path="/admin/update-pages" element={<ProtectedRoute role="admin"><UpdatePages /></ProtectedRoute>} />
           <Route path="/admin/update-details/:pageName" element={<ProtectedRoute role="admin"><UpdateDetails /></ProtectedRoute>} />
-          <Route path="/admin/iam/users" element={<ProtectedRoute role="admin"><IAMUsers /></ProtectedRoute>} />
-          <Route path="/admin/users-manage" element={<ProtectedRoute role="admin"><UsersManage /></ProtectedRoute>} />
-          <Route path="/admin/iam/create" element={<ProtectedRoute role="admin"><CreateUser /></ProtectedRoute>} />
-          <Route path="/admin/audit-logs" element={<ProtectedRoute role="admin"><AuditLogs /></ProtectedRoute>} />
-          <Route path="/admin/errors" element={<ProtectedRoute role="admin"><ErrorDashboard /></ProtectedRoute>} />
-          <Route path="/admin/media-stats" element={<ProtectedRoute role="admin"><MediaStats /></ProtectedRoute>} />
-          <Route path="/admin/login-activity" element={<ProtectedRoute role="admin"><LoginActivityPage /></ProtectedRoute>} />
-          <Route path="/admin/approvals" element={<ProtectedRoute role="admin"><Approvals /></ProtectedRoute>} />
-          <Route path="/admin/abuse-logs" element={<ProtectedRoute role="admin"><AbuseLogs /></ProtectedRoute>} />
+          <Route path="/admin/iam/users" element={<ProtectedRoute role="superadmin"><IAMUsers /></ProtectedRoute>} />
+          <Route path="/admin/users-manage" element={<ProtectedRoute role="superadmin"><UsersManage /></ProtectedRoute>} />
+          <Route path="/admin/iam/create" element={<ProtectedRoute role="superadmin"><CreateUser /></ProtectedRoute>} />
+          <Route path="/admin/audit-logs" element={<ProtectedRoute role="superadmin"><AuditLogs /></ProtectedRoute>} />
+          <Route path="/admin/errors" element={<ProtectedRoute role="superadmin"><ErrorDashboard /></ProtectedRoute>} />
+          <Route path="/admin/media-stats" element={<ProtectedRoute role="superadmin"><MediaStats /></ProtectedRoute>} />
+          <Route path="/admin/login-activity" element={<ProtectedRoute role="superadmin"><LoginActivityPage /></ProtectedRoute>} />
+          <Route path="/admin/approvals" element={<ProtectedRoute role="superadmin"><Approvals /></ProtectedRoute>} />
+          <Route path="/admin/abuse-logs" element={<ProtectedRoute role="superadmin"><AbuseLogs /></ProtectedRoute>} />
         </Routes>
       </main>
       {!isAuthPage && !isAdmin && <Footer />}

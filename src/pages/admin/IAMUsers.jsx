@@ -36,10 +36,10 @@ const IAMUsers = () => {
     phone: "",
     email: "",
     password: "",
-    role: "admin"
+    role: "creator"
   });
   const [otpDeliveryMethod, setOtpDeliveryMethod] = useState("email"); // "email" or "sms"
-  const [selectedRole, setSelectedRole] = useState("admin");
+  const [selectedRole, setSelectedRole] = useState("creator");
   const [code, setCode] = useState("");
   const [phoneCode, setPhoneCode] = useState("");
   const [createdUser, setCreatedUser] = useState(null);
@@ -62,9 +62,9 @@ const IAMUsers = () => {
       setForm(f => ({
         ...f,
         phone: phone || "",
-        role: role || "admin"
+        role: role || "creator"
       }));
-      setSelectedRole(role || "admin");
+      setSelectedRole(role || "creator");
     } catch (err) {
       setError("Invalid or expired invitation link");
       console.error(err);
@@ -215,7 +215,7 @@ const IAMUsers = () => {
       phone: "",
       email: "",
       password: "",
-      role: "admin"
+      role: "creator"
     });
     setCode("");
     setError("");
@@ -272,6 +272,7 @@ const IAMUsers = () => {
                 <option value="superadmin" style={{ color: "#000" }}>Super Admin</option>
                 <option value="admin" style={{ color: "#000" }}>Admin</option>
                 <option value="creator" style={{ color: "#000" }}>Creator</option>
+                <option value="viewer" style={{ color: "#000" }}>Viewer</option>
               </select>
             </div>
 

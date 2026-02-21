@@ -20,7 +20,7 @@ const CreateUser = () => {
     name: "",
     email: "",
     password: "",
-    role: "student"
+    role: "creator"
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -41,7 +41,7 @@ const CreateUser = () => {
     try {
       await IAMService.createUser(form);
       alert("User successfully created");
-      setForm({ name: "", email: "", password: "", role: "student" });
+      setForm({ name: "", email: "", password: "", role: "creator" });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -95,9 +95,10 @@ const CreateUser = () => {
               <select id="create-user-role" name="role" className="input"
                 value={form.role}
                 onChange={e => setForm({ ...form, role: e.target.value })}>
-                <option value="student">Student</option>
-                <option value="coach">Coach</option>
+                <option value="creator">Creator</option>
                 <option value="admin">Admin</option>
+                <option value="viewer">Viewer</option>
+                <option value="superadmin">Super Admin</option>
               </select>
             </FormField>
 

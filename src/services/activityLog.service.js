@@ -27,7 +27,7 @@ const logActivity = async (action, pageName, details = '') => {
       return null;
     }
 
-    if (user.role !== 'admin') {
+    if (!['creator', 'admin', 'superadmin'].includes(String(user.role || '').toLowerCase())) {
       return null;
     }
 

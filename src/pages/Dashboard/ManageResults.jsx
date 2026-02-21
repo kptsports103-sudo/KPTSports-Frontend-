@@ -18,6 +18,15 @@ const normalizeName = (name) => {
 };
 
 const ManageResults = () => {
+  const currentUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || '{}');
+    } catch {
+      return {};
+    }
+  })();
+  const canDelete = ['admin', 'superadmin'].includes(String(currentUser?.role || '').toLowerCase());
+
   const currentYear = new Date().getFullYear();
   const [data, setData] = useState([]); // [{ year, results: [] }]
   const [groupData, setGroupData] = useState([]); // [{ year, results: [] }]
@@ -32,7 +41,7 @@ const ManageResults = () => {
 
   const [form, setForm] = useState({
     name: '',
-    playerId: '',
+    playerMasterId: '',
     branch: '',
     event: '',
     year: '',
@@ -163,23 +172,45 @@ const ManageResults = () => {
     try {
       const res = await api.get('/home/players');
       const grouped = res.data || {};
-      const flat = [];
+      const masterMap = {};
+
       Object.keys(grouped).forEach(year => {
         grouped[year].forEach(p => {
-          flat.push({
-            ...p,
-            id: p.id || p.playerId,
-            participationYear: Number(year),
-          });
+          const masterId = String(p.masterId || p.id || p.playerId || '').trim();
+          if (!masterId) return;
+
+          if (!masterMap[masterId]) {
+            masterMap[masterId] = {
+              masterId,
+              id: masterId,
+              name: p.name,
+              branch: p.branch,
+              diplomaYear: p.diplomaYear,
+              aliasIds: new Set()
+            };
+          }
+
+          const rowId = String(p.id || p.playerId || '').trim();
+          if (rowId) {
+            masterMap[masterId].aliasIds.add(rowId);
+          }
         });
       });
 
-      const byId = flat.reduce((acc, p) => {
-        if (p.id) acc[p.id] = p;
+      const uniquePlayers = Object.values(masterMap).map(({ aliasIds, ...p }) => ({
+        ...p,
+        aliasIds: Array.from(aliasIds)
+      }));
+
+      const byId = uniquePlayers.reduce((acc, p) => {
+        acc[p.masterId] = p;
+        (p.aliasIds || []).forEach(aliasId => {
+          acc[aliasId] = p;
+        });
         return acc;
       }, {});
 
-      setPlayers(flat);
+      setPlayers(uniquePlayers);
       setPlayersById(byId);
     } catch (error) {
       console.error('Failed to fetch players:', error);
@@ -192,7 +223,7 @@ const ManageResults = () => {
     try {
       console.log('Submitting form:', form);
 
-      const selectedPlayer = form.playerId ? playersById[form.playerId] : null;
+      const selectedPlayer = form.playerMasterId ? playersById[form.playerMasterId] : null;
       const manualName = (form.name || '').trim();
       const manualBranch = (form.branch || '').trim();
 
@@ -215,7 +246,7 @@ const ManageResults = () => {
         name: selectedPlayer?.name || manualName,
         branch: selectedPlayer?.branch || manualBranch,
         diplomaYear: finalDiplomaYear,
-        playerId: selectedPlayer?.id || ''
+        playerMasterId: form.playerMasterId || null
       };
 
       if (editingId) {
@@ -270,13 +301,15 @@ const ManageResults = () => {
 
   /* ================= HELPERS ================= */
   const handleEdit = (item) => {
-    const matchedPlayer = item.playerId
+    const matchedPlayer = item.playerMasterId
+      ? playersById[item.playerMasterId]
+      : item.playerId
       ? playersById[item.playerId]
       : players.find(p => normalizeName(p.name) === normalizeName(item.name));
 
     setForm({
       name: item.name || '',
-      playerId: item.playerId || matchedPlayer?.id || '',
+      playerMasterId: item.playerMasterId || matchedPlayer?.masterId || '',
       branch: item.branch || matchedPlayer?.branch || '',
       event: item.event || '',
       year: item.year || '',
@@ -329,19 +362,24 @@ const ManageResults = () => {
         const diplomaYear = [1, 2, 3].includes(yearNum) ? yearNum : null;
         if (matched) {
           return {
-            playerId: matched.id,
+            playerMasterId: matched.masterId,
+            playerId: matched.id || '',
             name: matched.name,
             diplomaYear: diplomaYear || matched.diplomaYear || null
           };
         }
-        return { playerId: null, name: row.name, diplomaYear: diplomaYear || null };
+        return { playerMasterId: null, playerId: null, name: row.name, diplomaYear: diplomaYear || null };
       });
 
       const combinedMembers = [...manualMembersResolved];
       const dedupedMembers = [];
       const seen = new Set();
       combinedMembers.forEach(m => {
-        const key = m.playerId ? `id:${m.playerId}` : `name:${normalizeName(m.name)}`;
+        const key = m.playerMasterId
+          ? `mid:${m.playerMasterId}`
+          : m.playerId
+          ? `id:${m.playerId}`
+          : `name:${normalizeName(m.name)}`;
         if (seen.has(key)) return;
         seen.add(key);
         dedupedMembers.push(m);
@@ -353,6 +391,7 @@ const ManageResults = () => {
       }
 
       const combinedMemberIds = Array.from(new Set(dedupedMembers.map(m => m.playerId).filter(Boolean)));
+      const combinedMemberMasterIds = Array.from(new Set(dedupedMembers.map(m => m.playerMasterId).filter(Boolean)));
 
       const payload = {
         teamName: groupForm.teamName,
@@ -361,7 +400,8 @@ const ManageResults = () => {
         medal: groupForm.medal,
         imageUrl: groupForm.imageUrl,
         members: dedupedMembers,
-        memberIds: combinedMemberIds
+        memberIds: combinedMemberIds,
+        memberMasterIds: combinedMemberMasterIds
       };
 
       if (editingGroupId) {
@@ -484,7 +524,7 @@ const ManageResults = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: '', playerId: '', branch: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
+    setForm({ name: '', playerMasterId: '', branch: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
     setEditingId(null);
   };
 
@@ -674,12 +714,14 @@ const ManageResults = () => {
                               style={styles.iconButton}
                               onClick={() => handleEdit(item)}
                             />
-                            <img
-                              src="/Delete button.png"
-                              alt="Delete"
-                              style={styles.iconButton}
-                              onClick={() => handleDelete(item._id, item.name)}
-                            />
+                            {canDelete ? (
+                              <img
+                                src="/Delete button.png"
+                                alt="Delete"
+                                style={styles.iconButton}
+                                onClick={() => handleDelete(item._id, item.name)}
+                              />
+                            ) : null}
                           </div>
                         </td>
                       </tr>
@@ -732,8 +774,9 @@ const ManageResults = () => {
                               }
                               
                               // Fallback: try memberIds
-                              if (memberNames.length === 0 && item.memberIds) {
-                                memberNames = (item.memberIds || []).map(id => playersById[id]?.name).filter(Boolean);
+                              if (memberNames.length === 0 && (item.memberMasterIds || item.memberIds)) {
+                                const memberRefs = item.memberMasterIds || item.memberIds || [];
+                                memberNames = memberRefs.map(id => playersById[id]?.name).filter(Boolean);
                               }
                               
                               return memberNames.length > 0 ? (
@@ -772,12 +815,14 @@ const ManageResults = () => {
                                 style={styles.iconButton}
                                 onClick={() => handleGroupEdit(item)}
                               />
-                              <img
-                                src="/Delete button.png"
-                                alt="Delete"
-                                style={styles.iconButton}
-                                onClick={() => handleGroupDelete(item._id, item.teamName)}
-                              />
+                              {canDelete ? (
+                                <img
+                                  src="/Delete button.png"
+                                  alt="Delete"
+                                  style={styles.iconButton}
+                                  onClick={() => handleGroupDelete(item._id, item.teamName)}
+                                />
+                              ) : null}
                             </div>
                           </td>
                         </tr>
@@ -811,23 +856,23 @@ const ManageResults = () => {
                       id="result-player"
                       name="result-player"
                       style={styles.select}
-                      value={form.playerId}
+                      value={form.playerMasterId}
                       onChange={e => {
                         const selectedId = e.target.value;
                         const selectedPlayer = playersById[selectedId];
                         setForm({
                           ...form,
-                          playerId: selectedId,
-                          name: selectedPlayer?.name || form.name,
-                          branch: selectedPlayer?.branch || form.branch,
-                          diplomaYear: selectedPlayer?.diplomaYear || form.diplomaYear
+                          playerMasterId: selectedId,
+                          name: selectedPlayer?.name || '',
+                          branch: selectedPlayer?.branch || '',
+                          diplomaYear: selectedPlayer?.diplomaYear || ''
                         });
                       }}
                     >
                       <option value="">Manual entry</option>
                       {players.map(p => (
-                        <option key={p.id} value={p.id}>
-                          {p.name} - {p.branch} (Y{p.diplomaYear}, {p.participationYear})
+                        <option key={p.masterId} value={p.masterId}>
+                          {p.name} - {p.branch}
                         </option>
                       ))}
                     </select>
@@ -839,8 +884,8 @@ const ManageResults = () => {
                       style={styles.input}
                       value={form.name}
                       onChange={e => setForm({ ...form, name: e.target.value })}
-                      readOnly={!!form.playerId}
-                      required={!form.playerId}
+                      readOnly={!!form.playerMasterId}
+                      required={!form.playerMasterId}
                     />
                   </td>
                   <td style={styles.cell}>
@@ -850,7 +895,7 @@ const ManageResults = () => {
                       style={styles.input}
                       value={form.branch}
                       onChange={e => setForm({ ...form, branch: e.target.value })}
-                      readOnly={!!form.playerId}
+                      readOnly={!!form.playerMasterId}
                       placeholder="Branch"
                     />
                   </td>

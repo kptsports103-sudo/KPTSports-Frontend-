@@ -43,6 +43,7 @@ const AdminLayout = ({ children }) => {
   }, []);
 
   const isSuperAdmin = user?.role === 'superadmin';
+  const isCreator = user?.role === 'creator';
 
   const adminMenuItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
@@ -68,7 +69,13 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/abuse-logs', label: 'Abuse Logs', icon: '🚫' },
   ];
 
-  const menuItems = isSuperAdmin ? superAdminMenuItems : adminMenuItems;
+  const creatorMenuItems = [
+    { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
+    { path: '/admin/media', label: 'Media Management', icon: '🖼️' },
+    { path: '/admin/manage-results', label: 'Manage Results', icon: '🏆' },
+  ];
+
+  const menuItems = isSuperAdmin ? superAdminMenuItems : isCreator ? creatorMenuItems : adminMenuItems;
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
@@ -142,11 +149,13 @@ const AdminLayout = ({ children }) => {
                       background:
                         user?.role === 'admin' ? '#dbeafe' :
                         user?.role === 'superadmin' ? '#fef3c7' :
-                        user?.role === 'creator' ? '#fce7f3' : '#f3f4f6',
+                        user?.role === 'creator' ? '#fce7f3' :
+                        user?.role === 'viewer' ? '#ecfeff' : '#f3f4f6',
                       color:
                         user?.role === 'admin' ? '#1e40af' :
                         user?.role === 'superadmin' ? '#92400e' :
-                        user?.role === 'creator' ? '#9f1239' : '#374151',
+                        user?.role === 'creator' ? '#9f1239' :
+                        user?.role === 'viewer' ? '#155e75' : '#374151',
                       textTransform: 'uppercase'
                     }}>
                       {user?.role}
