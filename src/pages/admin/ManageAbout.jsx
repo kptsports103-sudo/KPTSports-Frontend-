@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from './AdminLayout';
 import PageLatestChangeCard from '../../components/PageLatestChangeCard';
 
 const DEFAULT_STATE = {
@@ -314,3 +314,4 @@ const ManageAbout = () => {
 };
 
 export default ManageAbout;
+

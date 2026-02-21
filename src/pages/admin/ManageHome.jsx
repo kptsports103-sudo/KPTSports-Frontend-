@@ -1,7 +1,7 @@
 import { useEffect, useId, useState } from 'react';
 import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from './AdminLayout';
 import PageLatestChangeCard from '../../components/PageLatestChangeCard';
 import { emitPageUpdate } from '../../utils/eventBus';
 import './ManageHome.css';
@@ -692,4 +692,5 @@ const ManageHome = () => {
 };
 
 export default ManageHome;
+
 

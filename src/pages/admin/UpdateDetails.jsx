@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import AdminLayout from '../components/AdminLayout';
-import activityLogService from '../services/activityLog.service';
-import { CMS_PAGE_UPDATED } from '../utils/eventBus';
+import AdminLayout from './AdminLayout';
+import activityLogService from '../../services/activityLog.service';
+import { CMS_PAGE_UPDATED } from '../../utils/eventBus';
 
 const PAGE_META = {
   'Home Page': { title: 'Update Home', description: 'Manage home page content' },
@@ -98,3 +98,5 @@ const UpdateDetails = () => {
 };
 
 export default UpdateDetails;
+
+

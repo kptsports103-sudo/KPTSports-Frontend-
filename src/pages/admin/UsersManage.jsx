@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import AdminLayout from "../../components/AdminLayout";
+import AdminLayout from "./AdminLayout";
 import { IAMService } from "../../services/iam.service";
 import { confirmAction } from "../../utils/notify";
 
@@ -322,3 +322,4 @@ const UsersManage = () => {
 };
 
 export default UsersManage;
+

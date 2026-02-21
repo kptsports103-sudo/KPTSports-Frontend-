@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import AdminLayout from "../../components/AdminLayout";
+import AdminLayout from "../admin/AdminLayout";
 
 const MediaStats = () => {
   const [media, setMedia] = useState([]);
@@ -246,3 +246,4 @@ const MediaStats = () => {
 };
 
 export default MediaStats;
+

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import AdminLayout from "../../components/AdminLayout";
+import AdminLayout from "../admin/AdminLayout";
 
 const ErrorDashboard = () => {
   const [errors, setErrors] = useState([]);

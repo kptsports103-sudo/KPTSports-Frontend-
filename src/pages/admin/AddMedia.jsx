@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import AdminLayout from "../../components/AdminLayout";
+import AdminLayout from "./AdminLayout";
 import api from "../../services/api";
 
 
@@ -353,3 +353,4 @@ const AddMedia = () => {
 };
 
 export default AddMedia;
+

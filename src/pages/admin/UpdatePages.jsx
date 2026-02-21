@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AdminLayout from '../components/AdminLayout';
-import activityLogService from '../services/activityLog.service';
-import { CMS_PAGE_UPDATED } from '../utils/eventBus';
+import AdminLayout from './AdminLayout';
+import activityLogService from '../../services/activityLog.service';
+import { CMS_PAGE_UPDATED } from '../../utils/eventBus';
 
 const UPDATE_CARDS = [
   { title: 'Update Home', icon: '🏠', description: 'Manage home page content', pageName: 'Home Page' },
@@ -204,3 +204,5 @@ const styles = {
 };
 
 export default UpdatePages;
+
+

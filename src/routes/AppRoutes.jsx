@@ -23,42 +23,42 @@ import Login from '../pages/Login';
 
 import OTPVerify from '../pages/OTPVerify';
 
-import AdminDashboard from '../pages/Dashboard/AdminDashboard';
+import AdminDashboard from '../pages/admin/AdminDashboard';
 
 
-import CoachDashboard from '../pages/Dashboard/CoachDashboard';
+import CoachDashboard from '../components/Creator/CoachDashboard';
 
-import CreatorDashboard from '../pages/Dashboard/CreatorDashboard';
+import CreatorDashboard from '../components/Creator/CreatorDashboard';
 
-import ManageEvents from '../pages/Dashboard/ManageEvents';
+import ManageEvents from '../pages/admin/ManageEvents';
 
-import ManageGallery from '../pages/Dashboard/ManageGallery';
+import ManageGallery from '../pages/admin/ManageGallery';
 
 
-import ManageResults from '../pages/Dashboard/ManageResults';
+import ManageResults from '../pages/admin/ManageResults';
 
-import ManageHome from '../pages/Dashboard/ManageHome';
+import ManageHome from '../pages/admin/ManageHome';
 
-import UpdatePages from '../pages/UpdatePages';
-import UpdateDetails from '../pages/UpdateDetails';
+import UpdatePages from '../pages/admin/UpdatePages';
+import UpdateDetails from '../pages/admin/UpdateDetails';
 
-import ManageAbout from '../pages/Dashboard/ManageAbout';
+import ManageAbout from '../pages/admin/ManageAbout';
 
-import ManageHistory from '../pages/Dashboard/ManageHistory';
+import ManageHistory from '../pages/admin/ManageHistory';
 
-import Media from '../pages/Dashboard/Media';
-import AddMedia from '../pages/Dashboard/AddMedia';
+import Media from '../pages/admin/Media';
+import AddMedia from '../pages/admin/AddMedia';
 
-import IAMUsers from '../pages/admin/IAMUsers';
+import IAMUsers from '../pages/super-admin/IAMUsers';
 import UsersManage from '../pages/admin/UsersManage';
-import SuperAdminDashboard from '../pages/admin/SuperAdminDashboard';
-import CreateUser from '../pages/admin/CreateUser';
-import AuditLogs from '../pages/admin/AuditLogs';
-import ErrorDashboard from '../pages/admin/ErrorDashboard';
-import MediaStats from '../pages/admin/MediaStats';
-import LoginActivityPage from '../pages/admin/LoginActivityPage';
-import Approvals from '../pages/admin/Approvals';
-import AbuseLogs from '../pages/admin/AbuseLogs';
+import SuperAdminDashboard from '../pages/super-admin/SuperAdminDashboard';
+import CreateUser from '../pages/super-admin/CreateUser';
+import AuditLogs from '../pages/super-admin/AuditLogs';
+import ErrorDashboard from '../pages/super-admin/ErrorDashboard';
+import MediaStats from '../pages/super-admin/MediaStats';
+import LoginActivityPage from '../pages/super-admin/LoginActivityPage';
+import Approvals from '../pages/super-admin/Approvals';
+import AbuseLogs from '../pages/super-admin/AbuseLogs';
 
 import SportsDashboard from '../pages/SportsDashboard';
 import VerifyCertificate from '../pages/VerifyCertificate';
@@ -135,3 +135,5 @@ const AppContent = () => {
 };
 
 export default AppRoutes;
+
+

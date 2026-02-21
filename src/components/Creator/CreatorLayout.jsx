@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import activityLogService from '../services/activityLog.service';
-import '../admin.css';
+import { useAuth } from '../../context/AuthContext';
+import activityLogService from '../../services/activityLog.service';
+import '../../admin.css';
 
 const CreatorLayout = ({ children }) => {
   const location = useLocation();
@@ -254,4 +254,5 @@ const CreatorLayout = ({ children }) => {
 };
 
 export default CreatorLayout;
+
 

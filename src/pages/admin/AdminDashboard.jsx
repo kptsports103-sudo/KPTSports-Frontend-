@@ -1,6 +1,6 @@
-﻿
+
 import { Link } from "react-router-dom";
-import AdminLayout from "../../components/AdminLayout";
+import AdminLayout from "./AdminLayout";
 import { useState, useEffect, useMemo, useRef } from "react";
 import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonChart";
 import { useRealtimeAnalytics } from "../../hooks/useRealtimeAnalytics";
@@ -1006,10 +1006,10 @@ const AdminDashboard = () => {
   };
 
   const stats = [
-    { title: "Update Pages", value: "Manage", icon: "📄", link: "/admin/update-pages" },
-    { title: "Media Files", value: totalMedia, icon: "🖼️", link: "/admin/media-stats" },
-    { title: "Visitors", value: "Analytics", icon: "📊", action: "scrollToVisitors" },
-    { title: "IAM Users", value: "Manage", icon: "🔐", link: "/admin/iam/users" },
+    { title: "Update Pages", value: "Manage", icon: "??", link: "/admin/update-pages" },
+    { title: "Media Files", value: totalMedia, icon: "???", link: "/admin/media-stats" },
+    { title: "Visitors", value: "Analytics", icon: "??", action: "scrollToVisitors" },
+    { title: "IAM Users", value: "Manage", icon: "??", link: "/admin/iam/users" },
   ];
 
   return (
@@ -1021,7 +1021,7 @@ const AdminDashboard = () => {
               <div className="dashboard-title">Admin Analytics</div>
               <div className="dashboard-subtitle">Enterprise dashboard with real-time operational insights</div>
             </div>
-            <span className="live-indicator">🟢 Live Sync</span>
+            <span className="live-indicator">?? Live Sync</span>
           </div>
           <div className="header-right">
             <div className="header-stat">
@@ -1041,7 +1041,7 @@ const AdminDashboard = () => {
 
         {certificateStats.pending > 0 && (
           <div className="alert-banner">
-            ⚠ {certificateStats.pending} certificates pending generation for {selectedCertificateYearLabel}.
+            ? {certificateStats.pending} certificates pending generation for {selectedCertificateYearLabel}.
           </div>
         )}
 
@@ -1065,7 +1065,7 @@ const AdminDashboard = () => {
         </div>
 
         <div className="section-header">
-          <div className="section-title">🧭 System Overview</div>
+          <div className="section-title">?? System Overview</div>
           <div className="section-subtitle">Quick access to core admin modules</div>
         </div>
         <div className="stats-grid">
@@ -1114,7 +1114,7 @@ const AdminDashboard = () => {
         >
           <div className="panel-inner">
             <div className="section-header">
-              <div className="section-title">📈 Analytics</div>
+              <div className="section-title">?? Analytics</div>
               <div className="section-subtitle">Trends, performance, and engagement</div>
             </div>
 
@@ -1127,9 +1127,9 @@ const AdminDashboard = () => {
             <div className="alert-panel">
               <h3>System Alerts</h3>
               {certificateStats.pending > 0 ? (
-                <div className="alert warning">⚠ {certificateStats.pending} certificates pending generation</div>
+                <div className="alert warning">? {certificateStats.pending} certificates pending generation</div>
               ) : (
-                <div className="alert success">✅ All certificates generated</div>
+                <div className="alert success">? All certificates generated</div>
               )}
             </div>
 
@@ -1139,7 +1139,7 @@ const AdminDashboard = () => {
             ====================== */}
             <div className="section-header compact">
               <div className="section-header-left">
-                <div className="section-title">📊 Quick Stats</div>
+                <div className="section-title">?? Quick Stats</div>
                 <div className="section-subtitle">Points by year (Individual + Group)</div>
               </div>
               <div className="quick-stats-controls">
@@ -1226,14 +1226,14 @@ const AdminDashboard = () => {
                           <span className="stats-mini-label">Total</span>
                         </div>
                       </div>
-                      <div className="stats-note">Weights: Individual 5/3/1 • Group 10/7/4</div>
+                      <div className="stats-note">Weights: Individual 5/3/1 � Group 10/7/4</div>
                     </div>
                   </div>
                 </div>
 
                 <div className="analytics-sidebar">
                   <div className="kpi-card">
-                    <h4>🏆 Best Performing Year</h4>
+                    <h4>?? Best Performing Year</h4>
                     <h2>{topYears[0]?.year || "-"}</h2>
                     <p>{topYears[0]?.totalPoints || 0} Points</p>
                   </div>
@@ -1241,7 +1241,7 @@ const AdminDashboard = () => {
                     className={`kpi-card clickable ${filterMode === "total" ? "active" : ""}`}
                     onClick={() => setFilterMode("total")}
                   >
-                    <h4>🎖 Certificates ({selectedCertificateYearLabel})</h4>
+                    <h4>?? Certificates ({selectedCertificateYearLabel})</h4>
                     <h2>{certificateStats.total}</h2>
                     <p>Click to view all for selected year</p>
                   </div>
@@ -1249,7 +1249,7 @@ const AdminDashboard = () => {
                     className={`kpi-card clickable ${filterMode === "generated" ? "active" : ""}`}
                     onClick={() => setFilterMode("generated")}
                   >
-                    <h4>✅ Generated</h4>
+                    <h4>? Generated</h4>
                     <h2>{certificateStats.generated}</h2>
                     <p>Click to view generated only</p>
                   </div>
@@ -1257,12 +1257,12 @@ const AdminDashboard = () => {
                     className={`kpi-card clickable ${filterMode === "pending" ? "active" : ""}`}
                     onClick={() => setFilterMode("pending")}
                   >
-                    <h4>⏳ Pending</h4>
+                    <h4>? Pending</h4>
                     <h2>{certificateStats.pending}</h2>
                     <p>Click to view pending only</p>
                   </div>
                   <div className="kpi-card">
-                    <h4>📦 Certificates (All Years)</h4>
+                    <h4>?? Certificates (All Years)</h4>
                     <h2>{certificateRows.length}</h2>
                     <p>Total records in the system</p>
                   </div>
@@ -1316,7 +1316,7 @@ const AdminDashboard = () => {
               TOP YEARS
           ====================== */}
           <div className="section-header compact">
-            <div className="section-title">🏆 Best Performing Years</div>
+            <div className="section-title">?? Best Performing Years</div>
             <div className="section-subtitle">Top 5 years by medal points</div>
           </div>
 
@@ -1329,7 +1329,7 @@ const AdminDashboard = () => {
               className="top-year-card-animated"
             >
               <h1 style={{ margin: 0 }}>
-                {index === 0 ? "🥇" : "🥈"}
+                {index === 0 ? "??" : "??"}
               </h1>
               <h2 style={{ margin: "10px 0" }}>{year.year}</h2>
               <h3 style={{ margin: 0 }}>{year.totalPoints} Points</h3>
@@ -1344,7 +1344,7 @@ const AdminDashboard = () => {
         ====================== */}
         <div className="section-header compact table-stretch">
           <div className="section-header-left">
-            <div className="section-title">🧑‍🎓 Players List</div>
+            <div className="section-title">????? Players List</div>
             <div className="section-subtitle">Search by name or branch and filter by year</div>
           </div>
           <div className="table-filters">
@@ -1404,7 +1404,7 @@ const AdminDashboard = () => {
         ====================== */}
         <div className="section-header compact table-stretch">
           <div className="section-header-left">
-            <div className="section-title">🏅 Certificates</div>
+            <div className="section-title">?? Certificates</div>
             <div className="section-subtitle">Generate and download student certificates</div>
           </div>
           <div className="table-filters">
@@ -1444,7 +1444,7 @@ const AdminDashboard = () => {
               onClick={() => setShowBatchControls(!showBatchControls)}
               style={{ fontWeight: 600 }}
             >
-              {showBatchControls ? '👁️ Hide' : '☑️ Batch Select'} ({selectedCertificates.size})
+              {showBatchControls ? '??? Hide' : '?? Batch Select'} ({selectedCertificates.size})
             </button>
             {showBatchControls && (
               <>
@@ -1492,7 +1492,7 @@ const AdminDashboard = () => {
             <table className="iam-table">
               <thead>
                 <tr>
-                  {showBatchControls && <th style={{ width: 40 }}>✓</th>}
+                  {showBatchControls && <th style={{ width: 40 }}>?</th>}
                   <th>Student</th>
                   <th>KPM No.</th>
                   <th>Semester</th>
@@ -1580,3 +1580,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

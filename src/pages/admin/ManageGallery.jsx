@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from './AdminLayout';
 import { confirmAction } from '../../utils/notify';
 import PageLatestChangeCard from '../../components/PageLatestChangeCard';
 
@@ -514,3 +514,4 @@ const ManageGallery = () => {
 };
 
 export default ManageGallery;
+

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from './AdminLayout';
 import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
 import PageLatestChangeCard from '../../components/PageLatestChangeCard';
@@ -418,3 +418,4 @@ const errorBox = { background: '#f8d7da', color: '#721c24', padding: '10px', bor
 const successBox = { background: '#d4edda', color: '#155724', padding: '10px', borderRadius: '6px', marginBottom: '10px' };
 
 export default ManageEvents;
+

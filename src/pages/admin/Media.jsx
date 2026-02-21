@@ -1,8 +1,8 @@
-﻿
+
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import AdminLayout from "../../components/AdminLayout";
+import AdminLayout from "./AdminLayout";
 import { confirmAction } from "../../utils/notify";
 
 const Media = () => {
@@ -268,7 +268,7 @@ const Media = () => {
                           fontSize: "14px"
                         }}
                       >
-                        âœ” Save
+                        ✔ Save
                       </button>
 
                       <button
@@ -284,7 +284,7 @@ const Media = () => {
                           fontSize: "14px"
                         }}
                       >
-                        âœ– Cancel
+                        ✖ Cancel
                       </button>
                     </div>
                   </div>
@@ -328,7 +328,7 @@ const Media = () => {
                         onMouseLeave={handleHoverOut}
                         title={copiedId === m.id ? "Copied!" : "Copy URL"}
                       >
-                        {copiedId === m.id ? "âœ… Copied" : <img src="/Copy button.png" alt="Copy" style={{ width: '16px', height: '16px' }} />}
+                        {copiedId === m.id ? "✅ Copied" : <img src="/Copy button.png" alt="Copy" style={{ width: '16px', height: '16px' }} />}
                       </button>
                       <button
                         onClick={() => enableEdit(m.id)}
@@ -367,4 +367,5 @@ const Media = () => {
 };
 
 export default Media;
+
 

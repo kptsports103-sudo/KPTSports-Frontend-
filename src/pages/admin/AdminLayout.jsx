@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import activityLogService from '../services/activityLog.service';
-import '../admin.css';
+import { useAuth } from '../../context/AuthContext';
+import activityLogService from '../../services/activityLog.service';
+import '../../admin.css';
 
-const SuperAdminLayout = ({ children }) => {
+const AdminLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
@@ -42,17 +42,27 @@ const SuperAdminLayout = ({ children }) => {
     }
   }, []);
 
-  const superAdminMenuItems = [
-    { path: '/admin/super-admin-dashboard', label: 'Super Admin Dashboard', icon: '👑' },
-    { path: '/admin/iam/users', label: 'IAM Users', icon: '👥' },
+  const isCreator = user?.role === 'creator';
+
+  const adminMenuItems = [
+    { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/admin/users-manage', label: 'Users Management', icon: '⚙️' },
-    { path: '/admin/audit-logs', label: 'Audit Logs', icon: '📋' },
-    { path: '/admin/errors', label: 'Error Dashboard', icon: '🚨' },
-    { path: '/admin/media-stats', label: 'Media Stats', icon: '📊' },
-    { path: '/admin/login-activity', label: 'Login Activity', icon: '🔐' },
-    { path: '/admin/approvals', label: 'Approvals', icon: '✅' },
-    { path: '/admin/abuse-logs', label: 'Abuse Logs', icon: '🚫' },
+    { path: '/admin/media', label: 'Media Management', icon: '🖼️' },
+    { path: '/admin/manage-home', label: 'Manage Home', icon: '🏠' },
+    { path: '/admin/manage-about', label: 'Manage About', icon: 'ℹ️' },
+    { path: '/admin/manage-history', label: 'Manage History', icon: '📜' },
+    { path: '/admin/manage-events', label: 'Manage Events', icon: '📅' },
+    { path: '/admin/manage-gallery', label: 'Manage Gallery', icon: '🖼️' },
+    { path: '/admin/manage-results', label: 'Manage Results', icon: '🏆' },
   ];
+
+  const creatorMenuItems = [
+    { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
+    { path: '/admin/media', label: 'Media Management', icon: '🖼️' },
+    { path: '/admin/manage-results', label: 'Manage Results', icon: '🏆' },
+  ];
+
+  const menuItems = isCreator ? creatorMenuItems : adminMenuItems;
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
@@ -62,24 +72,25 @@ const SuperAdminLayout = ({ children }) => {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Super Admin Sidebar */}
-      <div className="sidebar" style={{ 
-        width: isSidebarOpen ? '350px' : '60px',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-      }}>
+      {/* Sidebar */}
+      <div className="sidebar" style={{ width: '350px' }}>
+        
         {/* Profile Section */}
         <div 
-          className="profile"
           onClick={handleProfileClick}
-          style={{ 
+          style={{
+            padding: '20px',
+            textAlign: 'center',
+            borderBottom: '1px solid #e5e7eb',
+            marginBottom: '20px',
             cursor: 'pointer',
-            background: showActivityHistory ? 'rgba(255,255,255,0.1)' : 'transparent'
+            background: showActivityHistory ? '#f0f9ff' : 'transparent'
           }}
         >
           {/* Toggle indicator */}
           <div style={{ 
             fontSize: '12px', 
-            color: 'rgba(255,255,255,0.8)', 
+            color: '#6b7280', 
             marginBottom: '8px',
             display: 'flex',
             justifyContent: 'center',
@@ -88,44 +99,53 @@ const SuperAdminLayout = ({ children }) => {
           }}>
             {showActivityHistory ? '▼' : '▶'} {showActivityHistory ? 'Hide Activity' : 'View Activity'}
           </div>
-          
+          {/* Avatar */}
           <img
-            src={user?.profileImage || "/avatar.png"}
+            src={user?.profileImage || '/avatar.png'}
             alt="Profile"
-            style={{ 
-              width: '150px', 
-              height: '150px', 
-              imageRendering: 'auto', 
-              borderRadius: '12px', 
+            style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '8px',
               objectFit: 'cover',
-              border: '3px solid rgba(255,255,255,0.3)'
+              border: '2px solid #e5e7eb',
+              marginBottom: '15px'
             }}
           />
+
           {/* User Info Table */}
-          <div style={{ marginTop: '16px' }}>
-            <table style={{ width: '100%', fontSize: '14px', color: '#fff' }}>
+          <div style={{ textAlign: 'left', marginTop: '15px' }}>
+            <table style={{ width: '100%', fontSize: '14px' }}>
               <tbody>
                 <tr>
-                  <td style={{ padding: '4px 0', fontWeight: 600, color: 'rgba(255,255,255,0.8)', width: '80px' }}>Name:</td>
-                  <td style={{ padding: '4px 0', fontWeight: 600 }}>{user?.name || 'Super Admin'}</td>
+                  <td style={{ padding: '4px 0', fontWeight: 600, color: '#6b7280', width: '80px' }}>Name:</td>
+                  <td style={{ padding: '4px 0', fontWeight: 600 }}>{user?.name || 'Admin'}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '4px 0', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>Email:</td>
-                  <td style={{ padding: '4px 0', fontSize: '13px' }}>{user?.email}</td>
+                  <td style={{ padding: '4px 0', fontWeight: 600, color: '#6b7280' }}>Email:</td>
+                  <td style={{ padding: '4px 0', fontSize: '13px' }}>{user?.email || 'N/A'}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '4px 0', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>Role:</td>
+                  <td style={{ padding: '4px 0', fontWeight: 600, color: '#6b7280' }}>Role:</td>
                   <td style={{ padding: '4px 0' }}>
                     <span style={{
                       padding: '2px 8px',
                       fontSize: '11px',
                       fontWeight: 600,
                       borderRadius: '12px',
-                      background: '#ffd700',
-                      color: '#000',
+                      background:
+                        user?.role === 'admin' ? '#dbeafe' :
+                        user?.role === 'superadmin' ? '#fef3c7' :
+                        user?.role === 'creator' ? '#fce7f3' :
+                        user?.role === 'viewer' ? '#ecfeff' : '#f3f4f6',
+                      color:
+                        user?.role === 'admin' ? '#1e40af' :
+                        user?.role === 'superadmin' ? '#92400e' :
+                        user?.role === 'creator' ? '#9f1239' :
+                        user?.role === 'viewer' ? '#155e75' : '#374151',
                       textTransform: 'uppercase'
                     }}>
-                      {user?.role || 'SuperAdmin'}
+                      {user?.role}
                     </span>
                   </td>
                 </tr>
@@ -138,12 +158,12 @@ const SuperAdminLayout = ({ children }) => {
             <div style={{
               marginTop: '15px',
               paddingTop: '15px',
-              borderTop: '1px solid rgba(255,255,255,0.2)'
+              borderTop: '1px solid #e5e7eb'
             }}>
               <h4 style={{ 
                 margin: '0 0 10px 0', 
                 fontSize: '13px', 
-                color: '#fff',
+                color: '#374151',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '5px'
@@ -152,7 +172,7 @@ const SuperAdminLayout = ({ children }) => {
               </h4>
               
               {loadingActivity ? (
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>Loading...</div>
+                <div style={{ fontSize: '12px', color: '#6b7280' }}>Loading...</div>
               ) : activityLogs.length > 0 ? (
                 <div style={{ 
                   maxHeight: '200px', 
@@ -163,29 +183,29 @@ const SuperAdminLayout = ({ children }) => {
                     <div key={index} style={{
                       padding: '8px',
                       marginBottom: '6px',
-                      background: 'rgba(255,255,255,0.1)',
+                      background: '#f9fafb',
                       borderRadius: '4px',
-                      borderLeft: '3px solid #ffd700'
+                      borderLeft: '3px solid #3b82f6'
                     }}>
-                      <div style={{ fontWeight: 600, color: '#fff' }}>
+                      <div style={{ fontWeight: 600, color: '#1f2937' }}>
                         🔹 {log.action}
                       </div>
-                      <div style={{ color: 'rgba(255,255,255,0.8)', marginTop: '2px' }}>
+                      <div style={{ color: '#6b7280', marginTop: '2px' }}>
                         Page: {log.pageName}
                       </div>
                       {log.details ? (
-                        <div style={{ color: 'rgba(255,255,255,0.9)', marginTop: '2px' }}>
+                        <div style={{ color: '#4b5563', marginTop: '2px' }}>
                           Changes: {log.details}
                         </div>
                       ) : null}
-                      <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '10px', marginTop: '2px' }}>
+                      <div style={{ color: '#9ca3af', fontSize: '10px', marginTop: '2px' }}>
                         {log.createdAt ? new Date(log.createdAt).toLocaleString() : 'Just now'}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', fontStyle: 'italic' }}>
+                <div style={{ fontSize: '12px', color: '#6b7280', fontStyle: 'italic' }}>
                   No activity yet
                 </div>
               )}
@@ -194,51 +214,30 @@ const SuperAdminLayout = ({ children }) => {
 
         </div>
 
-        {/* Logout Button */}
-        <button 
-          className="logout-btn" 
-          onClick={handleLogout}
-          style={{
-            background: 'rgba(255,255,255,0.2)',
-            color: '#fff',
-            border: '1px solid rgba(255,255,255,0.3)'
-          }}
-        >
-          Logout
-        </button>
+        {/* Logout */}
+        <button className="logout-btn" onClick={handleLogout}>Logout</button>
 
         {/* Menu */}
         <div className="menu">
-          {superAdminMenuItems.map((item) => (
+          {menuItems.map(item => (
             <Link
               key={item.path}
               to={item.path}
               className={`menu-item ${location.pathname === item.path ? 'active' : ''}`}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                textDecoration: 'none',
-                color: 'rgba(255,255,255,0.9)',
-                padding: '12px 20px',
-                borderRadius: '8px',
-                margin: '4px 10px',
-                transition: 'all 0.3s ease',
-                background: location.pathname === item.path ? 'rgba(255,255,255,0.2)' : 'transparent'
-              }}
             >
-              <span style={{ marginRight: '10px', fontSize: '18px' }}>{item.icon}</span>
-              {isSidebarOpen && <span>{item.label}</span>}
+              <span style={{ marginRight: 10 }}>{item.icon}</span>
+              {isSidebarOpen && item.label}
             </Link>
           ))}
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="main-content" style={{ background: '#f8f9fa' }}>
-        {children}
-      </div>
+      <div className="main-content">{children}</div>
     </div>
   );
 };
 
-export default SuperAdminLayout;
+export default AdminLayout;
+
+
