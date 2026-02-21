@@ -263,6 +263,12 @@
   border-radius: 20px;
 }
 
+.admin-dashboard.enterprise-dashboard {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+}
+
 .panel {
   background: var(--panel-bg);
   border-radius: var(--radius-lg);
@@ -1110,6 +1116,10 @@
 
 @media (max-width: 768px) {
   .creator-content-stretch {
+    width: 100%;
+  }
+
+  .admin-dashboard.enterprise-dashboard {
     width: 100%;
   }
 
