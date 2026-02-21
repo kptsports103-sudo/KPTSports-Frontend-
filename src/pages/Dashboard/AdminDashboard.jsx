@@ -1110,7 +1110,7 @@ const AdminDashboard = () => {
         {/* ANALYTICS */}
         <div
           id="visitor-charts"
-          className="dashboard-panel"
+          className="dashboard-panel table-stretch"
         >
           <div className="panel-inner">
             <div className="section-header">
