@@ -43,7 +43,7 @@ const CreatorDashboard = () => {
       <div className="min-h-screen bg-[#e5e7eb]">
         {/* Refined Professional Navbar */}
         <div className="bg-white border-b border-gray-300">
-          <div className="max-w-7xl mx-auto px-8">
+          <div className="creator-content-stretch px-8">
 
             {/* Top Row */}
             <div className="flex items-center justify-between py-8">
@@ -56,7 +56,7 @@ const CreatorDashboard = () => {
                 {/* Title */}
                 <div>
                   <h1 className="text-3xl font-semibold text-gray-900 leading-tight">
-                    Dashboard
+                    CreatorDashboard
                   </h1>
                   <p className="text-base text-gray-500 mt-1">
                     Manage players, schedules, and performance
@@ -111,7 +111,7 @@ const CreatorDashboard = () => {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-8 py-10">
+        <div className="creator-content-stretch px-8 py-10">
           <div className="bg-white border border-gray-200">
             <div className="p-8">
               {renderContent()}

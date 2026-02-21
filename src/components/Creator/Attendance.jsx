@@ -486,8 +486,6 @@ const styles = {
 
   table: {
     width: "100%",
-    maxWidth: "1100px",
-    margin: "0 auto",
     background: "#fff",
     color: "#000",
     borderCollapse: "separate",

@@ -252,6 +252,11 @@
   margin: 0 auto;
 }
 
+.creator-content-stretch {
+  width: min(1680px, calc(100vw - 430px));
+  margin: 0 auto;
+}
+
 .enterprise-dashboard {
   padding: 32px;
   background: var(--bg-main);
@@ -1104,6 +1109,10 @@
 }
 
 @media (max-width: 768px) {
+  .creator-content-stretch {
+    width: 100%;
+  }
+
   .enterprise-dashboard {
     padding: 16px;
   }

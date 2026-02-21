@@ -123,8 +123,7 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
     gap: "24px",
-    maxWidth: "1200px",
-    margin: "0 auto",
+    width: "100%",
   },
 
   card: {
