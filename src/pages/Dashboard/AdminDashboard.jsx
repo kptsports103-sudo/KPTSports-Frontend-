@@ -1,6 +1,4 @@
 ﻿
-
-import { Link } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { useState, useEffect, useMemo, useRef } from "react";
 import DailyVisitorsChart from "../../admin/components/DailyVisitorsChart";
@@ -91,7 +89,6 @@ const normalizeMedalKey = (medal = "") => {
 };
 
 const AdminDashboard = () => {
-  const [totalMedia, setTotalMedia] = useState(0);
   const [certificateRows, setCertificateRows] = useState([]);
   const [issuedCertificates, setIssuedCertificates] = useState([]);
   const [isGeneratingId, setIsGeneratingId] = useState(null);
@@ -1000,82 +997,57 @@ const AdminDashboard = () => {
 
   useAdminAlerts(certificateStats);
 
-  // Scroll to visitor charts
-  const scrollToVisitors = () => {
-    const element = document.getElementById('visitor-charts');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  // Dynamic stats
-  const stats = [
-    { title: "Update Pages", value: "Manage", icon: "📄", link: "/admin/update-pages" },
-    { title: "Media Files", value: totalMedia, icon: "🖼️", link: "/admin/media-stats" },
-    { title: "Visitors", value: "Analytics", icon: "📊", action: "scrollToVisitors" },
-    { title: "IAM Users", value: "Manage", icon: "🔐", link: "/admin/iam/users" },
-  ];
-
   return (
     <AdminLayout>
-      {/* Improved layout wrapper for consistent spacing and readability */}
-      <div className="admin-dashboard">
-        <div className="realtime-indicator">🟢 Live Data Sync Active</div>
-        <div className="last-update">
-          Last Updated: {new Date(lastUpdateTime).toLocaleTimeString()}
+      <div className="admin-dashboard enterprise-dashboard">
+        <div className="enterprise-header">
+          <div className="header-left">
+            <div>
+              <div className="dashboard-title">Admin Analytics</div>
+              <div className="dashboard-subtitle">Enterprise dashboard with real-time operational insights</div>
+            </div>
+            <span className="live-indicator">🟢 Live Sync</span>
+          </div>
+          <div className="header-right">
+            <div className="header-stat">
+              Pending Certificates
+              <b>{certificateStats.pending}</b>
+            </div>
+            <div className="header-stat">
+              Generated
+              <b>{certificateStats.generated}</b>
+            </div>
+            <div className="header-stat">
+              Last Updated
+              <b>{new Date(lastUpdateTime).toLocaleTimeString()}</b>
+            </div>
+          </div>
         </div>
-        <div className="dashboard-title">Admin Dashboard</div>
-        <div className="dashboard-subtitle">System Overview & Analytics</div>
+
         {certificateStats.pending > 0 && (
           <div className="alert-banner">
             ⚠ {certificateStats.pending} certificates pending generation for {selectedCertificateYearLabel}.
           </div>
         )}
 
-        {/* SYSTEM OVERVIEW */}
-        <div className="section-header">
-          <div className="section-title">🧭 System Overview</div>
-          <div className="section-subtitle">Key operational totals at a glance</div>
+        <div className="kpi-row">
+          <div className={`kpi-card ${filterMode === "total" ? "active" : ""}`} onClick={() => setFilterMode("total")}>
+            <span>Total Certificates ({selectedCertificateYearLabel})</span>
+            <h2>{certificateStats.total}</h2>
+          </div>
+          <div className={`kpi-card success ${filterMode === "generated" ? "active" : ""}`} onClick={() => setFilterMode("generated")}>
+            <span>Generated</span>
+            <h2>{certificateStats.generated}</h2>
+          </div>
+          <div className={`kpi-card warning ${filterMode === "pending" ? "active" : ""}`} onClick={() => setFilterMode("pending")}>
+            <span>Pending</span>
+            <h2>{certificateStats.pending}</h2>
+          </div>
+          <div className="kpi-card primary">
+            <span>Players</span>
+            <h2>{certificateRows.length}</h2>
+          </div>
         </div>
-        <div className="stats-grid">
-          {stats.map((stat, index) => {
-            const Card = (
-              <div 
-                className="stat-card" 
-                style={{ 
-                  cursor: (stat.link || stat.action) ? "pointer" : "default",
-                  transition: "transform 0.2s, box-shadow 0.2s"
-                }}
-                onClick={stat.action === "scrollToVisitors" ? scrollToVisitors : undefined}
-                onMouseEnter={(e) => {
-                  if (stat.link || stat.action) {
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (stat.link || stat.action) {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
-                  }
-                }}
-              >
-                <div className="stat-icon">{stat.icon}</div>
-                <h3>{stat.value}</h3>
-                <p>{stat.title}</p>
-              </div>
-            );
-
-            return stat.link ? (
-              <Link key={index} to={stat.link} style={{ textDecoration: "none", color: "inherit" }}>
-                {Card}
-              </Link>
-            ) : (
-              <div key={index}>{Card}</div>
-            );
-          })}
-        </div>
-
 
         {/* ANALYTICS */}
         <div
@@ -1088,11 +1060,23 @@ const AdminDashboard = () => {
               <div className="section-subtitle">Trends, performance, and engagement</div>
             </div>
 
-            {/* Daily Visitors Chart */}
-            <DailyVisitorsChart />
+            <div className="analytics-grid">
+              <div className="panel">
+                <DailyVisitorsChart />
+              </div>
+              <div className="panel">
+                <VisitorsComparisonChart />
+              </div>
+            </div>
 
-            {/* Daily vs Total Visitors Comparison */}
-            <VisitorsComparisonChart />
+            <div className="alert-panel">
+              <h3>System Alerts</h3>
+              {certificateStats.pending > 0 ? (
+                <div className="alert warning">⚠ {certificateStats.pending} certificates pending generation</div>
+              ) : (
+                <div className="alert success">✅ All certificates generated</div>
+              )}
+            </div>
 
             {/* =====================
                 QUICK STATS - NEW LAYOUT
