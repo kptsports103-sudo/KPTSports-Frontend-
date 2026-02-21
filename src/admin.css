@@ -1155,6 +1155,22 @@
   color: #000000;
 }
 
+.table-stretch {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1680px, calc(100vw - 430px));
+}
+
+@media (max-width: 768px) {
+  .table-stretch {
+    position: static;
+    left: auto;
+    transform: none;
+    width: 100%;
+  }
+}
+
 /* Ensure readable text in Admin Dashboard Players List + Certificates blocks */
 .table-card .iam-empty {
   color: #000000;

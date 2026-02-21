@@ -1342,7 +1342,7 @@ const AdminDashboard = () => {
         {/* =====================
             PLAYERS LIST
         ====================== */}
-        <div className="section-header compact">
+        <div className="section-header compact table-stretch">
           <div className="section-header-left">
             <div className="section-title">🧑‍🎓 Players List</div>
             <div className="section-subtitle">Search by name or branch and filter by year</div>
@@ -1374,7 +1374,7 @@ const AdminDashboard = () => {
             </select>
           </div>
         </div>
-        <div className="table-card">
+        <div className="table-card table-stretch">
           {filteredPlayers.length === 0 ? (
             <div className="iam-empty">No matching players found.</div>
           ) : (
@@ -1402,7 +1402,7 @@ const AdminDashboard = () => {
         {/* =====================
             CERTIFICATE DOWNLOADS
         ====================== */}
-        <div className="section-header compact">
+        <div className="section-header compact table-stretch">
           <div className="section-header-left">
             <div className="section-title">🏅 Certificates</div>
             <div className="section-subtitle">Generate and download student certificates</div>
@@ -1429,7 +1429,7 @@ const AdminDashboard = () => {
         ENTERPRISE V5 - BATCH CONTROLS
         ============================================ */}
         {certificateRows.length > 0 && (
-          <div className="batch-controls" style={{ 
+          <div className="batch-controls table-stretch" style={{ 
             display: 'flex', 
             gap: '12px', 
             marginBottom: '16px', 
@@ -1485,7 +1485,7 @@ const AdminDashboard = () => {
           </div>
         )}
         
-        <div className="table-card">
+        <div className="table-card table-stretch">
           {filteredCertificateRowsByStatus.length === 0 ? (
             <div className="iam-empty">No student records available for certificates.</div>
           ) : (
