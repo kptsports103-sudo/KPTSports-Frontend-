@@ -223,18 +223,17 @@ const ManageResults = () => {
     try {
       console.log('Submitting form:', form);
 
-      const selectedPlayer = form.playerMasterId ? playersById[form.playerMasterId] : null;
       const manualName = (form.name || '').trim();
       const manualBranch = (form.branch || '').trim();
 
-      const finalDiplomaYear = form.diplomaYear || selectedPlayer?.diplomaYear || '';
+      const finalDiplomaYear = form.diplomaYear || '';
       if (!finalDiplomaYear) {
         alert('Diploma Year is required. Please select 1, 2, or 3.');
         return;
       }
 
-      if (!selectedPlayer && !manualName) {
-        alert('Enter Name (manual) or select a player.');
+      if (!manualName) {
+        alert('Enter Name (manual).');
         return;
       }
       
@@ -243,10 +242,10 @@ const ManageResults = () => {
         year: form.year,
         medal: form.medal,
         imageUrl: form.imageUrl,
-        name: selectedPlayer?.name || manualName,
-        branch: selectedPlayer?.branch || manualBranch,
+        name: manualName,
+        branch: manualBranch,
         diplomaYear: finalDiplomaYear,
-        playerMasterId: form.playerMasterId || null
+        playerMasterId: null
       };
 
       if (editingId) {
@@ -309,7 +308,7 @@ const ManageResults = () => {
 
     setForm({
       name: item.name || '',
-      playerMasterId: item.playerMasterId || matchedPlayer?.masterId || '',
+      playerMasterId: '',
       branch: item.branch || matchedPlayer?.branch || '',
       event: item.event || '',
       year: item.year || '',
@@ -839,7 +838,6 @@ const ManageResults = () => {
             <table style={styles.table}>
               <thead>
                 <tr style={styles.headerRow}>
-                  <th style={styles.headerCell}>Player</th>
                   <th style={styles.headerCell}>Name (manual)</th>
                   <th style={styles.headerCell}>Branch</th>
                   <th style={styles.headerCell}>Event</th>
@@ -852,40 +850,13 @@ const ManageResults = () => {
               <tbody>
                 <tr style={styles.bodyRow}>
                   <td style={styles.cell}>
-                    <select
-                      id="result-player"
-                      name="result-player"
-                      style={styles.select}
-                      value={form.playerMasterId}
-                      onChange={e => {
-                        const selectedId = e.target.value;
-                        const selectedPlayer = playersById[selectedId];
-                        setForm({
-                          ...form,
-                          playerMasterId: selectedId,
-                          name: selectedPlayer?.name || '',
-                          branch: selectedPlayer?.branch || '',
-                          diplomaYear: selectedPlayer?.diplomaYear || ''
-                        });
-                      }}
-                    >
-                      <option value="">Manual entry</option>
-                      {players.map(p => (
-                        <option key={p.masterId} value={p.masterId}>
-                          {p.name} - {p.branch}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td style={styles.cell}>
                     <input
                       id="result-name"
                       name="result-name"
                       style={styles.input}
                       value={form.name}
                       onChange={e => setForm({ ...form, name: e.target.value })}
-                      readOnly={!!form.playerMasterId}
-                      required={!form.playerMasterId}
+                      required
                     />
                   </td>
                   <td style={styles.cell}>
@@ -895,7 +866,6 @@ const ManageResults = () => {
                       style={styles.input}
                       value={form.branch}
                       onChange={e => setForm({ ...form, branch: e.target.value })}
-                      readOnly={!!form.playerMasterId}
                       placeholder="Branch"
                     />
                   </td>
