@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import SuperAdminLayout from "./SuperAdminLayout";
 import { useAuth } from "../../context/AuthContext";
+import MediaPerformanceCard from "./MediaPerformanceCard";
+import MediaHeatmap from "./MediaHeatmap";
 
 const summaryCards = [
   { title: "Total Users", value: "150", tone: "text-blue-600" },
@@ -60,6 +62,9 @@ const SuperAdminDashboard = () => {
             ))}
           </div>
         </div>
+
+        <MediaPerformanceCard />
+        <MediaHeatmap />
       </section>
     </SuperAdminLayout>
   );

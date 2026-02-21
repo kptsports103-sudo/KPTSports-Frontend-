@@ -3,7 +3,12 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import AdminLayout from "./AdminLayout";
+import api from "../../services/api";
 import { confirmAction } from "../../utils/notify";
+import CloudImage from "../../components/CloudImage";
+import SmartPreloader from "../../components/SmartPreloader";
+import { autoOptimizeMedia } from "../../utils/mediaMiddleware";
+import { trackMediaUsage } from "../../utils/mediaTracker";
 
 const Media = () => {
   const [media, setMedia] = useState([]);
@@ -12,6 +17,7 @@ const Media = () => {
   const [editing, setEditing] = useState(null);
   const [editData, setEditData] = useState({});
   const [copiedId, setCopiedId] = useState(null);
+  const [predictedUrls, setPredictedUrls] = useState([]);
 
   const iconButtonStyle = {
     width: "28px",
@@ -38,12 +44,61 @@ const Media = () => {
 
   const load = () => {
     const stored = JSON.parse(localStorage.getItem("media") || "[]");
-    setMedia(stored);
+    setMedia(autoOptimizeMedia(stored));
   };
 
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadPredictions = async () => {
+      try {
+        const response = await api.get("/media/predict?limit=8");
+        const payload = response?.data?.data || {};
+        const predicted = Array.isArray(payload.urls) ? payload.urls : [];
+
+        // Fallback: resolve URLs from locally available media list by mediaId.
+        const byId = new Map();
+        media.forEach((item) => {
+          const id = String(item.id || item._id || "");
+          if (!id) return;
+          const url =
+            item.link && item.link.trim() !== ""
+              ? item.link
+              : item.files && item.files[0]
+              ? item.files[0].url
+              : item.imageUrl || "";
+          if (url) byId.set(id, url);
+        });
+
+        const fromPredictions = Array.isArray(payload.predictions)
+          ? payload.predictions
+              .map((item) => item.mediaUrl || byId.get(String(item.mediaId || "")) || "")
+              .filter(Boolean)
+          : [];
+
+        const merged = Array.from(new Set([...predicted, ...fromPredictions])).slice(0, 10);
+        if (!ignore) {
+          setPredictedUrls(merged);
+        }
+      } catch (error) {
+        if (!ignore) {
+          setPredictedUrls([]);
+        }
+      }
+    };
+
+    if (media.length) {
+      loadPredictions();
+    }
+
+    return () => {
+      ignore = true;
+    };
+  }, [media]);
 
   const remove = async (id) => {
     const shouldDelete = await confirmAction("Delete permanently?");
@@ -130,6 +185,7 @@ const Media = () => {
 
   return (
     <AdminLayout>
+      <SmartPreloader urls={predictedUrls} />
       <div
         style={{
           minHeight: "100vh",
@@ -295,15 +351,23 @@ const Media = () => {
                     </div>
 
                     {isImage && (
-                      <img
-                        src={url}
-                        alt=""
+                      <CloudImage
+                        url={url}
+                        mediaId={m.id || m._id || url}
+                        mediaType="image"
+                        width={400}
+                        height={200}
+                        alt={m.title || "Media image"}
                         style={{
-                          width: "100%",
                           height: "70px",
-                          objectFit: "cover",
-                          borderRadius: "4px"
+                          borderRadius: "4px",
+                          cursor: "pointer"
                         }}
+                        onClick={() =>
+                          trackMediaUsage(m.id || m._id || url, "image", "view", {
+                            mediaUrl: url,
+                          })
+                        }
                       />
                     )}
 
