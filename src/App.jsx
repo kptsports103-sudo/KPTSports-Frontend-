@@ -1,6 +1,7 @@
 import AppRoutes from './routes/AppRoutes';
 import AuthProvider from './context/AuthContext';
 import { ClerkProvider } from '@clerk/clerk-react';
+import { Analytics } from '@vercel/analytics/react';
 import NotificationHost from './components/NotificationHost';
 import { Toaster } from 'react-hot-toast';
 
@@ -23,6 +24,7 @@ function App() {
           }}
         />
         <AppRoutes />
+        <Analytics />
       </AuthProvider>
     </ClerkProvider>
   );
