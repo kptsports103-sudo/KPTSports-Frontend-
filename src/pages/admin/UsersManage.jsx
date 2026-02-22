@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import SuperAdminLayout from "../super-admin/SuperAdminLayout";
+import CreatorLayout from "../../components/Creator/CreatorLayout";
 import { IAMService } from "../../services/iam.service";
 import { confirmAction } from "../../utils/notify";
 import { useAuth } from "../../context/AuthContext";
@@ -92,6 +93,27 @@ const UsersManage = () => {
     return d.toLocaleDateString();
   };
 
+  const getPageLayout = () => {
+    if (user?.role === "superadmin") return SuperAdminLayout;
+    if (user?.role === "creator") return CreatorLayout;
+    return AdminLayout;
+  };
+
+  const canDeleteTarget = (targetRole) => {
+    const currentRole = String(user?.role || "").toLowerCase();
+    const normalizedTargetRole = String(targetRole || "").toLowerCase();
+
+    if (currentRole === "superadmin") {
+      return normalizedTargetRole !== "superadmin";
+    }
+
+    if (currentRole === "admin") {
+      return normalizedTargetRole === "creator";
+    }
+
+    return false;
+  };
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -112,8 +134,9 @@ const UsersManage = () => {
   }, []);
 
   const handleDeleteUser = async (userId) => {
-    if (user?.role !== "creator") {
-      setError("Only creator can delete users");
+    const targetUser = users.find((item) => item._id === userId);
+    if (!targetUser || !canDeleteTarget(targetUser.role)) {
+      setError("You do not have permission to delete this user");
       return;
     }
     const shouldDelete = await confirmAction("Are you sure?");
@@ -139,8 +162,7 @@ const UsersManage = () => {
     fetchUsers();
   };
 
-  const Layout = user?.role === "superadmin" ? SuperAdminLayout : AdminLayout;
-  const canDeleteUsers = user?.role === "creator";
+  const Layout = getPageLayout();
 
   return (
     <Layout>
@@ -163,7 +185,7 @@ const UsersManage = () => {
         >
           <div className="flex items-center gap-2 border-b pb-4 mb-6">
             <img src="/group.png" className="w-6 h-6" />
-            <h2 className="text-xl font-semibold" style={{ color: "#000" }}>Admin Users</h2>
+            <h2 className="text-xl font-semibold" style={{ color: "#000" }}>Users</h2>
           </div>
 
           {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
@@ -183,17 +205,17 @@ const UsersManage = () => {
                     <th style={{ ...tableStyles.headerCell, textAlign: "left" }}>Phone</th>
                     <th style={{ ...tableStyles.headerCell, textAlign: "center" }}>Role</th>
                     <th style={{ ...tableStyles.headerCell, textAlign: "center" }}>Verified</th>
-                    <th style={{ ...tableStyles.headerCell, textAlign: "right" }}>
-                      {canDeleteUsers ? "Actions" : "Profile"}
-                    </th>
+                    <th style={{ ...tableStyles.headerCell, textAlign: "right" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user, i) => (
-                    <tr key={user._id} style={i % 2 ? tableStyles.rowAlt : tableStyles.row}>
+                  {users.map((rowUser, i) => {
+                    const canDeleteThisUser = canDeleteTarget(rowUser.role);
+                    return (
+                    <tr key={rowUser._id} style={i % 2 ? tableStyles.rowAlt : tableStyles.row}>
                       <td style={{ ...tableStyles.cell, textAlign: "center" }}>
                         <img
-                          src={user.profileImage || "/avatar.png"}
+                          src={rowUser.profileImage || "/avatar.png"}
                           alt="profile"
                           style={{
                             width: 40,
@@ -204,18 +226,18 @@ const UsersManage = () => {
                           }}
                         />
                       </td>
-                      <td style={tableStyles.cell}>{user.name}</td>
-                      <td style={tableStyles.cell}>{maskEmail(user.email)}</td>
-                      <td style={tableStyles.cell}>{maskPhone(user.phone)}</td>
-                      <td style={{ ...tableStyles.cell, textAlign: "center" }}>{user.role}</td>
+                      <td style={tableStyles.cell}>{rowUser.name}</td>
+                      <td style={tableStyles.cell}>{maskEmail(rowUser.email)}</td>
+                      <td style={tableStyles.cell}>{maskPhone(rowUser.phone)}</td>
+                      <td style={{ ...tableStyles.cell, textAlign: "center" }}>{rowUser.role}</td>
                       <td style={{ ...tableStyles.cell, textAlign: "center" }}>
-                        <span className={`text-sm ${user.is_verified ? "text-green-600" : "text-red-600"}`}>
-                          {user.is_verified ? "Yes" : "No"}
+                        <span className={`text-sm ${rowUser.is_verified ? "text-green-600" : "text-red-600"}`}>
+                          {rowUser.is_verified ? "Yes" : "No"}
                         </span>
                       </td>
                       <td style={{ ...tableStyles.cell, textAlign: "right" }}>
                         <button
-                          onClick={() => handleProfileClick(user)}
+                          onClick={() => handleProfileClick(rowUser)}
                           style={{
                             padding: "6px 12px",
                             background: "#dee2e6",
@@ -227,9 +249,9 @@ const UsersManage = () => {
                         >
                           Profile
                         </button>
-                        {canDeleteUsers ? (
+                        {canDeleteThisUser ? (
                           <button
-                            onClick={() => handleDeleteUser(user._id)}
+                            onClick={() => handleDeleteUser(rowUser._id)}
                             style={{
                               padding: "6px 12px",
                               background: "#dc3545",
@@ -243,7 +265,7 @@ const UsersManage = () => {
                         ) : null}
                       </td>
                     </tr>
-                  ))}
+                  )})}
                 </tbody>
               </table>
             </div>

@@ -45,6 +45,7 @@ const SuperAdminLayout = ({ children }) => {
   const superAdminMenuItems = [
     { path: '/admin/super-admin-dashboard', label: 'Super Admin Dashboard', icon: '👑' },
     { path: '/admin/iam/users', label: 'IAM Users', icon: '👥' },
+    { path: '/admin/users-manage', label: 'Users Management', icon: '⚙️' },
     { path: '/admin/audit-logs', label: 'Audit Logs', icon: '📋' },
     { path: '/admin/errors', label: 'Error Dashboard', icon: '🚨' },
     { path: '/admin/media-stats', label: 'Media Stats', icon: '📊' },
