@@ -20,16 +20,16 @@ const CERT_TEMPLATES = {
   default: {
     id: "default",
     name: "Default Certificate Template",
-    width: 1394,
-    height: 2048,
+    width: 1600,
+    height: 1000,
     slots: {
-      kpm: { x: 250, y: 820, w: 380, h: 50, align: "left" },
-      name: { x: 470, y: 1115, w: 760, h: 80, align: "center" },
-      semester: { x: 515, y: 1265, w: 200, h: 60, align: "center" },
-      department: { x: 760, y: 1265, w: 360, h: 60, align: "center" },
-      competition: { x: 640, y: 1385, w: 460, h: 60, align: "center" },
-      year: { x: 1020, y: 1500, w: 220, h: 60, align: "center" },
-      position: { x: 740, y: 1610, w: 360, h: 60, align: "center" },
+      kpm: { x: 1200, y: 150, w: 150, h: 40, align: "left" },
+      name: { x: 300, y: 400, w: 500, h: 40, align: "center" },
+      semester: { x: 350, y: 460, w: 100, h: 40, align: "center" },
+      department: { x: 600, y: 460, w: 300, h: 40, align: "center" },
+      competition: { x: 450, y: 520, w: 200, h: 40, align: "center" },
+      year: { x: 700, y: 580, w: 150, h: 40, align: "center" },
+      position: { x: 400, y: 640, w: 200, h: 40, align: "center" },
     },
   },
 };
@@ -1009,7 +1009,7 @@ const AdminDashboard = () => {
     { title: "Update Pages", value: "Manage", icon: "??", link: "/admin/update-pages" },
     { title: "Media Files", value: totalMedia, icon: "???", link: "/admin/media" },
     { title: "Visitors", value: "Analytics", icon: "??", action: "scrollToVisitors" },
-    { title: "Manage Results", value: "Manage", icon: "??", link: "/admin/manage-results" },
+    { title: "IAM Users", value: "Manage", icon: "??", link: "/admin/users-manage" },
   ];
 
   return (
@@ -1580,5 +1580,7 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+
 
 
