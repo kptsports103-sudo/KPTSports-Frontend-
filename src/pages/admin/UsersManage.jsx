@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
+import SuperAdminLayout from "../super-admin/SuperAdminLayout";
 import { IAMService } from "../../services/iam.service";
 import { confirmAction } from "../../utils/notify";
+import { useAuth } from "../../context/AuthContext";
 
 const UsersManage = () => {
+  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -132,8 +135,10 @@ const UsersManage = () => {
     fetchUsers();
   };
 
+  const Layout = user?.role === "superadmin" ? SuperAdminLayout : AdminLayout;
+
   return (
-    <AdminLayout>
+    <Layout>
       <div className="p-8 min-h-screen" style={{ background: "#f4f6f8" }}>
         <div className="flex justify-center mb-8">
           <h1 className="text-3xl font-bold flex items-center gap-3" style={{ color: "#000" }}>
@@ -317,7 +322,7 @@ const UsersManage = () => {
           </div>
         </div>
       )}
-    </AdminLayout>
+    </Layout>
   );
 };
 

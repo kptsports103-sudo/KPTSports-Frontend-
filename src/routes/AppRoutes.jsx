@@ -119,11 +119,11 @@ const AppContent = () => {
           <Route path="/admin/update-pages" element={<ProtectedRoute role="admin"><UpdatePages /></ProtectedRoute>} />
           <Route path="/admin/update-details/:pageName" element={<ProtectedRoute role="admin"><UpdateDetails /></ProtectedRoute>} />
           <Route path="/admin/iam/users" element={<ProtectedRoute role="superadmin"><IAMUsers /></ProtectedRoute>} />
-          <Route path="/admin/users-manage" element={<ProtectedRoute role="superadmin"><UsersManage /></ProtectedRoute>} />
+          <Route path="/admin/users-manage" element={<ProtectedRoute roles={["admin", "superadmin"]}><UsersManage /></ProtectedRoute>} />
           <Route path="/admin/iam/create" element={<ProtectedRoute role="superadmin"><CreateUser /></ProtectedRoute>} />
           <Route path="/admin/audit-logs" element={<ProtectedRoute role="superadmin"><AuditLogs /></ProtectedRoute>} />
           <Route path="/admin/errors" element={<ProtectedRoute role="superadmin"><ErrorDashboard /></ProtectedRoute>} />
-          <Route path="/admin/media-stats" element={<ProtectedRoute role="superadmin"><MediaStats /></ProtectedRoute>} />
+          <Route path="/admin/media-stats" element={<ProtectedRoute roles={["admin", "superadmin"]}><MediaStats /></ProtectedRoute>} />
           <Route path="/admin/login-activity" element={<ProtectedRoute role="superadmin"><LoginActivityPage /></ProtectedRoute>} />
           <Route path="/admin/approvals" element={<ProtectedRoute role="superadmin"><Approvals /></ProtectedRoute>} />
           <Route path="/admin/abuse-logs" element={<ProtectedRoute role="superadmin"><AbuseLogs /></ProtectedRoute>} />

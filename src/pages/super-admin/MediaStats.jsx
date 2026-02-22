@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../admin/AdminLayout";
+import SuperAdminLayout from "./SuperAdminLayout";
+import { useAuth } from "../../context/AuthContext";
 
 const MediaStats = () => {
+  const { user } = useAuth();
   const [media, setMedia] = useState([]);
   const [calculator, setCalculator] = useState({
     fileSize: '',
@@ -78,8 +81,10 @@ const MediaStats = () => {
     return num.toLocaleString();
   };
 
+  const Layout = user?.role === "superadmin" ? SuperAdminLayout : AdminLayout;
+
   return (
-    <AdminLayout>
+    <Layout>
       <div style={{ padding: '20px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
         <h2 style={{ color: '#333', marginBottom: '30px', fontSize: '28px', fontWeight: '700' }}>
           Media Statistics & Calculator
@@ -241,7 +246,7 @@ const MediaStats = () => {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </Layout>
   );
 };
 
