@@ -58,6 +58,7 @@ const AdminLayout = ({ children }) => {
 
   const creatorMenuItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: 'D' },
+    { path: '/admin/users-manage', label: 'Users Management', icon: 'U' },
     { path: '/admin/media', label: 'Media Management', icon: 'M' },
     { path: '/admin/manage-results', label: 'Manage Results', icon: 'T' },
   ];

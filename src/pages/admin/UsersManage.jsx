@@ -112,6 +112,10 @@ const UsersManage = () => {
   }, []);
 
   const handleDeleteUser = async (userId) => {
+    if (user?.role !== "creator") {
+      setError("Only creator can delete users");
+      return;
+    }
     const shouldDelete = await confirmAction("Are you sure?");
     if (!shouldDelete) return;
     try {
@@ -136,6 +140,7 @@ const UsersManage = () => {
   };
 
   const Layout = user?.role === "superadmin" ? SuperAdminLayout : AdminLayout;
+  const canDeleteUsers = user?.role === "creator";
 
   return (
     <Layout>
@@ -178,7 +183,9 @@ const UsersManage = () => {
                     <th style={{ ...tableStyles.headerCell, textAlign: "left" }}>Phone</th>
                     <th style={{ ...tableStyles.headerCell, textAlign: "center" }}>Role</th>
                     <th style={{ ...tableStyles.headerCell, textAlign: "center" }}>Verified</th>
-                    <th style={{ ...tableStyles.headerCell, textAlign: "right" }}>Actions</th>
+                    <th style={{ ...tableStyles.headerCell, textAlign: "right" }}>
+                      {canDeleteUsers ? "Actions" : "Profile"}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -220,18 +227,20 @@ const UsersManage = () => {
                         >
                           Profile
                         </button>
-                        <button
-                          onClick={() => handleDeleteUser(user._id)}
-                          style={{
-                            padding: "6px 12px",
-                            background: "#dc3545",
-                            color: "#fff",
-                            border: "1px solid #dc3545",
-                            cursor: "pointer",
-                          }}
-                        >
-                          Delete
-                        </button>
+                        {canDeleteUsers ? (
+                          <button
+                            onClick={() => handleDeleteUser(user._id)}
+                            style={{
+                              padding: "6px 12px",
+                              background: "#dc3545",
+                              color: "#fff",
+                              border: "1px solid #dc3545",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Delete
+                          </button>
+                        ) : null}
                       </td>
                     </tr>
                   ))}

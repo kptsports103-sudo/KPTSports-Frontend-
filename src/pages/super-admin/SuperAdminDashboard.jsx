@@ -14,7 +14,6 @@ const summaryCards = [
 
 const quickLinks = [
   { to: "/admin/iam/users", label: "Manage IAM Users" },
-  { to: "/admin/users-manage", label: "Users Management" },
   { to: "/admin/audit-logs", label: "Audit Logs" },
   { to: "/admin/errors", label: "Error Dashboard" },
   { to: "/admin/media-stats", label: "Media Stats" },

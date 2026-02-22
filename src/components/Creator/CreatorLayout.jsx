@@ -48,6 +48,7 @@ const CreatorLayout = ({ children }) => {
     { path: '/admin/creator-dashboard?tab=attendance', label: 'Attendance', icon: '✅' },
     { path: '/admin/creator-dashboard?tab=performance', label: 'Performance Analysis', icon: '📊' },
     { path: '/admin/creator-dashboard?tab=player-intelligence', label: 'Player Intelligence', icon: '🧠' },
+    { path: '/admin/users-manage', label: 'Users Management', icon: 'U' },
   ];
 
   const isActive = (itemPath) => {
@@ -254,5 +255,6 @@ const CreatorLayout = ({ children }) => {
 };
 
 export default CreatorLayout;
+
 
 
