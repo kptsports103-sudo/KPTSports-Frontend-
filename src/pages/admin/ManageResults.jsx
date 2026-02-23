@@ -363,6 +363,44 @@ const ManageResults = () => {
     setBulkRows(prev => prev.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
   };
 
+  const handleBulkRowDeleteFields = (index) => {
+    setBulkRows(prev =>
+      prev.map((row, i) =>
+        i === index
+          ? {
+              ...row,
+              event: '',
+              medal: '',
+              imageUrl: ''
+            }
+          : row
+      )
+    );
+  };
+
+  const handleBulkRowSave = async (row) => {
+    try {
+      if (!row.event || !row.medal) {
+        alert('Please fill Event and Medal before saving this row.');
+        return;
+      }
+
+      await api.post('/results', {
+        playerMasterId: row.playerMasterId,
+        event: row.event,
+        year: row.year,
+        medal: row.medal,
+        imageUrl: row.imageUrl
+      });
+
+      notify(`Saved row for ${row.name}`, { type: 'success', position: 'top-center' });
+      fetchResults();
+    } catch (error) {
+      console.error('Row save error:', error);
+      alert(error?.response?.data?.message || 'Row save failed');
+    }
+  };
+
   const handleBulkSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -1009,10 +1047,9 @@ const ManageResults = () => {
                     <th style={styles.headerCell}>Branch</th>
                     <th style={styles.headerCell}>KPM No</th>
                     <th style={styles.headerCell}>Event</th>
-                    <th style={styles.headerCell}>Year</th>
-                    <th style={styles.headerCell}>Diploma Year</th>
                     <th style={styles.headerCell}>Medal</th>
                     <th style={styles.headerCell}>Image URL</th>
+                    <th style={styles.headerCell}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1029,8 +1066,6 @@ const ManageResults = () => {
                           placeholder="Event"
                         />
                       </td>
-                      <td style={styles.cell}><input style={styles.input} value={row.year} readOnly /></td>
-                      <td style={styles.cell}><input style={styles.input} value={row.diplomaYear} readOnly /></td>
                       <td style={styles.cell}>
                         <select
                           style={styles.select}
@@ -1050,6 +1085,37 @@ const ManageResults = () => {
                           onChange={e => handleBulkRowChange(idx, 'imageUrl', e.target.value)}
                           placeholder="Image URL"
                         />
+                      </td>
+                      <td style={styles.cell}>
+                        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleBulkRowSave(row)}
+                            style={{
+                              ...styles.btnSecondary,
+                              minWidth: 96,
+                              padding: '8px 10px',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            Save Row
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleBulkRowDeleteFields(idx)}
+                            style={{
+                              ...styles.btnSecondary,
+                              minWidth: 96,
+                              padding: '8px 10px',
+                              whiteSpace: 'nowrap',
+                              background: '#dc3545',
+                              borderColor: '#dc3545',
+                              color: '#fff'
+                            }}
+                          >
+                            Delete Row
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
