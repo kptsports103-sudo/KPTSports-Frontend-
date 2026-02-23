@@ -43,6 +43,7 @@ const ManageResults = () => {
     name: '',
     playerMasterId: '',
     branch: '',
+    kpmNo: '',
     event: '',
     year: '',
     medal: '',
@@ -178,6 +179,8 @@ const ManageResults = () => {
         grouped[year].forEach(p => {
           const masterId = String(p.masterId || p.id || p.playerId || '').trim();
           if (!masterId) return;
+          const yearNumber = Number(year);
+          const rowDiplomaYear = p.diplomaYear || p.currentDiplomaYear || p.baseDiplomaYear || '';
 
           if (!masterMap[masterId]) {
             masterMap[masterId] = {
@@ -185,9 +188,19 @@ const ManageResults = () => {
               id: masterId,
               name: p.name,
               branch: p.branch,
-              diplomaYear: p.diplomaYear,
+              kpmNo: p.kpmNo || '',
+              diplomaYear: rowDiplomaYear,
+              _latestYear: Number.isFinite(yearNumber) ? yearNumber : -1,
               aliasIds: new Set()
             };
+          }
+
+          if (Number.isFinite(yearNumber) && yearNumber >= masterMap[masterId]._latestYear) {
+            masterMap[masterId].name = p.name || masterMap[masterId].name;
+            masterMap[masterId].branch = p.branch || masterMap[masterId].branch;
+            masterMap[masterId].kpmNo = p.kpmNo || masterMap[masterId].kpmNo;
+            masterMap[masterId].diplomaYear = rowDiplomaYear || masterMap[masterId].diplomaYear;
+            masterMap[masterId]._latestYear = yearNumber;
           }
 
           const rowId = String(p.id || p.playerId || '').trim();
@@ -197,7 +210,7 @@ const ManageResults = () => {
         });
       });
 
-      const uniquePlayers = Object.values(masterMap).map(({ aliasIds, ...p }) => ({
+      const uniquePlayers = Object.values(masterMap).map(({ aliasIds, _latestYear, ...p }) => ({
         ...p,
         aliasIds: Array.from(aliasIds)
       }));
@@ -223,29 +236,23 @@ const ManageResults = () => {
     try {
       console.log('Submitting form:', form);
 
-      const manualName = (form.name || '').trim();
-      const manualBranch = (form.branch || '').trim();
-
-      const finalDiplomaYear = form.diplomaYear || '';
-      if (!finalDiplomaYear) {
-        alert('Diploma Year is required. Please select 1, 2, or 3.');
+      const selectedMasterId = String(form.playerMasterId || '').trim();
+      if (!selectedMasterId) {
+        alert('Please select a player.');
         return;
       }
 
-      if (!manualName) {
-        alert('Enter Name (manual).');
+      if (!playersById[selectedMasterId]) {
+        alert('Selected player could not be resolved. Please reselect.');
         return;
       }
-      
+
       const payload = {
+        playerMasterId: selectedMasterId,
         event: form.event,
         year: form.year,
         medal: form.medal,
-        imageUrl: form.imageUrl,
-        name: manualName,
-        branch: manualBranch,
-        diplomaYear: finalDiplomaYear,
-        playerMasterId: null
+        imageUrl: form.imageUrl
       };
 
       if (editingId) {
@@ -307,13 +314,14 @@ const ManageResults = () => {
       : players.find(p => normalizeName(p.name) === normalizeName(item.name));
 
     setForm({
-      name: item.name || '',
-      playerMasterId: '',
-      branch: item.branch || matchedPlayer?.branch || '',
+      name: matchedPlayer?.name || item.name || '',
+      playerMasterId: matchedPlayer?.masterId || item.playerMasterId || item.playerId || '',
+      branch: matchedPlayer?.branch || item.branch || '',
+      kpmNo: matchedPlayer?.kpmNo || '',
       event: item.event || '',
       year: item.year || '',
       medal: item.medal || '',
-      diplomaYear: item.diplomaYear || matchedPlayer?.diplomaYear || '',
+      diplomaYear: String(matchedPlayer?.diplomaYear || item.diplomaYear || ''),
       imageUrl: item.imageUrl || ''
     });
     setEditingId(item._id);
@@ -523,7 +531,7 @@ const ManageResults = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: '', playerMasterId: '', branch: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
+    setForm({ name: '', playerMasterId: '', branch: '', kpmNo: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
     setEditingId(null);
   };
 
@@ -603,7 +611,7 @@ const ManageResults = () => {
         <div style={styles.topActionBar}>
           {!isEditing && !isGroupEditing ? (
             <>
-              <button onClick={() => setIsEditing(true)} style={styles.topBtnPrimary}>
+              <button onClick={() => { resetForm(); setIsEditing(true); }} style={styles.topBtnPrimary}>
                 ➕ Individual Result
               </button>
               <button onClick={() => setIsGroupEditing(true)} style={styles.topBtnSecondary}>
@@ -838,8 +846,10 @@ const ManageResults = () => {
             <table style={styles.table}>
               <thead>
                 <tr style={styles.headerRow}>
-                  <th style={styles.headerCell}>Name (manual)</th>
+                  <th style={styles.headerCell}>Player</th>
+                  <th style={styles.headerCell}>Name</th>
                   <th style={styles.headerCell}>Branch</th>
+                  <th style={styles.headerCell}>KPM No</th>
                   <th style={styles.headerCell}>Event</th>
                   <th style={styles.headerCell}>Year</th>
                   <th style={styles.headerCell}>Diploma Year</th>
@@ -850,13 +860,40 @@ const ManageResults = () => {
               <tbody>
                 <tr style={styles.bodyRow}>
                   <td style={styles.cell}>
+                    <select
+                      id="result-player"
+                      name="result-player"
+                      style={styles.select}
+                      value={form.playerMasterId}
+                      onChange={e => {
+                        const masterId = String(e.target.value || '').trim();
+                        const selectedPlayer = playersById[masterId];
+                        setForm(prev => ({
+                          ...prev,
+                          playerMasterId: masterId,
+                          name: selectedPlayer?.name || '',
+                          branch: selectedPlayer?.branch || '',
+                          kpmNo: selectedPlayer?.kpmNo || '',
+                          diplomaYear: selectedPlayer?.diplomaYear ? String(selectedPlayer.diplomaYear) : ''
+                        }));
+                      }}
+                      required
+                    >
+                      <option value="">Select Player</option>
+                      {[...players].sort((a, b) => (a.name || '').localeCompare(b.name || '')).map(p => (
+                        <option key={p.masterId} value={p.masterId}>
+                          {p.name} - {p.branch}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td style={styles.cell}>
                     <input
                       id="result-name"
                       name="result-name"
                       style={styles.input}
                       value={form.name}
-                      onChange={e => setForm({ ...form, name: e.target.value })}
-                      required
+                      readOnly
                     />
                   </td>
                   <td style={styles.cell}>
@@ -865,8 +902,16 @@ const ManageResults = () => {
                       name="result-branch"
                       style={styles.input}
                       value={form.branch}
-                      onChange={e => setForm({ ...form, branch: e.target.value })}
-                      placeholder="Branch"
+                      readOnly
+                    />
+                  </td>
+                  <td style={styles.cell}>
+                    <input
+                      id="result-kpm-no"
+                      name="result-kpm-no"
+                      style={styles.input}
+                      value={form.kpmNo}
+                      readOnly
                     />
                   </td>
                   <td style={styles.cell}>
@@ -891,18 +936,13 @@ const ManageResults = () => {
                     />
                   </td>
                   <td style={styles.cell}>
-                    <select
+                    <input
                       id="result-diploma"
                       name="result-diploma"
-                      style={styles.select}
+                      style={styles.input}
                       value={form.diplomaYear}
-                      onChange={e => setForm({ ...form, diplomaYear: e.target.value })}
-                    >
-                      <option value="">Select Year</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                    </select>
+                      readOnly
+                    />
                   </td>
                   <td style={styles.cell}>
                     <select
