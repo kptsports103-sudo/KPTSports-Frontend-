@@ -56,6 +56,7 @@ const Players = ({ isStudent = false }) => {
         hydratePoolFromReusablePlayers(cleaned);
         setData(cleaned);
         setDirtyRows(new Set());
+        setFixedRows(new Set());
 
         // Auto-select current year or latest
         const years = cleaned.map(d => d.year);
@@ -86,6 +87,7 @@ const Players = ({ isStudent = false }) => {
           hydratePoolFromReusablePlayers(cleaned);
           setData(cleaned);
           setDirtyRows(new Set());
+          setFixedRows(new Set());
 
           const years = cleaned.map(d => d.year);
           if (years.includes(currentYear)) {
@@ -724,6 +726,10 @@ const Players = ({ isStudent = false }) => {
       }
       setLastSavedAt(new Date());
       setDirtyRows(new Set());
+      // Keep "Fixed" only for immediate row flow; clear after full save cycle.
+      if (showFeedback) {
+        setFixedRows(new Set());
+      }
       return true;
     } catch (error) {
       console.error("Save failed:", error);
