@@ -29,14 +29,6 @@ const Players = ({ isStudent = false }) => {
     localStorage.setItem("offlineQueue", JSON.stringify(queue));
   };
 
-  const getKpmPool = () =>
-    JSON.parse(localStorage.getItem("kpmFreePool") || "{}");
-
-  const saveKpmPool = (pool) =>
-    localStorage.setItem("kpmFreePool", JSON.stringify(pool));
-
-  const KPM_GLOBAL_POOL_KEY = "__GLOBAL__";
-
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
@@ -55,7 +47,6 @@ const Players = ({ isStudent = false }) => {
           })),
         }));
         const cleaned = normalizeLoadedPlayers(mergeDuplicatePlayers(dataArray));
-        hydratePoolFromReusablePlayers(cleaned);
         setData(cleaned);
         setDirtyRows(new Set());
         setFixedRows(new Set());
@@ -86,7 +77,6 @@ const Players = ({ isStudent = false }) => {
             })),
           }));
           const cleaned = normalizeLoadedPlayers(mergeDuplicatePlayers(withIds));
-          hydratePoolFromReusablePlayers(cleaned);
           setData(cleaned);
           setDirtyRows(new Set());
           setFixedRows(new Set());
@@ -235,193 +225,14 @@ const Players = ({ isStudent = false }) => {
     return ["1"];
   };
 
-  const getKpmPrefix = (year, diplomaYear, semester) =>
-    `${String(year).slice(-2)}${String(diplomaYear)}${String(semester)}`;
-
-  const releaseKpmNumber = (kpmNo) => {
-    const safeKpm = String(kpmNo || "").trim();
-    if (!safeKpm || safeKpm.length < 6) return;
-
-    const seq = parseInt(safeKpm.slice(-2), 10);
-    if (Number.isNaN(seq) || seq < 1 || seq > 99) return;
-
-    const pool = getKpmPool();
-    if (!Array.isArray(pool[KPM_GLOBAL_POOL_KEY])) pool[KPM_GLOBAL_POOL_KEY] = [];
-    if (!pool[KPM_GLOBAL_POOL_KEY].includes(seq)) {
-      pool[KPM_GLOBAL_POOL_KEY].push(seq);
-      pool[KPM_GLOBAL_POOL_KEY].sort((a, b) => a - b);
-      saveKpmPool(pool);
-    }
-  };
-
   const shouldAutoComplete = (player) =>
     String(player?.diplomaYear || "") === "3" && String(player?.semester || "") === "6";
 
-  const maybeReleaseByStatusTransition = (beforePlayer, afterPlayer) => {
-    const prevStatus = String(beforePlayer?.status || "ACTIVE");
-    const nextStatus = String(afterPlayer?.status || "ACTIVE");
-    const transitionedToReusable = prevStatus === "ACTIVE" && nextStatus !== "ACTIVE";
-    if (transitionedToReusable) {
-      releaseKpmNumber(beforePlayer?.kpmNo || afterPlayer?.kpmNo);
-    }
-  };
-
-  const hydratePoolFromReusablePlayers = (allData) => {
-    (allData || []).forEach((yearData) => {
-      (yearData.players || []).forEach((player) => {
-        const status = String(player?.status || "ACTIVE");
-        if (status !== "ACTIVE") {
-          releaseKpmNumber(player?.kpmNo);
-        }
-      });
-    });
-  };
-
-  const generateKpmNoEnterprise = (year, diplomaYear, semester, allData, currentId = null) => {
-    if (!year || !diplomaYear || !semester) return "";
-
-    const prefix = getKpmPrefix(year, diplomaYear, semester);
-    const pool = getKpmPool();
-    const allPlayers = (allData || []).flatMap((d) => d.players || []);
-    const usedSeq = new Set();
-
-    allPlayers.forEach((p) => {
-      const kpm = String(p?.kpmNo || "").trim();
-      if (!kpm) return;
-      if (currentId && p?.id === currentId) return;
-      if (String(p?.status || "ACTIVE") !== "ACTIVE") return;
-
-      const seq = parseInt(kpm.slice(-2), 10);
-      if (!Number.isNaN(seq) && seq >= 1 && seq <= 99) {
-        usedSeq.add(seq);
-      }
-    });
-
-    if (Array.isArray(pool[KPM_GLOBAL_POOL_KEY]) && pool[KPM_GLOBAL_POOL_KEY].length > 0) {
-      while (pool[KPM_GLOBAL_POOL_KEY].length > 0) {
-        const reusedSeq = Number(pool[KPM_GLOBAL_POOL_KEY].shift());
-        if (!Number.isNaN(reusedSeq) && reusedSeq >= 1 && reusedSeq <= 99 && !usedSeq.has(reusedSeq)) {
-          saveKpmPool(pool);
-          return `${prefix}${String(reusedSeq).padStart(2, "0")}`;
-        }
-      }
-      saveKpmPool(pool);
-    }
-
-    for (let i = 1; i <= 99; i++) {
-      if (!usedSeq.has(i)) {
-        return `${prefix}${String(i).padStart(2, "0")}`;
-      }
-    }
-
-    throw new Error("Global KPM sequence limit reached (99 max)");
-  };
-
-  const canKeepCurrentKpm = (year, diplomaYear, semester, kpmNo, allData, currentId = null) => {
-    const safeKpm = String(kpmNo || "").trim();
-    if (!safeKpm) return false;
-    const expectedPrefix = getKpmPrefix(year, diplomaYear, semester);
-    if (!safeKpm.startsWith(expectedPrefix)) return false;
-    const ownSeq = parseInt(safeKpm.slice(-2), 10);
-    if (Number.isNaN(ownSeq) || ownSeq < 1 || ownSeq > 99) return false;
-
-    const allPlayers = (allData || []).flatMap((d) => d.players || []);
-    return !allPlayers.some((p) => {
-      if (!p || (currentId && p.id === currentId)) return false;
-      if (String(p.status || "ACTIVE") !== "ACTIVE") return false;
-      const candidate = String(p.kpmNo || "").trim();
-      const candidateSeq = parseInt(candidate.slice(-2), 10);
-      return !Number.isNaN(candidateSeq) && candidateSeq === ownSeq;
-    });
-  };
-
-  const assignEnterpriseKpmNos = (inputData) => {
-    const draft = (inputData || []).map((yearData) => ({
-      ...yearData,
-      players: (yearData.players || []).map((p) => ({ ...p })),
-    }));
-
-    const statusWeight = { ACTIVE: 1, COMPLETED: 2, DROPPED: 3 };
-    const masterLifecycleStatus = {};
-
-    // Build one lifecycle status per masterId across all years.
-    draft.forEach((yearData) => {
-      yearData.players.forEach((player) => {
-        const masterId = String(player?.masterId || "").trim();
-        if (!masterId) return;
-
-        const baseStatus = PLAYER_STATUSES.includes(String(player?.status || ""))
-          ? String(player.status)
-          : "ACTIVE";
-        const inferredStatus = shouldAutoComplete(player) && baseStatus === "ACTIVE"
-          ? "COMPLETED"
-          : baseStatus;
-
-        const current = masterLifecycleStatus[masterId] || "ACTIVE";
-        if ((statusWeight[inferredStatus] || 1) > (statusWeight[current] || 1)) {
-          masterLifecycleStatus[masterId] = inferredStatus;
-        }
-      });
-    });
-
-    draft.forEach((yearData) => {
-      yearData.players.forEach((player) => {
-        const allowedSemesters = getSemOptions(player?.diplomaYear || "1");
-        const normalizedSemester = allowedSemesters.includes(String(player?.semester || ""))
-          ? String(player.semester)
-          : allowedSemesters[0];
-        player.semester = normalizedSemester;
-        const masterId = String(player?.masterId || "").trim();
-        const ownStatus = PLAYER_STATUSES.includes(String(player?.status || ""))
-          ? String(player.status)
-          : "ACTIVE";
-        player.status = masterLifecycleStatus[masterId] || ownStatus;
-
-        const hasIdentity = Boolean(player?.name?.trim() && player?.branch?.trim());
-        if (!hasIdentity) {
-          player.kpmNo = String(player?.kpmNo || "").trim();
-          return;
-        }
-
-        if (player.status !== "ACTIVE") {
-          player.kpmNo = String(player?.kpmNo || "").trim();
-          return;
-        }
-
-        const existingKpm = String(player?.kpmNo || "").trim();
-        const canKeep = canKeepCurrentKpm(
-          yearData.year,
-          player?.diplomaYear || "1",
-          player.semester,
-          existingKpm,
-          draft,
-          player.id
-        );
-
-        if (!canKeep) {
-          player.kpmNo = generateKpmNoEnterprise(
-            yearData.year,
-            player?.diplomaYear || "1",
-            player.semester,
-            draft,
-            player.id
-          );
-        } else {
-          player.kpmNo = existingKpm;
-        }
-      });
-    });
-
-    return draft;
-  };
-
-  const normalizeLoadedPlayers = (inputData) => {
-    return assignEnterpriseKpmNos(inputData);
-  };
+  const normalizeLoadedPlayers = (inputData) => inputData;
 
   const updatePlayer = (year, playerIndex, field, value) => {
     setData(prev =>
-      assignEnterpriseKpmNos(prev.map(d =>
+      prev.map(d =>
         d.year === year
           ? (() => {
               const updatedPlayers = d.players.map((p, i) => {
@@ -466,41 +277,10 @@ const Players = ({ isStudent = false }) => {
                   updated.status = "ACTIVE";
                 }
 
-                // Live KPM generation as soon as required fields are present.
-                if (
-                  updated.name?.trim() &&
-                  updated.branch?.trim() &&
-                  updated.diplomaYear &&
-                  updated.semester
-                ) {
-                  const existingKpm = String(updated.kpmNo || '').trim();
-                  const keepExisting = canKeepCurrentKpm(
-                    year,
-                    updated.diplomaYear,
-                    updated.semester,
-                    existingKpm,
-                    prev,
-                    updated.id
-                  );
-                  updated.kpmNo = keepExisting
-                    ? existingKpm
-                    : generateKpmNoEnterprise(
-                        year,
-                        updated.diplomaYear,
-                        updated.semester,
-                        prev,
-                        updated.id
-                      );
-                } else {
-                  updated.kpmNo = String(updated.kpmNo || '').trim();
-                }
-
                 // Auto lifecycle close at Diploma 3 + Sem 6
                 if (shouldAutoComplete(updated) && updated.status === "ACTIVE") {
                   updated.status = "COMPLETED";
                 }
-
-                maybeReleaseByStatusTransition(p, updated);
 
                 return updated;
               });
@@ -508,7 +288,7 @@ const Players = ({ isStudent = false }) => {
               return { ...d, players: updatedPlayers };
             })()
           : d
-      ))
+      )
     );
 
     setDirtyRows(prev => {
@@ -648,7 +428,7 @@ const Players = ({ isStudent = false }) => {
       ...yearData,
       players: yearData.players
         .map(p => ({ ...p }))
-        .map((player, idx, workingPlayers) => {
+        .map((player) => {
           const identityKey = normalizeIdentity(player?.name, player?.branch);
           let masterId = player.masterId || masterIdByIdentity[identityKey] || crypto.randomUUID();
           if (identityKey && identityKey !== '|') {
@@ -662,34 +442,12 @@ const Players = ({ isStudent = false }) => {
             safeStatus = "COMPLETED";
           }
 
-          let kpmNo = String(player.kpmNo || '').trim();
-          const keepExisting = canKeepCurrentKpm(
-            yearData.year,
-            player.diplomaYear,
-            player.semester || '1',
-            kpmNo,
-            data,
-            player.id
-          );
-          if (safeStatus === "ACTIVE" && player.name && player.branch && player.diplomaYear && (player.semester || '1') && !keepExisting) {
-            kpmNo = generateKpmNoEnterprise(
-              yearData.year,
-              player.diplomaYear,
-              player.semester || '1',
-              data,
-              player.id
-            );
-          }
-          if (safeStatus !== "ACTIVE") {
-            releaseKpmNumber(kpmNo);
-          }
-          workingPlayers[idx] = { ...player, kpmNo };
           return {
             ...player,
             masterId,
             semester: player.semester || '1',
             status: safeStatus,
-            kpmNo,
+            kpmNo: String(player.kpmNo || '').trim(),
             id: player.id || player.playerId || crypto.randomUUID(),
           };
         })
@@ -699,13 +457,10 @@ const Players = ({ isStudent = false }) => {
         )
     })).filter(yearData => yearData.players.length > 0);
 
-    const normalizedValidData = assignEnterpriseKpmNos(validData);
-    hydratePoolFromReusablePlayers(normalizedValidData);
-
     console.log("Original data:", data);
-    console.log("Valid data to save:", normalizedValidData);
+    console.log("Valid data to save:", validData);
 
-    if (normalizedValidData.length === 0) {
+    if (validData.length === 0) {
       alert("No valid players to save. Please fill in names and branches for at least one player.");
       return false;
     }
@@ -713,15 +468,31 @@ const Players = ({ isStudent = false }) => {
     // Backup last known good state for reliable rollback on this save attempt.
     const previousSnapshot = JSON.parse(JSON.stringify(data));
     setLastSavedData(previousSnapshot);
-    setData(normalizedValidData);
+    setData(validData);
     setIsSaving(true);
 
     try {
       // Optimistically assume success
-      localStorage.setItem("playersData", JSON.stringify(normalizedValidData));
+      localStorage.setItem("playersData", JSON.stringify(validData));
 
-      // Background API save
-      await api.post('/home/players', { data: normalizedValidData });
+      // Background API save (backend is source of truth for KPM assignment)
+      const saveResponse = await api.post('/home/players', { data: validData });
+      const groupedFromServer = saveResponse?.data?.players;
+      if (groupedFromServer && typeof groupedFromServer === "object") {
+        const serverData = Object.keys(groupedFromServer).map(year => ({
+          year: parseInt(year),
+          players: groupedFromServer[year].map(p => ({
+            ...p,
+            id: p.id || p.playerId || crypto.randomUUID(),
+            masterId: p.masterId || crypto.randomUUID(),
+            semester: p.semester || '1',
+            kpmNo: p.kpmNo || '',
+            status: p.status || 'ACTIVE',
+            events: Array.isArray(p.events) ? p.events : [],
+          })),
+        }));
+        setData(normalizeLoadedPlayers(mergeDuplicatePlayers(serverData)));
+      }
 
       // Success feedback
       console.log("Saved successfully");
@@ -740,7 +511,7 @@ const Players = ({ isStudent = false }) => {
       const backendMessage = error?.response?.data?.message;
 
       if (isOffline) {
-        queueOfflineSave(normalizedValidData);
+        queueOfflineSave(validData);
         console.warn("Offline: changes queued");
         return true;
       } else {

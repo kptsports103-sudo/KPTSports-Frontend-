@@ -5,8 +5,35 @@ import Players from './Players';
 import Attendance from './Attendance';
 import PerformanceAnalysis from './PerformanceAnalysis';
 import PlayerIntelligence from './PlayerIntelligence';
+import api from '../../services/api';
 
 const CreatorOverview = ({ onNavigate }) => {
+  const [poolStatus, setPoolStatus] = useState(null);
+  const [poolError, setPoolError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchPoolStatus = async () => {
+      try {
+        setPoolError('');
+        const res = await api.get('/home/pool-status');
+        if (!cancelled) {
+          setPoolStatus(res.data || null);
+        }
+      } catch {
+        if (!cancelled) {
+          setPoolError('Unable to load pool status');
+        }
+      }
+    };
+
+    fetchPoolStatus();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const cards = [
     {
       id: 1,
@@ -42,6 +69,28 @@ const CreatorOverview = ({ onNavigate }) => {
       <div style={styles.header}>
         <h1 style={styles.pageTitle}>Dashboard</h1>
         <p style={styles.pageSubtitle}>Manage your sports academy efficiently</p>
+      </div>
+      <div style={styles.kpmCard}>
+        <div style={styles.kpmHeader}>KPM Pool Status</div>
+        <div style={styles.kpmGrid}>
+          <div style={styles.kpmItem}>
+            <span style={styles.kpmLabel}>Total</span>
+            <span style={styles.kpmValue}>{poolStatus?.total ?? '--'}</span>
+          </div>
+          <div style={styles.kpmItem}>
+            <span style={styles.kpmLabel}>Used</span>
+            <span style={styles.kpmValue}>{poolStatus?.allocated ?? '--'}</span>
+          </div>
+          <div style={styles.kpmItem}>
+            <span style={styles.kpmLabel}>Free</span>
+            <span style={styles.kpmValue}>{poolStatus?.available ?? '--'}</span>
+          </div>
+          <div style={styles.kpmItem}>
+            <span style={styles.kpmLabel}>Usage</span>
+            <span style={styles.kpmValue}>{poolStatus?.usagePercent ?? '--'}%</span>
+          </div>
+        </div>
+        {poolError && <div style={styles.kpmError}>{poolError}</div>}
       </div>
       <div style={styles.cardsContainer}>
         {cards.map((card) => (
@@ -182,6 +231,49 @@ const styles = {
     fontSize: '16px',
     color: '#6b7280',
     margin: 0,
+  },
+  kpmCard: {
+    backgroundColor: '#ffffff',
+    border: '1px solid #d1d5db',
+    borderRadius: '10px',
+    padding: '16px',
+    marginBottom: '24px',
+  },
+  kpmHeader: {
+    fontSize: '15px',
+    fontWeight: 700,
+    color: '#111827',
+    marginBottom: '12px',
+  },
+  kpmGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+    gap: '10px',
+  },
+  kpmItem: {
+    backgroundColor: '#f9fafb',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px',
+    padding: '10px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+  },
+  kpmLabel: {
+    fontSize: '12px',
+    color: '#6b7280',
+    textTransform: 'uppercase',
+    letterSpacing: '0.4px',
+  },
+  kpmValue: {
+    fontSize: '18px',
+    fontWeight: 700,
+    color: '#111827',
+  },
+  kpmError: {
+    marginTop: '10px',
+    color: '#b91c1c',
+    fontSize: '12px',
   },
   cardsContainer: {
     display: 'grid',
