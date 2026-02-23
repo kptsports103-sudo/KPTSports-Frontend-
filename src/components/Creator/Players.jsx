@@ -560,12 +560,14 @@ const Players = ({ isStudent = false }) => {
     setAutoSaveStatus("saving");
 
     try {
-      await saveAll(false); // Don't show alert for autosave
-      setAutoSaveStatus("saved");
+      const saved = await saveAll(false); // Don't show alert for autosave
+      setAutoSaveStatus(saved ? "saved" : "error");
 
-      setTimeout(() => {
-        setAutoSaveStatus("idle");
-      }, 1500);
+      if (saved) {
+        setTimeout(() => {
+          setAutoSaveStatus("idle");
+        }, 1500);
+      }
     } catch {
       setAutoSaveStatus("error");
     }
@@ -589,7 +591,7 @@ const Players = ({ isStudent = false }) => {
     });
   };
 
-  const savePlayerRow = (year, index, rowKey) => {
+  const savePlayerRow = async (year, index, rowKey) => {
     const yearData = data.find(d => d.year === year);
     const player = yearData?.players[index];
 
@@ -598,21 +600,30 @@ const Players = ({ isStudent = false }) => {
       return;
     }
 
-    // Future: call backend for single-row save
-    console.log("Saved player row:", { year, player });
+    try {
+      // Backend API currently persists full players payload.
+      // So row-save triggers a real backend save for latest dataset.
+      const saved = await saveAll(false);
+      if (!saved) {
+        return;
+      }
 
-    alert(`Saved Row ${index + 1}`);
-    if (rowKey) {
-      setFixedRows((prev) => {
-        const next = new Set(prev);
-        next.add(rowKey);
-        return next;
-      });
+      alert(`Saved Row ${index + 1}`);
+      if (rowKey) {
+        setFixedRows((prev) => {
+          const next = new Set(prev);
+          next.add(rowKey);
+          return next;
+        });
+      }
+    } catch (error) {
+      console.error("Save row failed:", error);
+      alert("Failed to save row");
     }
   };
 
   const saveAll = async (showFeedback = true) => {
-    if (isSaving) return;
+    if (isSaving) return false;
 
     const normalizeIdentity = (name, branch) =>
       `${normalize(name)}|${normalize(branch)}`;
@@ -691,7 +702,7 @@ const Players = ({ isStudent = false }) => {
 
     if (normalizedValidData.length === 0) {
       alert("No valid players to save. Please fill in names and branches for at least one player.");
-      return;
+      return false;
     }
 
     // Backup last known good state for reliable rollback on this save attempt.
@@ -714,6 +725,7 @@ const Players = ({ isStudent = false }) => {
       }
       setLastSavedAt(new Date());
       setDirtyRows(new Set());
+      return true;
     } catch (error) {
       console.error("Save failed:", error);
       const backendMessage = error?.response?.data?.message;
@@ -721,11 +733,13 @@ const Players = ({ isStudent = false }) => {
       if (isOffline) {
         queueOfflineSave(normalizedValidData);
         console.warn("Offline: changes queued");
+        return true;
       } else {
         // Rollback UI
         setData(previousSnapshot);
 
         alert(backendMessage || "Save failed. Changes were reverted.");
+        return false;
       }
     } finally {
       setIsSaving(false);
@@ -1001,7 +1015,6 @@ const Players = ({ isStudent = false }) => {
                         <th style={{ width: "160px", padding: "12px 16px", textAlign: "left" }}>BRANCH</th>
                         <th style={{ width: "140px", padding: "12px 16px", textAlign: "left" }}>DIPLOMA YEAR</th>
                         <th style={{ width: "120px", padding: "12px 16px", textAlign: "left" }}>SEM</th>
-                        <th style={{ width: "140px", padding: "12px 16px", textAlign: "left" }}>STATUS</th>
                         <th style={{ width: "140px", padding: "12px 16px", textAlign: "left" }}>KPM NO</th>
                         {!isStudent && <th style={{ width: "100px", padding: "12px 16px", textAlign: "left" }}>ACTIONS</th>}
                       </tr>
@@ -1010,7 +1023,7 @@ const Players = ({ isStudent = false }) => {
                     <tbody>
                       {paginatedPlayers.length === 0 ? (
                         <tr>
-                          <td colSpan={isStudent ? 8 : 9} style={styles.emptyState}>
+                          <td colSpan={isStudent ? 7 : 8} style={styles.emptyState}>
                             No players found
                           </td>
                         </tr>
@@ -1112,18 +1125,6 @@ const Players = ({ isStudent = false }) => {
                                   ))}
                                 </select>
                               </td>
-                              <td style={{ padding: "10px 16px" }}>
-                                <select
-                                  value={playerAtIndex?.status || "ACTIVE"}
-                                  onChange={(e) => updatePlayer(yearData.year, originalIndex, 'status', e.target.value)}
-                                  disabled={!isEditable}
-                                  style={{ ...styles.select, backgroundColor: !isEditable ? '#f8f9fa' : '#fff' }}
-                                >
-                                  <option value="ACTIVE">ACTIVE</option>
-                                  <option value="COMPLETED">COMPLETED</option>
-                                  <option value="DROPPED">DROPPED</option>
-                                </select>
-                              </td>
                               <td style={{ padding: "10px 16px", fontWeight: "bold", color: "#0d6efd" }}>
                                 {playerAtIndex?.kpmNo || "Auto"}
                               </td>
@@ -1132,22 +1133,17 @@ const Players = ({ isStudent = false }) => {
                                   {isEditable && (
                                     isRowFixed ? (
                                       <button
-                                        onClick={() => {
-                                          setFixedRows((prev) => {
-                                            const next = new Set(prev);
-                                            next.delete(actionRowKey);
-                                            return next;
-                                          });
-                                          alert(`Row ${playerIndex + 1} is editable again`);
-                                        }}
+                                        type="button"
                                         style={styles.fixedBtn}
-                                        title="Unfix Row"
+                                        title="Row saved"
+                                        disabled
                                       >
                                         Fixed
                                       </button>
                                     ) : (
                                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                         <button
+                                          type="button"
                                           onClick={() => savePlayerRow(yearData.year, originalIndex, actionRowKey)}
                                           style={styles.actionBtn}
                                           title="Save Row"
@@ -1160,6 +1156,7 @@ const Players = ({ isStudent = false }) => {
                                           />
                                         </button>
                                         <button
+                                          type="button"
                                           onClick={() => {
                                             deleteRow(yearData.year, originalIndex);
                                             alert(`Deleted Row ${playerIndex + 1}`);
