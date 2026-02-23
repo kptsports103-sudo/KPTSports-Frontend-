@@ -335,6 +335,29 @@ const Players = ({ isStudent = false }) => {
       players: (yearData.players || []).map((p) => ({ ...p })),
     }));
 
+    const statusWeight = { ACTIVE: 1, COMPLETED: 2, DROPPED: 3 };
+    const masterLifecycleStatus = {};
+
+    // Build one lifecycle status per masterId across all years.
+    draft.forEach((yearData) => {
+      yearData.players.forEach((player) => {
+        const masterId = String(player?.masterId || "").trim();
+        if (!masterId) return;
+
+        const baseStatus = PLAYER_STATUSES.includes(String(player?.status || ""))
+          ? String(player.status)
+          : "ACTIVE";
+        const inferredStatus = shouldAutoComplete(player) && baseStatus === "ACTIVE"
+          ? "COMPLETED"
+          : baseStatus;
+
+        const current = masterLifecycleStatus[masterId] || "ACTIVE";
+        if ((statusWeight[inferredStatus] || 1) > (statusWeight[current] || 1)) {
+          masterLifecycleStatus[masterId] = inferredStatus;
+        }
+      });
+    });
+
     draft.forEach((yearData) => {
       yearData.players.forEach((player) => {
         const allowedSemesters = getSemOptions(player?.diplomaYear || "1");
@@ -342,13 +365,11 @@ const Players = ({ isStudent = false }) => {
           ? String(player.semester)
           : allowedSemesters[0];
         player.semester = normalizedSemester;
-        player.status = PLAYER_STATUSES.includes(String(player?.status || ""))
+        const masterId = String(player?.masterId || "").trim();
+        const ownStatus = PLAYER_STATUSES.includes(String(player?.status || ""))
           ? String(player.status)
           : "ACTIVE";
-
-        if (shouldAutoComplete(player) && player.status === "ACTIVE") {
-          player.status = "COMPLETED";
-        }
+        player.status = masterLifecycleStatus[masterId] || ownStatus;
 
         const hasIdentity = Boolean(player?.name?.trim() && player?.branch?.trim());
         if (!hasIdentity) {
@@ -394,7 +415,7 @@ const Players = ({ isStudent = false }) => {
 
   const updatePlayer = (year, playerIndex, field, value) => {
     setData(prev =>
-      prev.map(d =>
+      assignEnterpriseKpmNos(prev.map(d =>
         d.year === year
           ? (() => {
               const updatedPlayers = d.players.map((p, i) => {
@@ -482,7 +503,7 @@ const Players = ({ isStudent = false }) => {
               return { ...d, players: updatedPlayers };
             })()
           : d
-      )
+      ))
     );
 
     setDirtyRows(prev => {
