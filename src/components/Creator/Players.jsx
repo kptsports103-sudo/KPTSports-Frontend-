@@ -35,6 +35,8 @@ const Players = ({ isStudent = false }) => {
   const saveKpmPool = (pool) =>
     localStorage.setItem("kpmFreePool", JSON.stringify(pool));
 
+  const KPM_GLOBAL_POOL_KEY = "__GLOBAL__";
+
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
@@ -240,15 +242,14 @@ const Players = ({ isStudent = false }) => {
     const safeKpm = String(kpmNo || "").trim();
     if (!safeKpm || safeKpm.length < 6) return;
 
-    const prefix = safeKpm.slice(0, -2);
     const seq = parseInt(safeKpm.slice(-2), 10);
     if (Number.isNaN(seq) || seq < 1 || seq > 99) return;
 
     const pool = getKpmPool();
-    if (!Array.isArray(pool[prefix])) pool[prefix] = [];
-    if (!pool[prefix].includes(seq)) {
-      pool[prefix].push(seq);
-      pool[prefix].sort((a, b) => a - b);
+    if (!Array.isArray(pool[KPM_GLOBAL_POOL_KEY])) pool[KPM_GLOBAL_POOL_KEY] = [];
+    if (!pool[KPM_GLOBAL_POOL_KEY].includes(seq)) {
+      pool[KPM_GLOBAL_POOL_KEY].push(seq);
+      pool[KPM_GLOBAL_POOL_KEY].sort((a, b) => a - b);
       saveKpmPool(pool);
     }
   };
@@ -289,7 +290,6 @@ const Players = ({ isStudent = false }) => {
       if (!kpm) return;
       if (currentId && p?.id === currentId) return;
       if (String(p?.status || "ACTIVE") !== "ACTIVE") return;
-      if (!kpm.startsWith(prefix)) return;
 
       const seq = parseInt(kpm.slice(-2), 10);
       if (!Number.isNaN(seq) && seq >= 1 && seq <= 99) {
@@ -297,9 +297,9 @@ const Players = ({ isStudent = false }) => {
       }
     });
 
-    if (Array.isArray(pool[prefix]) && pool[prefix].length > 0) {
-      while (pool[prefix].length > 0) {
-        const reusedSeq = Number(pool[prefix].shift());
+    if (Array.isArray(pool[KPM_GLOBAL_POOL_KEY]) && pool[KPM_GLOBAL_POOL_KEY].length > 0) {
+      while (pool[KPM_GLOBAL_POOL_KEY].length > 0) {
+        const reusedSeq = Number(pool[KPM_GLOBAL_POOL_KEY].shift());
         if (!Number.isNaN(reusedSeq) && reusedSeq >= 1 && reusedSeq <= 99 && !usedSeq.has(reusedSeq)) {
           saveKpmPool(pool);
           return `${prefix}${String(reusedSeq).padStart(2, "0")}`;
@@ -314,7 +314,7 @@ const Players = ({ isStudent = false }) => {
       }
     }
 
-    throw new Error("KPM limit reached for this prefix (99 max)");
+    throw new Error("Global KPM sequence limit reached (99 max)");
   };
 
   const canKeepCurrentKpm = (year, diplomaYear, semester, kpmNo, allData, currentId = null) => {
@@ -322,12 +322,16 @@ const Players = ({ isStudent = false }) => {
     if (!safeKpm) return false;
     const expectedPrefix = getKpmPrefix(year, diplomaYear, semester);
     if (!safeKpm.startsWith(expectedPrefix)) return false;
+    const ownSeq = parseInt(safeKpm.slice(-2), 10);
+    if (Number.isNaN(ownSeq) || ownSeq < 1 || ownSeq > 99) return false;
 
     const allPlayers = (allData || []).flatMap((d) => d.players || []);
     return !allPlayers.some((p) => {
       if (!p || (currentId && p.id === currentId)) return false;
       if (String(p.status || "ACTIVE") !== "ACTIVE") return false;
-      return String(p.kpmNo || "").trim() === safeKpm;
+      const candidate = String(p.kpmNo || "").trim();
+      const candidateSeq = parseInt(candidate.slice(-2), 10);
+      return !Number.isNaN(candidateSeq) && candidateSeq === ownSeq;
     });
   };
 
