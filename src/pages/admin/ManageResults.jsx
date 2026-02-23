@@ -33,6 +33,8 @@ const ManageResults = () => {
   const [selectedYear, setSelectedYear] = useState(String(currentYear));
   const [players, setPlayers] = useState([]);
   const [playersById, setPlayersById] = useState({});
+  const [playersByYear, setPlayersByYear] = useState({});
+  const [bulkRows, setBulkRows] = useState([]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [isGroupEditing, setIsGroupEditing] = useState(false);
@@ -174,13 +176,27 @@ const ManageResults = () => {
       const res = await api.get('/home/players');
       const grouped = res.data || {};
       const masterMap = {};
+      const yearMap = {};
 
       Object.keys(grouped).forEach(year => {
+        const yearKey = String(year);
+        yearMap[yearKey] = yearMap[yearKey] || [];
+
         grouped[year].forEach(p => {
           const masterId = String(p.masterId || p.id || p.playerId || '').trim();
           if (!masterId) return;
           const yearNumber = Number(year);
           const rowDiplomaYear = p.diplomaYear || p.currentDiplomaYear || p.baseDiplomaYear || '';
+          const yearPlayer = {
+            masterId,
+            id: masterId,
+            name: p.name || '',
+            branch: p.branch || '',
+            kpmNo: p.kpmNo || '',
+            diplomaYear: rowDiplomaYear,
+            year: yearNumber
+          };
+          yearMap[yearKey].push(yearPlayer);
 
           if (!masterMap[masterId]) {
             masterMap[masterId] = {
@@ -214,6 +230,14 @@ const ManageResults = () => {
         ...p,
         aliasIds: Array.from(aliasIds)
       }));
+      const cleanedYearMap = Object.keys(yearMap).reduce((acc, yearKey) => {
+        const byMaster = {};
+        yearMap[yearKey].forEach(player => {
+          byMaster[player.masterId] = player;
+        });
+        acc[yearKey] = Object.values(byMaster).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        return acc;
+      }, {});
 
       const byId = uniquePlayers.reduce((acc, p) => {
         acc[p.masterId] = p;
@@ -225,6 +249,7 @@ const ManageResults = () => {
 
       setPlayers(uniquePlayers);
       setPlayersById(byId);
+      setPlayersByYear(cleanedYearMap);
     } catch (error) {
       console.error('Failed to fetch players:', error);
     }
@@ -306,6 +331,77 @@ const ManageResults = () => {
   };
 
   /* ================= HELPERS ================= */
+  const startIndividualBulkEntry = () => {
+    const yearKey = String(selectedYear || '');
+    const yearPlayers = (playersByYear[yearKey] || []).slice();
+
+    if (!yearPlayers.length) {
+      alert(`No players found for year ${yearKey || 'selected year'}.`);
+      return;
+    }
+
+    const rows = yearPlayers.map(player => ({
+      playerMasterId: player.masterId,
+      name: player.name || '',
+      branch: player.branch || '',
+      kpmNo: player.kpmNo || '',
+      diplomaYear: String(player.diplomaYear || ''),
+      year: Number(yearKey),
+      event: '',
+      medal: '',
+      imageUrl: ''
+    }));
+
+    resetForm();
+    setEditingId(null);
+    setIsGroupEditing(false);
+    setIsEditing(true);
+    setBulkRows(rows);
+  };
+
+  const handleBulkRowChange = (index, key, value) => {
+    setBulkRows(prev => prev.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
+  };
+
+  const handleBulkSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const readyRows = (bulkRows || []).filter(row => row.event && row.medal);
+      if (!readyRows.length) {
+        alert('Please fill at least one row with Event and Medal.');
+        return;
+      }
+
+      await Promise.all(
+        readyRows.map(row =>
+          api.post('/results', {
+            playerMasterId: row.playerMasterId,
+            event: row.event,
+            year: row.year,
+            medal: row.medal,
+            imageUrl: row.imageUrl
+          })
+        )
+      );
+
+      fetchResults();
+      notify(`Saved ${readyRows.length} result(s)`, { type: 'success', position: 'top-center' });
+      setIsEditing(false);
+      setBulkRows([]);
+      resetForm();
+
+      await activityLogService.logActivity(
+        'Updated Match Results',
+        'Results Page',
+        `Created ${readyRows.length} result(s) for year ${selectedYear}`
+      );
+      fetchResultsActivityLogs();
+    } catch (error) {
+      console.error('Bulk save error:', error);
+      alert(error?.response?.data?.message || 'Bulk save failed');
+    }
+  };
+
   const handleEdit = (item) => {
     const matchedPlayer = item.playerMasterId
       ? playersById[item.playerMasterId]
@@ -326,6 +422,7 @@ const ManageResults = () => {
     });
     setEditingId(item._id);
     setIsEditing(true);
+    setBulkRows([]);
   };
 
   const handleGroupEdit = (item) => {
@@ -533,6 +630,7 @@ const ManageResults = () => {
   const resetForm = () => {
     setForm({ name: '', playerMasterId: '', branch: '', kpmNo: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
     setEditingId(null);
+    setBulkRows([]);
   };
 
   /* ================= FILTERED DATA ================= */
@@ -611,7 +709,7 @@ const ManageResults = () => {
         <div style={styles.topActionBar}>
           {!isEditing && !isGroupEditing ? (
             <>
-              <button onClick={() => { resetForm(); setIsEditing(true); }} style={styles.topBtnPrimary}>
+              <button onClick={startIndividualBulkEntry} style={styles.topBtnPrimary}>
                 ➕ Individual Result
               </button>
               <button onClick={() => setIsGroupEditing(true)} style={styles.topBtnSecondary}>
@@ -842,151 +940,129 @@ const ManageResults = () => {
 
         {/* INDIVIDUAL EDIT MODE */}
         {isEditing && !isGroupEditing && (
-          <form onSubmit={handleSubmit}>
-            <table style={styles.table}>
-              <thead>
-                <tr style={styles.headerRow}>
-                  <th style={styles.headerCell}>Player</th>
-                  <th style={styles.headerCell}>Name</th>
-                  <th style={styles.headerCell}>Branch</th>
-                  <th style={styles.headerCell}>KPM No</th>
-                  <th style={styles.headerCell}>Event</th>
-                  <th style={styles.headerCell}>Year</th>
-                  <th style={styles.headerCell}>Diploma Year</th>
-                  <th style={styles.headerCell}>Medal</th>
-                  <th style={styles.headerCell}>Image URL</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={styles.bodyRow}>
-                  <td style={styles.cell}>
-                    <select
-                      id="result-player"
-                      name="result-player"
-                      style={styles.select}
-                      value={form.playerMasterId}
-                      onChange={e => {
-                        const masterId = String(e.target.value || '').trim();
-                        const selectedPlayer = playersById[masterId];
-                        setForm(prev => ({
-                          ...prev,
-                          playerMasterId: masterId,
-                          name: selectedPlayer?.name || '',
-                          branch: selectedPlayer?.branch || '',
-                          kpmNo: selectedPlayer?.kpmNo || '',
-                          diplomaYear: selectedPlayer?.diplomaYear ? String(selectedPlayer.diplomaYear) : ''
-                        }));
-                      }}
-                      required
-                    >
-                      <option value="">Select Player</option>
-                      {[...players].sort((a, b) => (a.name || '').localeCompare(b.name || '')).map(p => (
-                        <option key={p.masterId} value={p.masterId}>
-                          {p.name} - {p.branch}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td style={styles.cell}>
-                    <input
-                      id="result-name"
-                      name="result-name"
-                      style={styles.input}
-                      value={form.name}
-                      readOnly
-                    />
-                  </td>
-                  <td style={styles.cell}>
-                    <input
-                      id="result-branch"
-                      name="result-branch"
-                      style={styles.input}
-                      value={form.branch}
-                      readOnly
-                    />
-                  </td>
-                  <td style={styles.cell}>
-                    <input
-                      id="result-kpm-no"
-                      name="result-kpm-no"
-                      style={styles.input}
-                      value={form.kpmNo}
-                      readOnly
-                    />
-                  </td>
-                  <td style={styles.cell}>
-                    <input
-                      id="result-event"
-                      name="result-event"
-                      style={styles.input}
-                      value={form.event}
-                      onChange={e => setForm({ ...form, event: e.target.value })}
-                      required
-                    />
-                  </td>
-                  <td style={styles.cell}>
-                    <input
-                      id="result-year"
-                      name="result-year"
-                      type="number"
-                      style={styles.input}
-                      value={form.year}
-                      onChange={e => setForm({ ...form, year: e.target.value })}
-                      required
-                    />
-                  </td>
-                  <td style={styles.cell}>
-                    <input
-                      id="result-diploma"
-                      name="result-diploma"
-                      style={styles.input}
-                      value={form.diplomaYear}
-                      readOnly
-                    />
-                  </td>
-                  <td style={styles.cell}>
-                    <select
-                      id="result-medal"
-                      name="result-medal"
-                      style={styles.select}
-                      value={form.medal}
-                      onChange={e => setForm({ ...form, medal: e.target.value })}
-                      required
-                    >
-                      <option value="">Select Medal</option>
-                      {MEDALS.map(m => (
-                        <option key={m}>{m}</option>
-                      ))}
-                    </select>
-                  </td>
-                  <td style={styles.cell}>
-                    <input
-                      id="result-image"
-                      name="result-image"
-                      type="text"
-                      style={styles.input}
-                      value={form.imageUrl}
-                      onChange={e => setForm({ ...form, imageUrl: e.target.value })}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div style={{ textAlign: 'center', marginTop: 16 }}>
-              <button type="submit" style={{
-                ...styles.btnSaveWithIcon,
-                background: 'linear-gradient(135deg, #28a745, #218838)'
-              }}>
-                <img
-                  src="/Save button.png"
-                  alt="Save"
-                  style={styles.saveIconLeft}
-                />
-                Save
-              </button>
-            </div>
-          </form>
+          editingId ? (
+            <form onSubmit={handleSubmit}>
+              <table style={styles.table}>
+                <thead>
+                  <tr style={styles.headerRow}>
+                    <th style={styles.headerCell}>Player</th>
+                    <th style={styles.headerCell}>Name</th>
+                    <th style={styles.headerCell}>Branch</th>
+                    <th style={styles.headerCell}>KPM No</th>
+                    <th style={styles.headerCell}>Event</th>
+                    <th style={styles.headerCell}>Year</th>
+                    <th style={styles.headerCell}>Diploma Year</th>
+                    <th style={styles.headerCell}>Medal</th>
+                    <th style={styles.headerCell}>Image URL</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={styles.bodyRow}>
+                    <td style={styles.cell}>
+                      <input style={styles.input} value={form.playerMasterId || ''} readOnly />
+                    </td>
+                    <td style={styles.cell}>
+                      <input id="result-name" name="result-name" style={styles.input} value={form.name} readOnly />
+                    </td>
+                    <td style={styles.cell}>
+                      <input id="result-branch" name="result-branch" style={styles.input} value={form.branch} readOnly />
+                    </td>
+                    <td style={styles.cell}>
+                      <input id="result-kpm-no" name="result-kpm-no" style={styles.input} value={form.kpmNo} readOnly />
+                    </td>
+                    <td style={styles.cell}>
+                      <input id="result-event" name="result-event" style={styles.input} value={form.event} onChange={e => setForm({ ...form, event: e.target.value })} required />
+                    </td>
+                    <td style={styles.cell}>
+                      <input id="result-year" name="result-year" type="number" style={styles.input} value={form.year} onChange={e => setForm({ ...form, year: e.target.value })} required />
+                    </td>
+                    <td style={styles.cell}>
+                      <input id="result-diploma" name="result-diploma" style={styles.input} value={form.diplomaYear} readOnly />
+                    </td>
+                    <td style={styles.cell}>
+                      <select id="result-medal" name="result-medal" style={styles.select} value={form.medal} onChange={e => setForm({ ...form, medal: e.target.value })} required>
+                        <option value="">Select Medal</option>
+                        {MEDALS.map(m => (
+                          <option key={m}>{m}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td style={styles.cell}>
+                      <input id="result-image" name="result-image" type="text" style={styles.input} value={form.imageUrl} onChange={e => setForm({ ...form, imageUrl: e.target.value })} />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style={{ textAlign: 'center', marginTop: 16 }}>
+                <button type="submit" style={{ ...styles.btnSaveWithIcon, background: 'linear-gradient(135deg, #28a745, #218838)' }}>
+                  <img src="/Save button.png" alt="Save" style={styles.saveIconLeft} />
+                  Save
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleBulkSubmit}>
+              <table style={styles.table}>
+                <thead>
+                  <tr style={styles.headerRow}>
+                    <th style={styles.headerCell}>Name</th>
+                    <th style={styles.headerCell}>Branch</th>
+                    <th style={styles.headerCell}>KPM No</th>
+                    <th style={styles.headerCell}>Event</th>
+                    <th style={styles.headerCell}>Year</th>
+                    <th style={styles.headerCell}>Diploma Year</th>
+                    <th style={styles.headerCell}>Medal</th>
+                    <th style={styles.headerCell}>Image URL</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bulkRows.map((row, idx) => (
+                    <tr key={row.playerMasterId} style={styles.bodyRow}>
+                      <td style={styles.cell}><input style={styles.input} value={row.name} readOnly /></td>
+                      <td style={styles.cell}><input style={styles.input} value={row.branch} readOnly /></td>
+                      <td style={styles.cell}><input style={styles.input} value={row.kpmNo} readOnly /></td>
+                      <td style={styles.cell}>
+                        <input
+                          style={styles.input}
+                          value={row.event}
+                          onChange={e => handleBulkRowChange(idx, 'event', e.target.value)}
+                          placeholder="Event"
+                        />
+                      </td>
+                      <td style={styles.cell}><input style={styles.input} value={row.year} readOnly /></td>
+                      <td style={styles.cell}><input style={styles.input} value={row.diplomaYear} readOnly /></td>
+                      <td style={styles.cell}>
+                        <select
+                          style={styles.select}
+                          value={row.medal}
+                          onChange={e => handleBulkRowChange(idx, 'medal', e.target.value)}
+                        >
+                          <option value="">Select Medal</option>
+                          {MEDALS.map(m => (
+                            <option key={m}>{m}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td style={styles.cell}>
+                        <input
+                          style={styles.input}
+                          value={row.imageUrl}
+                          onChange={e => handleBulkRowChange(idx, 'imageUrl', e.target.value)}
+                          placeholder="Image URL"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div style={{ textAlign: 'center', marginTop: 16 }}>
+                <button type="submit" style={{ ...styles.btnSaveWithIcon, background: 'linear-gradient(135deg, #28a745, #218838)' }}>
+                  <img src="/Save button.png" alt="Save" style={styles.saveIconLeft} />
+                  Save
+                </button>
+              </div>
+            </form>
+          )
         )}
 
         {/* GROUP EDIT MODE */}
