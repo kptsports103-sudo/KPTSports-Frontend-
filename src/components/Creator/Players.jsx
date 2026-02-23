@@ -460,16 +460,8 @@ const Players = ({ isStudent = false }) => {
                   updated.status = "ACTIVE";
                 }
 
-                // Auto lifecycle close at Diploma 3 + Sem 6
-                if (shouldAutoComplete(updated) && updated.status === "ACTIVE") {
-                  updated.status = "COMPLETED";
-                }
-
-                maybeReleaseByStatusTransition(p, updated);
-
                 // Live KPM generation as soon as required fields are present.
                 if (
-                  updated.status === "ACTIVE" &&
                   updated.name?.trim() &&
                   updated.branch?.trim() &&
                   updated.diplomaYear &&
@@ -496,6 +488,13 @@ const Players = ({ isStudent = false }) => {
                 } else {
                   updated.kpmNo = String(updated.kpmNo || '').trim();
                 }
+
+                // Auto lifecycle close at Diploma 3 + Sem 6
+                if (shouldAutoComplete(updated) && updated.status === "ACTIVE") {
+                  updated.status = "COMPLETED";
+                }
+
+                maybeReleaseByStatusTransition(p, updated);
 
                 return updated;
               });
