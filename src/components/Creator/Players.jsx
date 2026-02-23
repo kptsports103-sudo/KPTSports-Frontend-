@@ -21,12 +21,19 @@ const Players = ({ isStudent = false }) => {
   const ITEMS_PER_PAGE = 5;
 
   const isOffline = !navigator.onLine;
+  const PLAYER_STATUSES = ["ACTIVE", "COMPLETED", "DROPPED"];
 
   const queueOfflineSave = (payload) => {
     const queue = JSON.parse(localStorage.getItem("offlineQueue") || "[]");
     queue.push(payload);
     localStorage.setItem("offlineQueue", JSON.stringify(queue));
   };
+
+  const getKpmPool = () =>
+    JSON.parse(localStorage.getItem("kpmFreePool") || "{}");
+
+  const saveKpmPool = (pool) =>
+    localStorage.setItem("kpmFreePool", JSON.stringify(pool));
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -41,10 +48,12 @@ const Players = ({ isStudent = false }) => {
             masterId: p.masterId || crypto.randomUUID(),
             semester: p.semester || '1',
             kpmNo: p.kpmNo || '',
+            status: p.status || 'ACTIVE',
             events: Array.isArray(p.events) ? p.events : [],
           })),
         }));
-        const cleaned = mergeDuplicatePlayers(dataArray);
+        const cleaned = normalizeLoadedPlayers(mergeDuplicatePlayers(dataArray));
+        hydratePoolFromReusablePlayers(cleaned);
         setData(cleaned);
         setDirtyRows(new Set());
 
@@ -69,10 +78,12 @@ const Players = ({ isStudent = false }) => {
               masterId: p.masterId || crypto.randomUUID(),
               semester: p.semester || '1',
               kpmNo: p.kpmNo || '',
+              status: p.status || 'ACTIVE',
               events: Array.isArray(p.events) ? p.events : [],
             })),
           }));
-          const cleaned = mergeDuplicatePlayers(withIds);
+          const cleaned = normalizeLoadedPlayers(mergeDuplicatePlayers(withIds));
+          hydratePoolFromReusablePlayers(cleaned);
           setData(cleaned);
           setDirtyRows(new Set());
 
@@ -157,6 +168,7 @@ const Players = ({ isStudent = false }) => {
                 diplomaYear: '1',
                 semester: '1',
                 kpmNo: '',
+                status: 'ACTIVE',
                 events: [],
               },
             ],
@@ -219,6 +231,167 @@ const Players = ({ isStudent = false }) => {
     return ["1"];
   };
 
+  const getKpmPrefix = (year, diplomaYear, semester) =>
+    `${String(year).slice(-2)}${String(diplomaYear)}${String(semester)}`;
+
+  const releaseKpmNumber = (kpmNo) => {
+    const safeKpm = String(kpmNo || "").trim();
+    if (!safeKpm || safeKpm.length < 6) return;
+
+    const prefix = safeKpm.slice(0, -2);
+    const seq = parseInt(safeKpm.slice(-2), 10);
+    if (Number.isNaN(seq) || seq < 1 || seq > 99) return;
+
+    const pool = getKpmPool();
+    if (!Array.isArray(pool[prefix])) pool[prefix] = [];
+    if (!pool[prefix].includes(seq)) {
+      pool[prefix].push(seq);
+      pool[prefix].sort((a, b) => a - b);
+      saveKpmPool(pool);
+    }
+  };
+
+  const shouldAutoComplete = (player) =>
+    String(player?.diplomaYear || "") === "3" && String(player?.semester || "") === "6";
+
+  const maybeReleaseByStatusTransition = (beforePlayer, afterPlayer) => {
+    const prevStatus = String(beforePlayer?.status || "ACTIVE");
+    const nextStatus = String(afterPlayer?.status || "ACTIVE");
+    const transitionedToReusable = prevStatus === "ACTIVE" && nextStatus !== "ACTIVE";
+    if (transitionedToReusable) {
+      releaseKpmNumber(beforePlayer?.kpmNo || afterPlayer?.kpmNo);
+    }
+  };
+
+  const hydratePoolFromReusablePlayers = (allData) => {
+    (allData || []).forEach((yearData) => {
+      (yearData.players || []).forEach((player) => {
+        const status = String(player?.status || "ACTIVE");
+        if (status !== "ACTIVE") {
+          releaseKpmNumber(player?.kpmNo);
+        }
+      });
+    });
+  };
+
+  const generateKpmNoEnterprise = (year, diplomaYear, semester, allData, currentId = null) => {
+    if (!year || !diplomaYear || !semester) return "";
+
+    const prefix = getKpmPrefix(year, diplomaYear, semester);
+    const pool = getKpmPool();
+    const allPlayers = (allData || []).flatMap((d) => d.players || []);
+    const usedSeq = new Set();
+
+    allPlayers.forEach((p) => {
+      const kpm = String(p?.kpmNo || "").trim();
+      if (!kpm) return;
+      if (currentId && p?.id === currentId) return;
+      if (String(p?.status || "ACTIVE") !== "ACTIVE") return;
+      if (!kpm.startsWith(prefix)) return;
+
+      const seq = parseInt(kpm.slice(-2), 10);
+      if (!Number.isNaN(seq) && seq >= 1 && seq <= 99) {
+        usedSeq.add(seq);
+      }
+    });
+
+    if (Array.isArray(pool[prefix]) && pool[prefix].length > 0) {
+      while (pool[prefix].length > 0) {
+        const reusedSeq = Number(pool[prefix].shift());
+        if (!Number.isNaN(reusedSeq) && reusedSeq >= 1 && reusedSeq <= 99 && !usedSeq.has(reusedSeq)) {
+          saveKpmPool(pool);
+          return `${prefix}${String(reusedSeq).padStart(2, "0")}`;
+        }
+      }
+      saveKpmPool(pool);
+    }
+
+    for (let i = 1; i <= 99; i++) {
+      if (!usedSeq.has(i)) {
+        return `${prefix}${String(i).padStart(2, "0")}`;
+      }
+    }
+
+    throw new Error("KPM limit reached for this prefix (99 max)");
+  };
+
+  const canKeepCurrentKpm = (year, diplomaYear, semester, kpmNo, allData, currentId = null) => {
+    const safeKpm = String(kpmNo || "").trim();
+    if (!safeKpm) return false;
+    const expectedPrefix = getKpmPrefix(year, diplomaYear, semester);
+    if (!safeKpm.startsWith(expectedPrefix)) return false;
+
+    const allPlayers = (allData || []).flatMap((d) => d.players || []);
+    return !allPlayers.some((p) => {
+      if (!p || (currentId && p.id === currentId)) return false;
+      if (String(p.status || "ACTIVE") !== "ACTIVE") return false;
+      return String(p.kpmNo || "").trim() === safeKpm;
+    });
+  };
+
+  const assignEnterpriseKpmNos = (inputData) => {
+    const draft = (inputData || []).map((yearData) => ({
+      ...yearData,
+      players: (yearData.players || []).map((p) => ({ ...p })),
+    }));
+
+    draft.forEach((yearData) => {
+      yearData.players.forEach((player) => {
+        const allowedSemesters = getSemOptions(player?.diplomaYear || "1");
+        const normalizedSemester = allowedSemesters.includes(String(player?.semester || ""))
+          ? String(player.semester)
+          : allowedSemesters[0];
+        player.semester = normalizedSemester;
+        player.status = PLAYER_STATUSES.includes(String(player?.status || ""))
+          ? String(player.status)
+          : "ACTIVE";
+
+        if (shouldAutoComplete(player) && player.status === "ACTIVE") {
+          player.status = "COMPLETED";
+        }
+
+        const hasIdentity = Boolean(player?.name?.trim() && player?.branch?.trim());
+        if (!hasIdentity) {
+          player.kpmNo = String(player?.kpmNo || "").trim();
+          return;
+        }
+
+        if (player.status !== "ACTIVE") {
+          player.kpmNo = String(player?.kpmNo || "").trim();
+          return;
+        }
+
+        const existingKpm = String(player?.kpmNo || "").trim();
+        const canKeep = canKeepCurrentKpm(
+          yearData.year,
+          player?.diplomaYear || "1",
+          player.semester,
+          existingKpm,
+          draft,
+          player.id
+        );
+
+        if (!canKeep) {
+          player.kpmNo = generateKpmNoEnterprise(
+            yearData.year,
+            player?.diplomaYear || "1",
+            player.semester,
+            draft,
+            player.id
+          );
+        } else {
+          player.kpmNo = existingKpm;
+        }
+      });
+    });
+
+    return draft;
+  };
+
+  const normalizeLoadedPlayers = (inputData) => {
+    return assignEnterpriseKpmNos(inputData);
+  };
+
   const updatePlayer = (year, playerIndex, field, value) => {
     setData(prev =>
       prev.map(d =>
@@ -262,22 +435,45 @@ const Players = ({ isStudent = false }) => {
                   updated.semester = allowed[0];
                 }
 
+                if (!PLAYER_STATUSES.includes(String(updated.status || ""))) {
+                  updated.status = "ACTIVE";
+                }
+
+                // Auto lifecycle close at Diploma 3 + Sem 6
+                if (shouldAutoComplete(updated) && updated.status === "ACTIVE") {
+                  updated.status = "COMPLETED";
+                }
+
+                maybeReleaseByStatusTransition(p, updated);
+
                 // Live KPM generation as soon as required fields are present.
                 if (
+                  updated.status === "ACTIVE" &&
                   updated.name?.trim() &&
                   updated.branch?.trim() &&
                   updated.diplomaYear &&
                   updated.semester
                 ) {
-                  updated.kpmNo = generateKpmNoLive(
+                  const existingKpm = String(updated.kpmNo || '').trim();
+                  const keepExisting = canKeepCurrentKpm(
                     year,
                     updated.diplomaYear,
                     updated.semester,
+                    existingKpm,
                     prev,
                     updated.id
                   );
+                  updated.kpmNo = keepExisting
+                    ? existingKpm
+                    : generateKpmNoEnterprise(
+                        year,
+                        updated.diplomaYear,
+                        updated.semester,
+                        prev,
+                        updated.id
+                      );
                 } else {
-                  updated.kpmNo = '';
+                  updated.kpmNo = String(updated.kpmNo || '').trim();
                 }
 
                 return updated;
@@ -422,20 +618,40 @@ const Players = ({ isStudent = false }) => {
             masterIdByIdentity[identityKey] = masterId;
           }
 
-          let kpmNo = player.kpmNo;
-          if (!kpmNo && player.name && player.branch) {
-            kpmNo = generateKpmNo(
+          let safeStatus = PLAYER_STATUSES.includes(String(player.status || ""))
+            ? String(player.status)
+            : "ACTIVE";
+          if (String(player.diplomaYear || "") === "3" && String(player.semester || "") === "6" && safeStatus === "ACTIVE") {
+            safeStatus = "COMPLETED";
+          }
+
+          let kpmNo = String(player.kpmNo || '').trim();
+          const keepExisting = canKeepCurrentKpm(
+            yearData.year,
+            player.diplomaYear,
+            player.semester || '1',
+            kpmNo,
+            data,
+            player.id
+          );
+          if (safeStatus === "ACTIVE" && player.name && player.branch && player.diplomaYear && (player.semester || '1') && !keepExisting) {
+            kpmNo = generateKpmNoEnterprise(
               yearData.year,
               player.diplomaYear,
               player.semester || '1',
-              workingPlayers
+              data,
+              player.id
             );
+          }
+          if (safeStatus !== "ACTIVE") {
+            releaseKpmNumber(kpmNo);
           }
           workingPlayers[idx] = { ...player, kpmNo };
           return {
             ...player,
             masterId,
             semester: player.semester || '1',
+            status: safeStatus,
             kpmNo,
             id: player.id || player.playerId || crypto.randomUUID(),
           };
@@ -446,10 +662,13 @@ const Players = ({ isStudent = false }) => {
         )
     })).filter(yearData => yearData.players.length > 0);
 
-    console.log("Original data:", data);
-    console.log("Valid data to save:", validData);
+    const normalizedValidData = assignEnterpriseKpmNos(validData);
+    hydratePoolFromReusablePlayers(normalizedValidData);
 
-    if (validData.length === 0) {
+    console.log("Original data:", data);
+    console.log("Valid data to save:", normalizedValidData);
+
+    if (normalizedValidData.length === 0) {
       alert("No valid players to save. Please fill in names and branches for at least one player.");
       return;
     }
@@ -457,15 +676,15 @@ const Players = ({ isStudent = false }) => {
     // Backup last known good state for reliable rollback on this save attempt.
     const previousSnapshot = JSON.parse(JSON.stringify(data));
     setLastSavedData(previousSnapshot);
-    setData(validData);
+    setData(normalizedValidData);
     setIsSaving(true);
 
     try {
       // Optimistically assume success
-      localStorage.setItem("playersData", JSON.stringify(validData));
+      localStorage.setItem("playersData", JSON.stringify(normalizedValidData));
 
       // Background API save
-      await api.post('/home/players', { data: validData });
+      await api.post('/home/players', { data: normalizedValidData });
 
       // Success feedback
       console.log("Saved successfully");
@@ -479,7 +698,7 @@ const Players = ({ isStudent = false }) => {
       const backendMessage = error?.response?.data?.message;
 
       if (isOffline) {
-        queueOfflineSave(validData);
+        queueOfflineSave(normalizedValidData);
         console.warn("Offline: changes queued");
       } else {
         // Rollback UI
@@ -502,43 +721,6 @@ const Players = ({ isStudent = false }) => {
     clip: 'rect(0, 0, 0, 0)',
     whiteSpace: 'nowrap',
     border: 0
-  };
-
-  const generateKpmNo = (year, diplomaYear, semester, playersList) => {
-    const yy = String(year).slice(-2);
-    const prefix = `${yy}${diplomaYear}${semester}`;
-    const existing = playersList
-      .map(p => p.kpmNo)
-      .filter(k => k && k.startsWith(prefix));
-
-    let nextSeq = 1;
-    if (existing.length > 0) {
-      const max = Math.max(...existing.map(k => parseInt(k.slice(-2), 10)));
-      nextSeq = max + 1;
-    }
-
-    return `${prefix}${String(nextSeq).padStart(2, "0")}`;
-  };
-
-  const generateKpmNoLive = (year, diplomaYear, semester, allData, currentId) => {
-    if (!year || !diplomaYear || !semester) return "";
-
-    const yy = String(year).slice(-2);
-    const prefix = `${yy}${diplomaYear}${semester}`;
-    const allPlayers = (allData || []).flatMap((d) => d.players || []);
-
-    const existing = allPlayers
-      .filter((p) => p.id !== currentId)
-      .map((p) => p.kpmNo)
-      .filter((k) => k && k.startsWith(prefix));
-
-    let nextSeq = 1;
-    if (existing.length > 0) {
-      const max = Math.max(...existing.map((k) => parseInt(k.slice(-2), 10)));
-      nextSeq = max + 1;
-    }
-
-    return `${prefix}${String(nextSeq).padStart(2, "0")}`;
   };
 
   const getParticipationMap = () => {
@@ -657,7 +839,7 @@ const Players = ({ isStudent = false }) => {
           {isEditMode && (
             <button
               onClick={() => {
-                const merged = mergeDuplicatePlayers(data);
+                const merged = normalizeLoadedPlayers(mergeDuplicatePlayers(data));
                 setData(merged);
                 setDirtyRows(prev => {
                   const next = new Set(prev);
@@ -798,6 +980,7 @@ const Players = ({ isStudent = false }) => {
                         <th style={{ width: "160px", padding: "12px 16px", textAlign: "left" }}>BRANCH</th>
                         <th style={{ width: "140px", padding: "12px 16px", textAlign: "left" }}>DIPLOMA YEAR</th>
                         <th style={{ width: "120px", padding: "12px 16px", textAlign: "left" }}>SEM</th>
+                        <th style={{ width: "140px", padding: "12px 16px", textAlign: "left" }}>STATUS</th>
                         <th style={{ width: "140px", padding: "12px 16px", textAlign: "left" }}>KPM NO</th>
                         {!isStudent && <th style={{ width: "100px", padding: "12px 16px", textAlign: "left" }}>ACTIONS</th>}
                       </tr>
@@ -806,7 +989,7 @@ const Players = ({ isStudent = false }) => {
                     <tbody>
                       {paginatedPlayers.length === 0 ? (
                         <tr>
-                          <td colSpan={isStudent ? 7 : 8} style={styles.emptyState}>
+                          <td colSpan={isStudent ? 8 : 9} style={styles.emptyState}>
                             No players found
                           </td>
                         </tr>
@@ -906,6 +1089,18 @@ const Players = ({ isStudent = false }) => {
                                   {getSemOptions(playerAtIndex?.diplomaYear).map((sem) => (
                                     <option key={sem} value={sem}>{sem}</option>
                                   ))}
+                                </select>
+                              </td>
+                              <td style={{ padding: "10px 16px" }}>
+                                <select
+                                  value={playerAtIndex?.status || "ACTIVE"}
+                                  onChange={(e) => updatePlayer(yearData.year, originalIndex, 'status', e.target.value)}
+                                  disabled={!isEditable}
+                                  style={{ ...styles.select, backgroundColor: !isEditable ? '#f8f9fa' : '#fff' }}
+                                >
+                                  <option value="ACTIVE">ACTIVE</option>
+                                  <option value="COMPLETED">COMPLETED</option>
+                                  <option value="DROPPED">DROPPED</option>
                                 </select>
                               </td>
                               <td style={{ padding: "10px 16px", fontWeight: "bold", color: "#0d6efd" }}>
