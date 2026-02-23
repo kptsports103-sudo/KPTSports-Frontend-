@@ -1134,9 +1134,15 @@ const Players = ({ isStudent = false }) => {
                                     isRowFixed ? (
                                       <button
                                         type="button"
+                                        onClick={() => {
+                                          setFixedRows((prev) => {
+                                            const next = new Set(prev);
+                                            next.delete(actionRowKey);
+                                            return next;
+                                          });
+                                        }}
                                         style={styles.fixedBtn}
-                                        title="Row saved"
-                                        disabled
+                                        title="Click to edit row"
                                       >
                                         Fixed
                                       </button>
