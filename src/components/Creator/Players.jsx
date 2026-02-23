@@ -302,7 +302,9 @@ const Players = ({ isStudent = false }) => {
     setCurrentPage(1); // Reset to first page when deleting row
     const yearData = data.find((d) => d.year === year);
     const targetPlayer = yearData?.players?.[playerIndex];
-    const targetKey = targetPlayer ? `${year}-${targetPlayer.id || playerIndex}` : null;
+    const targetKey = targetPlayer
+      ? `${year}-${targetPlayer.masterId || targetPlayer.id || playerIndex}`
+      : null;
     const newData = data.map(d =>
       d.year === year
         ? { ...d, players: d.players.filter((_, i) => i !== playerIndex) }
@@ -813,7 +815,7 @@ const Players = ({ isStudent = false }) => {
                           const originalIndex = row.idx;
                           const playerAtIndex = yearData.players[originalIndex];
                           const isEditable = !isStudent && isEditMode;
-                          const actionRowKey = `${yearData.year}-${playerAtIndex?.id || originalIndex}`;
+                          const actionRowKey = `${yearData.year}-${playerAtIndex?.masterId || playerAtIndex?.id || originalIndex}`;
                           const isRowFixed = fixedRows.has(actionRowKey);
                           return (
                             <tr
