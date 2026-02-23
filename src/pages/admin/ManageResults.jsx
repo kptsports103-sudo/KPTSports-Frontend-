@@ -17,6 +17,13 @@ const normalizeName = (name) => {
   return (name || '').toLowerCase().trim().replace(/\s+/g, ' ');
 };
 
+const getSemesterOptions = (diplomaYear) => {
+  if (String(diplomaYear) === '1') return ['1', '2'];
+  if (String(diplomaYear) === '2') return ['3', '4'];
+  if (String(diplomaYear) === '3') return ['5', '6'];
+  return [];
+};
+
 const ManageResults = () => {
   const currentUser = (() => {
     try {
@@ -35,6 +42,7 @@ const ManageResults = () => {
   const [playersById, setPlayersById] = useState({});
   const [playersByYear, setPlayersByYear] = useState({});
   const [bulkRows, setBulkRows] = useState([]);
+  const [rowActionsVisible, setRowActionsVisible] = useState({});
 
   const [isEditing, setIsEditing] = useState(false);
   const [isGroupEditing, setIsGroupEditing] = useState(false);
@@ -59,7 +67,7 @@ const ManageResults = () => {
     year: '',
     memberIds: [],
     members: [],
-    manualMembers: [{ name: '', branch: '', year: '' }],
+    manualMembers: [{ name: '', branch: '', diplomaYear: '', semester: '' }],
     medal: '',
     imageUrl: ''
   });
@@ -187,6 +195,7 @@ const ManageResults = () => {
           if (!masterId) return;
           const yearNumber = Number(year);
           const rowDiplomaYear = p.diplomaYear || p.currentDiplomaYear || p.baseDiplomaYear || '';
+          const rowSemester = p.semester ? String(p.semester) : '';
           const yearPlayer = {
             masterId,
             id: masterId,
@@ -194,6 +203,7 @@ const ManageResults = () => {
             branch: p.branch || '',
             kpmNo: p.kpmNo || '',
             diplomaYear: rowDiplomaYear,
+            semester: rowSemester,
             year: yearNumber
           };
           yearMap[yearKey].push(yearPlayer);
@@ -206,6 +216,7 @@ const ManageResults = () => {
               branch: p.branch,
               kpmNo: p.kpmNo || '',
               diplomaYear: rowDiplomaYear,
+              semester: rowSemester,
               _latestYear: Number.isFinite(yearNumber) ? yearNumber : -1,
               aliasIds: new Set()
             };
@@ -216,6 +227,7 @@ const ManageResults = () => {
             masterMap[masterId].branch = p.branch || masterMap[masterId].branch;
             masterMap[masterId].kpmNo = p.kpmNo || masterMap[masterId].kpmNo;
             masterMap[masterId].diplomaYear = rowDiplomaYear || masterMap[masterId].diplomaYear;
+            masterMap[masterId].semester = rowSemester || masterMap[masterId].semester;
             masterMap[masterId]._latestYear = yearNumber;
           }
 
@@ -357,6 +369,7 @@ const ManageResults = () => {
     setIsGroupEditing(false);
     setIsEditing(true);
     setBulkRows(rows);
+    setRowActionsVisible({});
   };
 
   const handleBulkRowChange = (index, key, value) => {
@@ -376,9 +389,10 @@ const ManageResults = () => {
           : row
       )
     );
+    setRowActionsVisible(prev => ({ ...prev, [index]: false }));
   };
 
-  const handleBulkRowSave = async (row) => {
+  const handleBulkRowSave = async (row, index) => {
     try {
       if (!row.event || !row.medal) {
         alert('Please fill Event and Medal before saving this row.');
@@ -395,6 +409,7 @@ const ManageResults = () => {
 
       notify(`Saved row for ${row.name}`, { type: 'success', position: 'top-center' });
       fetchResults();
+      setRowActionsVisible(prev => ({ ...prev, [index]: false }));
     } catch (error) {
       console.error('Row save error:', error);
       alert(error?.response?.data?.message || 'Row save failed');
@@ -426,6 +441,7 @@ const ManageResults = () => {
       notify(`Saved ${readyRows.length} result(s)`, { type: 'success', position: 'top-center' });
       setIsEditing(false);
       setBulkRows([]);
+      setRowActionsVisible({});
       resetForm();
 
       await activityLogService.logActivity(
@@ -461,6 +477,7 @@ const ManageResults = () => {
     setEditingId(item._id);
     setIsEditing(true);
     setBulkRows([]);
+    setRowActionsVisible({});
   };
 
   const handleGroupEdit = (item) => {
@@ -476,9 +493,21 @@ const ManageResults = () => {
       ...item,
       memberIds: [],
       members: item.members && Array.isArray(item.members) ? item.members : [],
-      manualMembers: manualNames.length
-        ? manualNames.map(name => ({ name, branch: '', year: '' }))
-        : [{ name: '', branch: '', year: '' }]
+      manualMembers: (item.members && Array.isArray(item.members) && item.members.length)
+        ? item.members.map((member) => {
+            if (typeof member === 'string') {
+              return { name: member, branch: '', diplomaYear: '', semester: '' };
+            }
+            return {
+              name: member?.name || '',
+              branch: '',
+              diplomaYear: member?.diplomaYear ? String(member.diplomaYear) : '',
+              semester: member?.semester ? String(member.semester) : ''
+            };
+          })
+        : manualNames.length
+        ? manualNames.map(name => ({ name, branch: '', diplomaYear: '', semester: '' }))
+        : [{ name: '', branch: '', diplomaYear: '', semester: '' }]
     });
     setEditingGroupId(item._id);
     setIsGroupEditing(true);
@@ -494,23 +523,30 @@ const ManageResults = () => {
         .map(row => ({
           name: (row.name || '').trim(),
           branch: (row.branch || '').trim(),
-          year: (row.year || '').toString().trim()
+          diplomaYear: (row.diplomaYear || '').toString().trim(),
+          semester: (row.semester || '').toString().trim()
         }))
         .filter(row => row.name);
 
       const manualMembersResolved = manualMembers.map(row => {
         const matched = players.find(p => normalizeName(p.name) === normalizeName(row.name));
-        const yearNum = Number(row.year);
-        const diplomaYear = [1, 2, 3].includes(yearNum) ? yearNum : null;
+        const diplomaYearNum = Number(row.diplomaYear);
+        const diplomaYear = [1, 2, 3].includes(diplomaYearNum) ? diplomaYearNum : null;
+        const allowedSemesters = getSemesterOptions(diplomaYear);
+        let semester = allowedSemesters.includes(String(row.semester || '')) ? String(row.semester) : null;
+        if (!semester && matched?.semester && allowedSemesters.includes(String(matched.semester))) {
+          semester = String(matched.semester);
+        }
         if (matched) {
           return {
             playerMasterId: matched.masterId,
             playerId: matched.id || '',
             name: matched.name,
-            diplomaYear: diplomaYear || matched.diplomaYear || null
+            diplomaYear: diplomaYear || matched.diplomaYear || null,
+            semester
           };
         }
-        return { playerMasterId: null, playerId: null, name: row.name, diplomaYear: diplomaYear || null };
+        return { playerMasterId: null, playerId: null, name: row.name, diplomaYear: diplomaYear || null, semester };
       });
 
       const combinedMembers = [...manualMembersResolved];
@@ -558,7 +594,7 @@ const ManageResults = () => {
       notify('Data saved successfully', { type: 'success', position: 'top-center' });
       setIsGroupEditing(false);
       setEditingGroupId(null);
-      setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: [{ name: '', branch: '', year: '' }], medal: '', imageUrl: '' });
+      setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: [{ name: '', branch: '', diplomaYear: '', semester: '' }], medal: '', imageUrl: '' });
       
       // Log the activity
       await activityLogService.logActivity(
@@ -669,6 +705,7 @@ const ManageResults = () => {
     setForm({ name: '', playerMasterId: '', branch: '', kpmNo: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
     setEditingId(null);
     setBulkRows([]);
+    setRowActionsVisible({});
   };
 
   /* ================= FILTERED DATA ================= */
@@ -761,7 +798,7 @@ const ManageResults = () => {
                 setIsEditing(false);
                 setIsGroupEditing(false);
                 setEditingGroupId(null);
-                setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: [{ name: '', branch: '', year: '' }], medal: '', imageUrl: '' });
+                setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: [{ name: '', branch: '', diplomaYear: '', semester: '' }], medal: '', imageUrl: '' });
               }}
               style={styles.topBtnSecondary}
             >
@@ -1088,33 +1125,50 @@ const ManageResults = () => {
                       </td>
                       <td style={styles.cell}>
                         <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                          <button
-                            type="button"
-                            onClick={() => handleBulkRowSave(row)}
-                            style={{
-                              ...styles.btnSecondary,
-                              minWidth: 96,
-                              padding: '8px 10px',
-                              whiteSpace: 'nowrap'
-                            }}
-                          >
-                            Save Row
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleBulkRowDeleteFields(idx)}
-                            style={{
-                              ...styles.btnSecondary,
-                              minWidth: 96,
-                              padding: '8px 10px',
-                              whiteSpace: 'nowrap',
-                              background: '#dc3545',
-                              borderColor: '#dc3545',
-                              color: '#fff'
-                            }}
-                          >
-                            Delete Row
-                          </button>
+                          {!rowActionsVisible[idx] ? (
+                            <button
+                              type="button"
+                              onClick={() => setRowActionsVisible(prev => ({ ...prev, [idx]: true }))}
+                              style={{
+                                ...styles.btnSecondary,
+                                minWidth: 96,
+                                padding: '8px 10px',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              Fixed
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleBulkRowSave(row, idx)}
+                                style={{
+                                  ...styles.btnSecondary,
+                                  minWidth: 96,
+                                  padding: '8px 10px',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                Save Row
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleBulkRowDeleteFields(idx)}
+                                style={{
+                                  ...styles.btnSecondary,
+                                  minWidth: 96,
+                                  padding: '8px 10px',
+                                  whiteSpace: 'nowrap',
+                                  background: '#dc3545',
+                                  borderColor: '#dc3545',
+                                  color: '#fff'
+                                }}
+                              >
+                                Delete Row
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -1165,14 +1219,18 @@ const ManageResults = () => {
                     />
                   </td>
                   <td style={styles.cell}>
-                    <input
+                    <select
                       id="group-year"
                       name="group-year"
-                      type="number"
-                      style={styles.input}
+                      style={styles.select}
                       value={groupForm.year}
                       onChange={e => setGroupForm({ ...groupForm, year: e.target.value })}
-                    />
+                    >
+                      <option value="">Select Year</option>
+                      {availableYears.map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
                   </td>
                   <td style={styles.cell}>
                     <select
@@ -1207,7 +1265,7 @@ const ManageResults = () => {
                           onClick={() => {
                             setGroupForm({
                               ...groupForm,
-                              manualMembers: [...(groupForm.manualMembers || []), { name: '', branch: '', year: '' }]
+                              manualMembers: [...(groupForm.manualMembers || []), { name: '', branch: '', diplomaYear: '', semester: '' }]
                             });
                           }}
                           style={styles.btnSecondary}
@@ -1234,7 +1292,8 @@ const ManageResults = () => {
                           <tr style={styles.headerRow}>
                             <th style={styles.headerCell}>Name</th>
                             <th style={styles.headerCell}>Branch</th>
-                            <th style={styles.headerCell}>Year</th>
+                            <th style={styles.headerCell}>Diploma Year</th>
+                            <th style={styles.headerCell}>Semester</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1265,17 +1324,45 @@ const ManageResults = () => {
                                 />
                               </td>
                               <td style={styles.cell}>
-                                <input
-                                  type="number"
-                                  style={styles.input}
-                                  value={row.year || ''}
+                                <select
+                                  style={styles.select}
+                                  value={row.diplomaYear || ''}
                                   onChange={e => {
+                                    const nextDiplomaYear = e.target.value;
+                                    const semesterOptions = getSemesterOptions(nextDiplomaYear);
                                     const rows = [...groupForm.manualMembers];
-                                    rows[idx] = { ...rows[idx], year: e.target.value };
+                                    rows[idx] = {
+                                      ...rows[idx],
+                                      diplomaYear: nextDiplomaYear,
+                                      semester: semesterOptions.includes(String(rows[idx]?.semester || ''))
+                                        ? String(rows[idx]?.semester || '')
+                                        : ''
+                                    };
                                     setGroupForm({ ...groupForm, manualMembers: rows });
                                   }}
-                                  placeholder="1/2/3"
-                                />
+                                >
+                                  <option value="">Select Diploma Year</option>
+                                  <option value="1">1</option>
+                                  <option value="2">2</option>
+                                  <option value="3">3</option>
+                                </select>
+                              </td>
+                              <td style={styles.cell}>
+                                <select
+                                  style={styles.select}
+                                  value={row.semester || ''}
+                                  onChange={e => {
+                                    const rows = [...groupForm.manualMembers];
+                                    rows[idx] = { ...rows[idx], semester: e.target.value };
+                                    setGroupForm({ ...groupForm, manualMembers: rows });
+                                  }}
+                                  disabled={!row.diplomaYear}
+                                >
+                                  <option value="">Select Semester</option>
+                                  {getSemesterOptions(row.diplomaYear).map((sem) => (
+                                    <option key={sem} value={sem}>{sem}</option>
+                                  ))}
+                                </select>
                               </td>
                             </tr>
                           ))}
