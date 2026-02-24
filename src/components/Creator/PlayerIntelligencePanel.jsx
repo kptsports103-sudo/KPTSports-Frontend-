@@ -90,16 +90,23 @@ const PlayerHeader = ({ onClose }) => (
   </div>
 );
 
-const PlayerHero = ({ player, profileImage, historyYears }) => (
+const PlayerHero = ({ player, profileImage, historyYears, performanceScore }) => (
   <div style={styles.hero} className="heroResponsive">
-    <img src={profileImage} alt={player.name || "player"} style={styles.avatar} />
-    <div>
-      <h2 style={{ margin: 0 }}>{player.name || "-"}</h2>
-      <p style={styles.college}>{player.college || player.branch || "-"}</p>
-      <div style={styles.badges}>
-        <span style={styles.participation}>{historyYears.length} Years Participation</span>
-        <span style={styles.senior}>{"\uD83C\uDFC6"} {historyYears.length >= 3 ? "Senior Player" : "Rising Player"}</span>
+    <div style={styles.heroLeft}>
+      <img src={profileImage} alt={player.name || "player"} style={styles.avatar} />
+      <div>
+        <h2 style={{ margin: 0 }}>{player.name || "-"}</h2>
+        <p style={styles.college}>{player.college || player.branch || "-"}</p>
+        <div style={styles.badges}>
+          <span style={styles.participation}>{historyYears.length} Years Participation</span>
+          <span style={styles.senior}>{"\uD83C\uDFC6"} {historyYears.length >= 3 ? "Senior Player" : "Rising Player"}</span>
+        </div>
       </div>
+    </div>
+
+    <div style={styles.topScoreBox}>
+      <div style={styles.topScoreLabel}>Performance Score</div>
+      <div style={styles.topScoreValue}>{performanceScore}</div>
     </div>
   </div>
 );
@@ -377,7 +384,12 @@ const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], te
         animate={{ opacity: 1, scale: 1 }}
       >
         <PlayerHeader onClose={onClose} />
-        <PlayerHero player={player} profileImage={profileImage} historyYears={history} />
+        <PlayerHero
+          player={player}
+          profileImage={profileImage}
+          historyYears={history}
+          performanceScore={performanceScore}
+        />
         <Timeline history={history} />
         <EventsSection history={history} eventsByYear={eventsByYear} />
 
@@ -431,9 +443,15 @@ const styles = {
   close: { cursor: "pointer", fontWeight: 600 },
   hero: {
     display: "flex",
-    gap: 20,
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 30,
     background: "#fff"
+  },
+  heroLeft: {
+    display: "flex",
+    gap: 20,
+    alignItems: "center"
   },
   avatar: {
     width: 120,
@@ -453,6 +471,25 @@ const styles = {
     background: "#dbeafe",
     padding: "6px 12px",
     borderRadius: 20
+  },
+  topScoreBox: {
+    background: "linear-gradient(135deg,#1e40af,#2563eb)",
+    color: "#fff",
+    padding: "20px 30px",
+    borderRadius: 20,
+    minWidth: 220,
+    textAlign: "center",
+    boxShadow: "0 10px 30px rgba(37,99,235,0.35)"
+  },
+  topScoreLabel: {
+    fontSize: 14,
+    opacity: 0.85,
+    marginBottom: 6
+  },
+  topScoreValue: {
+    fontSize: 40,
+    fontWeight: 800,
+    lineHeight: 1
   },
   timelineSection: { padding: 30 },
   h3: { margin: 0, color: "#0f172a" },
