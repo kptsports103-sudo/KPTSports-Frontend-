@@ -66,6 +66,23 @@ const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamRes
     })
     .sort((a, b) => Number(a?.year || 0) - Number(b?.year || 0));
 
+  const resultTimeline = [
+    ...matchedIndividualResults.map((row) => ({
+      year: Number(row?.year || 0),
+      event: row?.event || "-",
+      medal: row?.medal || "-",
+      type: "Individual",
+    })),
+    ...matchedTeamResults.map((row) => ({
+      year: Number(row?.year || 0),
+      event: row?.event || "-",
+      medal: row?.medal || "-",
+      type: "Team",
+    })),
+  ]
+    .filter((row) => row.year)
+    .sort((a, b) => a.year - b.year);
+
   matchedIndividualResults.forEach((row) => {
     const yearKey = Number(row?.year || 0);
     if (!yearKey) return;
@@ -156,17 +173,33 @@ const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamRes
 
         {/* TIMELINE */}
         <h3 style={styles.section}>Career Timeline</h3>
-        <div style={styles.timeline}>
-          {history.map((h, i) => (
-            <div key={i} style={styles.timelineItem}>
-              <div style={styles.dot} />
-              <strong>{h.year}</strong>
-              <p style={{ margin: "4px 0" }}>
-                Diploma {h.diplomaYear} Sem {h.semester}
-              </p>
-              <b>{h.kpmNo}</b>
-            </div>
-          ))}
+        <div style={styles.chartCard}>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Year</th>
+                <th style={styles.th}>Event</th>
+                <th style={styles.th}>Medal</th>
+                <th style={styles.th}>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {resultTimeline.length ? (
+                resultTimeline.map((row, idx) => (
+                  <tr key={`timeline-row-${row.year}-${row.event}-${idx}`}>
+                    <td style={styles.td}>{row.year}</td>
+                    <td style={styles.td}>{row.event}</td>
+                    <td style={styles.td}>{row.medal}</td>
+                    <td style={styles.td}>{row.type}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td style={styles.td} colSpan={4}>No timeline result data</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
         {/* EVENTS */}

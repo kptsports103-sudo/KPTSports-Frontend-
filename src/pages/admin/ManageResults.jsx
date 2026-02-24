@@ -1487,31 +1487,6 @@ const ManageResults = () => {
                 )}
               </div>
 
-              <div style={styles.intelligenceCard}>
-                <h4 style={styles.intelligenceSectionTitle}>Career Timeline</h4>
-                {groupIntelligence.timeline.length ? (
-                  <table style={styles.intelligenceTable}>
-                    <thead>
-                      <tr>
-                        <th style={styles.intelligenceTh}>Year</th>
-                        <th style={styles.intelligenceTh}>Event</th>
-                        <th style={styles.intelligenceTh}>Medal</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {groupIntelligence.timeline.map((entry, idx) => (
-                        <tr key={`group-timeline-${entry.year}-${idx}`}>
-                          <td style={styles.intelligenceTd}>{entry.year || '-'}</td>
-                          <td style={styles.intelligenceTd}>{entry.event || '-'}</td>
-                          <td style={styles.intelligenceTd}>{entry.medal || '-'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <p style={{ margin: 0, color: '#6b7280' }}>No timeline records found.</p>
-                )}
-              </div>
             </div>
           </div>
         ) : null}
