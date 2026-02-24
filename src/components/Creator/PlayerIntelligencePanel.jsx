@@ -1,6 +1,5 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FaMedal } from "react-icons/fa";
 import {
   AreaChart,
   Area,
@@ -12,6 +11,7 @@ import {
 } from "recharts";
 
 const normalizeName = (name) => String(name || "").toLowerCase().trim().replace(/\s+/g, " ");
+
 const getMedalPoints = (medal) => {
   const m = String(medal || "").toLowerCase().trim();
   if (m === "gold") return 5;
@@ -20,332 +20,257 @@ const getMedalPoints = (medal) => {
   return 0;
 };
 
-const getEventMedalStyle = (medal) => {
+const getMedalBadgeStyle = (medal) => {
   const m = String(medal || "").toLowerCase().trim();
-  const base = {
-    padding: "2px 8px",
-    borderRadius: 6,
-    fontSize: 12,
-    marginLeft: "auto",
-    fontWeight: 600,
-    color: "#334155"
-  };
-  if (m === "gold") return { ...base, background: "#fef3c7" };
-  if (m === "silver") return { ...base, background: "#e5e7eb" };
-  if (m === "bronze") return { ...base, background: "#fde68a" };
-  return { ...base, background: "#d1fae5" };
+  if (m === "gold") return { ...styles.medalBadge, background: "#fef3c7" };
+  if (m === "silver") return { ...styles.medalBadge, background: "#e5e7eb" };
+  if (m === "bronze") return { ...styles.medalBadge, background: "#fde68a" };
+  return { ...styles.medalBadge, background: "#d1fae5" };
 };
 
-const SummaryCard = ({ label, count }) => (
-  <div style={styles.summaryCard}>
-    <FaMedal />
-    <span>{label}</span>
-    <strong>{count}</strong>
-  </div>
-);
-
-const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamResults = [], onClose }) => {
+const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], teamResults = [], onClose }) => {
   if (!player) return null;
 
+  const playerKey = String(player.masterId || player.id || "").trim();
   const history = [];
   const eventsByYear = {};
 
   data.forEach((yearBlock) => {
-    yearBlock.players.forEach((p) => {
-      if ((p.masterId || p.id) !== (player.masterId || player.id)) return;
+    const yearNumber = Number(yearBlock?.year || 0);
+    (yearBlock?.players || []).forEach((p) => {
+      const rowKey = String(p.masterId || p.id || "").trim();
+      const samePlayer =
+        (playerKey && rowKey && playerKey === rowKey) ||
+        normalizeName(p.name) === normalizeName(player.name);
+      if (!samePlayer) return;
 
       history.push({
-        year: yearBlock.year,
-        kpmNo: p.kpmNo,
-        diplomaYear: p.diplomaYear,
-        semester: p.semester,
+        year: yearNumber,
+        kpmNo: p.kpmNo || "-",
+        diplomaYear: p.diplomaYear || "-",
+        semester: p.semester || "-"
       });
 
-      if (Array.isArray(p.events) && p.events.length > 0) {
-        eventsByYear[yearBlock.year] = p.events;
-      }
+      if (!Array.isArray(p.events)) return;
+      p.events.forEach((e) => {
+        eventsByYear[yearNumber] = eventsByYear[yearNumber] || [];
+        const eventName = String(e?.name || "-").trim();
+        if (eventsByYear[yearNumber].some((entry) => normalizeName(entry.name) === normalizeName(eventName))) return;
+        eventsByYear[yearNumber].push({
+          name: eventName,
+          medal: e?.medal || "Participation"
+        });
+      });
     });
   });
 
-  const matchedIndividualResults = (individualResults || [])
-    .filter((row) => {
-      const playerMasterId = String(player.masterId || player.id || "").trim();
-      const rowMasterId = String(row.playerMasterId || row.playerId || "").trim();
-      if (playerMasterId && rowMasterId && playerMasterId === rowMasterId) return true;
-      return normalizeName(row.name) === normalizeName(player.name);
-    })
-    .sort((a, b) => Number(a?.year || 0) - Number(b?.year || 0));
+  const matchedIndividualResults = (individualResults || []).filter((row) => {
+    const rowKey = String(row.playerMasterId || row.playerId || "").trim();
+    if (playerKey && rowKey && playerKey === rowKey) return true;
+    return normalizeName(row.name) === normalizeName(player.name);
+  });
 
-  const matchedTeamResults = (teamResults || [])
-    .filter((groupRow) => {
-      const playerMasterId = String(player.masterId || player.id || "").trim();
+  const matchedTeamResults = (teamResults || []).filter((groupRow) => {
+    const masterIds = Array.isArray(groupRow?.memberMasterIds) ? groupRow.memberMasterIds.map((id) => String(id)) : [];
+    const ids = Array.isArray(groupRow?.memberIds) ? groupRow.memberIds.map((id) => String(id)) : [];
+    if (playerKey && [...masterIds, ...ids].includes(playerKey)) return true;
 
-      const memberMasterIds = Array.isArray(groupRow?.memberMasterIds) ? groupRow.memberMasterIds : [];
-      const memberIds = Array.isArray(groupRow?.memberIds) ? groupRow.memberIds : [];
-      if (playerMasterId && [...memberMasterIds, ...memberIds].map((id) => String(id)).includes(playerMasterId)) {
-        return true;
-      }
+    const members = Array.isArray(groupRow?.members) ? groupRow.members : [];
+    return members.some((member) => {
+      if (!member) return false;
+      if (typeof member === "string") return normalizeName(member) === normalizeName(player.name);
+      const memberKey = String(member.playerMasterId || member.playerId || member.masterId || "").trim();
+      if (playerKey && memberKey && playerKey === memberKey) return true;
+      return normalizeName(member.name) === normalizeName(player.name);
+    });
+  });
 
-      const members = Array.isArray(groupRow?.members) ? groupRow.members : [];
-      return members.some((member) => {
-        if (!member) return false;
-        if (typeof member === "string") return normalizeName(member) === normalizeName(player.name);
-        const memberMasterId = String(member.playerMasterId || member.playerId || member.masterId || "").trim();
-        if (playerMasterId && memberMasterId && playerMasterId === memberMasterId) return true;
-        return normalizeName(member.name) === normalizeName(player.name);
-      });
-    })
-    .sort((a, b) => Number(a?.year || 0) - Number(b?.year || 0));
-
-  const pushUniqueEvent = (yearKey, eventName, medalValue) => {
-    if (!yearKey) return;
-    const normalizedEvent = String(eventName || "").toLowerCase().trim();
-    eventsByYear[yearKey] = eventsByYear[yearKey] || [];
-    const exists = eventsByYear[yearKey].some((e) => String(e?.name || "").toLowerCase().trim() === normalizedEvent);
-    if (exists) return;
-    eventsByYear[yearKey].push({
-      name: eventName || "-",
-      medal: medalValue || ""
+  const pushUniqueResultEvent = (year, event, medal) => {
+    const yearNumber = Number(year || 0);
+    if (!yearNumber) return;
+    eventsByYear[yearNumber] = eventsByYear[yearNumber] || [];
+    if (eventsByYear[yearNumber].some((entry) => normalizeName(entry.name) === normalizeName(event))) return;
+    eventsByYear[yearNumber].push({
+      name: event || "-",
+      medal: medal || "Participation"
     });
   };
 
   matchedIndividualResults.forEach((row) => {
-    const yearKey = Number(row?.year || 0);
-    pushUniqueEvent(yearKey, row.event, row.medal);
+    pushUniqueResultEvent(row.year, row.event, row.medal);
   });
 
   matchedTeamResults.forEach((row) => {
-    const yearKey = Number(row?.year || 0);
-    pushUniqueEvent(yearKey, row.event, row.medal);
+    pushUniqueResultEvent(row.year, row.event, row.medal);
   });
 
-  history.sort((a, b) => a.year - b.year);
-  const chartData = history.map((h) => {
-    const events = eventsByYear[h.year] || [];
-    return {
-      year: h.year,
-      participation: events.length
-    };
-  });
+  history.sort((a, b) => Number(a.year) - Number(b.year));
+
+  const chartData = Object.keys(eventsByYear)
+    .map((year) => ({
+      year: Number(year),
+      participation: (eventsByYear[year] || []).length
+    }))
+    .sort((a, b) => a.year - b.year);
 
   const medals = { gold: 0, silver: 0, bronze: 0, participation: 0 };
-  Object.values(eventsByYear)
-    .flat()
-    .forEach((e) => {
-      const m = String(e?.medal || "").toLowerCase();
-      if (medals[m] !== undefined) {
-        medals[m] += 1;
-      } else if (!m) {
-        medals.participation += 1;
-      }
-    });
+  Object.values(eventsByYear).flat().forEach((e) => {
+    const medal = String(e?.medal || "").toLowerCase();
+    if (medals[medal] !== undefined) {
+      medals[medal] += 1;
+    } else {
+      medals.participation += 1;
+    }
+  });
 
-  const individualPoints = matchedIndividualResults.reduce((sum, row) => sum + getMedalPoints(row?.medal), 0);
-  const teamPoints = matchedTeamResults.reduce((sum, row) => sum + getMedalPoints(row?.medal), 0);
-  const performanceScore = individualPoints + teamPoints;
-  const seniorBadge = history.length >= 3 ? "Senior Player" : "Rising Player";
   const totalParticipationsByYear = chartData.map((d) => d.participation);
-  const baseParticipation = totalParticipationsByYear[0] || 0;
   const latestParticipation = totalParticipationsByYear.length ? totalParticipationsByYear[totalParticipationsByYear.length - 1] : 0;
   const growthPercentage =
-    totalParticipationsByYear.length > 1 && baseParticipation > 0
-      ? (((latestParticipation - baseParticipation) / baseParticipation) * 100).toFixed(1)
+    totalParticipationsByYear.length > 1 && totalParticipationsByYear[0] > 0
+      ? (((latestParticipation - totalParticipationsByYear[0]) / totalParticipationsByYear[0]) * 100).toFixed(1)
       : "0.0";
+
+  const individualPoints = matchedIndividualResults.reduce((sum, row) => sum + getMedalPoints(row.medal), 0);
+  const teamPoints = matchedTeamResults.reduce((sum, row) => sum + getMedalPoints(row.medal), 0);
+  const performanceScore = individualPoints + teamPoints;
+  const seniorBadge = history.length >= 3 ? "Senior Player" : "Rising Player";
+  const profileImage = player.image || matchedIndividualResults.find((row) => row?.imageUrl)?.imageUrl || "/default-avatar.png";
 
   return (
     <div style={styles.overlay} onClick={onClose}>
       <motion.div
         style={styles.modal}
         onClick={(e) => e.stopPropagation()}
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
       >
-        {/* HEADER */}
         <div style={styles.header}>
           <h2 style={{ margin: 0 }}>Player Intelligence Panel</h2>
-          <span style={styles.closeText} onClick={onClose}>Close</span>
+          <span style={styles.close} onClick={onClose}>Close</span>
         </div>
 
-        {/* HERO */}
         <div style={styles.hero}>
-          <img src={player.image || matchedIndividualResults.find((row) => row?.imageUrl)?.imageUrl || "/default-avatar.png"} style={styles.avatar} alt="" />
+          <img src={profileImage} alt={player.name || "player"} style={styles.avatar} />
           <div>
-            <h2 style={{ margin: 0 }}>{player.name}</h2>
-            <p style={{ color: "#6b7280", margin: "4px 0 0" }}>{player.branch}</p>
-            <div style={styles.badgeRow}>
-              <div style={styles.participationBadge}>{history.length} Years Participation</div>
-              <div style={styles.seniorBadge}>Trophy {seniorBadge}</div>
+            <h2 style={{ margin: 0 }}>{player.name || "-"}</h2>
+            <p style={styles.college}>{player.college || player.branch || "-"}</p>
+            <div style={styles.badges}>
+              <span style={styles.participation}>{history.length} Years Participation</span>
+              <span style={styles.senior}>{"\uD83C\uDFC6"} {seniorBadge}</span>
             </div>
           </div>
         </div>
 
-        <h3 style={styles.section}>Player Details</h3>
-        <div style={styles.summaryRow}>
-          <div style={styles.summaryCard}><b>KPM No:</b> {player.kpmNo || "-"}</div>
-          <div style={styles.summaryCard}><b>Name:</b> {player.name || "-"}</div>
-          <div style={styles.summaryCard}><b>Branch:</b> {player.branch || "-"}</div>
-          <div style={styles.summaryCard}><b>Diploma Year:</b> {player.diplomaYear || "-"}</div>
+        <div style={styles.timelineSection}>
+          <h3 style={styles.h3}>Career Timeline</h3>
+          <div style={styles.timeline}>
+            <div style={styles.timelineLine} />
+            {history.map((h, i) => (
+              <div key={`${h.year}-${i}`} style={styles.timelineItem}>
+                <div style={styles.yearBadge}>{h.year}</div>
+                <div style={styles.dot} />
+                <div style={styles.timelineText}>Diploma {h.diplomaYear} Sem {h.semester}</div>
+                <div style={styles.kpm}>{h.kpmNo}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* TIMELINE */}
-        <h3 style={styles.section}>Career Timeline</h3>
-        <div style={styles.timelineContainer}>
-          <div style={styles.timelineLine} />
-          {history.length ? history.map((h, i) => (
-            <div key={i} style={styles.timelineItem}>
-              <div style={styles.timelineYear}>{h.year}</div>
-              <div style={styles.timelineDot} />
-              <div style={styles.timelineText}>Diploma {h.diplomaYear} Sem {h.semester}</div>
-              <div style={styles.timelineKpm}>{h.kpmNo || "-"}</div>
+        <div style={styles.eventsSection}>
+          <h3 style={styles.h3}>
+            Events Participated{" "}
+            <span style={styles.subtitle}>(Karnataka State Inter-Polytechnic Meet)</span>
+          </h3>
+          <div style={styles.eventsGrid}>
+            {Object.entries(eventsByYear)
+              .sort((a, b) => Number(a[0]) - Number(b[0]))
+              .map(([year, events]) => (
+                <div key={year} style={styles.yearCard}>
+                  <h4 style={{ margin: 0 }}>{year}</h4>
+                  {events.map((e, i) => (
+                    <div key={`${year}-${i}`} style={styles.eventRow}>
+                      <span style={styles.smallDot} />
+                      <span style={styles.eventName}>{e.name}</span>
+                      <span style={getMedalBadgeStyle(e.medal)}>{e.medal || "Participation"}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+          </div>
+        </div>
+
+        <div style={styles.dashboard}>
+          <div>
+            <h3 style={styles.h3}>KPM History</h3>
+            <div style={styles.card}>
+              <table style={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={styles.th}>Year</th>
+                    <th style={styles.th}>KPM No</th>
+                    <th style={styles.th}>Diploma</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((h, i) => (
+                    <tr key={`kpm-row-${i}`}>
+                      <td style={styles.td}>{h.year}</td>
+                      <td style={styles.td}>{h.kpmNo}</td>
+                      <td style={styles.td}>{h.diplomaYear}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )) : (
-            <div style={{ color: "#64748b", padding: 20 }}>No timeline records</div>
-          )}
-        </div>
 
-        {/* EVENTS */}
-        <h3 style={styles.section}>
-          Events Participated{" "}
-          <span style={{ fontWeight: 400, color: "#64748b" }}>(Karnataka State Inter-Polytechnic Meet)</span>
-        </h3>
-        <div style={styles.eventsWrapper}>
-          {Object.entries(eventsByYear).sort((a, b) => Number(a[0]) - Number(b[0])).map(([year, events]) => (
-            <div key={year} style={styles.yearColumn}>
-              <h4 style={{ margin: "0 0 10px" }}>{year}</h4>
-              {events.map((e, i) => (
-                <div key={i} style={styles.eventCard}>
-                  <span style={styles.dot} />
-                  <span>{e.name}</span>
-                  <span style={getEventMedalStyle(e.medal || "participation")}>
-                    {e.medal || "Participation"}
-                  </span>
+            <div style={styles.kpmChips}>
+              {history.map((h, i) => (
+                <div key={`kpm-chip-${i}`} style={styles.chip}>
+                  {h.year} <span>{h.kpmNo}</span>
                 </div>
               ))}
             </div>
-          ))}
-        </div>
+          </div>
 
-        <h3 style={styles.section}>Individual Results</h3>
-        <div style={styles.chartCard}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Year</th>
-                <th style={styles.th}>Event</th>
-                <th style={styles.th}>Medal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {matchedIndividualResults.length ? matchedIndividualResults.map((row, idx) => (
-                <tr key={`individual-${row._id || idx}`}>
-                  <td style={styles.td}>{row.year || "-"}</td>
-                  <td style={styles.td}>{row.event || "-"}</td>
-                  <td style={styles.td}>{row.medal || "-"}</td>
-                </tr>
-              )) : (
-                <tr>
-                  <td style={styles.td} colSpan={3}>No individual results</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+          <div>
+            <h3 style={styles.h3}>Medal Summary</h3>
+            <div style={styles.medalGrid}>
+              <div style={styles.medalCard}>{"\uD83E\uDD47"} {medals.gold} Gold</div>
+              <div style={styles.medalCard}>{"\uD83E\uDD48"} {medals.silver} Silver</div>
+              <div style={styles.medalCard}>{"\uD83E\uDD49"} {medals.bronze} Bronze</div>
+              <div style={styles.medalCard}>{"\uD83D\uDD35"} {medals.participation} Participation</div>
+            </div>
 
-        <h3 style={styles.section}>Team Results</h3>
-        <div style={styles.chartCard}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Year</th>
-                <th style={styles.th}>Team</th>
-                <th style={styles.th}>Event</th>
-                <th style={styles.th}>Medal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {matchedTeamResults.length ? matchedTeamResults.map((row, idx) => (
-                <tr key={`team-${row._id || idx}`}>
-                  <td style={styles.td}>{row.year || "-"}</td>
-                  <td style={styles.td}>{row.teamName || "-"}</td>
-                  <td style={styles.td}>{row.event || "-"}</td>
-                  <td style={styles.td}>{row.medal || "-"}</td>
-                </tr>
-              )) : (
-                <tr>
-                  <td style={styles.td} colSpan={4}>No team results</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* SUMMARY */}
-        <h3 style={styles.section}>Medal Summary</h3>
-        <div style={styles.summaryGrid}>
-          <SummaryCard label="Gold" count={medals.gold} />
-          <SummaryCard label="Silver" count={medals.silver} />
-          <SummaryCard label="Bronze" count={medals.bronze} />
-          <SummaryCard label="Participation" count={medals.participation} />
-        </div>
-
-        {/* PERFORMANCE CHART */}
-        <h3 style={styles.section}>Performance Chart</h3>
-        <div style={styles.growthText}>
-          +{growthPercentage}% • {latestParticipation}
-        </div>
-        <div style={styles.chartCard}>
-          <ResponsiveContainer width="100%" height={250}>
-            <AreaChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="year" />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Area
-                type="monotone"
-                dataKey="participation"
-                stroke="#0ea5e9"
-                strokeWidth={3}
-                fill="#bae6fd"
-                fillOpacity={0.3}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+            <h3 style={{ ...styles.h3, marginTop: 30 }}>Performance Chart</h3>
+            <div style={styles.growth}>+{growthPercentage}% {"\u2022"} {latestParticipation}</div>
+            <div style={styles.card}>
+              <ResponsiveContainer width="100%" height={260}>
+                <AreaChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="year" />
+                  <YAxis />
+                  <Tooltip />
+                  <Area
+                    type="monotone"
+                    dataKey="participation"
+                    stroke="#0ea5e9"
+                    fill="#bae6fd"
+                    strokeWidth={3}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
 
         <div style={styles.scoreCard}>
-          <h4 style={{ margin: "0 0 10px" }}>Performance Score</h4>
-          <div style={styles.scoreValue}>{performanceScore}</div>
-          <div style={{ marginBottom: 8, fontSize: 14 }}>
+          <h3 style={styles.h3White}>Performance Score</h3>
+          <div style={styles.score}>{performanceScore}</div>
+          <div style={styles.scoreSplit}>
             <div>Individual Result Points: {individualPoints}</div>
             <div>Team Result Points: {teamPoints}</div>
           </div>
-          <p style={{ fontSize: 13, color: "#dbeafe", margin: 0 }}>
-            Based on medal weight scoring system
-          </p>
         </div>
-
-        {/* KPM TABLE */}
-        <h3 style={styles.section}>KPM History</h3>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>Year</th>
-              <th style={styles.th}>KPM</th>
-              <th style={styles.th}>Diploma</th>
-              <th style={styles.th}>Sem</th>
-            </tr>
-          </thead>
-          <tbody>
-            {history.map((h, i) => (
-              <tr key={i}>
-                <td style={styles.td}>{h.year}</td>
-                <td style={styles.td}>{h.kpmNo}</td>
-                <td style={styles.td}>{h.diplomaYear}</td>
-                <td style={styles.td}>{h.semester}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </motion.div>
     </div>
   );
@@ -357,206 +282,201 @@ const styles = {
     inset: 0,
     background: "rgba(0,0,0,0.6)",
     display: "flex",
-    alignItems: "center",
     justifyContent: "center",
-    zIndex: 999,
+    alignItems: "center",
+    zIndex: 999
   },
   modal: {
     width: "95%",
-    maxWidth: "1200px",
+    maxWidth: "1300px",
     height: "95vh",
     overflowY: "auto",
-    scrollbarWidth: "thin",
     background: "#f8fafc",
-    borderRadius: 16,
-    boxShadow: "0 25px 60px rgba(0,0,0,0.35)",
+    borderRadius: 20
   },
   header: {
     background: "linear-gradient(90deg,#2563eb,#1e40af)",
-    color: "#fff",
-    padding: 16,
+    color: "white",
+    padding: 20,
     display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
+    justifyContent: "space-between"
   },
-  closeText: {
-    cursor: "pointer",
-    fontWeight: 500,
-    opacity: 0.9
-  },
+  close: { cursor: "pointer", fontWeight: 600 },
   hero: {
     display: "flex",
     gap: 20,
-    padding: 20,
-    background: "#fff",
+    padding: 30,
+    background: "#fff"
   },
   avatar: {
-    width: 110,
-    height: 110,
-    borderRadius: 12,
-    objectFit: "cover",
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+    objectFit: "cover"
   },
-  badgeRow: {
-    marginTop: 8,
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    flexWrap: "wrap"
-  },
-  participationBadge: {
-    marginTop: 8,
+  college: { color: "#64748b", marginTop: 4 },
+  badges: { marginTop: 10, display: "flex", gap: 10, flexWrap: "wrap" },
+  participation: {
     background: "#10b981",
-    color: "#fff",
-    padding: "4px 10px",
-    borderRadius: 20,
-    display: "inline-block",
+    color: "white",
+    padding: "6px 12px",
+    borderRadius: 20
   },
-  seniorBadge: {
-    background: "#e0e7ff",
-    color: "#3730a3",
-    padding: "4px 10px",
-    borderRadius: 20,
-    fontWeight: 600,
-    fontSize: 12
+  senior: {
+    background: "#dbeafe",
+    padding: "6px 12px",
+    borderRadius: 20
   },
-  section: { padding: "20px 20px 10px", margin: 0 },
-  timelineContainer: {
+  timelineSection: { padding: 30 },
+  h3: { margin: 0, color: "#0f172a" },
+  h3White: { margin: 0, color: "white" },
+  timeline: {
     display: "flex",
     justifyContent: "space-between",
-    padding: 20,
-    gap: 10,
-    flexWrap: "wrap",
-    position: "relative"
+    position: "relative",
+    marginTop: 20,
+    gap: 8
   },
   timelineLine: {
     position: "absolute",
-    top: 48,
-    left: 40,
-    right: 40,
+    top: 30,
+    left: 50,
+    right: 50,
     height: 2,
-    background: "#cbd5e1",
-    zIndex: 0
+    background: "#cbd5e1"
   },
-  timelineItem: {
-    textAlign: "center",
-    flex: 1,
-    minWidth: 140,
-    position: "relative",
-    zIndex: 1
-  },
-  timelineYear: {
-    background: "#e5e7eb",
+  timelineItem: { textAlign: "center", flex: 1, zIndex: 1 },
+  yearBadge: {
+    background: "#e2e8f0",
     padding: "4px 12px",
     borderRadius: 20,
-    display: "inline-block",
-    fontWeight: 600
+    display: "inline-block"
   },
-  timelineDot: {
-    width: 10,
-    height: 10,
+  dot: {
+    width: 12,
+    height: 12,
     background: "#2563eb",
     borderRadius: "50%",
     margin: "10px auto"
   },
-  timelineText: {
-    fontSize: 13,
-    color: "#475569"
-  },
-  timelineKpm: {
-    fontWeight: "bold",
-    fontSize: 18,
-    color: "#0f172a",
-    marginTop: 6
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    background: "#2563eb",
-    borderRadius: "50%",
-    marginRight: 8,
-    flexShrink: 0
-  },
-  eventsWrapper: {
+  timelineText: { fontSize: 13, color: "#64748b" },
+  kpm: { fontWeight: "bold", marginTop: 5 },
+  eventsSection: { padding: 30 },
+  subtitle: { fontWeight: 400, color: "#64748b" },
+  eventsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: 14,
-    padding: 20,
+    gridTemplateColumns: "repeat(3,1fr)",
+    gap: 20,
+    marginTop: 20
   },
-  yearColumn: {
-    background: "#ffffff",
-    border: "1px solid #e2e8f0",
-    borderRadius: 10,
-    padding: 12
-  },
-  eventCard: {
-    display: "flex",
-    alignItems: "center",
-    marginBottom: 8,
-    gap: 8,
-    fontSize: 14
-  },
-  summaryRow: { display: "flex", gap: 10, padding: 20, flexWrap: "wrap" },
-  summaryGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-    gap: 10,
-    padding: "0 20px 20px"
-  },
-  summaryCard: {
+  yearCard: {
     background: "#fff",
-    padding: 12,
-    borderRadius: 8,
-    display: "flex",
-    gap: 6,
-    alignItems: "center",
-    justifyContent: "space-between",
+    padding: 15,
+    borderRadius: 12,
     border: "1px solid #e2e8f0"
   },
-  chartCard: {
+  eventRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginTop: 8,
+    alignItems: "center",
+    gap: 8
+  },
+  smallDot: {
+    width: 6,
+    height: 6,
+    background: "#2563eb",
+    borderRadius: "50%",
+    marginRight: 6,
+    flexShrink: 0
+  },
+  eventName: {
+    flex: 1,
+    color: "#1f2937"
+  },
+  medalBadge: {
+    padding: "2px 8px",
+    borderRadius: 6,
+    fontSize: 12,
+    whiteSpace: "nowrap"
+  },
+  dashboard: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1.5fr",
+    gap: 30,
+    padding: 30
+  },
+  card: {
     background: "#fff",
-    margin: 20,
-    padding: 20,
-    borderRadius: 10,
-    boxShadow: "0 4px 12px rgba(0,0,0,0.08)"
-  },
-  growthText: {
-    textAlign: "right",
-    paddingRight: 20,
-    fontWeight: "bold",
-    color: "#059669"
-  },
-  scoreCard: {
-    background: "linear-gradient(135deg,#2563eb,#1e40af)",
-    color: "white",
-    margin: 20,
     padding: 20,
     borderRadius: 12,
-    textAlign: "center",
-    boxShadow: "0 6px 18px rgba(0,0,0,0.15)"
-  },
-  scoreValue: {
-    fontSize: 48,
-    fontWeight: "bold",
-    marginBottom: 5
+    border: "1px solid #e2e8f0"
   },
   table: {
     width: "100%",
-    background: "#fff",
-    borderCollapse: "separate",
-    borderSpacing: 0,
-    fontSize: 15
+    borderCollapse: "collapse"
   },
   th: {
     textAlign: "left",
-    padding: "14px 18px",
-    background: "#f1f5f9",
-    fontWeight: 600,
+    padding: "10px 12px",
     borderBottom: "2px solid #e2e8f0"
   },
   td: {
-    padding: "14px 18px",
-    borderBottom: "1px solid #e5e7eb"
+    textAlign: "left",
+    padding: "10px 12px",
+    borderBottom: "1px solid #e2e8f0"
   },
+  kpmChips: {
+    marginTop: 14,
+    display: "flex",
+    gap: 10,
+    flexWrap: "wrap"
+  },
+  chip: {
+    background: "#dbeafe",
+    color: "#1e3a8a",
+    borderRadius: 999,
+    padding: "6px 12px",
+    fontWeight: 600,
+    display: "inline-flex",
+    gap: 8
+  },
+  medalGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(2,1fr)",
+    gap: 10
+  },
+  medalCard: {
+    background: "#fff",
+    padding: 15,
+    borderRadius: 12,
+    border: "1px solid #e2e8f0",
+    fontWeight: 600
+  },
+  growth: {
+    textAlign: "right",
+    color: "#059669",
+    fontWeight: "bold",
+    marginBottom: 10
+  },
+  scoreCard: {
+    margin: 30,
+    padding: 30,
+    borderRadius: 16,
+    background: "linear-gradient(135deg,#2563eb,#1e40af)",
+    color: "white",
+    textAlign: "center"
+  },
+  score: {
+    fontSize: 50,
+    fontWeight: "bold",
+    lineHeight: 1.2
+  },
+  scoreSplit: {
+    marginTop: 8,
+    fontSize: 14,
+    opacity: 0.95
+  }
 };
 
 export default PlayerIntelligencePanel;
