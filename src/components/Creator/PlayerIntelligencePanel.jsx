@@ -164,70 +164,39 @@ const EventsSection = ({ history, eventsByYear }) => (
   </div>
 );
 
-const KpmHistory = ({ history }) => {
-  const [hoveredRow, setHoveredRow] = useState(null);
-
-  return (
-    <div>
-      <h3 style={styles.h3}>KPM History</h3>
-      <div style={styles.card}>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>Year</th>
-              <th style={styles.th}>KPM No</th>
-              <th style={styles.th}>Diploma</th>
+const KpmHistory = ({ history }) => (
+  <div>
+    <h3 style={styles.h3}>KPM History</h3>
+    <div style={styles.card}>
+      <table style={styles.table}>
+        <thead>
+          <tr>
+            <th style={styles.th}>Year</th>
+            <th style={styles.th}>KPM No</th>
+            <th style={styles.th}>Diploma</th>
+          </tr>
+        </thead>
+        <tbody>
+          {history.map((h, i) => (
+            <tr key={`kpm-row-${i}`}>
+              <td style={{ ...styles.td, ...(i === history.length - 1 ? { borderBottom: "none" } : {}) }}>{h.year}</td>
+              <td style={{ ...styles.td, ...(i === history.length - 1 ? { borderBottom: "none" } : {}) }}>{h.kpmNo}</td>
+              <td style={{ ...styles.td, ...(i === history.length - 1 ? { borderBottom: "none" } : {}) }}>{h.diplomaYear}</td>
             </tr>
-          </thead>
-          <tbody>
-            {history.map((h, i) => {
-              const isHovered = hoveredRow === i;
-              return (
-                <motion.tr
-                  key={`kpm-row-${i}`}
-                  initial={{ backgroundColor: "transparent" }}
-                  whileHover={{
-                    backgroundColor: "#e2e8f0",
-                    y: -2,
-                    boxShadow: "0 6px 14px rgba(15,23,42,0.08)"
-                  }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                  style={{ cursor: "pointer" }}
-                  onHoverStart={() => setHoveredRow(i)}
-                  onHoverEnd={() => setHoveredRow(null)}
-                >
-                  <td colSpan={3} style={{ padding: 0 }}>
-                    <div
-                      style={{
-                        ...styles.rowWrapper,
-                        ...(i === history.length - 1 ? { borderBottom: "none" } : {})
-                      }}
-                    >
-                      <div style={{ ...styles.rowAccent, opacity: isHovered ? 1 : 0 }} />
-                      <div style={styles.rowContent}>
-                        <div style={styles.cell}>{h.year}</div>
-                        <div style={styles.cell}>{h.kpmNo}</div>
-                        <div style={styles.cell}>{h.diplomaYear}</div>
-                      </div>
-                    </div>
-                  </td>
-                </motion.tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      <div style={styles.kpmChips}>
-        {history.map((h, i) => (
-          <div key={`kpm-chip-${i}`} style={styles.chip}>
-            {h.year} <span>{h.kpmNo}</span>
-          </div>
-        ))}
-      </div>
+          ))}
+        </tbody>
+      </table>
     </div>
-  );
-};
+
+    <div style={styles.kpmChips}>
+      {history.map((h, i) => (
+        <div key={`kpm-chip-${i}`} style={styles.chip}>
+          {h.year} <span>{h.kpmNo}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
 const MedalSummary = ({ medals }) => (
   <div>
