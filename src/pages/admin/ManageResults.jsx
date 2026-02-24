@@ -42,11 +42,7 @@ const ManageResults = () => {
   const [playersById, setPlayersById] = useState({});
   const [playersByYear, setPlayersByYear] = useState({});
   const [bulkRows, setBulkRows] = useState([]);
-  const [bulkDefaults, setBulkDefaults] = useState({
-    event: '',
-    medal: '',
-    imageUrl: ''
-  });
+  const [bulkImageUrl, setBulkImageUrl] = useState('');
 
   const [isEditing, setIsEditing] = useState(false);
   const [isGroupEditing, setIsGroupEditing] = useState(false);
@@ -363,9 +359,9 @@ const ManageResults = () => {
       kpmNo: player.kpmNo || '',
       diplomaYear: String(player.diplomaYear || ''),
       year: Number(yearKey),
-      event: bulkDefaults.event || '',
-      medal: bulkDefaults.medal || '',
-      imageUrl: bulkDefaults.imageUrl || '',
+      event: '',
+      medal: '',
+      imageUrl: '',
       status: 'pending'
     }));
 
@@ -376,13 +372,11 @@ const ManageResults = () => {
     setBulkRows(rows);
   };
 
-  const applyBulkDefaults = () => {
+  const applyBulkImageUrlToAll = () => {
     setBulkRows((prev) =>
       prev.map((row) => ({
         ...row,
-        event: bulkDefaults.event,
-        medal: bulkDefaults.medal,
-        imageUrl: bulkDefaults.imageUrl
+        imageUrl: bulkImageUrl || ''
       }))
     );
   };
@@ -740,7 +734,7 @@ const ManageResults = () => {
     setForm({ name: '', playerMasterId: '', branch: '', kpmNo: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
     setEditingId(null);
     setBulkRows([]);
-    setBulkDefaults({ event: '', medal: '', imageUrl: '' });
+    setBulkImageUrl('');
   };
 
   /* ================= FILTERED DATA ================= */
@@ -1068,10 +1062,10 @@ const ManageResults = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr style={styles.bodyRow}>
-                    <td style={styles.cell}>
-                      <input style={styles.input} value={form.playerMasterId || ''} readOnly />
-                    </td>
+                    <tr style={styles.bodyRow}>
+                      <td style={styles.cell}>
+                        <input id="result-player-master-id" name="result-player-master-id" style={styles.input} value={form.playerMasterId || ''} readOnly />
+                      </td>
                     <td style={styles.cell}>
                       <input id="result-name" name="result-name" style={styles.input} value={form.name} readOnly />
                     </td>
@@ -1116,32 +1110,18 @@ const ManageResults = () => {
               <div style={{ marginBottom: 12, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                 <input
                   style={{ ...styles.input, width: 220 }}
-                  placeholder="Write once: Event"
-                  value={bulkDefaults.event}
-                  onChange={(e) => setBulkDefaults((prev) => ({ ...prev, event: e.target.value }))}
-                />
-                <select
-                  style={{ ...styles.select, width: 180 }}
-                  value={bulkDefaults.medal}
-                  onChange={(e) => setBulkDefaults((prev) => ({ ...prev, medal: e.target.value }))}
-                >
-                  <option value="">Write once: Medal</option>
-                  {MEDALS.map(m => (
-                    <option key={m}>{m}</option>
-                  ))}
-                </select>
-                <input
-                  style={{ ...styles.input, width: 280 }}
-                  placeholder="Write once: Image URL"
-                  value={bulkDefaults.imageUrl}
-                  onChange={(e) => setBulkDefaults((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                  id="bulk-common-image-url"
+                  name="bulk-common-image-url"
+                  placeholder="Common Image URL"
+                  value={bulkImageUrl}
+                  onChange={(e) => setBulkImageUrl(e.target.value)}
                 />
                 <button
                   type="button"
-                  onClick={applyBulkDefaults}
+                  onClick={applyBulkImageUrlToAll}
                   style={{ ...styles.topBtnPrimary, padding: '10px 16px' }}
                 >
-                  Apply To All Rows
+                  Apply URL To All Rows
                 </button>
               </div>
               <table style={styles.table}>
@@ -1159,11 +1139,13 @@ const ManageResults = () => {
                 <tbody>
                   {bulkRows.map((row, idx) => (
                     <tr key={row.playerMasterId} style={styles.bodyRow}>
-                      <td style={styles.cell}><input style={styles.input} value={row.name} readOnly /></td>
-                      <td style={styles.cell}><input style={styles.input} value={row.branch} readOnly /></td>
-                      <td style={styles.cell}><input style={styles.input} value={row.kpmNo} readOnly /></td>
+                      <td style={styles.cell}><input id={`bulk-name-${idx}`} name={`bulk-name-${idx}`} style={styles.input} value={row.name} readOnly /></td>
+                      <td style={styles.cell}><input id={`bulk-branch-${idx}`} name={`bulk-branch-${idx}`} style={styles.input} value={row.branch} readOnly /></td>
+                      <td style={styles.cell}><input id={`bulk-kpm-${idx}`} name={`bulk-kpm-${idx}`} style={styles.input} value={row.kpmNo} readOnly /></td>
                       <td style={styles.cell}>
                         <input
+                          id={`bulk-event-${idx}`}
+                          name={`bulk-event-${idx}`}
                           style={styles.input}
                           value={row.event}
                           onChange={e => handleBulkRowChange(idx, 'event', e.target.value)}
@@ -1173,6 +1155,8 @@ const ManageResults = () => {
                       </td>
                       <td style={styles.cell}>
                         <select
+                          id={`bulk-medal-${idx}`}
+                          name={`bulk-medal-${idx}`}
                           style={styles.select}
                           value={row.medal}
                           onChange={e => handleBulkRowChange(idx, 'medal', e.target.value)}
@@ -1186,6 +1170,8 @@ const ManageResults = () => {
                       </td>
                       <td style={styles.cell}>
                         <input
+                          id={`bulk-image-url-${idx}`}
+                          name={`bulk-image-url-${idx}`}
                           style={styles.input}
                           value={row.imageUrl}
                           onChange={e => handleBulkRowChange(idx, 'imageUrl', e.target.value)}
@@ -1375,6 +1361,8 @@ const ManageResults = () => {
                             <tr key={idx} style={styles.bodyRow}>
                               <td style={styles.cell}>
                                 <input
+                                  id={`group-member-name-${idx}`}
+                                  name={`group-member-name-${idx}`}
                                   style={styles.input}
                                   value={row.name || ''}
                                   onChange={e => {
@@ -1387,6 +1375,8 @@ const ManageResults = () => {
                               </td>
                               <td style={styles.cell}>
                                 <input
+                                  id={`group-member-branch-${idx}`}
+                                  name={`group-member-branch-${idx}`}
                                   style={styles.input}
                                   value={row.branch || ''}
                                   onChange={e => {
@@ -1399,6 +1389,8 @@ const ManageResults = () => {
                               </td>
                               <td style={styles.cell}>
                                 <select
+                                  id={`group-member-diploma-year-${idx}`}
+                                  name={`group-member-diploma-year-${idx}`}
                                   style={styles.select}
                                   value={row.diplomaYear || ''}
                                   onChange={e => {
@@ -1423,6 +1415,8 @@ const ManageResults = () => {
                               </td>
                               <td style={styles.cell}>
                                 <select
+                                  id={`group-member-semester-${idx}`}
+                                  name={`group-member-semester-${idx}`}
                                   style={styles.select}
                                   value={row.semester || ''}
                                   onChange={e => {
