@@ -359,9 +359,13 @@ const ManageResults = () => {
       kpmNo: player.kpmNo || '',
       diplomaYear: String(player.diplomaYear || ''),
       year: Number(yearKey),
-      event: '',
+      eventCount: 1,
+      event_0: '',
+      event_1: '',
+      event_2: '',
       medal: '',
       imageUrl: '',
+      selected: false,
       status: 'pending'
     }));
 
@@ -372,11 +376,12 @@ const ManageResults = () => {
     setBulkRows(rows);
   };
 
-  const applyBulkImageUrlToAll = () => {
+  const applyImageToSelected = () => {
+    if (!String(bulkImageUrl || '').trim()) return;
     setBulkRows((prev) =>
       prev.map((row) => ({
         ...row,
-        imageUrl: bulkImageUrl || ''
+        imageUrl: row.selected ? String(bulkImageUrl || '').trim() : row.imageUrl
       }))
     );
   };
@@ -385,15 +390,23 @@ const ManageResults = () => {
     setBulkRows(prev => prev.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
   };
 
+  const handleSelectAllBulkRows = (checked) => {
+    setBulkRows((prev) => prev.map((row) => ({ ...row, selected: checked })));
+  };
+
   const handleBulkRowDeleteFields = (index) => {
     setBulkRows(prev =>
       prev.map((row, i) =>
         i === index
           ? {
               ...row,
-              event: '',
+              eventCount: 1,
+              event_0: '',
+              event_1: '',
+              event_2: '',
               medal: '',
               imageUrl: '',
+              selected: false,
               status: 'pending'
             }
           : row
@@ -414,22 +427,42 @@ const ManageResults = () => {
     );
   };
 
+  const getRowEvents = (row) => {
+    const count = Math.max(1, Math.min(3, Number(row?.eventCount || 1)));
+    const seen = new Set();
+    const events = [];
+    for (let i = 0; i < count; i += 1) {
+      const value = String(row?.[`event_${i}`] || '').trim();
+      if (!value) continue;
+      const key = value.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      events.push(value);
+    }
+    return events;
+  };
+
   const handleBulkRowSave = async (row, index) => {
     try {
-      if (!row.event || !row.medal) {
-        alert('Please fill Event and Medal before saving this row.');
+      const events = getRowEvents(row);
+      if (!events.length || !row.medal) {
+        alert('Fill event(s) and medal.');
         return;
       }
 
-      await api.post('/results', {
-        playerMasterId: row.playerMasterId,
-        event: row.event,
-        year: row.year,
-        medal: row.medal,
-        imageUrl: row.imageUrl
-      });
+      await Promise.all(
+        events.map((eventName) =>
+          api.post('/results', {
+            playerMasterId: row.playerMasterId,
+            event: eventName,
+            year: row.year,
+            medal: row.medal,
+            imageUrl: row.imageUrl
+          })
+        )
+      );
 
-      notify(`Saved row for ${row.name}`, { type: 'success', position: 'top-center' });
+      notify(`Saved ${events.length} event(s) for ${row.name}`, { type: 'success', position: 'top-center' });
       fetchResults();
       setBulkRows((prev) =>
         prev.map((r, i) =>
@@ -450,34 +483,54 @@ const ManageResults = () => {
   const handleBulkSubmit = async (e) => {
     e.preventDefault();
     try {
-      const readyRows = (bulkRows || []).filter(row => row.event && row.medal && row.status !== 'saved');
+      const readyRows = (bulkRows || []).filter((row) => row.status !== 'saved' && getRowEvents(row).length && row.medal);
       if (!readyRows.length) {
         alert('No pending rows to save. Fill at least one row with Event and Medal.');
         return;
       }
 
-      await Promise.all(
-        readyRows.map(row =>
-          api.post('/results', {
-            playerMasterId: row.playerMasterId,
-            event: row.event,
-            year: row.year,
-            medal: row.medal,
-            imageUrl: row.imageUrl
-          })
-        )
-      );
+      let savedEventCount = 0;
+      const failedPlayers = [];
+      for (const row of readyRows) {
+        const events = getRowEvents(row);
+        try {
+          await Promise.all(
+            events.map((eventName) =>
+              api.post('/results', {
+                playerMasterId: row.playerMasterId,
+                event: eventName,
+                year: row.year,
+                medal: row.medal,
+                imageUrl: row.imageUrl
+              })
+            )
+          );
+          savedEventCount += events.length;
+          setBulkRows((prev) =>
+            prev.map((r) =>
+              r.playerMasterId === row.playerMasterId
+                ? { ...r, status: 'saved' }
+                : r
+            )
+          );
+        } catch (error) {
+          failedPlayers.push(row.name || row.playerMasterId);
+          console.error('Bulk row failed:', error);
+        }
+      }
 
       fetchResults();
-      notify(`Saved ${readyRows.length} result(s)`, { type: 'success', position: 'top-center' });
-      setIsEditing(false);
-      setBulkRows([]);
-      resetForm();
+      if (savedEventCount > 0) {
+        notify(`Saved ${savedEventCount} result event(s)`, { type: 'success', position: 'top-center' });
+      }
+      if (failedPlayers.length) {
+        alert(`Some players failed to save: ${failedPlayers.join(', ')}`);
+      }
 
       await activityLogService.logActivity(
         'Updated Match Results',
         'Results Page',
-        `Created ${readyRows.length} result(s) for year ${selectedYear}`
+        `Created ${savedEventCount} result event(s) for year ${selectedYear}`
       );
       fetchResultsActivityLogs();
     } catch (error) {
@@ -1118,15 +1171,24 @@ const ManageResults = () => {
                 />
                 <button
                   type="button"
-                  onClick={applyBulkImageUrlToAll}
+                  onClick={applyImageToSelected}
                   style={{ ...styles.topBtnPrimary, padding: '10px 16px' }}
                 >
-                  Apply URL To All Rows
+                  Apply To Selected Players
                 </button>
               </div>
               <table style={styles.table}>
                 <thead>
                   <tr style={styles.headerRow}>
+                    <th style={styles.headerCell}>
+                      <input
+                        id="bulk-select-all"
+                        name="bulk-select-all"
+                        type="checkbox"
+                        checked={bulkRows.length > 0 && bulkRows.every((row) => !!row.selected)}
+                        onChange={(e) => handleSelectAllBulkRows(e.target.checked)}
+                      />
+                    </th>
                     <th style={styles.headerCell}>Name</th>
                     <th style={styles.headerCell}>Branch</th>
                     <th style={styles.headerCell}>KPM No</th>
@@ -1139,19 +1201,43 @@ const ManageResults = () => {
                 <tbody>
                   {bulkRows.map((row, idx) => (
                     <tr key={row.playerMasterId} style={styles.bodyRow}>
+                      <td style={styles.cell}>
+                        <input
+                          id={`bulk-selected-${idx}`}
+                          name={`bulk-selected-${idx}`}
+                          type="checkbox"
+                          checked={!!row.selected}
+                          onChange={(e) => handleBulkRowChange(idx, 'selected', e.target.checked)}
+                        />
+                      </td>
                       <td style={styles.cell}><input id={`bulk-name-${idx}`} name={`bulk-name-${idx}`} style={styles.input} value={row.name} readOnly /></td>
                       <td style={styles.cell}><input id={`bulk-branch-${idx}`} name={`bulk-branch-${idx}`} style={styles.input} value={row.branch} readOnly /></td>
                       <td style={styles.cell}><input id={`bulk-kpm-${idx}`} name={`bulk-kpm-${idx}`} style={styles.input} value={row.kpmNo} readOnly /></td>
                       <td style={styles.cell}>
-                        <input
-                          id={`bulk-event-${idx}`}
-                          name={`bulk-event-${idx}`}
-                          style={styles.input}
-                          value={row.event}
-                          onChange={e => handleBulkRowChange(idx, 'event', e.target.value)}
-                          placeholder="Event"
+                        <select
+                          id={`bulk-event-count-${idx}`}
+                          name={`bulk-event-count-${idx}`}
+                          style={styles.select}
+                          value={Number(row.eventCount || 1)}
+                          onChange={e => handleBulkRowChange(idx, 'eventCount', Number(e.target.value))}
                           disabled={row.status === 'saved'}
-                        />
+                        >
+                          <option value={1}>1 Event</option>
+                          <option value={2}>2 Events</option>
+                          <option value={3}>3 Events</option>
+                        </select>
+                        {Array.from({ length: Number(row.eventCount || 1) }).map((_, eventIndex) => (
+                          <input
+                            key={eventIndex}
+                            id={`bulk-event-${idx}-${eventIndex}`}
+                            name={`bulk-event-${idx}-${eventIndex}`}
+                            style={{ ...styles.input, marginTop: 6 }}
+                            placeholder={`Event ${eventIndex + 1}`}
+                            value={row[`event_${eventIndex}`] || ''}
+                            onChange={e => handleBulkRowChange(idx, `event_${eventIndex}`, e.target.value)}
+                            disabled={row.status === 'saved'}
+                          />
+                        ))}
                       </td>
                       <td style={styles.cell}>
                         <select
@@ -1230,6 +1316,17 @@ const ManageResults = () => {
                             </>
                           )}
                         </div>
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            marginTop: 8,
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: row.status === 'saved' ? '#198754' : '#6b7280'
+                          }}
+                        >
+                          {row.status === 'saved' ? 'Saved' : 'Pending'}
+                        </span>
                       </td>
                     </tr>
                   ))}
