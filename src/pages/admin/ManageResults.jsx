@@ -363,7 +363,9 @@ const ManageResults = () => {
       event_0: '',
       event_1: '',
       event_2: '',
-      medal: '',
+      medal_0: '',
+      medal_1: '',
+      medal_2: '',
       imageUrl: '',
       selected: false,
       status: 'pending'
@@ -404,7 +406,9 @@ const ManageResults = () => {
               event_0: '',
               event_1: '',
               event_2: '',
-              medal: '',
+              medal_0: '',
+              medal_1: '',
+              medal_2: '',
               imageUrl: '',
               selected: false,
               status: 'pending'
@@ -427,42 +431,44 @@ const ManageResults = () => {
     );
   };
 
-  const getRowEvents = (row) => {
+  const getRowEntries = (row) => {
     const count = Math.max(1, Math.min(3, Number(row?.eventCount || 1)));
     const seen = new Set();
-    const events = [];
+    const entries = [];
     for (let i = 0; i < count; i += 1) {
       const value = String(row?.[`event_${i}`] || '').trim();
+      const medal = String(row?.[`medal_${i}`] || '').trim();
       if (!value) continue;
+      if (!medal) continue;
       const key = value.toLowerCase();
       if (seen.has(key)) continue;
       seen.add(key);
-      events.push(value);
+      entries.push({ event: value, medal });
     }
-    return events;
+    return entries;
   };
 
   const handleBulkRowSave = async (row, index) => {
     try {
-      const events = getRowEvents(row);
-      if (!events.length || !row.medal) {
-        alert('Fill event(s) and medal.');
+      const entries = getRowEntries(row);
+      if (!entries.length) {
+        alert('Fill event(s) and medal(s).');
         return;
       }
 
       await Promise.all(
-        events.map((eventName) =>
+        entries.map((entry) =>
           api.post('/results', {
             playerMasterId: row.playerMasterId,
-            event: eventName,
+            event: entry.event,
             year: row.year,
-            medal: row.medal,
+            medal: entry.medal,
             imageUrl: row.imageUrl
           })
         )
       );
 
-      notify(`Saved ${events.length} event(s) for ${row.name}`, { type: 'success', position: 'top-center' });
+      notify(`Saved ${entries.length} event(s) for ${row.name}`, { type: 'success', position: 'top-center' });
       fetchResults();
       setBulkRows((prev) =>
         prev.map((r, i) =>
@@ -483,7 +489,7 @@ const ManageResults = () => {
   const handleBulkSubmit = async (e) => {
     e.preventDefault();
     try {
-      const readyRows = (bulkRows || []).filter((row) => row.status !== 'saved' && getRowEvents(row).length && row.medal);
+      const readyRows = (bulkRows || []).filter((row) => row.status !== 'saved' && getRowEntries(row).length);
       if (!readyRows.length) {
         alert('No pending rows to save. Fill at least one row with Event and Medal.');
         return;
@@ -492,20 +498,20 @@ const ManageResults = () => {
       let savedEventCount = 0;
       const failedPlayers = [];
       for (const row of readyRows) {
-        const events = getRowEvents(row);
+        const entries = getRowEntries(row);
         try {
           await Promise.all(
-            events.map((eventName) =>
+            entries.map((entry) =>
               api.post('/results', {
                 playerMasterId: row.playerMasterId,
-                event: eventName,
+                event: entry.event,
                 year: row.year,
-                medal: row.medal,
+                medal: entry.medal,
                 imageUrl: row.imageUrl
               })
             )
           );
-          savedEventCount += events.length;
+          savedEventCount += entries.length;
           setBulkRows((prev) =>
             prev.map((r) =>
               r.playerMasterId === row.playerMasterId
@@ -1243,19 +1249,22 @@ const ManageResults = () => {
                         ))}
                       </td>
                       <td style={styles.cell}>
-                        <select
-                          id={`bulk-medal-${idx}`}
-                          name={`bulk-medal-${idx}`}
-                          style={styles.select}
-                          value={row.medal}
-                          onChange={e => handleBulkRowChange(idx, 'medal', e.target.value)}
-                          disabled={row.status === 'saved'}
-                        >
-                          <option value="">Select Medal</option>
-                          {MEDALS.map(m => (
-                            <option key={m}>{m}</option>
-                          ))}
-                        </select>
+                        {Array.from({ length: Number(row.eventCount || 1) }).map((_, medalIndex) => (
+                          <select
+                            key={medalIndex}
+                            id={`bulk-medal-${idx}-${medalIndex}`}
+                            name={`bulk-medal-${idx}-${medalIndex}`}
+                            style={{ ...styles.select, marginTop: medalIndex > 0 ? 6 : 0 }}
+                            value={row[`medal_${medalIndex}`] || ''}
+                            onChange={e => handleBulkRowChange(idx, `medal_${medalIndex}`, e.target.value)}
+                            disabled={row.status === 'saved'}
+                          >
+                            <option value="">{`Select Medal ${medalIndex + 1}`}</option>
+                            {MEDALS.map(m => (
+                              <option key={m}>{m}</option>
+                            ))}
+                          </select>
+                        ))}
                       </td>
                       <td style={styles.cell}>
                         <input
