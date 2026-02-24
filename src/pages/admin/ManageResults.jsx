@@ -83,6 +83,7 @@ const ManageResults = () => {
   const [resultsActivityLogs, setResultsActivityLogs] = useState([]);
   const [loadingResultsActivity, setLoadingResultsActivity] = useState(false);
   const [groupMemberSelection, setGroupMemberSelection] = useState({});
+  const [playerIntelligence, setPlayerIntelligence] = useState(null);
 
   // Check authentication on component mount
   useEffect(() => {
@@ -828,6 +829,115 @@ const ManageResults = () => {
     setBulkRows([]);
   };
 
+  const resolvePlayerIdentity = (item) => {
+    if (!item) return null;
+    const idCandidates = [item.playerMasterId, item.playerId].filter(Boolean).map(String);
+
+    for (const id of idCandidates) {
+      if (playersById[id]) {
+        return {
+          masterId: playersById[id].masterId || id,
+          name: playersById[id].name || item.name || '',
+          branch: playersById[id].branch || item.branch || '',
+          kpmNo: playersById[id].kpmNo || item.kpmNo || '',
+          diplomaYear: playersById[id].diplomaYear || item.diplomaYear || '',
+          semester: playersById[id].semester || item.semester || ''
+        };
+      }
+    }
+
+    const byName = players.find((p) => normalizeName(p.name) === normalizeName(item.name));
+    if (byName) {
+      return {
+        masterId: byName.masterId || byName.id || '',
+        name: byName.name || item.name || '',
+        branch: byName.branch || item.branch || '',
+        kpmNo: byName.kpmNo || item.kpmNo || '',
+        diplomaYear: byName.diplomaYear || item.diplomaYear || '',
+        semester: byName.semester || item.semester || ''
+      };
+    }
+
+    return {
+      masterId: String(item.playerMasterId || item.playerId || ''),
+      name: item.name || '',
+      branch: item.branch || '',
+      kpmNo: item.kpmNo || '',
+      diplomaYear: item.diplomaYear || '',
+      semester: item.semester || ''
+    };
+  };
+
+  const handleOpenPlayerIntelligence = (item) => {
+    const player = resolvePlayerIdentity(item);
+    if (!player || !player.name) return;
+
+    const allResults = data.flatMap((yearBlock) => yearBlock.results || []);
+    const matchedResults = allResults
+      .filter((row) => {
+        const rowMasterId = String(row.playerMasterId || row.playerId || '').trim();
+        if (player.masterId && rowMasterId && player.masterId === rowMasterId) return true;
+        return normalizeName(row.name) === normalizeName(player.name);
+      })
+      .sort((a, b) => Number(a.year || 0) - Number(b.year || 0));
+
+    const eventsParticipated = matchedResults.map((row) => ({
+      year: Number(row.year || 0),
+      event: row.event || '-',
+      medal: row.medal || '',
+      imageUrl: row.imageUrl || ''
+    }));
+
+    const medalSummary = {
+      Gold: 0,
+      Silver: 0,
+      Bronze: 0,
+      Participation: 0
+    };
+
+    eventsParticipated.forEach((entry) => {
+      const medal = String(entry.medal || '').trim();
+      if (medalSummary[medal] !== undefined) medalSummary[medal] += 1;
+    });
+
+    const performanceScore =
+      (medalSummary.Gold * 5) +
+      (medalSummary.Silver * 3) +
+      (medalSummary.Bronze * 1) +
+      (medalSummary.Participation * 0);
+
+    const timeline = Object.keys(playersByYear)
+      .map((yearKey) => {
+        const profile = (playersByYear[yearKey] || []).find((p) => {
+          if (player.masterId && p.masterId && String(p.masterId) === String(player.masterId)) return true;
+          return normalizeName(p.name) === normalizeName(player.name);
+        });
+        if (!profile) return null;
+        return {
+          year: Number(yearKey),
+          diplomaYear: profile.diplomaYear || '',
+          semester: profile.semester || '',
+          kpmNo: profile.kpmNo || player.kpmNo || ''
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.year - b.year);
+
+    const imageUrl =
+      item.imageUrl ||
+      matchedResults.find((row) => row.imageUrl)?.imageUrl ||
+      '';
+
+    setPlayerIntelligence({
+      player,
+      imageUrl,
+      eventsParticipated,
+      medalSummary,
+      performanceScore,
+      timeline
+    });
+  };
+
   /* ================= FILTERED DATA ================= */
   const availableYears = Array.from(
     new Set([
@@ -1011,6 +1121,13 @@ const ManageResults = () => {
                         </td>
                         <td style={styles.cell}>
                           <div style={styles.leftIconGroup}>
+                            <button
+                              type="button"
+                              style={styles.intelligenceBtn}
+                              onClick={() => handleOpenPlayerIntelligence(item)}
+                            >
+                              Player Intelligence
+                            </button>
                             <img
                               src="/Edit button.png"
                               alt="Edit"
@@ -1133,6 +1250,107 @@ const ManageResults = () => {
           ))}
 
         {/* INDIVIDUAL EDIT MODE */}
+        {playerIntelligence ? (
+          <div style={styles.intelligenceOverlay} onClick={() => setPlayerIntelligence(null)}>
+            <div style={styles.intelligenceModal} onClick={(e) => e.stopPropagation()}>
+              <div style={styles.intelligenceHeader}>
+                <h3 style={{ margin: 0 }}>Player Intelligence</h3>
+                <button
+                  type="button"
+                  style={styles.intelligenceClose}
+                  onClick={() => setPlayerIntelligence(null)}
+                >
+                  Close
+                </button>
+              </div>
+
+              <div style={styles.intelligenceHero}>
+                <img
+                  src={playerIntelligence.imageUrl || '/default-avatar.png'}
+                  alt={playerIntelligence.player.name || 'Player'}
+                  style={styles.intelligenceImage}
+                />
+                <div>
+                  <h4 style={{ margin: '0 0 6px', color: '#111827' }}>{playerIntelligence.player.name || '-'}</h4>
+                  <p style={{ margin: 0, color: '#4b5563' }}>
+                    {playerIntelligence.player.branch || '-'} | KPM: {playerIntelligence.player.kpmNo || '-'}
+                  </p>
+                </div>
+              </div>
+
+              <div style={styles.intelligenceGrid}>
+                <div style={styles.intelligenceCard}>
+                  <h4 style={styles.intelligenceSectionTitle}>Medal Summary</h4>
+                  <p style={styles.intelligenceLine}>Gold: {playerIntelligence.medalSummary.Gold}</p>
+                  <p style={styles.intelligenceLine}>Silver: {playerIntelligence.medalSummary.Silver}</p>
+                  <p style={styles.intelligenceLine}>Bronze: {playerIntelligence.medalSummary.Bronze}</p>
+                  <p style={styles.intelligenceLine}>Participation: {playerIntelligence.medalSummary.Participation}</p>
+                </div>
+
+                <div style={styles.intelligenceCard}>
+                  <h4 style={styles.intelligenceSectionTitle}>Performance Score</h4>
+                  <p style={styles.intelligenceScoreValue}>{playerIntelligence.performanceScore}</p>
+                  <p style={{ margin: 0, color: '#4b5563', fontSize: 12 }}>Score = 5*Gold + 3*Silver + 1*Bronze</p>
+                </div>
+              </div>
+
+              <div style={styles.intelligenceCard}>
+                <h4 style={styles.intelligenceSectionTitle}>Events Participated</h4>
+                {playerIntelligence.eventsParticipated.length ? (
+                  <table style={styles.intelligenceTable}>
+                    <thead>
+                      <tr>
+                        <th style={styles.intelligenceTh}>Year</th>
+                        <th style={styles.intelligenceTh}>Event</th>
+                        <th style={styles.intelligenceTh}>Medal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {playerIntelligence.eventsParticipated.map((entry, idx) => (
+                        <tr key={`${entry.year}-${entry.event}-${idx}`}>
+                          <td style={styles.intelligenceTd}>{entry.year || '-'}</td>
+                          <td style={styles.intelligenceTd}>{entry.event || '-'}</td>
+                          <td style={styles.intelligenceTd}>{entry.medal || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p style={{ margin: 0, color: '#6b7280' }}>No event records found.</p>
+                )}
+              </div>
+
+              <div style={styles.intelligenceCard}>
+                <h4 style={styles.intelligenceSectionTitle}>Career Timeline</h4>
+                {playerIntelligence.timeline.length ? (
+                  <table style={styles.intelligenceTable}>
+                    <thead>
+                      <tr>
+                        <th style={styles.intelligenceTh}>Year</th>
+                        <th style={styles.intelligenceTh}>Diploma Year</th>
+                        <th style={styles.intelligenceTh}>Semester</th>
+                        <th style={styles.intelligenceTh}>KPM No</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {playerIntelligence.timeline.map((entry) => (
+                        <tr key={`timeline-${entry.year}`}>
+                          <td style={styles.intelligenceTd}>{entry.year || '-'}</td>
+                          <td style={styles.intelligenceTd}>{entry.diplomaYear || '-'}</td>
+                          <td style={styles.intelligenceTd}>{entry.semester || '-'}</td>
+                          <td style={styles.intelligenceTd}>{entry.kpmNo || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p style={{ margin: 0, color: '#6b7280' }}>No timeline records found.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         {isEditing && !isGroupEditing && (
           editingId ? (
             <form onSubmit={handleSubmit}>
@@ -2059,6 +2277,135 @@ const styles = {
     height: '28px',
     cursor: 'pointer',
     transition: 'transform 0.2s ease',
+  },
+
+  intelligenceBtn: {
+    padding: '6px 10px',
+    border: '1px solid #1d4ed8',
+    borderRadius: 6,
+    background: '#eff6ff',
+    color: '#1e40af',
+    fontSize: 12,
+    fontWeight: 700,
+    cursor: 'pointer',
+    whiteSpace: 'nowrap'
+  },
+
+  intelligenceOverlay: {
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(15, 23, 42, 0.55)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 14
+  },
+
+  intelligenceModal: {
+    width: 'min(920px, 96vw)',
+    maxHeight: '92vh',
+    overflowY: 'auto',
+    background: '#f8fafc',
+    border: '1px solid #cbd5e1',
+    borderRadius: 12,
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.25)'
+  },
+
+  intelligenceHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '16px 18px',
+    borderBottom: '1px solid #dbeafe',
+    background: 'linear-gradient(135deg, #1d4ed8, #1e3a8a)',
+    color: '#ffffff'
+  },
+
+  intelligenceClose: {
+    border: '1px solid rgba(255,255,255,0.6)',
+    background: 'transparent',
+    color: '#ffffff',
+    borderRadius: 6,
+    padding: '6px 10px',
+    cursor: 'pointer',
+    fontWeight: 600
+  },
+
+  intelligenceHero: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 14,
+    padding: 16,
+    borderBottom: '1px solid #e2e8f0',
+    background: '#ffffff'
+  },
+
+  intelligenceImage: {
+    width: 74,
+    height: 74,
+    borderRadius: 10,
+    objectFit: 'cover',
+    border: '1px solid #cbd5e1'
+  },
+
+  intelligenceGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+    gap: 12,
+    padding: '12px 16px 0'
+  },
+
+  intelligenceCard: {
+    background: '#ffffff',
+    border: '1px solid #e2e8f0',
+    borderRadius: 10,
+    padding: 14,
+    margin: '12px 16px'
+  },
+
+  intelligenceSectionTitle: {
+    margin: '0 0 10px',
+    color: '#1e293b',
+    fontSize: 15
+  },
+
+  intelligenceLine: {
+    margin: '0 0 6px',
+    color: '#374151',
+    fontSize: 14
+  },
+
+  intelligenceScoreValue: {
+    margin: '0 0 8px',
+    fontSize: 40,
+    fontWeight: 800,
+    color: '#1d4ed8',
+    lineHeight: 1
+  },
+
+  intelligenceTable: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    background: '#ffffff'
+  },
+
+  intelligenceTh: {
+    textAlign: 'left',
+    padding: '8px 10px',
+    background: '#eff6ff',
+    borderBottom: '1px solid #dbeafe',
+    color: '#1e3a8a',
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: '0.4px'
+  },
+
+  intelligenceTd: {
+    padding: '8px 10px',
+    borderBottom: '1px solid #eef2f7',
+    color: '#1f2937',
+    fontSize: 13
   },
 
 };
