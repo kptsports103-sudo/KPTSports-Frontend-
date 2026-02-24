@@ -206,6 +206,49 @@ const PlayerIntelligence = () => {
       background: "#ffffff",
       boxShadow: "0 10px 24px rgba(15, 23, 42, 0.06)",
     },
+    paginationShell: {
+      background: "linear-gradient(135deg, #ffffff, #f8fbff)",
+      border: "1px solid #dbe3ef",
+      borderRadius: "12px",
+      padding: "10px 14px",
+      boxShadow: "0 8px 22px rgba(15, 23, 42, 0.05)",
+    },
+    paginationBtn: (disabled) => ({
+      minWidth: "96px",
+      height: "38px",
+      border: "1px solid #cbd5e1",
+      borderRadius: "8px",
+      background: disabled ? "#f1f5f9" : "linear-gradient(135deg, #e0ecff, #dbeafe)",
+      color: "#1e3a8a",
+      fontWeight: 700,
+      cursor: disabled ? "not-allowed" : "pointer",
+      opacity: disabled ? 0.6 : 1,
+    }),
+    paginationMeta: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "8px",
+      border: "1px solid #dbe3ef",
+      borderRadius: "9px",
+      background: "#f8fafc",
+      color: "#334155",
+      fontWeight: 700,
+      padding: "7px 12px",
+      lineHeight: 1,
+    },
+    paginationBadge: {
+      background: "#1d4ed8",
+      color: "#ffffff",
+      borderRadius: "999px",
+      minWidth: "26px",
+      height: "26px",
+      padding: "0 8px",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "13px",
+      fontWeight: 800,
+    },
     table: {
       width: "100%",
       backgroundColor: "#ffffff",
@@ -395,58 +438,24 @@ const PlayerIntelligence = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div
-          className="flex justify-center items-center gap-2 mt-6"
-          style={{
-            background: "#ffffff",
-            border: "1px solid #dbe3ef",
-            borderRadius: "10px",
-            padding: "10px 12px",
-          }}
-        >
+        <div className="flex justify-center items-center gap-2 mt-6" style={tableStyles.paginationShell}>
           <button
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            style={{
-              minWidth: "90px",
-              height: "38px",
-              border: "1px solid #cbd5e1",
-              borderRadius: "8px",
-              background: currentPage === 1 ? "#f1f5f9" : "#eff6ff",
-              color: "#1e3a8a",
-              fontWeight: 600,
-              cursor: currentPage === 1 ? "not-allowed" : "pointer",
-              opacity: currentPage === 1 ? 0.6 : 1,
-            }}
+            style={tableStyles.paginationBtn(currentPage === 1)}
           >
             Previous
           </button>
-          <span
-            className="px-4 py-2 text-sm text-gray-600"
-            style={{
-              border: "1px solid #dbe3ef",
-              borderRadius: "8px",
-              background: "#f8fafc",
-              color: "#334155",
-              fontWeight: 600,
-            }}
-          >
-            Page {currentPage} of {totalPages}
-          </span>
+          <div style={tableStyles.paginationMeta}>
+            <span>Page</span>
+            <span style={tableStyles.paginationBadge}>{currentPage}</span>
+            <span>of</span>
+            <span style={{ ...tableStyles.paginationBadge, background: "#0f172a" }}>{totalPages}</span>
+          </div>
           <button
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            style={{
-              minWidth: "90px",
-              height: "38px",
-              border: "1px solid #cbd5e1",
-              borderRadius: "8px",
-              background: currentPage === totalPages ? "#f1f5f9" : "#eff6ff",
-              color: "#1e3a8a",
-              fontWeight: 600,
-              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-              opacity: currentPage === totalPages ? 0.6 : 1,
-            }}
+            style={tableStyles.paginationBtn(currentPage === totalPages)}
           >
             Next
           </button>
