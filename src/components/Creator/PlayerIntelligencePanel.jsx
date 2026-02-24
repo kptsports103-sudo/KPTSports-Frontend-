@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { Medal, Award } from "lucide-react";
 import {
   AreaChart,
   Area,
@@ -47,6 +48,31 @@ const getMedalBadgeStyle = (medal) => {
   if (m === "silver") return { ...styles.medalBadge, background: "#e5e7eb" };
   if (m === "bronze") return { ...styles.medalBadge, background: "#fde68a" };
   return { ...styles.medalBadge, background: "#d1fae5" };
+};
+
+const AnimatedCounter = ({ value }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const target = Number(value || 0);
+    let start = 0;
+    const duration = 800;
+    const increment = target / (duration / 16 || 1);
+
+    const counter = setInterval(() => {
+      start += increment;
+      if (start >= target) {
+        setCount(target);
+        clearInterval(counter);
+      } else {
+        setCount(Math.floor(start));
+      }
+    }, 16);
+
+    return () => clearInterval(counter);
+  }, [value]);
+
+  return <span>{count}</span>;
 };
 
 const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], teamResults = [], onClose }) => {
@@ -214,9 +240,10 @@ const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], te
             <span style={styles.subtitle}>(Karnataka State Inter-Polytechnic Meet)</span>
           </h3>
           <div style={styles.eventsGrid} className="eventsResponsive">
-            {Object.entries(eventsByYear)
-              .sort((a, b) => Number(a[0]) - Number(b[0]))
-              .map(([year, events]) => (
+            {history.map((h) => {
+              const year = h.year;
+              const events = eventsByYear[year] || [];
+              return (
                 <div key={year} style={styles.yearCard}>
                   <h4 style={{ margin: 0 }}>{year}</h4>
                   {[...Array(5)].map((_, i) => {
@@ -224,13 +251,14 @@ const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], te
                     return (
                       <div key={`${year}-${i}`} style={styles.eventRow}>
                         <span style={styles.smallDot} />
-                        <span style={styles.eventName}>{e?.name || "\u2014"}</span>
+                        <span style={styles.eventName}>{e?.name || ""}</span>
                         <span style={getMedalBadgeStyle(e?.medal)}>{e?.medal || ""}</span>
                       </div>
                     );
                   })}
                 </div>
-              ))}
+              );
+            })}
           </div>
         </div>
 
@@ -269,11 +297,45 @@ const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], te
 
           <div>
             <h3 style={styles.h3}>Medal Summary</h3>
-            <div style={styles.medalGrid}>
-              <div style={styles.medalCard}>{"\uD83E\uDD47"} {medals.gold} Gold</div>
-              <div style={styles.medalCard}>{"\uD83E\uDD48"} {medals.silver} Silver</div>
-              <div style={styles.medalCard}>{"\uD83E\uDD49"} {medals.bronze} Bronze</div>
-              <div style={styles.medalCard}>{"\uD83D\uDD35"} {medals.participation} Participation</div>
+            <div style={styles.medalWrapper}>
+              <div style={styles.medalGrid}>
+                <div style={{ ...styles.medalCard, ...styles.goldCard }}>
+                  <Medal size={32} strokeWidth={2.5} style={styles.iconShadow} />
+                  <div style={styles.medalContent}>
+                    <div style={styles.medalCount}>
+                      <AnimatedCounter value={medals.gold} />
+                    </div>
+                    <div style={styles.medalLabel}>Gold</div>
+                  </div>
+                </div>
+                <div style={{ ...styles.medalCard, ...styles.silverCard }}>
+                  <Medal size={32} strokeWidth={2.5} style={styles.iconShadow} />
+                  <div style={styles.medalContent}>
+                    <div style={styles.medalCount}>
+                      <AnimatedCounter value={medals.silver} />
+                    </div>
+                    <div style={styles.medalLabel}>Silver</div>
+                  </div>
+                </div>
+                <div style={{ ...styles.medalCard, ...styles.bronzeCard }}>
+                  <Medal size={32} strokeWidth={2.5} style={styles.iconShadow} />
+                  <div style={styles.medalContent}>
+                    <div style={styles.medalCount}>
+                      <AnimatedCounter value={medals.bronze} />
+                    </div>
+                    <div style={styles.medalLabel}>Bronze</div>
+                  </div>
+                </div>
+                <div style={{ ...styles.medalCard, ...styles.participationCard }}>
+                  <Award size={32} strokeWidth={2.5} style={styles.iconShadow} />
+                  <div style={styles.medalContent}>
+                    <div style={styles.medalCount}>
+                      <AnimatedCounter value={medals.participation} />
+                    </div>
+                    <div style={styles.medalLabel}>Participation</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <h3 style={{ ...styles.h3, marginTop: 30 }}>Performance Chart</h3>
@@ -478,19 +540,52 @@ const styles = {
   },
   medalGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(2,1fr)",
-    gap: 10
+    gridTemplateColumns: "repeat(4, 1fr)",
+    gap: 20
+  },
+  medalWrapper: {
+    width: 829,
+    maxWidth: "100%"
   },
   medalCard: {
-    background: "#ffffff",
-    padding: 18,
-    borderRadius: 14,
-    border: "1px solid #e5e7eb",
-    fontWeight: 700,
-    fontSize: 15,
+    height: 100,
+    borderRadius: 20,
+    padding: "20px",
     display: "flex",
     alignItems: "center",
-    gap: 10
+    gap: 14,
+    color: "#fff",
+    fontWeight: 600,
+    fontSize: 16,
+    boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+    transform: "perspective(600px) rotateX(4deg)"
+  },
+  goldCard: {
+    background: "linear-gradient(135deg,#fbbf24,#f59e0b)"
+  },
+  silverCard: {
+    background: "linear-gradient(135deg,#d1d5db,#9ca3af)"
+  },
+  bronzeCard: {
+    background: "linear-gradient(135deg,#f59e0b,#b45309)"
+  },
+  participationCard: {
+    background: "linear-gradient(135deg,#38bdf8,#0ea5e9)"
+  },
+  medalContent: {
+    display: "flex",
+    flexDirection: "column"
+  },
+  iconShadow: {
+    filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.3))"
+  },
+  medalCount: {
+    fontSize: 22,
+    fontWeight: 800
+  },
+  medalLabel: {
+    fontSize: 14,
+    opacity: 0.9
   },
   growth: {
     textAlign: "right",
