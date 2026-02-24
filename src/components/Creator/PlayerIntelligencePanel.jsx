@@ -75,6 +75,188 @@ const AnimatedCounter = ({ value }) => {
   return <span>{count}</span>;
 };
 
+const PlayerHeader = ({ onClose }) => (
+  <div style={styles.header}>
+    <h2 style={{ margin: 0 }}>Player Intelligence Panel</h2>
+    <span style={styles.close} onClick={onClose}>Close</span>
+  </div>
+);
+
+const PlayerHero = ({ player, profileImage, historyYears }) => (
+  <div style={styles.hero} className="heroResponsive">
+    <img src={profileImage} alt={player.name || "player"} style={styles.avatar} />
+    <div>
+      <h2 style={{ margin: 0 }}>{player.name || "-"}</h2>
+      <p style={styles.college}>{player.college || player.branch || "-"}</p>
+      <div style={styles.badges}>
+        <span style={styles.participation}>{historyYears.length} Years Participation</span>
+        <span style={styles.senior}>{"\uD83C\uDFC6"} {historyYears.length >= 3 ? "Senior Player" : "Rising Player"}</span>
+      </div>
+    </div>
+  </div>
+);
+
+const Timeline = ({ history }) => (
+  <div style={styles.timelineSection}>
+    <h3 style={styles.h3}>Career Timeline</h3>
+    <div style={styles.timeline}>
+      <div style={styles.timelineLine} />
+      {history.map((h, i) => (
+        <div key={`${h.year}-${i}`} style={styles.timelineItem}>
+          <div style={styles.yearBadge}>{h.year}</div>
+          <div style={styles.dot} />
+          <div style={styles.timelineText}>Diploma {h.diplomaYear} Sem {h.semester}</div>
+          <div style={styles.kpm}>{h.kpmNo}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const EventsSection = ({ history, eventsByYear }) => (
+  <div style={styles.eventsSection}>
+    <h3 style={styles.h3}>
+      Events Participated{" "}
+      <span style={styles.subtitle}>(Karnataka State Inter-Polytechnic Meet)</span>
+    </h3>
+    <div style={styles.eventsGrid} className="eventsResponsive">
+      {history.map((h) => {
+        const year = h.year;
+        const events = eventsByYear[year] || [];
+        return (
+          <div key={year} style={styles.yearCard}>
+            <h4 style={{ margin: 0 }}>{year}</h4>
+            {[...Array(5)].map((_, i) => {
+              const e = events[i];
+              const isEmpty = !e;
+              return (
+                <div
+                  key={`${year}-${i}`}
+                  style={{
+                    ...styles.eventRow,
+                    ...(isEmpty ? styles.emptyEventRow : {})
+                  }}
+                >
+                  <span style={{ ...styles.smallDot, ...(isEmpty ? styles.emptyDot : {}) }} />
+                  <span style={{ ...styles.eventName, ...(isEmpty ? styles.emptyText : {}) }}>
+                    {e?.name || ""}
+                  </span>
+                  {e ? (
+                    <span style={getMedalBadgeStyle(e.medal)}>{e.medal}</span>
+                  ) : (
+                    <span style={styles.emptyBadge} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  </div>
+);
+
+const KpmHistory = ({ history }) => (
+  <div>
+    <h3 style={styles.h3}>KPM History</h3>
+    <div style={styles.card}>
+      <table style={styles.table}>
+        <thead>
+          <tr>
+            <th style={styles.th}>Year</th>
+            <th style={styles.th}>KPM No</th>
+            <th style={styles.th}>Diploma</th>
+          </tr>
+        </thead>
+        <tbody>
+          {history.map((h, i) => (
+            <tr key={`kpm-row-${i}`}>
+              <td style={styles.td}>{h.year}</td>
+              <td style={styles.td}>{h.kpmNo}</td>
+              <td style={styles.td}>{h.diplomaYear}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <div style={styles.kpmChips}>
+      {history.map((h, i) => (
+        <div key={`kpm-chip-${i}`} style={styles.chip}>
+          {h.year} <span>{h.kpmNo}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const MedalSummary = ({ medals }) => (
+  <div>
+    <h3 style={styles.h3}>Medal Summary</h3>
+    <div style={styles.medalWrapper}>
+      <div style={styles.medalGrid}>
+        <motion.div whileHover={{ y: -4, scale: 1.02 }} style={{ ...styles.medalCard, ...styles.goldCard }}>
+          <Medal size={32} strokeWidth={2.5} style={styles.iconShadow} />
+          <div style={styles.medalContent}>
+            <div style={styles.medalCount}><AnimatedCounter value={medals.gold} /></div>
+            <div style={styles.medalLabel}>Gold</div>
+          </div>
+        </motion.div>
+        <motion.div whileHover={{ y: -4, scale: 1.02 }} style={{ ...styles.medalCard, ...styles.silverCard }}>
+          <Medal size={32} strokeWidth={2.5} style={styles.iconShadow} />
+          <div style={styles.medalContent}>
+            <div style={styles.medalCount}><AnimatedCounter value={medals.silver} /></div>
+            <div style={styles.medalLabel}>Silver</div>
+          </div>
+        </motion.div>
+        <motion.div whileHover={{ y: -4, scale: 1.02 }} style={{ ...styles.medalCard, ...styles.bronzeCard }}>
+          <Medal size={32} strokeWidth={2.5} style={styles.iconShadow} />
+          <div style={styles.medalContent}>
+            <div style={styles.medalCount}><AnimatedCounter value={medals.bronze} /></div>
+            <div style={styles.medalLabel}>Bronze</div>
+          </div>
+        </motion.div>
+        <motion.div whileHover={{ y: -4, scale: 1.02 }} style={{ ...styles.medalCard, ...styles.participationCard }}>
+          <Award size={32} strokeWidth={2.5} style={styles.iconShadow} />
+          <div style={styles.medalContent}>
+            <div style={styles.medalCount}><AnimatedCounter value={medals.participation} /></div>
+            <div style={styles.medalLabel}>Participation</div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  </div>
+);
+
+const PerformanceChart = ({ growthPercentage, latestParticipation, chartData }) => (
+  <>
+    <h3 style={{ ...styles.h3, marginTop: 30 }}>Performance Chart</h3>
+    <div style={styles.growth}>+{growthPercentage}% {"\u2022"} {latestParticipation}</div>
+    <div style={styles.card}>
+      <ResponsiveContainer width="100%" height={260}>
+        <AreaChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="year" />
+          <YAxis />
+          <Tooltip />
+          <Area type="monotone" dataKey="participation" stroke="#0ea5e9" fill="#bae6fd" strokeWidth={3} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  </>
+);
+
+const ScoreCard = ({ performanceScore, individualPoints, teamPoints }) => (
+  <div style={styles.scoreCard}>
+    <h3 style={styles.h3White}>Performance Score</h3>
+    <div style={styles.score}>{performanceScore}</div>
+    <div style={styles.scoreSplit}>
+      <div>Individual Result Points: {individualPoints}</div>
+      <div>Team Result Points: {teamPoints}</div>
+    </div>
+  </div>
+);
+
 const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], teamResults = [], onClose }) => {
   if (!player) return null;
 
@@ -155,43 +337,27 @@ const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], te
     });
   };
 
-  matchedIndividualResults.forEach((row) => {
-    pushUniqueResultEvent(row.year, row.event, row.medal);
-  });
-
-  matchedTeamResults.forEach((row) => {
-    pushUniqueResultEvent(row.year, row.event, row.medal);
-  });
+  matchedIndividualResults.forEach((row) => pushUniqueResultEvent(row.year, row.event, row.medal));
+  matchedTeamResults.forEach((row) => pushUniqueResultEvent(row.year, row.event, row.medal));
 
   history.sort((a, b) => Number(a.year) - Number(b.year));
-
-  const chartData = history.map((h) => ({
-    year: h.year,
-    participation: (eventsByYear[h.year] || []).length
-  }));
+  const chartData = history.map((h) => ({ year: h.year, participation: (eventsByYear[h.year] || []).length }));
 
   const medals = { gold: 0, silver: 0, bronze: 0, participation: 0 };
   Object.values(eventsByYear).flat().forEach((e) => {
     const medal = String(e?.medal || "").toLowerCase();
-    if (medals[medal] !== undefined) {
-      medals[medal] += 1;
-    } else {
-      medals.participation += 1;
-    }
+    if (medals[medal] !== undefined) medals[medal] += 1;
+    else medals.participation += 1;
   });
 
   const base = chartData[0]?.participation || 0;
   const latest = chartData[chartData.length - 1]?.participation || 0;
-  const growthPercentage =
-    base > 0
-      ? (((latest - base) / base) * 100).toFixed(1)
-      : "0.0";
+  const growthPercentage = base > 0 ? (((latest - base) / base) * 100).toFixed(1) : "0.0";
   const latestParticipation = latest;
 
   const individualPoints = matchedIndividualResults.reduce((sum, row) => sum + getMedalPoints(row.medal), 0);
   const teamPoints = matchedTeamResults.reduce((sum, row) => sum + getMedalPoints(row.medal), 0);
   const performanceScore = individualPoints + teamPoints;
-  const seniorBadge = history.length >= 3 ? "Senior Player" : "Rising Player";
   const profileImage = player.image || matchedIndividualResults.find((row) => row?.imageUrl)?.imageUrl || "/default-avatar.png";
 
   return (
@@ -202,172 +368,28 @@ const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], te
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
       >
-        <div style={styles.header}>
-          <h2 style={{ margin: 0 }}>Player Intelligence Panel</h2>
-          <span style={styles.close} onClick={onClose}>Close</span>
-        </div>
-
-        <div style={styles.hero} className="heroResponsive">
-          <img src={profileImage} alt={player.name || "player"} style={styles.avatar} />
-          <div>
-            <h2 style={{ margin: 0 }}>{player.name || "-"}</h2>
-            <p style={styles.college}>{player.college || player.branch || "-"}</p>
-            <div style={styles.badges}>
-              <span style={styles.participation}>{history.length} Years Participation</span>
-              <span style={styles.senior}>{"\uD83C\uDFC6"} {seniorBadge}</span>
-            </div>
-          </div>
-        </div>
-
-        <div style={styles.timelineSection}>
-          <h3 style={styles.h3}>Career Timeline</h3>
-          <div style={styles.timeline}>
-            <div style={styles.timelineLine} />
-            {history.map((h, i) => (
-              <div key={`${h.year}-${i}`} style={styles.timelineItem}>
-                <div style={styles.yearBadge}>{h.year}</div>
-                <div style={styles.dot} />
-                <div style={styles.timelineText}>Diploma {h.diplomaYear} Sem {h.semester}</div>
-                <div style={styles.kpm}>{h.kpmNo}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={styles.eventsSection}>
-          <h3 style={styles.h3}>
-            Events Participated{" "}
-            <span style={styles.subtitle}>(Karnataka State Inter-Polytechnic Meet)</span>
-          </h3>
-          <div style={styles.eventsGrid} className="eventsResponsive">
-            {history.map((h) => {
-              const year = h.year;
-              const events = eventsByYear[year] || [];
-              return (
-                <div key={year} style={styles.yearCard}>
-                  <h4 style={{ margin: 0 }}>{year}</h4>
-                  {[...Array(5)].map((_, i) => {
-                    const e = events[i];
-                    return (
-                      <div key={`${year}-${i}`} style={styles.eventRow}>
-                        <span style={styles.smallDot} />
-                        <span style={styles.eventName}>{e?.name || ""}</span>
-                        <span style={getMedalBadgeStyle(e?.medal)}>{e?.medal || ""}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <PlayerHeader onClose={onClose} />
+        <PlayerHero player={player} profileImage={profileImage} historyYears={history} />
+        <Timeline history={history} />
+        <EventsSection history={history} eventsByYear={eventsByYear} />
 
         <div style={styles.dashboard} className="dashboardResponsive">
+          <KpmHistory history={history} />
           <div>
-            <h3 style={styles.h3}>KPM History</h3>
-            <div style={styles.card}>
-              <table style={styles.table}>
-                <thead>
-                  <tr>
-                    <th style={styles.th}>Year</th>
-                    <th style={styles.th}>KPM No</th>
-                    <th style={styles.th}>Diploma</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((h, i) => (
-                    <tr key={`kpm-row-${i}`}>
-                      <td style={styles.td}>{h.year}</td>
-                      <td style={styles.td}>{h.kpmNo}</td>
-                      <td style={styles.td}>{h.diplomaYear}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div style={styles.kpmChips}>
-              {history.map((h, i) => (
-                <div key={`kpm-chip-${i}`} style={styles.chip}>
-                  {h.year} <span>{h.kpmNo}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h3 style={styles.h3}>Medal Summary</h3>
-            <div style={styles.medalWrapper}>
-              <div style={styles.medalGrid}>
-                <div style={{ ...styles.medalCard, ...styles.goldCard }}>
-                  <Medal size={32} strokeWidth={2.5} style={styles.iconShadow} />
-                  <div style={styles.medalContent}>
-                    <div style={styles.medalCount}>
-                      <AnimatedCounter value={medals.gold} />
-                    </div>
-                    <div style={styles.medalLabel}>Gold</div>
-                  </div>
-                </div>
-                <div style={{ ...styles.medalCard, ...styles.silverCard }}>
-                  <Medal size={32} strokeWidth={2.5} style={styles.iconShadow} />
-                  <div style={styles.medalContent}>
-                    <div style={styles.medalCount}>
-                      <AnimatedCounter value={medals.silver} />
-                    </div>
-                    <div style={styles.medalLabel}>Silver</div>
-                  </div>
-                </div>
-                <div style={{ ...styles.medalCard, ...styles.bronzeCard }}>
-                  <Medal size={32} strokeWidth={2.5} style={styles.iconShadow} />
-                  <div style={styles.medalContent}>
-                    <div style={styles.medalCount}>
-                      <AnimatedCounter value={medals.bronze} />
-                    </div>
-                    <div style={styles.medalLabel}>Bronze</div>
-                  </div>
-                </div>
-                <div style={{ ...styles.medalCard, ...styles.participationCard }}>
-                  <Award size={32} strokeWidth={2.5} style={styles.iconShadow} />
-                  <div style={styles.medalContent}>
-                    <div style={styles.medalCount}>
-                      <AnimatedCounter value={medals.participation} />
-                    </div>
-                    <div style={styles.medalLabel}>Participation</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <h3 style={{ ...styles.h3, marginTop: 30 }}>Performance Chart</h3>
-            <div style={styles.growth}>+{growthPercentage}% {"\u2022"} {latestParticipation}</div>
-            <div style={styles.card}>
-              <ResponsiveContainer width="100%" height={260}>
-                <AreaChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="year" />
-                  <YAxis />
-                  <Tooltip />
-                  <Area
-                    type="monotone"
-                    dataKey="participation"
-                    stroke="#0ea5e9"
-                    fill="#bae6fd"
-                    strokeWidth={3}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+            <MedalSummary medals={medals} />
+            <PerformanceChart
+              growthPercentage={growthPercentage}
+              latestParticipation={latestParticipation}
+              chartData={chartData}
+            />
           </div>
         </div>
 
-        <div style={styles.scoreCard}>
-          <h3 style={styles.h3White}>Performance Score</h3>
-          <div style={styles.score}>{performanceScore}</div>
-          <div style={styles.scoreSplit}>
-            <div>Individual Result Points: {individualPoints}</div>
-            <div>Team Result Points: {teamPoints}</div>
-          </div>
-        </div>
+        <ScoreCard
+          performanceScore={performanceScore}
+          individualPoints={individualPoints}
+          teamPoints={teamPoints}
+        />
       </motion.div>
     </div>
   );
@@ -436,9 +458,9 @@ const styles = {
   },
   timelineLine: {
     position: "absolute",
-    top: 30,
-    left: 50,
-    right: 50,
+    top: 34,
+    left: 60,
+    right: 60,
     height: 2,
     background: "#cbd5e1"
   },
@@ -450,11 +472,11 @@ const styles = {
     display: "inline-block"
   },
   dot: {
-    width: 12,
-    height: 12,
+    width: 14,
+    height: 14,
     background: "#2563eb",
     borderRadius: "50%",
-    margin: "10px auto"
+    margin: "12px auto"
   },
   timelineText: { fontSize: 13, color: "#64748b" },
   kpm: { fontWeight: "bold", marginTop: 5 },
@@ -468,9 +490,13 @@ const styles = {
   },
   yearCard: {
     background: "#fff",
-    padding: 15,
-    borderRadius: 12,
-    border: "1px solid #e2e8f0"
+    padding: 16,
+    borderRadius: 14,
+    border: "1px solid #e2e8f0",
+    minHeight: 260,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "flex-start"
   },
   eventRow: {
     display: "flex",
@@ -478,6 +504,12 @@ const styles = {
     marginTop: 8,
     alignItems: "center",
     gap: 8
+  },
+  emptyEventRow: {
+    background: "#f8fafc",
+    borderRadius: 8,
+    padding: "10px 12px",
+    opacity: 0.9
   },
   smallDot: {
     width: 6,
@@ -487,9 +519,21 @@ const styles = {
     marginRight: 6,
     flexShrink: 0
   },
+  emptyDot: {
+    background: "#cbd5e1"
+  },
   eventName: {
     flex: 1,
     color: "#1f2937"
+  },
+  emptyText: {
+    color: "#94a3b8"
+  },
+  emptyBadge: {
+    width: 58,
+    height: 22,
+    borderRadius: 6,
+    background: "linear-gradient(90deg,#e2e8f0,#f1f5f9)"
   },
   medalBadge: {
     padding: "2px 8px",
@@ -544,21 +588,25 @@ const styles = {
     gap: 20
   },
   medalWrapper: {
-    width: 829,
-    maxWidth: "100%"
+    width: "829px",
+    maxWidth: "100%",
+    margin: "0 auto",
+    paddingTop: 10,
+    paddingBottom: 10
   },
   medalCard: {
-    height: 100,
-    borderRadius: 20,
-    padding: "20px",
+    height: 104,
+    borderRadius: 18,
+    padding: "18px 22px",
     display: "flex",
     alignItems: "center",
-    gap: 14,
+    gap: 16,
     color: "#fff",
     fontWeight: 600,
-    fontSize: 16,
-    boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
-    transform: "perspective(600px) rotateX(4deg)"
+    fontSize: 15,
+    boxShadow: "0 14px 28px rgba(0,0,0,0.18)",
+    transition: "all 0.25s ease",
+    transformStyle: "preserve-3d"
   },
   goldCard: {
     background: "linear-gradient(135deg,#fbbf24,#f59e0b)"
@@ -577,7 +625,8 @@ const styles = {
     flexDirection: "column"
   },
   iconShadow: {
-    filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.3))"
+    filter: "drop-shadow(0 6px 10px rgba(0,0,0,0.35))",
+    transform: "translateZ(10px)"
   },
   medalCount: {
     fontSize: 22,
@@ -614,3 +663,4 @@ const styles = {
 };
 
 export default PlayerIntelligencePanel;
+
