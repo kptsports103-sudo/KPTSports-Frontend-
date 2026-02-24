@@ -299,3 +299,19 @@ nav ul {
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
   }
 }
+
+@media (max-width: 1024px) {
+  .dashboardResponsive {
+    grid-template-columns: 1fr !important;
+  }
+
+  .eventsResponsive {
+    grid-template-columns: 1fr !important;
+  }
+
+  .heroResponsive {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+}

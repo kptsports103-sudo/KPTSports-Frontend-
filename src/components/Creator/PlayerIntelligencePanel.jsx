@@ -12,6 +12,27 @@ import {
 
 const normalizeName = (name) => String(name || "").toLowerCase().trim().replace(/\s+/g, " ");
 
+const deriveAcademicHistory = (kpmNo) => {
+  const normalizedKpm = String(kpmNo || "").trim();
+  if (!normalizedKpm || normalizedKpm.length < 3) return [];
+
+  const yearPrefix = parseInt(normalizedKpm.substring(0, 2), 10);
+  const diplomaYear = parseInt(normalizedKpm[2], 10);
+  if (Number.isNaN(yearPrefix) || Number.isNaN(diplomaYear)) return [];
+
+  const finalYear = 2000 + yearPrefix;
+  const history = [];
+  for (let i = diplomaYear - 1; i >= 0; i -= 1) {
+    history.push({
+      year: finalYear - i,
+      diplomaYear: diplomaYear - i,
+      semester: "-",
+      kpmNo: normalizedKpm
+    });
+  }
+  return history;
+};
+
 const getMedalPoints = (medal) => {
   const m = String(medal || "").toLowerCase().trim();
   if (m === "gold") return 5;
@@ -32,8 +53,12 @@ const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], te
   if (!player) return null;
 
   const playerKey = String(player.masterId || player.id || "").trim();
-  const history = [];
+  const history = deriveAcademicHistory(player.kpmNo);
   const eventsByYear = {};
+  const historyByYear = history.reduce((acc, row) => {
+    acc[Number(row.year)] = row;
+    return acc;
+  }, {});
 
   data.forEach((yearBlock) => {
     const yearNumber = Number(yearBlock?.year || 0);
@@ -44,12 +69,20 @@ const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], te
         normalizeName(p.name) === normalizeName(player.name);
       if (!samePlayer) return;
 
-      history.push({
-        year: yearNumber,
-        kpmNo: p.kpmNo || "-",
-        diplomaYear: p.diplomaYear || "-",
-        semester: p.semester || "-"
-      });
+      if (historyByYear[yearNumber]) {
+        historyByYear[yearNumber].semester = p.semester || historyByYear[yearNumber].semester || "-";
+        historyByYear[yearNumber].diplomaYear = p.diplomaYear || historyByYear[yearNumber].diplomaYear || "-";
+        historyByYear[yearNumber].kpmNo = p.kpmNo || historyByYear[yearNumber].kpmNo || "-";
+      } else if (yearNumber) {
+        const fallbackRow = {
+          year: yearNumber,
+          kpmNo: p.kpmNo || player.kpmNo || "-",
+          diplomaYear: p.diplomaYear || "-",
+          semester: p.semester || "-"
+        };
+        history.push(fallbackRow);
+        historyByYear[yearNumber] = fallbackRow;
+      }
 
       if (!Array.isArray(p.events)) return;
       p.events.forEach((e) => {
@@ -106,12 +139,10 @@ const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], te
 
   history.sort((a, b) => Number(a.year) - Number(b.year));
 
-  const chartData = Object.keys(eventsByYear)
-    .map((year) => ({
-      year: Number(year),
-      participation: (eventsByYear[year] || []).length
-    }))
-    .sort((a, b) => a.year - b.year);
+  const chartData = history.map((h) => ({
+    year: h.year,
+    participation: (eventsByYear[h.year] || []).length
+  }));
 
   const medals = { gold: 0, silver: 0, bronze: 0, participation: 0 };
   Object.values(eventsByYear).flat().forEach((e) => {
@@ -123,12 +154,13 @@ const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], te
     }
   });
 
-  const totalParticipationsByYear = chartData.map((d) => d.participation);
-  const latestParticipation = totalParticipationsByYear.length ? totalParticipationsByYear[totalParticipationsByYear.length - 1] : 0;
+  const base = chartData[0]?.participation || 0;
+  const latest = chartData[chartData.length - 1]?.participation || 0;
   const growthPercentage =
-    totalParticipationsByYear.length > 1 && totalParticipationsByYear[0] > 0
-      ? (((latestParticipation - totalParticipationsByYear[0]) / totalParticipationsByYear[0]) * 100).toFixed(1)
+    base > 0
+      ? (((latest - base) / base) * 100).toFixed(1)
       : "0.0";
+  const latestParticipation = latest;
 
   const individualPoints = matchedIndividualResults.reduce((sum, row) => sum + getMedalPoints(row.medal), 0);
   const teamPoints = matchedTeamResults.reduce((sum, row) => sum + getMedalPoints(row.medal), 0);
@@ -149,7 +181,7 @@ const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], te
           <span style={styles.close} onClick={onClose}>Close</span>
         </div>
 
-        <div style={styles.hero}>
+        <div style={styles.hero} className="heroResponsive">
           <img src={profileImage} alt={player.name || "player"} style={styles.avatar} />
           <div>
             <h2 style={{ margin: 0 }}>{player.name || "-"}</h2>
@@ -181,25 +213,28 @@ const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], te
             Events Participated{" "}
             <span style={styles.subtitle}>(Karnataka State Inter-Polytechnic Meet)</span>
           </h3>
-          <div style={styles.eventsGrid}>
+          <div style={styles.eventsGrid} className="eventsResponsive">
             {Object.entries(eventsByYear)
               .sort((a, b) => Number(a[0]) - Number(b[0]))
               .map(([year, events]) => (
                 <div key={year} style={styles.yearCard}>
                   <h4 style={{ margin: 0 }}>{year}</h4>
-                  {events.map((e, i) => (
-                    <div key={`${year}-${i}`} style={styles.eventRow}>
-                      <span style={styles.smallDot} />
-                      <span style={styles.eventName}>{e.name}</span>
-                      <span style={getMedalBadgeStyle(e.medal)}>{e.medal || "Participation"}</span>
-                    </div>
-                  ))}
+                  {[...Array(5)].map((_, i) => {
+                    const e = events[i];
+                    return (
+                      <div key={`${year}-${i}`} style={styles.eventRow}>
+                        <span style={styles.smallDot} />
+                        <span style={styles.eventName}>{e?.name || "\u2014"}</span>
+                        <span style={getMedalBadgeStyle(e?.medal)}>{e?.medal || ""}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               ))}
           </div>
         </div>
 
-        <div style={styles.dashboard}>
+        <div style={styles.dashboard} className="dashboardResponsive">
           <div>
             <h3 style={styles.h3}>KPM History</h3>
             <div style={styles.card}>
@@ -447,11 +482,15 @@ const styles = {
     gap: 10
   },
   medalCard: {
-    background: "#fff",
-    padding: 15,
-    borderRadius: 12,
-    border: "1px solid #e2e8f0",
-    fontWeight: 600
+    background: "#ffffff",
+    padding: 18,
+    borderRadius: 14,
+    border: "1px solid #e5e7eb",
+    fontWeight: 700,
+    fontSize: 15,
+    display: "flex",
+    alignItems: "center",
+    gap: 10
   },
   growth: {
     textAlign: "right",
