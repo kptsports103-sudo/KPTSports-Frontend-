@@ -1,9 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FaTimes, FaMedal, FaRunning } from "react-icons/fa";
+import { FaMedal } from "react-icons/fa";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
@@ -19,6 +19,30 @@ const getMedalPoints = (medal) => {
   if (m === "bronze") return 1;
   return 0;
 };
+
+const getEventMedalStyle = (medal) => {
+  const m = String(medal || "").toLowerCase().trim();
+  const base = {
+    padding: "2px 8px",
+    borderRadius: 6,
+    fontSize: 12,
+    marginLeft: "auto",
+    fontWeight: 600,
+    color: "#334155"
+  };
+  if (m === "gold") return { ...base, background: "#fef3c7" };
+  if (m === "silver") return { ...base, background: "#e5e7eb" };
+  if (m === "bronze") return { ...base, background: "#fde68a" };
+  return { ...base, background: "#d1fae5" };
+};
+
+const SummaryCard = ({ label, count }) => (
+  <div style={styles.summaryCard}>
+    <FaMedal />
+    <span>{label}</span>
+    <strong>{count}</strong>
+  </div>
+);
 
 const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamResults = [], onClose }) => {
   if (!player) return null;
@@ -73,31 +97,26 @@ const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamRes
     })
     .sort((a, b) => Number(a?.year || 0) - Number(b?.year || 0));
 
-  const resultTimeline = [
-    ...matchedIndividualResults.map((row) => ({
-      year: Number(row?.year || 0),
-      event: row?.event || "-",
-      medal: row?.medal || "-",
-      type: "Individual",
-    })),
-    ...matchedTeamResults.map((row) => ({
-      year: Number(row?.year || 0),
-      event: row?.event || "-",
-      medal: row?.medal || "-",
-      type: "Team",
-    })),
-  ]
-    .filter((row) => row.year)
-    .sort((a, b) => a.year - b.year);
+  const pushUniqueEvent = (yearKey, eventName, medalValue) => {
+    if (!yearKey) return;
+    const normalizedEvent = String(eventName || "").toLowerCase().trim();
+    eventsByYear[yearKey] = eventsByYear[yearKey] || [];
+    const exists = eventsByYear[yearKey].some((e) => String(e?.name || "").toLowerCase().trim() === normalizedEvent);
+    if (exists) return;
+    eventsByYear[yearKey].push({
+      name: eventName || "-",
+      medal: medalValue || ""
+    });
+  };
 
   matchedIndividualResults.forEach((row) => {
     const yearKey = Number(row?.year || 0);
-    if (!yearKey) return;
-    eventsByYear[yearKey] = eventsByYear[yearKey] || [];
-    eventsByYear[yearKey].push({
-      name: row.event || "-",
-      medal: row.medal || ""
-    });
+    pushUniqueEvent(yearKey, row.event, row.medal);
+  });
+
+  matchedTeamResults.forEach((row) => {
+    const yearKey = Number(row?.year || 0);
+    pushUniqueEvent(yearKey, row.event, row.medal);
   });
 
   history.sort((a, b) => a.year - b.year);
@@ -109,39 +128,29 @@ const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamRes
     };
   });
 
-  const medals = { gold: 0, silver: 0, bronze: 0 };
+  const medals = { gold: 0, silver: 0, bronze: 0, participation: 0 };
   Object.values(eventsByYear)
     .flat()
     .forEach((e) => {
       const m = String(e?.medal || "").toLowerCase();
-      if (m === "gold") medals.gold++;
-      if (m === "silver") medals.silver++;
-      if (m === "bronze") medals.bronze++;
+      if (medals[m] !== undefined) {
+        medals[m] += 1;
+      } else if (!m) {
+        medals.participation += 1;
+      }
     });
-
-  const medalStatsByYear = {};
-  Object.entries(eventsByYear).forEach(([year, events]) => {
-    medalStatsByYear[year] = { gold: 0, silver: 0, bronze: 0 };
-    events.forEach((e) => {
-      const medal = String(e?.medal || "").toLowerCase();
-      if (medal === "gold") medalStatsByYear[year].gold++;
-      if (medal === "silver") medalStatsByYear[year].silver++;
-      if (medal === "bronze") medalStatsByYear[year].bronze++;
-    });
-  });
-
-  const medalTrendData = Object.keys(medalStatsByYear)
-    .sort((a, b) => Number(a) - Number(b))
-    .map((year) => ({
-      year,
-      gold: medalStatsByYear[year].gold,
-      silver: medalStatsByYear[year].silver,
-      bronze: medalStatsByYear[year].bronze,
-    }));
 
   const individualPoints = matchedIndividualResults.reduce((sum, row) => sum + getMedalPoints(row?.medal), 0);
   const teamPoints = matchedTeamResults.reduce((sum, row) => sum + getMedalPoints(row?.medal), 0);
   const performanceScore = individualPoints + teamPoints;
+  const seniorBadge = history.length >= 3 ? "Senior Player" : "Rising Player";
+  const totalParticipationsByYear = chartData.map((d) => d.participation);
+  const baseParticipation = totalParticipationsByYear[0] || 0;
+  const latestParticipation = totalParticipationsByYear.length ? totalParticipationsByYear[totalParticipationsByYear.length - 1] : 0;
+  const growthPercentage =
+    totalParticipationsByYear.length > 1 && baseParticipation > 0
+      ? (((latestParticipation - baseParticipation) / baseParticipation) * 100).toFixed(1)
+      : "0.0";
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -154,7 +163,7 @@ const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamRes
         {/* HEADER */}
         <div style={styles.header}>
           <h2 style={{ margin: 0 }}>Player Intelligence Panel</h2>
-          <FaTimes style={styles.closeBtn} onClick={onClose} />
+          <span style={styles.closeText} onClick={onClose}>Close</span>
         </div>
 
         {/* HERO */}
@@ -163,7 +172,10 @@ const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamRes
           <div>
             <h2 style={{ margin: 0 }}>{player.name}</h2>
             <p style={{ color: "#6b7280", margin: "4px 0 0" }}>{player.branch}</p>
-            <div style={styles.badge}>{history.length} Years Participation</div>
+            <div style={styles.badgeRow}>
+              <div style={styles.participationBadge}>{history.length} Years Participation</div>
+              <div style={styles.seniorBadge}>Trophy {seniorBadge}</div>
+            </div>
           </div>
         </div>
 
@@ -177,48 +189,36 @@ const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamRes
 
         {/* TIMELINE */}
         <h3 style={styles.section}>Career Timeline</h3>
-        <div style={styles.chartCard}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Year</th>
-                <th style={styles.th}>Event</th>
-                <th style={styles.th}>Medal</th>
-                <th style={styles.th}>Type</th>
-              </tr>
-            </thead>
-            <tbody>
-              {resultTimeline.length ? (
-                resultTimeline.map((row, idx) => (
-                  <tr key={`timeline-row-${row.year}-${row.event}-${idx}`}>
-                    <td style={styles.td}>{row.year}</td>
-                    <td style={styles.td}>{row.event}</td>
-                    <td style={styles.td}>{row.medal}</td>
-                    <td style={styles.td}>{row.type}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td style={styles.td} colSpan={4}>No timeline result data</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div style={styles.timelineContainer}>
+          <div style={styles.timelineLine} />
+          {history.length ? history.map((h, i) => (
+            <div key={i} style={styles.timelineItem}>
+              <div style={styles.timelineYear}>{h.year}</div>
+              <div style={styles.timelineDot} />
+              <div style={styles.timelineText}>Diploma {h.diplomaYear} Sem {h.semester}</div>
+              <div style={styles.timelineKpm}>{h.kpmNo || "-"}</div>
+            </div>
+          )) : (
+            <div style={{ color: "#64748b", padding: 20 }}>No timeline records</div>
+          )}
         </div>
 
         {/* EVENTS */}
-        <h3 style={styles.section}>Events Participated</h3>
-        <div style={styles.eventGrid}>
-          {Object.entries(eventsByYear).map(([year, events]) => (
-            <div key={year} style={styles.yearCard}>
-              <h4 style={{ marginTop: 0 }}>{year}</h4>
+        <h3 style={styles.section}>
+          Events Participated{" "}
+          <span style={{ fontWeight: 400, color: "#64748b" }}>(Karnataka State Inter-Polytechnic Meet)</span>
+        </h3>
+        <div style={styles.eventsWrapper}>
+          {Object.entries(eventsByYear).sort((a, b) => Number(a[0]) - Number(b[0])).map(([year, events]) => (
+            <div key={year} style={styles.yearColumn}>
+              <h4 style={{ margin: "0 0 10px" }}>{year}</h4>
               {events.map((e, i) => (
-                <div key={i} style={styles.eventRow}>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                    <FaRunning />
-                    {e.name}
+                <div key={i} style={styles.eventCard}>
+                  <span style={styles.dot} />
+                  <span>{e.name}</span>
+                  <span style={getEventMedalStyle(e.medal || "participation")}>
+                    {e.medal || "Participation"}
                   </span>
-                  {e.medal && <span style={styles.medal}>{e.medal}</span>}
                 </div>
               ))}
             </div>
@@ -281,53 +281,34 @@ const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamRes
 
         {/* SUMMARY */}
         <h3 style={styles.section}>Medal Summary</h3>
-        <div style={styles.summaryRow}>
-          <div style={styles.summaryCard}>
-            <FaMedal /> Gold {medals.gold}
-          </div>
-          <div style={styles.summaryCard}>
-            <FaMedal /> Silver {medals.silver}
-          </div>
-          <div style={styles.summaryCard}>
-            <FaMedal /> Bronze {medals.bronze}
-          </div>
+        <div style={styles.summaryGrid}>
+          <SummaryCard label="Gold" count={medals.gold} />
+          <SummaryCard label="Silver" count={medals.silver} />
+          <SummaryCard label="Bronze" count={medals.bronze} />
+          <SummaryCard label="Participation" count={medals.participation} />
         </div>
 
         {/* PERFORMANCE CHART */}
         <h3 style={styles.section}>Performance Chart</h3>
+        <div style={styles.growthText}>
+          +{growthPercentage}% • {latestParticipation}
+        </div>
         <div style={styles.chartCard}>
           <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={chartData}>
+            <AreaChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="year" />
               <YAxis allowDecimals={false} />
               <Tooltip />
-              <Line
+              <Area
                 type="monotone"
                 dataKey="participation"
-                stroke="#2563eb"
+                stroke="#0ea5e9"
                 strokeWidth={3}
-                dot={{ r: 5 }}
-                activeDot={{ r: 7 }}
-                animationDuration={1200}
+                fill="#bae6fd"
+                fillOpacity={0.3}
               />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* MEDAL TREND CHART */}
-        <h3 style={styles.section}>Medal Growth Trend</h3>
-        <div style={styles.chartCard}>
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={medalTrendData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="year" />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Line type="monotone" dataKey="gold" stroke="#facc15" strokeWidth={3} dot={{ r: 5 }} name="Gold" />
-              <Line type="monotone" dataKey="silver" stroke="#94a3b8" strokeWidth={3} dot={{ r: 5 }} name="Silver" />
-              <Line type="monotone" dataKey="bronze" stroke="#b45309" strokeWidth={3} dot={{ r: 5 }} name="Bronze" />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         </div>
 
@@ -381,12 +362,14 @@ const styles = {
     zIndex: 999,
   },
   modal: {
-    width: 900,
-    maxHeight: "90vh",
+    width: "95%",
+    maxWidth: "1200px",
+    height: "95vh",
     overflowY: "auto",
+    scrollbarWidth: "thin",
     background: "#f8fafc",
-    borderRadius: 12,
-    boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
+    borderRadius: 16,
+    boxShadow: "0 25px 60px rgba(0,0,0,0.35)",
   },
   header: {
     background: "linear-gradient(90deg,#2563eb,#1e40af)",
@@ -396,7 +379,11 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
   },
-  closeBtn: { cursor: "pointer" },
+  closeText: {
+    cursor: "pointer",
+    fontWeight: 500,
+    opacity: 0.9
+  },
   hero: {
     display: "flex",
     gap: 20,
@@ -404,12 +391,19 @@ const styles = {
     background: "#fff",
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
+    width: 110,
+    height: 110,
+    borderRadius: 12,
     objectFit: "cover",
   },
-  badge: {
+  badgeRow: {
+    marginTop: 8,
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    flexWrap: "wrap"
+  },
+  participationBadge: {
     marginTop: 8,
     background: "#10b981",
     color: "#fff",
@@ -417,45 +411,106 @@ const styles = {
     borderRadius: 20,
     display: "inline-block",
   },
-  section: { padding: "20px 20px 10px", margin: 0 },
-  timeline: {
-    display: "flex",
-    justifyContent: "space-around",
-    padding: 20,
-    flexWrap: "wrap",
-    gap: 12,
+  seniorBadge: {
+    background: "#e0e7ff",
+    color: "#3730a3",
+    padding: "4px 10px",
+    borderRadius: 20,
+    fontWeight: 600,
+    fontSize: 12
   },
-  timelineItem: { textAlign: "center", minWidth: 130 },
-  dot: {
+  section: { padding: "20px 20px 10px", margin: 0 },
+  timelineContainer: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: 20,
+    gap: 10,
+    flexWrap: "wrap",
+    position: "relative"
+  },
+  timelineLine: {
+    position: "absolute",
+    top: 48,
+    left: 40,
+    right: 40,
+    height: 2,
+    background: "#cbd5e1",
+    zIndex: 0
+  },
+  timelineItem: {
+    textAlign: "center",
+    flex: 1,
+    minWidth: 140,
+    position: "relative",
+    zIndex: 1
+  },
+  timelineYear: {
+    background: "#e5e7eb",
+    padding: "4px 12px",
+    borderRadius: 20,
+    display: "inline-block",
+    fontWeight: 600
+  },
+  timelineDot: {
     width: 10,
     height: 10,
     background: "#2563eb",
     borderRadius: "50%",
-    margin: "0 auto 6px",
+    margin: "10px auto"
   },
-  eventGrid: {
+  timelineText: {
+    fontSize: 13,
+    color: "#475569"
+  },
+  timelineKpm: {
+    fontWeight: "bold",
+    fontSize: 18,
+    color: "#0f172a",
+    marginTop: 6
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    background: "#2563eb",
+    borderRadius: "50%",
+    marginRight: 8,
+    flexShrink: 0
+  },
+  eventsWrapper: {
     display: "grid",
-    gridTemplateColumns: "repeat(3,1fr)",
-    gap: 20,
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: 14,
     padding: 20,
   },
-  yearCard: { background: "#fff", padding: 12, borderRadius: 8 },
-  eventRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 6,
-    gap: 8,
+  yearColumn: {
+    background: "#ffffff",
+    border: "1px solid #e2e8f0",
+    borderRadius: 10,
+    padding: 12
   },
-  medal: { background: "#facc15", padding: "2px 6px", borderRadius: 4 },
+  eventCard: {
+    display: "flex",
+    alignItems: "center",
+    marginBottom: 8,
+    gap: 8,
+    fontSize: 14
+  },
   summaryRow: { display: "flex", gap: 10, padding: 20, flexWrap: "wrap" },
+  summaryGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+    gap: 10,
+    padding: "0 20px 20px"
+  },
   summaryCard: {
     background: "#fff",
-    padding: 10,
+    padding: 12,
     borderRadius: 8,
     display: "flex",
     gap: 6,
     alignItems: "center",
+    justifyContent: "space-between",
+    border: "1px solid #e2e8f0"
   },
   chartCard: {
     background: "#fff",
@@ -463,6 +518,12 @@ const styles = {
     padding: 20,
     borderRadius: 10,
     boxShadow: "0 4px 12px rgba(0,0,0,0.08)"
+  },
+  growthText: {
+    textAlign: "right",
+    paddingRight: 20,
+    fontWeight: "bold",
+    color: "#059669"
   },
   scoreCard: {
     background: "linear-gradient(135deg,#2563eb,#1e40af)",
@@ -478,9 +539,24 @@ const styles = {
     fontWeight: "bold",
     marginBottom: 5
   },
-  table: { width: "100%", background: "#fff", borderCollapse: "collapse" },
-  th: { textAlign: "left", padding: "10px 12px", borderBottom: "1px solid #e5e7eb" },
-  td: { padding: "10px 12px", borderBottom: "1px solid #f1f5f9" },
+  table: {
+    width: "100%",
+    background: "#fff",
+    borderCollapse: "separate",
+    borderSpacing: 0,
+    fontSize: 15
+  },
+  th: {
+    textAlign: "left",
+    padding: "14px 18px",
+    background: "#f1f5f9",
+    fontWeight: 600,
+    borderBottom: "2px solid #e2e8f0"
+  },
+  td: {
+    padding: "14px 18px",
+    borderBottom: "1px solid #e5e7eb"
+  },
 };
 
 export default PlayerIntelligencePanel;
