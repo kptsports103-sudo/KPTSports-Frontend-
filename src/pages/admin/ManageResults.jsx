@@ -929,8 +929,11 @@ const ManageResults = () => {
                         (item.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                         (item.event || '').toLowerCase().includes(searchTerm.toLowerCase())
                       )
-                      .sort((a, b) => (medalPriority[a.medal] || 999) - (medalPriority[b.medal] || 999))
-                      .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'en', { sensitivity: 'base' }))
+                      .sort((a, b) => {
+                        const byName = (a.name || '').localeCompare(b.name || '', 'en', { sensitivity: 'base' });
+                        if (byName !== 0) return byName;
+                        return (medalPriority[a.medal] || 999) - (medalPriority[b.medal] || 999);
+                      })
                       .map(item => (
                       <tr
                         key={item._id}
