@@ -84,6 +84,7 @@ const ManageResults = () => {
   const [loadingResultsActivity, setLoadingResultsActivity] = useState(false);
   const [groupMemberSelection, setGroupMemberSelection] = useState({});
   const [playerIntelligence, setPlayerIntelligence] = useState(null);
+  const [groupIntelligence, setGroupIntelligence] = useState(null);
 
   // Check authentication on component mount
   useEffect(() => {
@@ -938,6 +939,64 @@ const ManageResults = () => {
     });
   };
 
+  const handleOpenGroupIntelligence = (item) => {
+    if (!item) return;
+
+    const normalizedTeamName = normalizeName(item.teamName || '');
+    const allGroupResults = groupData.flatMap((yearBlock) => yearBlock.results || []);
+    const matchedResults = allGroupResults
+      .filter((row) => {
+        const teamNameMatch = normalizedTeamName && normalizeName(row.teamName) === normalizedTeamName;
+        const idMatch = item._id && row._id && String(item._id) === String(row._id);
+        return teamNameMatch || idMatch;
+      })
+      .sort((a, b) => Number(a.year || 0) - Number(b.year || 0));
+
+    const eventsParticipated = matchedResults.map((row) => ({
+      year: Number(row.year || 0),
+      event: row.event || '-',
+      medal: row.medal || ''
+    }));
+
+    const medalSummary = {
+      Gold: 0,
+      Silver: 0,
+      Bronze: 0,
+      Participation: 0
+    };
+
+    eventsParticipated.forEach((entry) => {
+      const medal = String(entry.medal || '').trim();
+      if (medalSummary[medal] !== undefined) medalSummary[medal] += 1;
+    });
+
+    const performanceScore =
+      (medalSummary.Gold * 5) +
+      (medalSummary.Silver * 3) +
+      (medalSummary.Bronze * 1) +
+      (medalSummary.Participation * 0);
+
+    const timeline = matchedResults.map((row) => ({
+      year: Number(row.year || 0),
+      event: row.event || '-',
+      medal: row.medal || '-'
+    }));
+
+    const imageUrl =
+      item.imageUrl ||
+      matchedResults.find((row) => row.imageUrl)?.imageUrl ||
+      '';
+
+    setGroupIntelligence({
+      teamName: item.teamName || 'Team',
+      imageUrl,
+      eventsParticipated,
+      medalSummary,
+      performanceScore,
+      timeline
+    });
+  };
+
   /* ================= FILTERED DATA ================= */
   const availableYears = Array.from(
     new Set([
@@ -1151,7 +1210,7 @@ const ManageResults = () => {
               </div>
 
               {/* ================= GROUP RESULTS ================= */}
-              <h4 style={{ marginTop: 20, fontSize: 16, fontWeight: 600, color: '#fff' }}>🧑‍🤝‍🧑 Group / Team Results</h4>
+              <h4 style={{ marginTop: 20, fontSize: 16, fontWeight: 600, color: '#111827' }}>🧑‍🤝‍🧑 Group / Team Results</h4>
 
               <div style={styles.tableContainer}>
                 <table style={styles.table}>
@@ -1225,6 +1284,13 @@ const ManageResults = () => {
                           </td>
                           <td style={styles.cell}>
                             <div style={styles.leftIconGroup}>
+                              <button
+                                type="button"
+                                style={styles.intelligenceBtn}
+                                onClick={() => handleOpenGroupIntelligence(item)}
+                              >
+                                Group Intelligence
+                              </button>
                               <img
                                 src="/Edit button.png"
                                 alt="Edit"
@@ -1339,6 +1405,105 @@ const ManageResults = () => {
                           <td style={styles.intelligenceTd}>{entry.diplomaYear || '-'}</td>
                           <td style={styles.intelligenceTd}>{entry.semester || '-'}</td>
                           <td style={styles.intelligenceTd}>{entry.kpmNo || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p style={{ margin: 0, color: '#6b7280' }}>No timeline records found.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {groupIntelligence ? (
+          <div style={styles.intelligenceOverlay} onClick={() => setGroupIntelligence(null)}>
+            <div style={styles.intelligenceModal} onClick={(e) => e.stopPropagation()}>
+              <div style={styles.intelligenceHeader}>
+                <h3 style={{ margin: 0 }}>Group Intelligence</h3>
+                <button
+                  type="button"
+                  style={styles.intelligenceClose}
+                  onClick={() => setGroupIntelligence(null)}
+                >
+                  Close
+                </button>
+              </div>
+
+              <div style={styles.intelligenceHero}>
+                <img
+                  src={groupIntelligence.imageUrl || '/default-avatar.png'}
+                  alt={groupIntelligence.teamName || 'Group'}
+                  style={styles.intelligenceImage}
+                />
+                <div>
+                  <h4 style={{ margin: '0 0 6px', color: '#111827' }}>{groupIntelligence.teamName || '-'}</h4>
+                  <p style={{ margin: 0, color: '#4b5563' }}>
+                    Group / Team Results Intelligence
+                  </p>
+                </div>
+              </div>
+
+              <div style={styles.intelligenceGrid}>
+                <div style={styles.intelligenceCard}>
+                  <h4 style={styles.intelligenceSectionTitle}>Medal Summary</h4>
+                  <p style={styles.intelligenceLine}>Gold: {groupIntelligence.medalSummary.Gold}</p>
+                  <p style={styles.intelligenceLine}>Silver: {groupIntelligence.medalSummary.Silver}</p>
+                  <p style={styles.intelligenceLine}>Bronze: {groupIntelligence.medalSummary.Bronze}</p>
+                  <p style={styles.intelligenceLine}>Participation: {groupIntelligence.medalSummary.Participation}</p>
+                </div>
+
+                <div style={styles.intelligenceCard}>
+                  <h4 style={styles.intelligenceSectionTitle}>Performance Score</h4>
+                  <p style={styles.intelligenceScoreValue}>{groupIntelligence.performanceScore}</p>
+                  <p style={{ margin: 0, color: '#4b5563', fontSize: 12 }}>Score = 5*Gold + 3*Silver + 1*Bronze</p>
+                </div>
+              </div>
+
+              <div style={styles.intelligenceCard}>
+                <h4 style={styles.intelligenceSectionTitle}>Events Participated</h4>
+                {groupIntelligence.eventsParticipated.length ? (
+                  <table style={styles.intelligenceTable}>
+                    <thead>
+                      <tr>
+                        <th style={styles.intelligenceTh}>Year</th>
+                        <th style={styles.intelligenceTh}>Event</th>
+                        <th style={styles.intelligenceTh}>Medal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {groupIntelligence.eventsParticipated.map((entry, idx) => (
+                        <tr key={`${entry.year}-${entry.event}-${idx}`}>
+                          <td style={styles.intelligenceTd}>{entry.year || '-'}</td>
+                          <td style={styles.intelligenceTd}>{entry.event || '-'}</td>
+                          <td style={styles.intelligenceTd}>{entry.medal || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p style={{ margin: 0, color: '#6b7280' }}>No event records found.</p>
+                )}
+              </div>
+
+              <div style={styles.intelligenceCard}>
+                <h4 style={styles.intelligenceSectionTitle}>Career Timeline</h4>
+                {groupIntelligence.timeline.length ? (
+                  <table style={styles.intelligenceTable}>
+                    <thead>
+                      <tr>
+                        <th style={styles.intelligenceTh}>Year</th>
+                        <th style={styles.intelligenceTh}>Event</th>
+                        <th style={styles.intelligenceTh}>Medal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {groupIntelligence.timeline.map((entry, idx) => (
+                        <tr key={`group-timeline-${entry.year}-${idx}`}>
+                          <td style={styles.intelligenceTd}>{entry.year || '-'}</td>
+                          <td style={styles.intelligenceTd}>{entry.event || '-'}</td>
+                          <td style={styles.intelligenceTd}>{entry.medal || '-'}</td>
                         </tr>
                       ))}
                     </tbody>

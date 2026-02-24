@@ -11,7 +11,9 @@ import {
   CartesianGrid
 } from "recharts";
 
-const PlayerIntelligencePanel = ({ player, data, onClose }) => {
+const normalizeName = (name) => String(name || "").toLowerCase().trim().replace(/\s+/g, " ");
+
+const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamResults = [], onClose }) => {
   if (!player) return null;
 
   const history = [];
@@ -31,6 +33,46 @@ const PlayerIntelligencePanel = ({ player, data, onClose }) => {
       if (Array.isArray(p.events) && p.events.length > 0) {
         eventsByYear[yearBlock.year] = p.events;
       }
+    });
+  });
+
+  const matchedIndividualResults = (individualResults || [])
+    .filter((row) => {
+      const playerMasterId = String(player.masterId || player.id || "").trim();
+      const rowMasterId = String(row.playerMasterId || row.playerId || "").trim();
+      if (playerMasterId && rowMasterId && playerMasterId === rowMasterId) return true;
+      return normalizeName(row.name) === normalizeName(player.name);
+    })
+    .sort((a, b) => Number(a?.year || 0) - Number(b?.year || 0));
+
+  const matchedTeamResults = (teamResults || [])
+    .filter((groupRow) => {
+      const playerMasterId = String(player.masterId || player.id || "").trim();
+
+      const memberMasterIds = Array.isArray(groupRow?.memberMasterIds) ? groupRow.memberMasterIds : [];
+      const memberIds = Array.isArray(groupRow?.memberIds) ? groupRow.memberIds : [];
+      if (playerMasterId && [...memberMasterIds, ...memberIds].map((id) => String(id)).includes(playerMasterId)) {
+        return true;
+      }
+
+      const members = Array.isArray(groupRow?.members) ? groupRow.members : [];
+      return members.some((member) => {
+        if (!member) return false;
+        if (typeof member === "string") return normalizeName(member) === normalizeName(player.name);
+        const memberMasterId = String(member.playerMasterId || member.playerId || member.masterId || "").trim();
+        if (playerMasterId && memberMasterId && playerMasterId === memberMasterId) return true;
+        return normalizeName(member.name) === normalizeName(player.name);
+      });
+    })
+    .sort((a, b) => Number(a?.year || 0) - Number(b?.year || 0));
+
+  matchedIndividualResults.forEach((row) => {
+    const yearKey = Number(row?.year || 0);
+    if (!yearKey) return;
+    eventsByYear[yearKey] = eventsByYear[yearKey] || [];
+    eventsByYear[yearKey].push({
+      name: row.event || "-",
+      medal: row.medal || ""
     });
   });
 
@@ -96,12 +138,20 @@ const PlayerIntelligencePanel = ({ player, data, onClose }) => {
 
         {/* HERO */}
         <div style={styles.hero}>
-          <img src={player.image || "/default-avatar.png"} style={styles.avatar} alt="" />
+          <img src={player.image || matchedIndividualResults.find((row) => row?.imageUrl)?.imageUrl || "/default-avatar.png"} style={styles.avatar} alt="" />
           <div>
             <h2 style={{ margin: 0 }}>{player.name}</h2>
             <p style={{ color: "#6b7280", margin: "4px 0 0" }}>{player.branch}</p>
             <div style={styles.badge}>{history.length} Years Participation</div>
           </div>
+        </div>
+
+        <h3 style={styles.section}>Player Details</h3>
+        <div style={styles.summaryRow}>
+          <div style={styles.summaryCard}><b>KPM No:</b> {player.kpmNo || "-"}</div>
+          <div style={styles.summaryCard}><b>Name:</b> {player.name || "-"}</div>
+          <div style={styles.summaryCard}><b>Branch:</b> {player.branch || "-"}</div>
+          <div style={styles.summaryCard}><b>Diploma Year:</b> {player.diplomaYear || "-"}</div>
         </div>
 
         {/* TIMELINE */}
@@ -136,6 +186,60 @@ const PlayerIntelligencePanel = ({ player, data, onClose }) => {
               ))}
             </div>
           ))}
+        </div>
+
+        <h3 style={styles.section}>Individual Results</h3>
+        <div style={styles.chartCard}>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Year</th>
+                <th style={styles.th}>Event</th>
+                <th style={styles.th}>Medal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {matchedIndividualResults.length ? matchedIndividualResults.map((row, idx) => (
+                <tr key={`individual-${row._id || idx}`}>
+                  <td style={styles.td}>{row.year || "-"}</td>
+                  <td style={styles.td}>{row.event || "-"}</td>
+                  <td style={styles.td}>{row.medal || "-"}</td>
+                </tr>
+              )) : (
+                <tr>
+                  <td style={styles.td} colSpan={3}>No individual results</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style={styles.section}>Team Results</h3>
+        <div style={styles.chartCard}>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Year</th>
+                <th style={styles.th}>Team</th>
+                <th style={styles.th}>Event</th>
+                <th style={styles.th}>Medal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {matchedTeamResults.length ? matchedTeamResults.map((row, idx) => (
+                <tr key={`team-${row._id || idx}`}>
+                  <td style={styles.td}>{row.year || "-"}</td>
+                  <td style={styles.td}>{row.teamName || "-"}</td>
+                  <td style={styles.td}>{row.event || "-"}</td>
+                  <td style={styles.td}>{row.medal || "-"}</td>
+                </tr>
+              )) : (
+                <tr>
+                  <td style={styles.td} colSpan={4}>No team results</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
         {/* SUMMARY */}

@@ -6,6 +6,8 @@ import PlayerIntelligencePanel from './PlayerIntelligencePanel';
 
 const PlayerIntelligence = () => {
   const [data, setData] = useState([]);
+  const [individualResults, setIndividualResults] = useState([]);
+  const [teamResults, setTeamResults] = useState([]);
   const [selectedYear, setSelectedYear] = useState("all");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -28,8 +30,13 @@ const PlayerIntelligence = () => {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const res = await api.get('/home/players');
-        const grouped = res.data;
+        const [playersRes, individualRes, groupRes] = await Promise.all([
+          api.get('/home/players'),
+          api.get('/results'),
+          api.get('/group-results')
+        ]);
+
+        const grouped = playersRes.data;
         const dataArray = Object.keys(grouped).map(year => ({
           year: parseInt(year),
           players: grouped[year].map(p => ({
@@ -53,6 +60,9 @@ const PlayerIntelligence = () => {
         } else if (years.length > 0) {
           setSelectedYear(String(Math.max(...years)));
         }
+
+        setIndividualResults(Array.isArray(individualRes?.data) ? individualRes.data : []);
+        setTeamResults(Array.isArray(groupRes?.data) ? groupRes.data : []);
       } catch (error) {
         console.error('Error fetching players:', error);
       }
@@ -128,6 +138,74 @@ const PlayerIntelligence = () => {
   };
 
   const tableStyles = {
+    pageShell: {
+      background: "linear-gradient(180deg, #f8fbff 0%, #f1f5f9 100%)",
+      border: "1px solid #dbeafe",
+      borderRadius: "16px",
+      padding: "18px",
+      boxShadow: "0 12px 30px rgba(15, 23, 42, 0.08)",
+    },
+    headerPanel: {
+      textAlign: "center",
+      fontSize: "20px",
+      fontWeight: 700,
+      marginBottom: "14px",
+      color: "#0f172a",
+      background: "linear-gradient(90deg, #dbeafe, #e0f2fe)",
+      border: "1px solid #bfdbfe",
+      borderRadius: "10px",
+      padding: "12px 16px",
+      boxShadow: "0 6px 16px rgba(37, 99, 235, 0.12)",
+    },
+    filterCard: {
+      background: "#ffffff",
+      border: "1px solid #e2e8f0",
+      borderRadius: "12px",
+      padding: "12px",
+      marginBottom: "14px",
+      boxShadow: "0 8px 20px rgba(15, 23, 42, 0.05)",
+      position: "sticky",
+      top: 0,
+      zIndex: 3,
+    },
+    selectBox: {
+      height: "42px",
+      border: "1px solid #cbd5e1",
+      borderRadius: "10px",
+      background: "#f8fafc",
+      color: "#0f172a",
+      fontSize: "14px",
+      fontWeight: 600,
+      padding: "0 12px",
+      minWidth: "130px",
+    },
+    searchBox: {
+      flex: 1,
+      minWidth: "260px",
+      height: "42px",
+      border: "1px solid #cbd5e1",
+      borderRadius: "10px",
+      background: "#ffffff",
+      color: "#0f172a",
+      fontSize: "14px",
+      padding: "0 14px",
+      outline: "none",
+    },
+    statsCard: {
+      background: "linear-gradient(135deg, #dbeafe, #eff6ff)",
+      border: "1px solid #93c5fd",
+      borderRadius: "10px",
+      padding: "10px 14px",
+      minWidth: "160px",
+      textAlign: "center",
+    },
+    tableShell: {
+      border: "1px solid #dbe3ef",
+      borderRadius: "12px",
+      overflow: "hidden",
+      background: "#ffffff",
+      boxShadow: "0 10px 24px rgba(15, 23, 42, 0.06)",
+    },
     table: {
       width: "100%",
       backgroundColor: "#ffffff",
@@ -187,22 +265,10 @@ const PlayerIntelligence = () => {
   };
 
   return (
-    <div className="player-intelligence">
+    <div className="player-intelligence" style={tableStyles.pageShell}>
       {/* Header */}
       <div className="mb-6">
-        <div
-          style={{
-            textAlign: "center",
-            fontSize: "20px",
-            fontWeight: 700,
-            marginBottom: "10px",
-            color: "#0f172a",
-            background: "linear-gradient(90deg, #dbeafe, #e0f2fe)",
-            border: "1px solid #bfdbfe",
-            borderRadius: "8px",
-            padding: "10px 14px",
-          }}
-        >
+        <div style={tableStyles.headerPanel}>
           KPT Sports Player Intelligence
         </div>
         <h2 className="text-3xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
@@ -215,7 +281,7 @@ const PlayerIntelligence = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex flex-wrap gap-4 mb-6 items-center" style={tableStyles.filterCard}>
         {/* Year Filter */}
         <label htmlFor="player-intelligence-year" style={srOnlyStyle}>
           Filter players by year
@@ -225,7 +291,7 @@ const PlayerIntelligence = () => {
           name="player-intelligence-year"
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          style={tableStyles.selectBox}
         >
           <option value="all">All Years</option>
           {availableYears.map(year => (
@@ -244,12 +310,12 @@ const PlayerIntelligence = () => {
           placeholder="Search by name, KPM No, department..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          className="flex-1 min-w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          style={tableStyles.searchBox}
         />
 
         {/* Stats */}
         <div className="flex gap-4 items-center">
-          <div className="bg-blue-50 px-4 py-2 rounded-lg">
+          <div style={tableStyles.statsCard}>
             <span className="text-blue-700 font-medium">Total Players: </span>
             <span className="text-blue-900 font-bold">{allPlayers.length}</span>
           </div>
@@ -257,7 +323,7 @@ const PlayerIntelligence = () => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" style={tableStyles.tableShell}>
         <table style={tableStyles.table}>
           <thead style={tableStyles.stickyHeader}>
             <tr style={tableStyles.headerRow}>
@@ -329,21 +395,58 @@ const PlayerIntelligence = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-6">
+        <div
+          className="flex justify-center items-center gap-2 mt-6"
+          style={{
+            background: "#ffffff",
+            border: "1px solid #dbe3ef",
+            borderRadius: "10px",
+            padding: "10px 12px",
+          }}
+        >
           <button
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            style={{
+              minWidth: "90px",
+              height: "38px",
+              border: "1px solid #cbd5e1",
+              borderRadius: "8px",
+              background: currentPage === 1 ? "#f1f5f9" : "#eff6ff",
+              color: "#1e3a8a",
+              fontWeight: 600,
+              cursor: currentPage === 1 ? "not-allowed" : "pointer",
+              opacity: currentPage === 1 ? 0.6 : 1,
+            }}
           >
             Previous
           </button>
-          <span className="px-4 py-2 text-sm text-gray-600">
+          <span
+            className="px-4 py-2 text-sm text-gray-600"
+            style={{
+              border: "1px solid #dbe3ef",
+              borderRadius: "8px",
+              background: "#f8fafc",
+              color: "#334155",
+              fontWeight: 600,
+            }}
+          >
             Page {currentPage} of {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            style={{
+              minWidth: "90px",
+              height: "38px",
+              border: "1px solid #cbd5e1",
+              borderRadius: "8px",
+              background: currentPage === totalPages ? "#f1f5f9" : "#eff6ff",
+              color: "#1e3a8a",
+              fontWeight: 600,
+              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+              opacity: currentPage === totalPages ? 0.6 : 1,
+            }}
           >
             Next
           </button>
@@ -355,6 +458,8 @@ const PlayerIntelligence = () => {
         <PlayerIntelligencePanel
           player={selectedPlayer}
           data={data}
+          individualResults={individualResults}
+          teamResults={teamResults}
           onClose={closeModal}
         />
       )}
