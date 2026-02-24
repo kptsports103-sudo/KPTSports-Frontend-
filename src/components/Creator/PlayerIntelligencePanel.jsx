@@ -156,39 +156,70 @@ const EventsSection = ({ history, eventsByYear }) => (
   </div>
 );
 
-const KpmHistory = ({ history }) => (
-  <div>
-    <h3 style={styles.h3}>KPM History</h3>
-    <div style={styles.card}>
-      <table style={styles.table}>
-        <thead>
-          <tr>
-            <th style={styles.th}>Year</th>
-            <th style={styles.th}>KPM No</th>
-            <th style={styles.th}>Diploma</th>
-          </tr>
-        </thead>
-        <tbody>
-          {history.map((h, i) => (
-            <tr key={`kpm-row-${i}`}>
-              <td style={styles.td}>{h.year}</td>
-              <td style={styles.td}>{h.kpmNo}</td>
-              <td style={styles.td}>{h.diplomaYear}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+const KpmHistory = ({ history }) => {
+  const [hoveredRow, setHoveredRow] = useState(null);
 
-    <div style={styles.kpmChips}>
-      {history.map((h, i) => (
-        <div key={`kpm-chip-${i}`} style={styles.chip}>
-          {h.year} <span>{h.kpmNo}</span>
-        </div>
-      ))}
+  return (
+    <div>
+      <h3 style={styles.h3}>KPM History</h3>
+      <div style={styles.card}>
+        <table style={styles.table}>
+          <thead>
+            <tr>
+              <th style={styles.th}>Year</th>
+              <th style={styles.th}>KPM No</th>
+              <th style={styles.th}>Diploma</th>
+            </tr>
+          </thead>
+          <tbody>
+            {history.map((h, i) => {
+              const isHovered = hoveredRow === i;
+              return (
+                <motion.tr
+                  key={`kpm-row-${i}`}
+                  initial={{ backgroundColor: "transparent" }}
+                  whileHover={{
+                    backgroundColor: "#e2e8f0",
+                    y: -2,
+                    boxShadow: "0 6px 14px rgba(15,23,42,0.08)"
+                  }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  style={{ cursor: "pointer" }}
+                  onHoverStart={() => setHoveredRow(i)}
+                  onHoverEnd={() => setHoveredRow(null)}
+                >
+                  <td colSpan={3} style={{ padding: 0 }}>
+                    <div
+                      style={{
+                        ...styles.rowWrapper,
+                        ...(i === history.length - 1 ? { borderBottom: "none" } : {})
+                      }}
+                    >
+                      <div style={{ ...styles.rowAccent, opacity: isHovered ? 1 : 0 }} />
+                      <div style={styles.rowContent}>
+                        <div style={styles.cell}>{h.year}</div>
+                        <div style={styles.cell}>{h.kpmNo}</div>
+                        <div style={styles.cell}>{h.diplomaYear}</div>
+                      </div>
+                    </div>
+                  </td>
+                </motion.tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={styles.kpmChips}>
+        {history.map((h, i) => (
+          <div key={`kpm-chip-${i}`} style={styles.chip}>
+            {h.year} <span>{h.kpmNo}</span>
+          </div>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const MedalSummary = ({ medals }) => (
   <div>
@@ -544,14 +575,15 @@ const styles = {
   dashboard: {
     display: "grid",
     gridTemplateColumns: "1fr 1.5fr",
-    gap: 30,
-    padding: 30
+    gap: 40,
+    padding: "40px 30px"
   },
   card: {
-    background: "#fff",
-    padding: 20,
-    borderRadius: 12,
-    border: "1px solid #e2e8f0"
+    background: "#f1f5f9",
+    padding: "22px 24px",
+    borderRadius: 18,
+    border: "1px solid #e2e8f0",
+    boxShadow: "0 4px 12px rgba(15,23,42,0.04)"
   },
   table: {
     width: "100%",
@@ -559,13 +591,43 @@ const styles = {
   },
   th: {
     textAlign: "left",
-    padding: "10px 12px",
-    borderBottom: "2px solid #e2e8f0"
+    padding: "14px 16px",
+    borderBottom: "2px solid #cbd5e1",
+    fontWeight: 700,
+    fontSize: 15,
+    color: "#0f172a"
   },
   td: {
     textAlign: "left",
-    padding: "10px 12px",
-    borderBottom: "1px solid #e2e8f0"
+    padding: "16px",
+    borderBottom: "1px solid #cbd5e1",
+    fontSize: 15,
+    color: "#1e293b",
+    transition: "all 0.2s ease"
+  },
+  rowWrapper: {
+    display: "flex",
+    alignItems: "stretch",
+    width: "100%",
+    borderBottom: "1px solid #cbd5e1"
+  },
+  rowAccent: {
+    width: 4,
+    background: "#2563eb",
+    borderTopLeftRadius: 6,
+    borderBottomLeftRadius: 6,
+    opacity: 0,
+    transition: "opacity 0.2s ease"
+  },
+  rowContent: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr 1fr",
+    width: "100%",
+    padding: "16px"
+  },
+  cell: {
+    fontSize: 15,
+    color: "#1e293b"
   },
   kpmChips: {
     marginTop: 14,
@@ -574,13 +636,16 @@ const styles = {
     flexWrap: "wrap"
   },
   chip: {
-    background: "#dbeafe",
-    color: "#1e3a8a",
+    background: "#e2e8f0",
+    color: "#0f172a",
     borderRadius: 999,
-    padding: "6px 12px",
+    padding: "10px 18px",
     fontWeight: 600,
+    fontSize: 14,
     display: "inline-flex",
-    gap: 8
+    alignItems: "center",
+    gap: 10,
+    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.04)"
   },
   medalGrid: {
     display: "grid",
@@ -663,4 +728,3 @@ const styles = {
 };
 
 export default PlayerIntelligencePanel;
-
