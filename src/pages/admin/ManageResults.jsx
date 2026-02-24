@@ -5,12 +5,20 @@ import AdminLayout from './AdminLayout';
 import { confirmAction, notify } from '../../utils/notify';
 import PageLatestChangeCard from '../../components/PageLatestChangeCard';
 
-const MEDALS = ['Gold', 'Silver', 'Bronze'];
+const MEDALS = ['Gold', 'Silver', 'Bronze', 'Participation'];
 
 const medalPriority = {
   Gold: 1,
   Silver: 2,
-  Bronze: 3
+  Bronze: 3,
+  Participation: 4
+};
+
+const getMedalStyle = (medal, styles) => {
+  if (medal === 'Gold') return styles.goldMedal;
+  if (medal === 'Silver') return styles.silverMedal;
+  if (medal === 'Bronze') return styles.bronzeMedal;
+  return styles.participationMedal;
 };
 
 const normalizeName = (name) => {
@@ -42,7 +50,6 @@ const ManageResults = () => {
   const [playersById, setPlayersById] = useState({});
   const [playersByYear, setPlayersByYear] = useState({});
   const [bulkRows, setBulkRows] = useState([]);
-  const [bulkImageUrl, setBulkImageUrl] = useState('');
 
   const [isEditing, setIsEditing] = useState(false);
   const [isGroupEditing, setIsGroupEditing] = useState(false);
@@ -75,6 +82,7 @@ const ManageResults = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [resultsActivityLogs, setResultsActivityLogs] = useState([]);
   const [loadingResultsActivity, setLoadingResultsActivity] = useState(false);
+  const [groupMemberSelection, setGroupMemberSelection] = useState({});
 
   // Check authentication on component mount
   useEffect(() => {
@@ -378,16 +386,6 @@ const ManageResults = () => {
     setBulkRows(rows);
   };
 
-  const applyImageToSelected = () => {
-    if (!String(bulkImageUrl || '').trim()) return;
-    setBulkRows((prev) =>
-      prev.map((row) => ({
-        ...row,
-        imageUrl: row.selected ? String(bulkImageUrl || '').trim() : row.imageUrl
-      }))
-    );
-  };
-
   const handleBulkRowChange = (index, key, value) => {
     setBulkRows(prev => prev.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
   };
@@ -599,6 +597,41 @@ const ManageResults = () => {
     });
     setEditingGroupId(item._id);
     setIsGroupEditing(true);
+    setGroupMemberSelection({});
+  };
+
+  const getGroupYearPlayers = () => {
+    const yearKey = String(groupForm.year || selectedYear || '');
+    return (playersByYear[yearKey] || []).slice();
+  };
+
+  const handleSelectAllGroupPlayers = (checked) => {
+    const yearPlayers = getGroupYearPlayers();
+    const next = {};
+    yearPlayers.forEach((p) => {
+      next[p.masterId] = checked;
+    });
+    setGroupMemberSelection(next);
+  };
+
+  const applySelectedPlayersToTeam = () => {
+    const yearPlayers = getGroupYearPlayers();
+    const selectedPlayers = yearPlayers.filter((p) => !!groupMemberSelection[p.masterId]);
+
+    if (!selectedPlayers.length) {
+      alert('Please select at least one player.');
+      return;
+    }
+
+    setGroupForm((prev) => ({
+      ...prev,
+      manualMembers: selectedPlayers.map((p) => ({
+        name: p.name || '',
+        branch: p.branch || '',
+        diplomaYear: String(p.diplomaYear || ''),
+        semester: String(p.semester || '')
+      }))
+    }));
   };
 
   const handleGroupSubmit = async (e) => {
@@ -793,7 +826,6 @@ const ManageResults = () => {
     setForm({ name: '', playerMasterId: '', branch: '', kpmNo: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
     setEditingId(null);
     setBulkRows([]);
-    setBulkImageUrl('');
   };
 
   /* ================= FILTERED DATA ================= */
@@ -876,8 +908,8 @@ const ManageResults = () => {
               <button onClick={startIndividualBulkEntry} style={styles.topBtnPrimary}>
                 ➕ Individual Result
               </button>
-              <button onClick={() => setIsGroupEditing(true)} style={styles.topBtnSecondary}>
-                🧑‍🤝‍🧑 Team Result
+              <button onClick={() => setIsGroupEditing(true)} style={styles.topBtnPrimary}>
+                ➕ Team Result
               </button>
             </>
           ) : (
@@ -963,8 +995,7 @@ const ManageResults = () => {
                         <td style={styles.cell}>
                           <span style={{
                             ...styles.medalBadge,
-                            ...(item.medal === 'Gold' ? styles.goldMedal :
-                              item.medal === 'Silver' ? styles.silverMedal : styles.bronzeMedal)
+                            ...getMedalStyle(item.medal, styles)
                           }}>
                             {item.medal}
                           </span>
@@ -1063,11 +1094,7 @@ const ManageResults = () => {
                           <td style={styles.cell}>
                             <span style={{
                               ...styles.medalBadge,
-                              ...(item.medal === 'Gold'
-                                ? styles.goldMedal
-                                : item.medal === 'Silver'
-                                ? styles.silverMedal
-                                : styles.bronzeMedal)
+                              ...getMedalStyle(item.medal, styles)
                             }}>
                               {item.medal || ''}
                             </span>
@@ -1169,23 +1196,6 @@ const ManageResults = () => {
             </form>
           ) : (
             <form onSubmit={handleBulkSubmit}>
-              <div style={{ marginBottom: 12, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                <input
-                  style={{ ...styles.input, width: 220 }}
-                  id="bulk-common-image-url"
-                  name="bulk-common-image-url"
-                  placeholder="Common Image URL"
-                  value={bulkImageUrl}
-                  onChange={(e) => setBulkImageUrl(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={applyImageToSelected}
-                  style={{ ...styles.topBtnPrimary, padding: '10px 16px' }}
-                >
-                  Apply To Selected Players
-                </button>
-              </div>
               <table style={styles.table}>
                 <thead>
                   <tr style={styles.headerRow}>
@@ -1393,7 +1403,10 @@ const ManageResults = () => {
                       name="group-year"
                       style={styles.select}
                       value={groupForm.year}
-                      onChange={e => setGroupForm({ ...groupForm, year: e.target.value })}
+                      onChange={e => {
+                        setGroupForm({ ...groupForm, year: e.target.value });
+                        setGroupMemberSelection({});
+                      }}
                     >
                       <option value="">Select Year</option>
                       {availableYears.map(y => (
@@ -1428,6 +1441,51 @@ const ManageResults = () => {
                 <tr style={styles.bodyRow}>
                   <td style={styles.cell} colSpan={5}>
                     <div>
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={{ display: 'flex', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectAllGroupPlayers(true)}
+                            style={styles.topBtnSecondary}
+                          >
+                            Select All Names
+                          </button>
+                          <button
+                            type="button"
+                            onClick={applySelectedPlayersToTeam}
+                            style={styles.topBtnPrimary}
+                          >
+                            Apply To Selected Players
+                          </button>
+                        </div>
+                        <div style={{ maxHeight: 180, overflowY: 'auto', border: '1px solid #e5e7eb', borderRadius: 8, padding: 8 }}>
+                          {getGroupYearPlayers().length === 0 ? (
+                            <div style={{ color: '#6b7280', fontSize: 13 }}>No players for selected year.</div>
+                          ) : (
+                            getGroupYearPlayers().map((p, idx) => (
+                              <label
+                                key={p.masterId}
+                                htmlFor={`group-select-player-${idx}`}
+                                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 4px', fontSize: 14, color: '#1f2937' }}
+                              >
+                                <input
+                                  id={`group-select-player-${idx}`}
+                                  name={`group-select-player-${idx}`}
+                                  type="checkbox"
+                                  checked={!!groupMemberSelection[p.masterId]}
+                                  onChange={(e) =>
+                                    setGroupMemberSelection((prev) => ({
+                                      ...prev,
+                                      [p.masterId]: e.target.checked
+                                    }))
+                                  }
+                                />
+                                <span>{p.name || '-'} ({p.branch || '-'})</span>
+                              </label>
+                            ))
+                          )}
+                        </div>
+                      </div>
                       <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
                         <button
                           type="button"
@@ -1790,6 +1848,12 @@ const styles = {
     background: 'linear-gradient(135deg, #cd7f32, #daa520)',
     color: '#5d4037',
     borderColor: '#cd7f32'
+  },
+
+  participationMedal: {
+    background: 'linear-gradient(135deg, #60a5fa, #2563eb)',
+    color: '#ffffff',
+    borderColor: '#2563eb'
   },
 
   imageLink: {

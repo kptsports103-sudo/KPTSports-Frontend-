@@ -5,19 +5,36 @@ import api from '../services/api';
 const medalPriority = {
   Gold: 1,
   Silver: 2,
-  Bronze: 3
+  Bronze: 3,
+  Participation: 4
 };
 
 const INDIVIDUAL_POINTS = {
   Gold: 5,
   Silver: 3,
-  Bronze: 1
+  Bronze: 1,
+  Participation: 0
 };
 
 const GROUP_POINTS = {
   Gold: 10,
   Silver: 7,
-  Bronze: 4
+  Bronze: 4,
+  Participation: 0
+};
+
+const medalIcon = (medal) => {
+  if (medal === 'Gold') return '🥇';
+  if (medal === 'Silver') return '🥈';
+  if (medal === 'Bronze') return '🥉';
+  return '🎖️';
+};
+
+const medalColor = (medal) => {
+  if (medal === 'Gold') return '#ffd700';
+  if (medal === 'Silver') return '#c0c0c0';
+  if (medal === 'Bronze') return '#cd7f32';
+  return '#2563eb';
 };
 
 const Results = () => {
@@ -213,7 +230,7 @@ const Results = () => {
                             fontSize: '2rem',
                             marginRight: '1rem'
                           }}>
-                            {result.medal === 'Gold' ? 'ðŸ¥‡' : result.medal === 'Silver' ? 'ðŸ¥ˆ' : 'ðŸ¥‰'}
+                            {medalIcon(result.medal)}
                           </span>
                           <div>
                             <h3 style={{
@@ -242,8 +259,7 @@ const Results = () => {
                           borderTop: '1px solid #e9ecef'
                         }}>
                           <span style={{
-                            background: result.medal === 'Gold' ? '#ffd700' :
-                                       result.medal === 'Silver' ? '#c0c0c0' : '#cd7f32',
+                            background: medalColor(result.medal),
                             color: '#fff',
                             padding: '0.25rem 0.75rem',
                             borderRadius: '20px',
@@ -321,7 +337,7 @@ const Results = () => {
                             fontSize: '2rem',
                             marginRight: '1rem'
                           }}>
-                            {result.medal === 'Gold' ? 'ðŸ¥‡' : result.medal === 'Silver' ? 'ðŸ¥ˆ' : 'ðŸ¥‰'}
+                            {medalIcon(result.medal)}
                           </span>
                           <div>
                             <h3 style={{
@@ -388,8 +404,7 @@ const Results = () => {
                           borderTop: '1px solid #e9ecef'
                         }}>
                           <span style={{
-                            background: result.medal === 'Gold' ? '#ffd700' :
-                                       result.medal === 'Silver' ? '#c0c0c0' : '#cd7f32',
+                            background: medalColor(result.medal),
                             color: '#fff',
                             padding: '0.25rem 0.75rem',
                             borderRadius: '20px',
