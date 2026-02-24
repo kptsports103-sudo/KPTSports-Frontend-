@@ -42,6 +42,14 @@ const getMedalPoints = (medal) => {
   return 0;
 };
 
+const getTeamMedalPoints = (medal) => {
+  const m = String(medal || "").toLowerCase().trim();
+  if (m === "gold") return 10;
+  if (m === "silver") return 7;
+  if (m === "bronze") return 4;
+  return 0;
+};
+
 const getMedalBadgeStyle = (medal) => {
   const m = String(medal || "").toLowerCase().trim();
   if (m === "gold") return { ...styles.medalBadge, background: "#fef3c7" };
@@ -387,7 +395,7 @@ const PlayerIntelligencePanel = ({ player, data = [], individualResults = [], te
   const latestParticipation = latest;
 
   const individualPoints = matchedIndividualResults.reduce((sum, row) => sum + getMedalPoints(row.medal), 0);
-  const teamPoints = matchedTeamResults.reduce((sum, row) => sum + getMedalPoints(row.medal), 0);
+  const teamPoints = matchedTeamResults.reduce((sum, row) => sum + getTeamMedalPoints(row.medal), 0);
   const performanceScore = individualPoints + teamPoints;
   const profileImage = player.image || matchedIndividualResults.find((row) => row?.imageUrl)?.imageUrl || "/default-avatar.png";
 
