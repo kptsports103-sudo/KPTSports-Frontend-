@@ -42,7 +42,6 @@ const ManageResults = () => {
   const [playersById, setPlayersById] = useState({});
   const [playersByYear, setPlayersByYear] = useState({});
   const [bulkRows, setBulkRows] = useState([]);
-  const [rowActionsVisible, setRowActionsVisible] = useState({});
   const [bulkDefaults, setBulkDefaults] = useState({
     event: '',
     medal: '',
@@ -366,7 +365,8 @@ const ManageResults = () => {
       year: Number(yearKey),
       event: bulkDefaults.event || '',
       medal: bulkDefaults.medal || '',
-      imageUrl: bulkDefaults.imageUrl || ''
+      imageUrl: bulkDefaults.imageUrl || '',
+      status: 'pending'
     }));
 
     resetForm();
@@ -374,7 +374,6 @@ const ManageResults = () => {
     setIsGroupEditing(false);
     setIsEditing(true);
     setBulkRows(rows);
-    setRowActionsVisible({});
   };
 
   const applyBulkDefaults = () => {
@@ -400,12 +399,25 @@ const ManageResults = () => {
               ...row,
               event: '',
               medal: '',
-              imageUrl: ''
+              imageUrl: '',
+              status: 'pending'
             }
           : row
       )
     );
-    setRowActionsVisible(prev => ({ ...prev, [index]: false }));
+  };
+
+  const handleBulkRowUnlock = (index) => {
+    setBulkRows(prev =>
+      prev.map((row, i) =>
+        i === index
+          ? {
+              ...row,
+              status: 'pending'
+            }
+          : row
+      )
+    );
   };
 
   const handleBulkRowSave = async (row, index) => {
@@ -425,7 +437,16 @@ const ManageResults = () => {
 
       notify(`Saved row for ${row.name}`, { type: 'success', position: 'top-center' });
       fetchResults();
-      setRowActionsVisible(prev => ({ ...prev, [index]: false }));
+      setBulkRows((prev) =>
+        prev.map((r, i) =>
+          i === index
+            ? {
+                ...r,
+                status: 'saved'
+              }
+            : r
+        )
+      );
     } catch (error) {
       console.error('Row save error:', error);
       alert(error?.response?.data?.message || 'Row save failed');
@@ -435,9 +456,9 @@ const ManageResults = () => {
   const handleBulkSubmit = async (e) => {
     e.preventDefault();
     try {
-      const readyRows = (bulkRows || []).filter(row => row.event && row.medal);
+      const readyRows = (bulkRows || []).filter(row => row.event && row.medal && row.status !== 'saved');
       if (!readyRows.length) {
-        alert('Please fill at least one row with Event and Medal.');
+        alert('No pending rows to save. Fill at least one row with Event and Medal.');
         return;
       }
 
@@ -457,7 +478,6 @@ const ManageResults = () => {
       notify(`Saved ${readyRows.length} result(s)`, { type: 'success', position: 'top-center' });
       setIsEditing(false);
       setBulkRows([]);
-      setRowActionsVisible({});
       resetForm();
 
       await activityLogService.logActivity(
@@ -493,7 +513,6 @@ const ManageResults = () => {
     setEditingId(item._id);
     setIsEditing(true);
     setBulkRows([]);
-    setRowActionsVisible({});
   };
 
   const handleGroupEdit = (item) => {
@@ -721,7 +740,6 @@ const ManageResults = () => {
     setForm({ name: '', playerMasterId: '', branch: '', kpmNo: '', event: '', year: '', medal: '', diplomaYear: '', imageUrl: '' });
     setEditingId(null);
     setBulkRows([]);
-    setRowActionsVisible({});
     setBulkDefaults({ event: '', medal: '', imageUrl: '' });
   };
 
@@ -1150,6 +1168,7 @@ const ManageResults = () => {
                           value={row.event}
                           onChange={e => handleBulkRowChange(idx, 'event', e.target.value)}
                           placeholder="Event"
+                          disabled={row.status === 'saved'}
                         />
                       </td>
                       <td style={styles.cell}>
@@ -1157,6 +1176,7 @@ const ManageResults = () => {
                           style={styles.select}
                           value={row.medal}
                           onChange={e => handleBulkRowChange(idx, 'medal', e.target.value)}
+                          disabled={row.status === 'saved'}
                         >
                           <option value="">Select Medal</option>
                           {MEDALS.map(m => (
@@ -1170,22 +1190,25 @@ const ManageResults = () => {
                           value={row.imageUrl}
                           onChange={e => handleBulkRowChange(idx, 'imageUrl', e.target.value)}
                           placeholder="Image URL"
+                          disabled={row.status === 'saved'}
                         />
                       </td>
                       <td style={styles.cell}>
                         <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                          {!rowActionsVisible[idx] ? (
+                          {row.status === 'saved' ? (
                             <button
                               type="button"
-                              onClick={() => setRowActionsVisible(prev => ({ ...prev, [idx]: true }))}
+                              onClick={() => handleBulkRowUnlock(idx)}
                               style={{
                                 ...styles.btnSecondary,
                                 minWidth: 96,
                                 padding: '8px 10px',
-                                whiteSpace: 'nowrap'
+                                whiteSpace: 'nowrap',
+                                background: '#198754',
+                                borderColor: '#198754'
                               }}
                             >
-                              Fixed
+                              Saved
                             </button>
                           ) : (
                             <>
@@ -1196,7 +1219,9 @@ const ManageResults = () => {
                                   ...styles.btnSecondary,
                                   minWidth: 96,
                                   padding: '8px 10px',
-                                  whiteSpace: 'nowrap'
+                                  whiteSpace: 'nowrap',
+                                  background: '#198754',
+                                  borderColor: '#198754'
                                 }}
                               >
                                 Save Row
