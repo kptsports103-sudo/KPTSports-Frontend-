@@ -12,6 +12,13 @@ import {
 } from "recharts";
 
 const normalizeName = (name) => String(name || "").toLowerCase().trim().replace(/\s+/g, " ");
+const getMedalPoints = (medal) => {
+  const m = String(medal || "").toLowerCase().trim();
+  if (m === "gold") return 5;
+  if (m === "silver") return 3;
+  if (m === "bronze") return 1;
+  return 0;
+};
 
 const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamResults = [], onClose }) => {
   if (!player) return null;
@@ -132,12 +139,9 @@ const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamRes
       bronze: medalStatsByYear[year].bronze,
     }));
 
-  let performanceScore = 0;
-  Object.values(medalStatsByYear).forEach((stat) => {
-    performanceScore += stat.gold * 5;
-    performanceScore += stat.silver * 3;
-    performanceScore += stat.bronze * 1;
-  });
+  const individualPoints = matchedIndividualResults.reduce((sum, row) => sum + getMedalPoints(row?.medal), 0);
+  const teamPoints = matchedTeamResults.reduce((sum, row) => sum + getMedalPoints(row?.medal), 0);
+  const performanceScore = individualPoints + teamPoints;
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -330,6 +334,10 @@ const PlayerIntelligencePanel = ({ player, data, individualResults = [], teamRes
         <div style={styles.scoreCard}>
           <h4 style={{ margin: "0 0 10px" }}>Performance Score</h4>
           <div style={styles.scoreValue}>{performanceScore}</div>
+          <div style={{ marginBottom: 8, fontSize: 14 }}>
+            <div>Individual Result Points: {individualPoints}</div>
+            <div>Team Result Points: {teamPoints}</div>
+          </div>
           <p style={{ fontSize: 13, color: "#dbeafe", margin: 0 }}>
             Based on medal weight scoring system
           </p>
