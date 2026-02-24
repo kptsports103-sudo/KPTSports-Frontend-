@@ -43,6 +43,11 @@ const ManageResults = () => {
   const [playersByYear, setPlayersByYear] = useState({});
   const [bulkRows, setBulkRows] = useState([]);
   const [rowActionsVisible, setRowActionsVisible] = useState({});
+  const [bulkDefaults, setBulkDefaults] = useState({
+    event: '',
+    medal: '',
+    imageUrl: ''
+  });
 
   const [isEditing, setIsEditing] = useState(false);
   const [isGroupEditing, setIsGroupEditing] = useState(false);
@@ -359,9 +364,9 @@ const ManageResults = () => {
       kpmNo: player.kpmNo || '',
       diplomaYear: String(player.diplomaYear || ''),
       year: Number(yearKey),
-      event: '',
-      medal: '',
-      imageUrl: ''
+      event: bulkDefaults.event || '',
+      medal: bulkDefaults.medal || '',
+      imageUrl: bulkDefaults.imageUrl || ''
     }));
 
     resetForm();
@@ -370,6 +375,17 @@ const ManageResults = () => {
     setIsEditing(true);
     setBulkRows(rows);
     setRowActionsVisible({});
+  };
+
+  const applyBulkDefaults = () => {
+    setBulkRows((prev) =>
+      prev.map((row) => ({
+        ...row,
+        event: bulkDefaults.event,
+        medal: bulkDefaults.medal,
+        imageUrl: bulkDefaults.imageUrl
+      }))
+    );
   };
 
   const handleBulkRowChange = (index, key, value) => {
@@ -706,6 +722,7 @@ const ManageResults = () => {
     setEditingId(null);
     setBulkRows([]);
     setRowActionsVisible({});
+    setBulkDefaults({ event: '', medal: '', imageUrl: '' });
   };
 
   /* ================= FILTERED DATA ================= */
@@ -713,6 +730,7 @@ const ManageResults = () => {
     new Set([
       ...data.map(d => Number(d.year)).filter(Boolean),
       ...groupData.map(g => Number(g.year)).filter(Boolean),
+      ...Object.keys(playersByYear).map((y) => Number(y)).filter(Boolean),
       currentYear
     ])
   ).sort((a, b) => b - a);
@@ -1077,6 +1095,37 @@ const ManageResults = () => {
             </form>
           ) : (
             <form onSubmit={handleBulkSubmit}>
+              <div style={{ marginBottom: 12, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                <input
+                  style={{ ...styles.input, width: 220 }}
+                  placeholder="Write once: Event"
+                  value={bulkDefaults.event}
+                  onChange={(e) => setBulkDefaults((prev) => ({ ...prev, event: e.target.value }))}
+                />
+                <select
+                  style={{ ...styles.select, width: 180 }}
+                  value={bulkDefaults.medal}
+                  onChange={(e) => setBulkDefaults((prev) => ({ ...prev, medal: e.target.value }))}
+                >
+                  <option value="">Write once: Medal</option>
+                  {MEDALS.map(m => (
+                    <option key={m}>{m}</option>
+                  ))}
+                </select>
+                <input
+                  style={{ ...styles.input, width: 280 }}
+                  placeholder="Write once: Image URL"
+                  value={bulkDefaults.imageUrl}
+                  onChange={(e) => setBulkDefaults((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                />
+                <button
+                  type="button"
+                  onClick={applyBulkDefaults}
+                  style={{ ...styles.topBtnPrimary, padding: '10px 16px' }}
+                >
+                  Apply To All Rows
+                </button>
+              </div>
               <table style={styles.table}>
                 <thead>
                   <tr style={styles.headerRow}>
