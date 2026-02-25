@@ -5,11 +5,25 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonChart";
 import { useRealtimeAnalytics } from "../../hooks/useRealtimeAnalytics";
 import { useAdminAlerts } from "../../hooks/useAdminAlerts";
+import useAnimatedCounter from "../../hooks/useAnimatedCounter";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import QRCode from "qrcode";
 import api from "../../services/api";
-import { Trophy, Award, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  Trophy,
+  Award,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Activity,
+  LayoutDashboard,
+  BarChart3,
+  Users,
+  ImageIcon,
+  FilePenLine,
+  BadgeCheck,
+} from "lucide-react";
 
 // ============================================
 // ENTERPRISE V5 - CERTIFICATE TEMPLATE ENGINE
@@ -854,6 +868,7 @@ const AdminDashboard = () => {
   const selectedStats = medalData.length > 0
     ? medalData.find((m) => String(m.year) === String(selectedYear)) || medalData[0]
     : null;
+  const animatedPoints = useAnimatedCounter(selectedStats?.totalPoints || 0, 900);
 
   // Calculate safe values for conic gradient
   const medalBase = selectedStats?.totalMedals > 0 ? selectedStats.totalMedals : 1;
@@ -1042,10 +1057,10 @@ const AdminDashboard = () => {
   };
 
   const stats = [
-    { title: "Update Pages", value: "Manage", icon: "??", link: "/admin/update-pages" },
-    { title: "Media Files", value: totalMedia, icon: "???", link: "/admin/media" },
-    { title: "Visitors", value: "Analytics", icon: "??", action: "scrollToVisitors" },
-    { title: "IAM Users", value: "Manage", icon: "??", link: "/admin/users-manage" },
+    { title: "Update Pages", value: "Manage", Icon: FilePenLine, link: "/admin/update-pages" },
+    { title: "Media Files", value: totalMedia, Icon: ImageIcon, link: "/admin/media" },
+    { title: "Visitors", value: "Analytics", Icon: BarChart3, action: "scrollToVisitors" },
+    { title: "IAM Users", value: "Manage", Icon: Users, link: "/admin/users-manage" },
   ];
 
   return (
@@ -1057,7 +1072,7 @@ const AdminDashboard = () => {
               <div className="dashboard-title">Admin Analytics</div>
               <div className="dashboard-subtitle">Enterprise dashboard with real-time operational insights</div>
             </div>
-            <span className="live-indicator">?? Live Sync</span>
+            <span className="live-indicator"><Activity size={14} /> Live Sync</span>
           </div>
           <div className="header-right">
             <div className="header-stat">
@@ -1077,7 +1092,7 @@ const AdminDashboard = () => {
 
         {certificateStats.pending > 0 && (
           <div className="alert-banner">
-            ? {certificateStats.pending} certificates pending generation for {selectedCertificateYearLabel}.
+            <AlertCircle size={16} /> {certificateStats.pending} certificates pending generation for {selectedCertificateYearLabel}.
           </div>
         )}
 
@@ -1101,7 +1116,7 @@ const AdminDashboard = () => {
         </div>
 
         <div className="section-header">
-          <div className="section-title">?? System Overview</div>
+          <div className="section-title"><LayoutDashboard size={16} className="title-icon" /> System Overview</div>
           <div className="section-subtitle">Quick access to core admin modules</div>
         </div>
         <div className="stats-grid">
@@ -1127,7 +1142,7 @@ const AdminDashboard = () => {
                   }
                 }}
               >
-                <div className="stat-icon">{stat.icon}</div>
+                <div className="stat-icon"><stat.Icon size={24} /></div>
                 <h3>{stat.value}</h3>
                 <p>{stat.title}</p>
               </div>
@@ -1150,7 +1165,7 @@ const AdminDashboard = () => {
         >
           <div className="panel-inner">
             <div className="section-header">
-              <div className="section-title">?? Analytics</div>
+              <div className="section-title"><BarChart3 size={16} className="title-icon" /> Analytics</div>
               <div className="section-subtitle">Trends, performance, and engagement</div>
             </div>
 
@@ -1163,9 +1178,9 @@ const AdminDashboard = () => {
             <div className="alert-panel">
               <h3>System Alerts</h3>
               {certificateStats.pending > 0 ? (
-                <div className="alert warning">? {certificateStats.pending} certificates pending generation</div>
+                <div className="alert warning"><AlertCircle size={14} /> {certificateStats.pending} certificates pending generation</div>
               ) : (
-                <div className="alert success">? All certificates generated</div>
+                <div className="alert success"><BadgeCheck size={14} /> All certificates generated</div>
               )}
             </div>
 
@@ -1191,7 +1206,7 @@ const AdminDashboard = () => {
                         }}
                       >
                         <div className="qs-donut-inner">
-                          <div className="qs-donut-value">{selectedStats?.totalPoints || 0}</div>
+                          <div className="qs-donut-value">{animatedPoints}</div>
                         </div>
                       </div>
                       <div className="qs-legend">
@@ -1230,7 +1245,7 @@ const AdminDashboard = () => {
                         </div>
                         <div className="qs-mini-wrap">
                           <div className="qs-mini orange">
-                            <div className="qs-mini-num">{selectedStats?.totalPoints || 0}</div>
+                            <div className="qs-mini-num">{animatedPoints}</div>
                           </div>
                           <div className="qs-mini-label">Total</div>
                         </div>
@@ -1431,7 +1446,7 @@ const AdminDashboard = () => {
         ====================== */}
         <div className="section-header compact table-stretch">
           <div className="section-header-left">
-            <div className="section-title">????? Players List</div>
+            <div className="section-title"><Users size={16} className="title-icon" /> Players List</div>
             <div className="section-subtitle">Search by name or branch and filter by year</div>
           </div>
           <div className="table-filters">
@@ -1491,7 +1506,7 @@ const AdminDashboard = () => {
         ====================== */}
         <div className="section-header compact table-stretch">
           <div className="section-header-left">
-            <div className="section-title">?? Certificates</div>
+            <div className="section-title"><Award size={16} className="title-icon" /> Certificates</div>
             <div className="section-subtitle">Generate and download student certificates</div>
           </div>
           <div className="table-filters">
@@ -1531,7 +1546,7 @@ const AdminDashboard = () => {
               onClick={() => setShowBatchControls(!showBatchControls)}
               style={{ fontWeight: 600 }}
             >
-              {showBatchControls ? '??? Hide' : '?? Batch Select'} ({selectedCertificates.size})
+              {showBatchControls ? "Hide Batch" : "Batch Select"} ({selectedCertificates.size})
             </button>
             {showBatchControls && (
               <>

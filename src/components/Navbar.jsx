@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Bell, Menu, Moon, Sun, X } from 'lucide-react';
 import './Navbar.css';
 
 const NAV_ITEMS = [
@@ -102,7 +103,7 @@ const Navbar = () => {
 
         <div className="kpt-navbar__right">
           <button type="button" className="kpt-navbar__icon-btn" onClick={toggleDarkMode} aria-label="Toggle theme">
-            {darkMode ? 'Sun' : 'Moon'}
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
           <div className="kpt-navbar__notify" ref={notifyRef}>
             <button
@@ -111,7 +112,7 @@ const Navbar = () => {
               onClick={() => setNotificationsOpen((v) => !v)}
               aria-label="Notifications"
             >
-              Bell
+              <Bell size={18} />
               <span className="kpt-navbar__badge">3</span>
             </button>
             {notificationsOpen && (
@@ -136,7 +137,7 @@ const Navbar = () => {
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
           >
-            {mobileOpen ? 'X' : 'Menu'}
+            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </nav>

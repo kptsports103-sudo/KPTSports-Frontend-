@@ -231,8 +231,27 @@
 }
 
 .stat-icon {
-  font-size: 30px;
-  margin-bottom: 8px;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 10px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f2f63;
+  background: linear-gradient(145deg, #ffffff 0%, #edf3ff 100%);
+  box-shadow:
+    0 10px 18px rgba(23, 45, 90, 0.15),
+    inset 0 2px 8px rgba(255, 255, 255, 0.9);
+  transform: translateZ(0);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover .stat-icon {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow:
+    0 14px 22px rgba(23, 45, 90, 0.2),
+    inset 0 2px 8px rgba(255, 255, 255, 0.95);
 }
 
 .stat-card h3 {
@@ -2163,6 +2182,42 @@ h3.stats-center-title {
 .table-card .iam-table th {
   background: #f1f5f9;
   color: #000000;
+}
+
+.title-icon {
+  margin-right: 6px;
+  vertical-align: -2px;
+}
+
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.alert.warning,
+.alert.success,
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qs-donut-value {
+  transition: transform 0.25s ease, text-shadow 0.25s ease;
+}
+
+.qs-donut:hover .qs-donut-value {
+  transform: scale(1.04);
+  text-shadow: 0 2px 8px rgba(20, 45, 96, 0.25);
+}
+
+.qs-mini-num {
+  transition: transform 0.25s ease;
+}
+
+.qs-mini:hover .qs-mini-num {
+  transform: scale(1.08);
 }
 
 .best-years-panel {
