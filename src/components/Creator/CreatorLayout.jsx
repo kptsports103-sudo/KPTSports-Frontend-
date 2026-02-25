@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircle, Users } from 'lucide-react';
+import { BarChart3, Brain, CheckCircle, LayoutDashboard, ShieldUser, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import activityLogService from '../../services/activityLog.service';
 import '../../admin.css';
 
 const CreatorLayout = ({ children }) => {
@@ -10,31 +9,6 @@ const CreatorLayout = ({ children }) => {
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [showActivityHistory, setShowActivityHistory] = useState(false);
-  const [activityLogs, setActivityLogs] = useState([]);
-  const [loadingActivity, setLoadingActivity] = useState(false);
-
-  // Fetch activity logs when profile is clicked
-  const fetchActivityLogs = async () => {
-    try {
-      setLoadingActivity(true);
-      const response = await activityLogService.getMyActivityLogs(10, 1);
-      if (response.success) {
-        setActivityLogs(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching activity logs:', error);
-    } finally {
-      setLoadingActivity(false);
-    }
-  };
-
-  const handleProfileClick = () => {
-    if (!showActivityHistory) {
-      fetchActivityLogs();
-    }
-    setShowActivityHistory(!showActivityHistory);
-  };
 
   useEffect(() => {
     // Refresh user data to get latest profileImage from Cloudinary
@@ -44,12 +18,12 @@ const CreatorLayout = ({ children }) => {
   }, []);
 
   const creatorMenuItems = [
-    { path: '/admin/creator-dashboard?tab=overview', label: 'Dashboard', icon: 'D' },
+    { path: '/admin/creator-dashboard?tab=overview', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
     { path: '/admin/creator-dashboard?tab=players', label: 'Players', icon: <Users size={18} /> },
     { path: '/admin/creator-dashboard?tab=attendance', label: 'Attendance', icon: <CheckCircle size={18} /> },
-    { path: '/admin/creator-dashboard?tab=performance', label: 'Performance Analysis', icon: '📊' },
-    { path: '/admin/creator-dashboard?tab=player-intelligence', label: 'Player Intelligence', icon: '🧠' },
-    { path: '/admin/users-manage', label: 'Users Management', icon: 'U' },
+    { path: '/admin/creator-dashboard?tab=performance', label: 'Performance Analysis', icon: <BarChart3 size={18} /> },
+    { path: '/admin/creator-dashboard?tab=player-intelligence', label: 'Player Intelligence', icon: <Brain size={18} /> },
+    { path: '/admin/users-manage', label: 'Users Management', icon: <ShieldUser size={18} /> },
   ];
 
   const isActive = (itemPath) => {
@@ -82,24 +56,9 @@ const CreatorLayout = ({ children }) => {
         {/* Profile Section */}
         <div 
           className="profile"
-          onClick={handleProfileClick}
-          style={{ 
-            cursor: 'pointer',
-            background: showActivityHistory ? 'rgba(255,255,255,0.1)' : 'transparent'
+          style={{
           }}
         >
-          {/* Toggle indicator */}
-          <div style={{ 
-            fontSize: '12px', 
-            color: 'rgba(255,255,255,0.8)', 
-            marginBottom: '8px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '5px'
-          }}>
-            {showActivityHistory ? '▼' : '▶'} {showActivityHistory ? 'Hide Activity' : 'View Activity'}
-          </div>
           
           <img
             src={user?.profileImage || "/avatar.png"}
@@ -144,65 +103,6 @@ const CreatorLayout = ({ children }) => {
               </tbody>
             </table>
           </div>
-
-          {/* Activity History Section */}
-          {showActivityHistory && (
-            <div style={{
-              marginTop: '15px',
-              paddingTop: '15px',
-              borderTop: '1px solid rgba(255,255,255,0.2)'
-            }}>
-              <h4 style={{ 
-                margin: '0 0 10px 0', 
-                fontSize: '13px', 
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                📋 Activity History
-              </h4>
-              
-              {loadingActivity ? (
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>Loading...</div>
-              ) : activityLogs.length > 0 ? (
-                <div style={{ 
-                  maxHeight: '200px', 
-                  overflowY: 'auto',
-                  fontSize: '11px' 
-                }}>
-                  {activityLogs.map((log, index) => (
-                    <div key={index} style={{
-                      padding: '8px',
-                      marginBottom: '6px',
-                      background: 'rgba(255,255,255,0.1)',
-                      borderRadius: '4px',
-                      borderLeft: '3px solid #f5576c'
-                    }}>
-                      <div style={{ fontWeight: 600, color: '#fff' }}>
-                        🔹 {log.action}
-                      </div>
-                      <div style={{ color: 'rgba(255,255,255,0.8)', marginTop: '2px' }}>
-                        Page: {log.pageName}
-                      </div>
-                      {log.details ? (
-                        <div style={{ color: 'rgba(255,255,255,0.9)', marginTop: '2px' }}>
-                          Changes: {log.details}
-                        </div>
-                      ) : null}
-                      <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '10px', marginTop: '2px' }}>
-                        {log.createdAt ? new Date(log.createdAt).toLocaleString() : 'Just now'}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', fontStyle: 'italic' }}>
-                  No activity yet
-                </div>
-              )}
-            </div>
-          )}
 
         </div>
 
@@ -256,6 +156,8 @@ const CreatorLayout = ({ children }) => {
 };
 
 export default CreatorLayout;
+
+
 
 
 

@@ -20,9 +20,6 @@ const AdminLayout = ({ children }) => {
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [showActivityHistory, setShowActivityHistory] = useState(false);
-  const [activityLogs, setActivityLogs] = useState([]);
-  const [loadingActivity, setLoadingActivity] = useState(false);
   const [cmsUnreadCount, setCmsUnreadCount] = useState(0);
 
   const readSeenMap = () => {
@@ -57,28 +54,6 @@ const AdminLayout = ({ children }) => {
       console.error('Failed to load CMS unread count:', error);
       setCmsUnreadCount(0);
     }
-  };
-
-  // Fetch activity logs when profile is clicked
-  const fetchActivityLogs = async () => {
-    try {
-      setLoadingActivity(true);
-      const response = await activityLogService.getMyActivityLogs(10, 1);
-      if (response.success) {
-        setActivityLogs(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching activity logs:', error);
-    } finally {
-      setLoadingActivity(false);
-    }
-  };
-
-  const handleProfileClick = () => {
-    if (!showActivityHistory) {
-      fetchActivityLogs();
-    }
-    setShowActivityHistory(!showActivityHistory);
   };
 
   useEffect(() => {
@@ -138,29 +113,14 @@ const AdminLayout = ({ children }) => {
       <div className="sidebar" style={{ width: '350px' }}>
         
         {/* Profile Section */}
-        <div 
-          onClick={handleProfileClick}
+        <div
           style={{
             padding: '20px',
             textAlign: 'center',
             borderBottom: '1px solid #e5e7eb',
             marginBottom: '20px',
-            cursor: 'pointer',
-            background: showActivityHistory ? '#f0f9ff' : 'transparent'
           }}
         >
-          {/* Toggle indicator */}
-          <div style={{ 
-            fontSize: '12px', 
-            color: '#6b7280', 
-            marginBottom: '8px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '5px'
-          }}>
-            {showActivityHistory ? '▼' : '▶'} {showActivityHistory ? 'Hide Activity' : 'View Activity'}
-          </div>
           {/* Avatar */}
           <img
             src={user?.profileImage || '/avatar.png'}
@@ -215,65 +175,6 @@ const AdminLayout = ({ children }) => {
             </table>
           </div>
 
-          {/* Activity History Section */}
-          {showActivityHistory && (
-            <div style={{
-              marginTop: '15px',
-              paddingTop: '15px',
-              borderTop: '1px solid #e5e7eb'
-            }}>
-              <h4 style={{ 
-                margin: '0 0 10px 0', 
-                fontSize: '13px', 
-                color: '#374151',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                📋 Admin Activity History
-              </h4>
-              
-              {loadingActivity ? (
-                <div style={{ fontSize: '12px', color: '#6b7280' }}>Loading...</div>
-              ) : activityLogs.length > 0 ? (
-                <div style={{ 
-                  maxHeight: '200px', 
-                  overflowY: 'auto',
-                  fontSize: '11px' 
-                }}>
-                  {activityLogs.map((log, index) => (
-                    <div key={index} style={{
-                      padding: '8px',
-                      marginBottom: '6px',
-                      background: '#f9fafb',
-                      borderRadius: '4px',
-                      borderLeft: '3px solid #3b82f6'
-                    }}>
-                      <div style={{ fontWeight: 600, color: '#1f2937' }}>
-                        🔹 {log.action}
-                      </div>
-                      <div style={{ color: '#6b7280', marginTop: '2px' }}>
-                        Page: {log.pageName}
-                      </div>
-                      {log.details ? (
-                        <div style={{ color: '#4b5563', marginTop: '2px' }}>
-                          Changes: {log.details}
-                        </div>
-                      ) : null}
-                      <div style={{ color: '#9ca3af', fontSize: '10px', marginTop: '2px' }}>
-                        {log.createdAt ? new Date(log.createdAt).toLocaleString() : 'Just now'}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ fontSize: '12px', color: '#6b7280', fontStyle: 'italic' }}>
-                  No activity yet
-                </div>
-              )}
-            </div>
-          )}
-
         </div>
 
         {/* Logout */}
@@ -323,4 +224,5 @@ const AdminLayout = ({ children }) => {
 };
 
 export default AdminLayout;
+
 

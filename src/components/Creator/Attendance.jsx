@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Trash2 } from 'lucide-react';
+import { CheckCircle2, Pencil, Plus, Save, Trash2 } from 'lucide-react';
 
 const Attendance = ({ isStudent = false }) => {
   const currentYear = new Date().getFullYear();
@@ -163,21 +163,21 @@ const Attendance = ({ isStudent = false }) => {
           <div style={styles.cardHeader}>
             <button
               onClick={() => setIsEditMode(p => !p)}
-              style={styles.primaryBtn}
+              style={{ ...styles.primaryBtn, display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
-              <img src="/Edit button.png" width={20} height={20} alt="Edit" />
+              {isEditMode ? <CheckCircle2 size={18} /> : <Pencil size={18} />}
               {isEditMode ? "Done Editing" : "Edit"}
             </button>
 
             {isEditMode && (
               <>
-                <button onClick={addRow} style={styles.successBtn}>
-                  <img src="/Add button.png" width={20} height={20} alt="Add" />
+                <button onClick={addRow} style={{ ...styles.successBtn, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <Plus size={18} />
                   Add Row
                 </button>
 
-                <button onClick={saveAttendance} style={styles.primaryBtn}>
-                  <img src="/Save button.png" width={20} height={20} alt="Save" />
+                <button onClick={saveAttendance} style={{ ...styles.primaryBtn, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <Save size={18} />
                   Save All
                 </button>
               </>
@@ -205,24 +205,19 @@ const Attendance = ({ isStudent = false }) => {
                 </select>
 
                 {isEditMode && (
-                  <button
-                    onClick={addYear}
-                    style={{
-                      ...styles.addYearBtn,
-                      display: "flex",
-                      alignItems: "center",
+                    <button
+                      onClick={addYear}
+                      style={{
+                        ...styles.addYearBtn,
+                        display: "flex",
+                        alignItems: "center",
                       gap: "6px",
                     }}
                     title="Add Year"
-                  >
-                    <img
-                      src="/Add button.png"
-                      width={16}
-                      height={16}
-                      alt="Add"
-                    />
-                    Add Year
-                  </button>
+                    >
+                      <Plus size={16} />
+                      Add Year
+                    </button>
                 )}
               </div>
             </div>

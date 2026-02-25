@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import api from '../../services/api';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import { FaPlusCircle } from 'react-icons/fa';
-import { Save, Trash2 } from 'lucide-react';
+import { CheckCircle2, Pencil, Plus, Save, Trash2 } from 'lucide-react';
 
 const Players = ({ isStudent = false }) => {
   const [data, setData] = useState([]);
@@ -625,13 +625,9 @@ const Players = ({ isStudent = false }) => {
         <div style={styles.topButtons}>
           <button
             onClick={() => setIsEditMode(!isEditMode)}
-            style={styles.editBtn}
+            style={{ ...styles.editBtn, display: 'inline-flex', alignItems: 'center', gap: '8px' }}
           >
-            <img
-              src="/Edit button.png"
-              alt="Edit"
-              style={{ width: 16, height: 16 }}
-            />
+            {isEditMode ? <CheckCircle2 size={16} /> : <Pencil size={16} />}
             {isEditMode ? "Done Editing" : "Edit"}
           </button>
 
@@ -643,13 +639,12 @@ const Players = ({ isStudent = false }) => {
                 ...styles.saveAllBtn,
                 opacity: isSaving ? 0.6 : 1,
                 cursor: isSaving ? "not-allowed" : "pointer",
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
               }}
             >
-              <img
-                src="/Save button.png"
-                alt="Save"
-                style={{ width: 20, height: 20, marginRight: 6 }}
-              />
+              <Save size={18} />
               {isSaving ? "Saving..." : "Save Changes"}
             </button>
           )}
@@ -682,11 +677,7 @@ const Players = ({ isStudent = false }) => {
                 gap: "6px",
               }}
             >
-              <img
-                src="/Add button.png"
-                alt="Add"
-                style={{ width: 16, height: 16 }}
-              />
+              <Plus size={16} />
               Add New Year
             </button>
           )}
@@ -1000,18 +991,7 @@ const Players = ({ isStudent = false }) => {
             })()}
 
             {!isStudent && isEditMode && (
-              <div style={{ marginBottom: '10px' }}>
-                <button
-                  onClick={() => deleteYear(yearData.year)}
-                  style={styles.deleteYearBtn}
-                >
-                  Delete Year
-                </button>
-              </div>
-            )}
-
-            {!isStudent && isEditMode && (
-              <div style={{ marginBottom: '10px' }}>
+              <div style={{ marginBottom: '10px', display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <button
                   onClick={() => addPlayerRow(yearData.year)}
                   style={{
@@ -1023,6 +1003,12 @@ const Players = ({ isStudent = false }) => {
                 >
                   <FaPlusCircle size={16} color="#16a34a" aria-hidden="true" />
                   Add Player
+                </button>
+                <button
+                  onClick={() => deleteYear(yearData.year)}
+                  style={styles.deleteYearBtn}
+                >
+                  Delete Year
                 </button>
               </div>
             )}
