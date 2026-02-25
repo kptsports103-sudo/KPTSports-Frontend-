@@ -55,7 +55,8 @@ export default function DailyVisitorsChart() {
       {data.length === 0 ? (
         <div style={styles.noData}>No visitor data available</div>
       ) : (
-        <ResponsiveContainer width="100%" height={300}>
+        <div style={{ minHeight: 300 }}>
+          <ResponsiveContainer width="100%" height={300}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
             <XAxis 
@@ -86,7 +87,8 @@ export default function DailyVisitorsChart() {
               activeDot={{ r: 6 }}
             />
           </LineChart>
-        </ResponsiveContainer>
+          </ResponsiveContainer>
+        </div>
       )}
     </div>
   );
