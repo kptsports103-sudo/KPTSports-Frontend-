@@ -9,6 +9,7 @@ import CloudImage from "../../components/CloudImage";
 import SmartPreloader from "../../components/SmartPreloader";
 import { autoOptimizeMedia } from "../../utils/mediaMiddleware";
 import { trackMediaUsage } from "../../utils/mediaTracker";
+import { Check, Clipboard, Pencil, Plus, Trash2, X } from "lucide-react";
 
 const Media = () => {
   const [media, setMedia] = useState([]);
@@ -216,7 +217,7 @@ const Media = () => {
               gap: "8px"
             }}
           >
-            <img src="/Add button.png" alt="Add" style={{ width: "16px", height: "16px" }} />
+            <Plus size={16} />
             Add Media
           </Link>
         </div>
@@ -324,7 +325,7 @@ const Media = () => {
                           fontSize: "14px"
                         }}
                       >
-                        ✔ Save
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><Check size={15} />Save</span>
                       </button>
 
                       <button
@@ -340,7 +341,7 @@ const Media = () => {
                           fontSize: "14px"
                         }}
                       >
-                        ✖ Cancel
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><X size={15} />Cancel</span>
                       </button>
                     </div>
                   </div>
@@ -392,7 +393,7 @@ const Media = () => {
                         onMouseLeave={handleHoverOut}
                         title={copiedId === m.id ? "Copied!" : "Copy URL"}
                       >
-                        {copiedId === m.id ? "✅ Copied" : <img src="/Copy button.png" alt="Copy" style={{ width: '16px', height: '16px' }} />}
+                        {copiedId === m.id ? (<span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700 }}><Check size={14} />Copied</span>) : (<Clipboard size={16} />)}
                       </button>
                       <button
                         onClick={() => enableEdit(m.id)}
@@ -401,7 +402,7 @@ const Media = () => {
                         onMouseLeave={handleHoverOut}
                         title="Edit"
                       >
-                        <img src="/Edit button.png" alt="Edit" style={{ width: '16px', height: '16px' }} />
+                        <Pencil size={16} />
                       </button>
                       <button
                         onClick={() => remove(m.id)}
@@ -416,7 +417,7 @@ const Media = () => {
                         }}
                         title="Delete"
                       >
-                        <img src="/Delete button.png" alt="Delete" style={{ width: '16px', height: '16px' }} />
+                        <Trash2 size={16} color="#ef4444" />
                       </button>
                     </div>
                   </>
@@ -431,5 +432,6 @@ const Media = () => {
 };
 
 export default Media;
+
 
 
