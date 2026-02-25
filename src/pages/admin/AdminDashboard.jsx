@@ -12,28 +12,21 @@ import api from "../../services/api";
 import { Trophy, Award, Clock, Medal, CheckCircle, AlertCircle } from "lucide-react";
 
 // ============================================
-// ENTERPRISE V5 - ANIMATED COUNTER HOOK
+// ENTERPRISE V5 - ANIMATED COUNTER (Utility Function)
 // ============================================
-const useAnimatedCounter = (value, duration = 800) => {
-  const [display, setDisplay] = useState(0);
-
-  useEffect(() => {
-    let start = 0;
-    const increment = value / (duration / 16);
-    const interval = setInterval(() => {
-      start += increment;
-      if (start >= value) {
-        setDisplay(value);
-        clearInterval(interval);
-      } else {
-        setDisplay(Math.floor(start));
-      }
-    }, 16);
-
-    return () => clearInterval(interval);
-  }, [value, duration]);
-
-  return display;
+// Note: Using requestAnimationFrame for smooth animations
+const animateValue = (start, end, duration, callback) => {
+  let startTimestamp = null;
+  const step = (timestamp) => {
+    if (!startTimestamp) startTimestamp = timestamp;
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+    const value = Math.floor(progress * (end - start) + start);
+    callback(value);
+    if (progress < 1) {
+      window.requestAnimationFrame(step);
+    }
+  };
+  window.requestAnimationFrame(step);
 };
 
 // ============================================
@@ -1214,7 +1207,7 @@ const AdminDashboard = () => {
                         }}
                       >
                         <div className="stats-circle-inner">
-                          {useAnimatedCounter(selectedStats?.totalPoints || 0)}
+                          {selectedStats?.totalPoints || 0}
                         </div>
                       </div>
                       <div className="stats-legend">
