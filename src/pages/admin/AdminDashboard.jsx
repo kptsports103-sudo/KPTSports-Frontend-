@@ -129,6 +129,31 @@ const AdminDashboard = () => {
   const [filterMode, setFilterMode] = useState("total");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
+
+  // ============================================
+  // ANIMATED COUNTER HOOK
+  // ============================================
+  const useAnimatedCounter = (value, duration = 800) => {
+    const [display, setDisplay] = useState(0);
+
+    useEffect(() => {
+      let start = 0;
+      const increment = value / (duration / 16);
+      const interval = setInterval(() => {
+        start += increment;
+        if (start >= value) {
+          setDisplay(value);
+          clearInterval(interval);
+        } else {
+          setDisplay(Math.floor(start));
+        }
+      }, 16);
+
+      return () => clearInterval(interval);
+    }, [value, duration]);
+
+    return display;
+  };
   
   // ============================================
   // ENTERPRISE V5 - TEMPLATE STATE
@@ -876,6 +901,9 @@ const AdminDashboard = () => {
     ? medalData.find((m) => String(m.year) === String(selectedYear)) || medalData[0]
     : null;
 
+  // Animated counter for total points
+  const animatedPoints = useAnimatedCounter(selectedStats?.totalPoints || 0);
+
   // Calculate safe values for conic gradient
   const medalBase = selectedStats?.totalMedals > 0 ? selectedStats.totalMedals : 1;
   const goldPercent = selectedStats ? (selectedStats.totalGold / medalBase) * 100 : 0;
@@ -1207,7 +1235,7 @@ const AdminDashboard = () => {
                         }}
                       >
                         <div className="stats-circle-inner">
-                          {selectedStats?.totalPoints || 0}
+                          {animatedPoints}
                         </div>
                       </div>
                       <div className="stats-legend">
