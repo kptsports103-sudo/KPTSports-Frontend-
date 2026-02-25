@@ -9,6 +9,41 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import QRCode from "qrcode";
 import api from "../../services/api";
+import { Trophy, Award, Clock, Medal, CheckCircle, AlertCircle } from "lucide-react";
+
+// ============================================
+// ENTERPRISE V5 - ANIMATED COUNTER HOOK
+// ============================================
+const useAnimatedCounter = (value, duration = 800) => {
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+    const increment = value / (duration / 16);
+    const interval = setInterval(() => {
+      start += increment;
+      if (start >= value) {
+        setDisplay(value);
+        clearInterval(interval);
+      } else {
+        setDisplay(Math.floor(start));
+      }
+    }, 16);
+
+    return () => clearInterval(interval);
+  }, [value, duration]);
+
+  return display;
+};
+
+// ============================================
+// MEDAL GRADIENT SYSTEM
+// ============================================
+const medalGradients = {
+  gold: "linear-gradient(135deg, #facc15, #f59e0b)",
+  silver: "linear-gradient(135deg, #e5e7eb, #9ca3af)",
+  bronze: "linear-gradient(135deg, #f97316, #b45309)",
+};
 
 // ============================================
 // ENTERPRISE V5 - CERTIFICATE TEMPLATE ENGINE
@@ -1169,16 +1204,18 @@ const AdminDashboard = () => {
                   <div className="analytics-primary-grid">
                     <div className="stats-left">
                       <div
-                        className="stats-circle-animated"
+                        className="stats-circle-3d"
                         style={{
                           background: `conic-gradient(
-                            #f1c40f 0 ${goldPercent}%,
-                            #bdc3c7 ${goldPercent}% ${silverPercent}%,
-                            #cd7f32 ${silverPercent}% 100%
+                            #facc15 0 ${goldPercent}%,
+                            #cbd5e1 ${goldPercent}% ${silverPercent}%,
+                            #f97316 ${silverPercent}% 100%
                           )`,
                         }}
                       >
-                        {selectedStats?.totalPoints || 0}
+                        <div className="stats-circle-inner">
+                          {useAnimatedCounter(selectedStats?.totalPoints || 0)}
+                        </div>
                       </div>
                       <div className="stats-legend">
                         <span><span className="legend-dot gold"></span> Gold</span>
@@ -1226,45 +1263,60 @@ const AdminDashboard = () => {
                           <span className="stats-mini-label">Total</span>
                         </div>
                       </div>
-                      <div className="stats-note">Weights: Individual 5/3/1 • Group 10/7/4</div>
+                      <div className="stats-note">Weights: Individual 5/3/1 ï¿½ Group 10/7/4</div>
                     </div>
                   </div>
                 </div>
 
                 <div className="analytics-sidebar">
-                  <div className="kpi-card">
-                    <h4>?? Best Performing Year</h4>
-                    <h2>{topYears[0]?.year || "-"}</h2>
-                    <p>{topYears[0]?.totalPoints || 0} Points</p>
+                  <div className="kpi-card premium gold-card">
+                    <Trophy size={28} className="kpi-icon" />
+                    <div>
+                      <h4>Best Performing Year</h4>
+                      <h2>{topYears[0]?.year || "-"}</h2>
+                      <p>{topYears[0]?.totalPoints || 0} Points</p>
+                    </div>
                   </div>
                   <div
-                    className={`kpi-card clickable ${filterMode === "total" ? "active" : ""}`}
+                    className={`kpi-card premium clickable ${filterMode === "total" ? "active" : ""}`}
                     onClick={() => setFilterMode("total")}
                   >
-                    <h4>?? Certificates ({selectedCertificateYearLabel})</h4>
-                    <h2>{certificateStats.total}</h2>
-                    <p>Click to view all for selected year</p>
+                    <Medal size={28} className="kpi-icon" />
+                    <div>
+                      <h4>Certificates ({selectedCertificateYearLabel})</h4>
+                      <h2>{certificateStats.total}</h2>
+                      <p>Click to view all for selected year</p>
+                    </div>
                   </div>
                   <div
-                    className={`kpi-card clickable ${filterMode === "generated" ? "active" : ""}`}
+                    className={`kpi-card premium success-card clickable ${filterMode === "generated" ? "active" : ""}`}
                     onClick={() => setFilterMode("generated")}
                   >
-                    <h4>? Generated</h4>
-                    <h2>{certificateStats.generated}</h2>
-                    <p>Click to view generated only</p>
+                    <CheckCircle size={28} className="kpi-icon" />
+                    <div>
+                      <h4>Generated</h4>
+                      <h2>{certificateStats.generated}</h2>
+                      <p>Click to view generated only</p>
+                    </div>
                   </div>
                   <div
-                    className={`kpi-card clickable ${filterMode === "pending" ? "active" : ""}`}
+                    className={`kpi-card premium warning-card clickable ${filterMode === "pending" ? "active" : ""}`}
                     onClick={() => setFilterMode("pending")}
                   >
-                    <h4>? Pending</h4>
-                    <h2>{certificateStats.pending}</h2>
-                    <p>Click to view pending only</p>
+                    <Clock size={28} className="kpi-icon" />
+                    <div>
+                      <h4>Pending</h4>
+                      <h2>{certificateStats.pending}</h2>
+                      <p>Click to view pending only</p>
+                    </div>
                   </div>
-                  <div className="kpi-card">
-                    <h4>?? Certificates (All Years)</h4>
-                    <h2>{certificateRows.length}</h2>
-                    <p>Total records in the system</p>
+                  <div className="kpi-card premium">
+                    <Award size={28} className="kpi-icon" />
+                    <div>
+                      <h4>Certificates (All Years)</h4>
+                      <h2>{certificateRows.length}</h2>
+                      <p>Total records in the system</p>
+                    </div>
                   </div>
                 </div>
               </div>

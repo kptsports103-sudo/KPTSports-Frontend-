@@ -747,6 +747,40 @@
   box-shadow: inset 0 0 0 6px rgba(255, 255, 255, 0.7);
 }
 
+/* 3D Stats Circle - Premium Style */
+.stats-circle-3d {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0 6px 12px rgba(255,255,255,0.5),
+    inset 0 -6px 12px rgba(0,0,0,0.15),
+    0 20px 40px rgba(0,0,0,0.15);
+  transition: transform 0.4s ease;
+  margin: 6px 0 12px;
+}
+
+.stats-circle-3d:hover {
+  transform: scale(1.05);
+}
+
+.stats-circle-inner {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+  font-weight: 700;
+  color: #0f172a;
+  box-shadow: inset 0 4px 10px rgba(0,0,0,0.08);
+}
+
 .stats-card-animated .stats-circle-animated,
 .stats-card-animated .stats-legend {
   justify-self: start;
@@ -889,6 +923,69 @@
 .kpi-card.active {
   border: 2px solid #2563eb;
   background: linear-gradient(135deg, #f0f9ff, #ffffff);
+}
+
+/* Premium KPI Card Styles */
+.kpi-card.premium {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 16px;
+  align-items: center;
+  transition: all 0.3s ease;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.kpi-card.premium:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.18);
+}
+
+.kpi-card.premium.gold-card {
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+}
+
+.kpi-card.premium.success-card {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.kpi-card.premium.warning-card {
+  background: linear-gradient(135deg, #fb923c, #ea580c);
+}
+
+.kpi-card.premium {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+}
+
+.kpi-icon {
+  background: rgba(255,255,255,0.25);
+  padding: 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  color: white;
+}
+
+.kpi-card.premium h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.kpi-card.premium h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.kpi-card.premium p {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.kpi-card.premium div {
+  flex: 1;
 }
 
 .stats-center {
