@@ -1553,39 +1553,108 @@ h3.stats-center-title {
 .advanced-analytics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 18px;
+  margin-bottom: 26px;
 }
 
 .advanced-card {
-  background: #ffffff;
-  border: 1px solid var(--card-border);
-  border-radius: 14px;
-  box-shadow: var(--card-shadow);
-  padding: 18px;
+  position: relative;
+  background: radial-gradient(circle at 85% 15%, rgba(240, 246, 255, 0.8), #ffffff 55%);
+  border: 1px solid #e3e8f4;
+  border-radius: 20px;
+  box-shadow: 0 14px 28px rgba(26, 41, 82, 0.08);
+  padding: 22px 24px;
+  overflow: hidden;
+}
+
+.advanced-card::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(191, 210, 239, 0.45);
+}
+
+.advanced-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.advanced-chip {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: #5f79a8;
+  background: #dbe7f8;
+}
+
+.advanced-chip.gold {
+  color: #a56c00;
+  background: #f8e8b8;
 }
 
 .advanced-card h4 {
-  margin: 0 0 8px;
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 600;
+  margin: 0;
+  color: #1e335e;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .advanced-card h2 {
-  margin: 0 0 6px;
-  color: var(--text-dark);
-  font-size: 28px;
+  margin: 12px 0 8px;
+  color: #1b2f5d;
+  font-size: 52px;
+  letter-spacing: -1px;
+  line-height: 1;
 }
 
 .advanced-card p {
   margin: 0;
-  color: var(--text-muted);
-  font-size: 13px;
+  color: #4d6189;
+  font-size: 30px;
+  line-height: 1;
+  padding-bottom: 22px;
 }
 
 .advanced-list {
-  line-height: 1.6;
+  line-height: 1.35;
+  white-space: pre-line;
+}
+
+.advanced-progress {
+  position: relative;
+  z-index: 2;
+  margin-top: 10px;
+}
+
+.advanced-progress-fill {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #8abaf0 0%, #c9def6 100%);
+}
+
+.insight-growth {
+  background:
+    radial-gradient(circle at 88% 14%, rgba(249, 238, 196, 0.8), rgba(255, 255, 255, 0.96) 55%),
+    #fff;
+}
+
+.insight-branches p {
+  font-size: 16px;
+  line-height: 1.7;
+  padding-bottom: 4px;
 }
 
 /* ================= QUICK STATS EXACT LAYOUT ================= */
@@ -2012,6 +2081,40 @@ h3.stats-center-title {
   .advanced-analytics {
     grid-template-columns: 1fr;
   }
+
+  .advanced-card h4 {
+    font-size: 24px;
+  }
+
+  .advanced-card h2 {
+    font-size: 44px;
+  }
+
+  .advanced-card p {
+    font-size: 18px;
+  }
+
+  .best-years-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .best-years-title {
+    font-size: 30px;
+  }
+
+  .best-years-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .top-year-year {
+    font-size: 46px;
+  }
+
+  .top-year-points {
+    font-size: 30px;
+  }
 }
 
 .table-card {
@@ -2062,17 +2165,120 @@ h3.stats-center-title {
   color: #000000;
 }
 
+.best-years-panel {
+  margin: 8px 0 50px;
+  padding: 20px 22px 24px;
+  border-radius: 24px;
+  border: 1px solid #d8e0ee;
+  background: linear-gradient(135deg, #f8fbff 0%, #ffffff 42%, #f9fcff 100%);
+  box-shadow: 0 18px 38px rgba(36, 54, 95, 0.1);
+}
+
+.best-years-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(169, 184, 213, 0.4);
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+
+.best-years-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #1a2f5a;
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.best-years-emoji {
+  font-size: 38px;
+}
+
+.best-years-info {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #dbe7f8;
+  color: #5f79a8;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.best-years-subtitle {
+  color: #5a7098;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.best-years-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
 .top-year-card-animated {
-  flex: 1;
-  min-width: 220px;
-  background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%);
+  position: relative;
+  min-height: 190px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(254, 249, 230, 0.85), rgba(255, 255, 255, 0.98) 60%),
+    #fff;
   color: var(--text-dark);
-  border-radius: 14px;
-  padding: 24px;
-  text-align: left;
+  border-radius: 20px;
+  padding: 40px 26px 24px;
+  text-align: center;
   animation: popIn 0.7s ease both;
-  border: 1px solid #fde68a;
-  box-shadow: var(--card-shadow);
+  border: 2px solid #f3d488;
+  box-shadow: 0 10px 24px rgba(198, 154, 58, 0.16);
+}
+
+.top-year-rank-badge {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 74px;
+  height: 42px;
+  border-radius: 999px;
+  padding: 0 14px;
+  background: linear-gradient(180deg, #ffe9a8 0%, #f8d984 100%);
+  border: 1px solid #efc96a;
+  color: #976100;
+  font-size: 24px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-year-year {
+  margin: 44px 0 8px;
+  font-size: 60px;
+  line-height: 1;
+  color: #1b2f5d;
+}
+
+.top-year-points {
+  margin: 0;
+  font-size: 42px;
+  font-weight: 700;
+  color: #243b69;
+}
+
+.top-year-card-animated.rank-2 .top-year-rank-badge {
+  background: linear-gradient(180deg, #edf2fb 0%, #dfe6f4 100%);
+  border-color: #c9d3e7;
+  color: #5d6f8f;
+}
+
+.top-year-card-animated.rank-3 .top-year-rank-badge {
+  background: linear-gradient(180deg, #ffe3c8 0%, #ffd1a5 100%);
+  border-color: #f5bc7c;
+  color: #9a5a20;
 }
 
 @keyframes fadeUp {

@@ -1337,13 +1337,25 @@ const AdminDashboard = () => {
 
             {showAdvanced && (
               <div id="advanced-analytics" className="advanced-analytics">
-                <div className="advanced-card">
-                  <h4>Certificate Generation Rate</h4>
+                <div className="advanced-card insight-rate">
+                  <div className="advanced-card-head">
+                    <h4>Certificate Generation Rate</h4>
+                    <span className="advanced-chip">i</span>
+                  </div>
                   <h2>{advancedCertificateInsights.generationRate}%</h2>
                   <p>{certificateStats.generated} of {certificateStats.total} generated</p>
+                  <div className="advanced-progress">
+                    <span
+                      className="advanced-progress-fill"
+                      style={{ width: `${Math.min(100, Number(advancedCertificateInsights.generationRate) || 0)}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="advanced-card">
-                  <h4>Year-over-Year Growth</h4>
+                <div className="advanced-card insight-growth">
+                  <div className="advanced-card-head">
+                    <h4>Year-over-Year Growth</h4>
+                    <span className="advanced-chip gold">↗</span>
+                  </div>
                   <h2>
                     {advancedCertificateInsights.growthPercent === null
                       ? "N/A"
@@ -1352,14 +1364,23 @@ const AdminDashboard = () => {
                   <p>
                     {advancedCertificateInsights.currentYearTotal} vs {advancedCertificateInsights.previousYearTotal} records
                   </p>
+                  <div className="advanced-progress">
+                    <span className="advanced-progress-fill" style={{ width: "28%" }} />
+                  </div>
                 </div>
-                <div className="advanced-card">
-                  <h4>Issued in {selectedCertificateYearLabel}</h4>
+                <div className="advanced-card insight-issued">
+                  <div className="advanced-card-head">
+                    <h4>Issued in {selectedCertificateYearLabel}</h4>
+                    <span className="advanced-chip">i</span>
+                  </div>
                   <h2>{advancedCertificateInsights.issuedThisYear}</h2>
                   <p>Certificates with generated IDs</p>
                 </div>
-                <div className="advanced-card">
-                  <h4>Top Branches ({selectedCertificateYearLabel})</h4>
+                <div className="advanced-card insight-branches">
+                  <div className="advanced-card-head">
+                    <h4>Top Branches ({selectedCertificateYearLabel})</h4>
+                    <span className="advanced-chip">i</span>
+                  </div>
                   <p className="advanced-list">
                     {advancedCertificateInsights.topBranches.length === 0
                       ? "No branch data available."
@@ -1374,27 +1395,34 @@ const AdminDashboard = () => {
           {/* =====================
               TOP YEARS
           ====================== */}
-          <div className="section-header compact">
-            <div className="section-title">?? Best Performing Years</div>
-            <div className="section-subtitle">Top 5 years by medal points</div>
-          </div>
-
-          <div style={{ display: "flex", gap: "20px", marginBottom: "50px", flexWrap: "wrap" }}>
-          {topYears.length === 0 ? (
-            <div className="iam-empty">No results yet to rank top years.</div>
-          ) : topYears.map((year, index) => (
-            <div
-              key={year.year}
-              className="top-year-card-animated"
-            >
-              <h1 style={{ margin: 0 }}>
-                {index === 0 ? "??" : "??"}
-              </h1>
-              <h2 style={{ margin: "10px 0" }}>{year.year}</h2>
-              <h3 style={{ margin: 0 }}>{year.totalPoints} Points</h3>
+          <div className="best-years-panel">
+            <div className="best-years-header">
+              <div className="best-years-title">
+                <span className="best-years-emoji">🏆</span>
+                Best Performing Years
+                <span className="best-years-info">i</span>
+              </div>
+              <div className="best-years-subtitle">Top 5 years by medal points ›</div>
             </div>
-          ))}
-        </div>
+
+            <div className="best-years-grid">
+              {topYears.length === 0 ? (
+                <div className="iam-empty">No results yet to rank top years.</div>
+              ) : topYears.map((year, index) => {
+                const rankIcon = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`;
+                return (
+                  <div
+                    key={year.year}
+                    className={`top-year-card-animated rank-${Math.min(index + 1, 4)}`}
+                  >
+                    <div className="top-year-rank-badge">{rankIcon}</div>
+                    <h2 className="top-year-year">{year.year}</h2>
+                    <h3 className="top-year-points">{year.totalPoints} Points</h3>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
       </div>
     </div>
 
