@@ -979,6 +979,8 @@ const AdminDashboard = () => {
     return certificateYear === "all" || String(row.year) === String(certificateYear);
   });
 
+  const selectedCertificateYearLabel = certificateYear === "all" ? "All Years" : String(certificateYear);
+
   const certificateStats = useMemo(() => {
     const generated = filteredCertificateRows.reduce((count, row) => {
       return count + (issuedCertificateByRowKey.has(getRowCertificateKey(row)) ? 1 : 0);
@@ -1004,15 +1006,6 @@ const AdminDashboard = () => {
   }, [filteredCertificateRows, issuedCertificateByRowKey, selectedCertificateYearLabel, certificateRows]);
 
   const filteredCertificateRowsByStatus = filteredCertificateRows.filter((row) => {
-    const isGenerated = issuedCertificateByRowKey.has(getRowCertificateKey(row));
-    if (filterMode === "generated") return isGenerated;
-    if (filterMode === "pending") return !isGenerated;
-    return true;
-  });
-
-  const selectedCertificateYearLabel = certificateYear === "all" ? "All Years" : String(certificateYear);
-
-  const advancedCertificateInsights = useMemo(() => {
     const yearCountMap = certificateRows.reduce((acc, row) => {
       const key = String(row?.year ?? "").trim();
       if (!key) return acc;
