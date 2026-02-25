@@ -1149,30 +1149,6 @@ const AdminDashboard = () => {
                 QUICK STATS - NEW LAYOUT
                 LEFT: Main stats card | RIGHT: Two stacked side cards
             ====================== */}
-            <div className="section-header compact">
-              <div className="section-header-left">
-                <div className="section-title">?? Quick Stats</div>
-                <div className="section-subtitle">Points by year (Individual + Group)</div>
-              </div>
-              <div className="quick-stats-controls">
-                <label className="quick-stats-label" htmlFor="quick-stats-year">Select Year</label>
-                <select
-                  id="quick-stats-year"
-                  name="quick-stats-year"
-                  className="quick-stats-select"
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                  disabled={medalData.length === 0}
-                >
-                  {medalData.map((item) => (
-                    <option key={item.year} value={item.year}>
-                      {item.year}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
             {medalData.length === 0 ? (
               <div className="iam-empty">No results yet to calculate points.</div>
             ) : (
@@ -1236,38 +1212,59 @@ const AdminDashboard = () => {
 
                   <div className="qs-divider" />
 
-                  <div className="qs-bars">
+                  <div className="qs-chart">
                     {(() => {
                       const yearsAsc = [...medalData].sort((a, b) => a.year - b.year);
                       const allPoints = yearsAsc.reduce((s, y) => s + (y.totalPoints || 0), 0);
                       const chartData = [...yearsAsc, { year: "All", totalPoints: allPoints }];
                       const max = Math.max(1, ...chartData.map((d) => d.totalPoints || 0));
+                      const ticks = [0, 20, 40, 60, 80, 100, 110, 120];
 
-                      return chartData.map((d) => {
-                        const h = Math.round(((d.totalPoints || 0) / max) * 100);
-                        const isSelected = String(d.year) === String(selectedStats?.year);
-                        const isAll = d.year === "All";
-
-                        return (
-                          <div key={String(d.year)} className="qs-bar-col">
-                            <div className="qs-bar-value">{d.totalPoints || 0}</div>
-                            <div className="qs-bar-track">
-                              <div
-                                className={["qs-bar-fill", isAll ? "all" : "", isSelected ? "selected" : ""].join(" ")}
-                                style={{ height: `${Math.max(h, 10)}%` }}
-                                title={`${d.year}: ${d.totalPoints || 0} points`}
-                              />
-                            </div>
-                            <div className="qs-bar-year">{d.year}</div>
+                      return (
+                        <>
+                          <div className="qs-y">
+                            {ticks.map((tick) => (
+                              <div key={tick} className="qs-y-row">
+                                <span>{tick}</span>
+                              </div>
+                            ))}
                           </div>
-                        );
-                      });
+
+                          <div className="qs-bars-area">
+                            <div className="qs-grid">
+                              {ticks.slice(1).map((tick) => (
+                                <div key={tick} className="qs-grid-line" />
+                              ))}
+                            </div>
+
+                            <div className="qs-bars">
+                              {chartData.map((d) => {
+                                const h = Math.round(((d.totalPoints || 0) / max) * 100);
+                                const isSelected = String(d.year) === String(selectedStats?.year);
+                                const isAll = d.year === "All";
+
+                                return (
+                                  <div key={String(d.year)} className="qs-bar-col">
+                                    <div className="qs-bar-value">{d.totalPoints || 0}</div>
+                                    <div
+                                      className={["qs-bar-fill", isAll ? "all" : "", isSelected ? "selected" : ""].join(" ")}
+                                      style={{ height: `${Math.max(h, 10)}%` }}
+                                      title={`${d.year}: ${d.totalPoints || 0} points`}
+                                    />
+                                    <div className="qs-bar-year">{d.year}</div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </>
+                      );
                     })()}
                   </div>
                 </div>
 
                 <div className="qs-side">
-                  <div className="qs-side-card">
+                  <div className="qs-side-card best">
                     <div className="qs-side-head">
                       <Trophy size={18} />
                       <span>Best Performing Year</span>
@@ -1277,7 +1274,7 @@ const AdminDashboard = () => {
                   </div>
 
                   <div
-                    className={`qs-side-card clickable ${filterMode === "total" ? "active" : ""}`}
+                    className={`qs-side-card total clickable ${filterMode === "total" ? "active" : ""}`}
                     onClick={() => setFilterMode("total")}
                   >
                     <div className="qs-side-head">
@@ -1289,7 +1286,7 @@ const AdminDashboard = () => {
                   </div>
 
                   <div
-                    className={`qs-side-card clickable ${filterMode === "generated" ? "active" : ""}`}
+                    className={`qs-side-card generated clickable ${filterMode === "generated" ? "active" : ""}`}
                     onClick={() => setFilterMode("generated")}
                   >
                     <div className="qs-side-head">
@@ -1301,7 +1298,7 @@ const AdminDashboard = () => {
                   </div>
 
                   <div
-                    className={`qs-side-card clickable ${filterMode === "pending" ? "active" : ""}`}
+                    className={`qs-side-card pending clickable ${filterMode === "pending" ? "active" : ""}`}
                     onClick={() => setFilterMode("pending")}
                   >
                     <div className="qs-side-head">
@@ -1312,7 +1309,7 @@ const AdminDashboard = () => {
                     <div className="qs-side-sub">Click to view pending only</div>
                   </div>
 
-                  <div className="qs-side-card">
+                  <div className="qs-side-card total-summary">
                     <div className="qs-side-head">
                       <Award size={18} />
                       <span>Certificates (All Years)</span>
