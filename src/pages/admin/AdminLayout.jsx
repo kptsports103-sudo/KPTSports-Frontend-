@@ -48,11 +48,13 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/users-manage', label: 'IAM Users', icon: 'U' },
     { path: '/admin/media-stats', label: 'Media Statistics & Calculator', icon: 'S' },
     { path: '/admin/media', label: 'Media Management', icon: 'M' },
+    { path: '/admin/update-pages', label: 'Content Management Dashboard', icon: 'C' },
     { path: '/admin/manage-home', label: 'Manage Home', icon: 'H' },
     { path: '/admin/manage-about', label: 'Manage About', icon: 'I' },
     { path: '/admin/manage-history', label: 'Manage History', icon: 'R' },
     { path: '/admin/manage-events', label: 'Manage Events', icon: 'E' },
-        { path: '/admin/manage-results', label: 'Manage Results', icon: 'T' },
+    { path: '/admin/manage-gallery', label: 'Manage Gallery', icon: 'G' },
+    { path: '/admin/manage-results', label: 'Manage Results', icon: 'T' },
   ];
 
   const creatorMenuItems = [

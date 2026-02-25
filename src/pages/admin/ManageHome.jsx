@@ -148,7 +148,19 @@ const ManageHome = () => {
       activityLogService.logActivity(
         'Home Page Updated',
         'Home Page',
-        'Content was successfully modified'
+        'Content was successfully modified',
+        [
+          { field: 'Hero Title', after: payload.heroTitle || '-' },
+          { field: 'Hero Subtitle', after: payload.heroSubtitle || '-' },
+          { field: 'Hero Buttons', after: String(payload.heroButtons.length) },
+          { field: 'Banners', after: String(payload.banners.length) },
+          { field: 'Achievements', after: String(payload.achievements.length) },
+          { field: 'Sports Categories', after: String(payload.sportsCategories.length) },
+          { field: 'Gallery Items', after: String(payload.gallery.length) },
+          { field: 'Upcoming Events', after: String(payload.upcomingEvents.length) },
+          { field: 'Clubs', after: String(payload.clubs.length) },
+          { field: 'Announcements', after: String(payload.announcements.length) }
+        ]
       );
       emitPageUpdate('Home Page');
       // Backward-compatible event for older listeners.

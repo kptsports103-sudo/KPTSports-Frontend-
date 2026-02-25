@@ -4,6 +4,8 @@ import AdminLayout from './AdminLayout';
 import activityLogService from '../../services/activityLog.service';
 import { CMS_PAGE_UPDATED } from '../../utils/eventBus';
 
+const CMS_SEEN_STORAGE_KEY = 'cms_page_last_seen_v1';
+
 const PAGE_META = {
   'Home Page': { title: 'Update Home', description: 'Manage home page content' },
   'About Page': { title: 'Update About', description: 'Manage about page content' },
@@ -56,6 +58,18 @@ const UpdateDetails = () => {
     };
   }, [pageName]);
 
+  useEffect(() => {
+    if (!pageName) return;
+    try {
+      const raw = localStorage.getItem(CMS_SEEN_STORAGE_KEY);
+      const seenMap = raw ? JSON.parse(raw) : {};
+      seenMap[pageName] = new Date().toISOString();
+      localStorage.setItem(CMS_SEEN_STORAGE_KEY, JSON.stringify(seenMap));
+    } catch (error) {
+      console.error('Failed to update seen state for CMS notifications:', error);
+    }
+  }, [pageName]);
+
   return (
     <AdminLayout>
       <div style={{ padding: 20, color: '#000' }}>
@@ -82,6 +96,19 @@ const UpdateDetails = () => {
                 }}
               >
                 <p style={{ margin: '0 0 6px 0' }}>Changes: {log.details || log.action}</p>
+                {Array.isArray(log.changes) && log.changes.length > 0 ? (
+                  <div style={{ margin: '0 0 8px 0', padding: '8px 10px', background: '#f8fafc', borderRadius: 6, border: '1px solid #e5e7eb' }}>
+                    <p style={{ margin: '0 0 6px 0', fontWeight: 700 }}>What changed</p>
+                    <ul style={{ margin: 0, paddingLeft: 16 }}>
+                      {log.changes.slice(0, 6).map((change, idx) => (
+                        <li key={`${log._id}-c-${idx}`} style={{ marginBottom: 4 }}>
+                          <b>{change.field}</b>
+                          {change.before || change.after ? `: ${change.before || '-'} -> ${change.after || '-'}` : ''}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
                 <p style={{ margin: '0 0 6px 0' }}>
                   Updated By: {log.adminName || 'Admin'} ({log.adminEmail || 'No email'})
                 </p>

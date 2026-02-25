@@ -37,6 +37,11 @@ const PageLatestChangeCard = ({ pageName }) => {
       ) : latest ? (
         <>
           <p style={{ margin: '0 0 6px 0', color: '#111827' }}>Changes: {latest.details || latest.action}</p>
+          {Array.isArray(latest.changes) && latest.changes.length > 0 ? (
+            <p style={{ margin: '0 0 6px 0', color: '#111827' }}>
+              What changed: {latest.changes.slice(0, 3).map((c) => c.field).join(', ')}
+            </p>
+          ) : null}
           <p style={{ margin: '0 0 6px 0', color: '#111827' }}>
             Updated By: {latest.adminName || 'Admin'} ({latest.adminEmail || 'No email'})
           </p>

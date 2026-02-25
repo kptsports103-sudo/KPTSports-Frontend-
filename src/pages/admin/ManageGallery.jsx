@@ -195,7 +195,13 @@ const ManageGallery = () => {
       activityLogService.logActivity(
         'Updated Gallery',
         'Gallery Page',
-        editingId ? `Updated gallery: ${form.title}` : `Created new gallery: ${form.title}`
+        editingId ? `Updated gallery: ${form.title}` : `Created new gallery: ${form.title}`,
+        [
+          { field: 'Gallery Title', after: form.title || '-' },
+          { field: 'Visibility', after: form.visibility || '-' },
+          { field: 'Media Items', after: String(payload.media.length) },
+          { field: 'Operation', after: editingId ? 'Update' : 'Create' }
+        ]
       );
     } catch (error) {
       console.error('Error saving gallery:', error);

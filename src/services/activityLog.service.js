@@ -19,7 +19,7 @@ const ALLOWED_PAGE_ACTIONS = {
 };
 
 // Log admin activity
-const logActivity = async (action, pageName, details = '') => {
+const logActivity = async (action, pageName, details = '', changes = []) => {
   try {
     const user = getUser();
     if (!user) {
@@ -38,7 +38,8 @@ const logActivity = async (action, pageName, details = '') => {
     const payload = {
       action,
       pageName,
-      details
+      details,
+      changes: Array.isArray(changes) ? changes : []
     };
 
     const response = await api.post('/admin-activity', payload);

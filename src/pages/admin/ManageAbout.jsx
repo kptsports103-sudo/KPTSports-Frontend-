@@ -75,7 +75,13 @@ const ManageAbout = () => {
       activityLogService.logActivity(
         'Updated About Page Content',
         'About Page',
-        'Updated banner images, boxes, header and text'
+        'Updated banner images, boxes, header and text',
+        [
+          { field: 'Banner Images', after: String(payload.bannerImages.length) },
+          { field: 'Info Boxes', after: String(payload.boxes.filter((b) => String(b || '').trim()).length) },
+          { field: 'Main Header', after: String(payload.bigHeader || '-').slice(0, 120) },
+          { field: 'Main Text', after: String(payload.bigText || '-').slice(0, 120) }
+        ]
       );
     } catch (err) {
       console.error('Save failed:', err);

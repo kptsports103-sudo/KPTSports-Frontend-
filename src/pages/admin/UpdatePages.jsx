@@ -4,6 +4,8 @@ import AdminLayout from './AdminLayout';
 import activityLogService from '../../services/activityLog.service';
 import { CMS_PAGE_UPDATED } from '../../utils/eventBus';
 
+const CMS_SEEN_STORAGE_KEY = 'cms_page_last_seen_v1';
+
 const UPDATE_CARDS = [
   { title: 'Update Home', icon: '🏠', description: 'Manage home page content', pageName: 'Home Page' },
   { title: 'Update About', icon: 'ℹ️', description: 'Manage about page content', pageName: 'About Page' },
@@ -17,6 +19,20 @@ const UpdatePages = () => {
   const navigate = useNavigate();
   const [dateTime, setDateTime] = useState(new Date());
   const [changeCountByPage, setChangeCountByPage] = useState({});
+  const [latestByPage, setLatestByPage] = useState({});
+
+  const readSeenMap = () => {
+    try {
+      const raw = localStorage.getItem(CMS_SEEN_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const writeSeenMap = (next) => {
+    localStorage.setItem(CMS_SEEN_STORAGE_KEY, JSON.stringify(next));
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -28,18 +44,29 @@ const UpdatePages = () => {
   useEffect(() => {
     const loadPageChangeCounts = async () => {
       try {
+        const seenMap = readSeenMap();
         const responses = await Promise.all(
-          UPDATE_CARDS.map((card) => activityLogService.getPageActivityLogs(card.pageName, 20))
+          UPDATE_CARDS.map((card) => activityLogService.getPageActivityLogs(card.pageName, 50))
         );
 
         const next = {};
+        const nextLatest = {};
         UPDATE_CARDS.forEach((card, index) => {
-          next[card.pageName] = Array.isArray(responses[index]?.data) ? responses[index].data.length : 0;
+          const logs = Array.isArray(responses[index]?.data) ? responses[index].data : [];
+          const latest = logs[0]?.createdAt || null;
+          nextLatest[card.pageName] = latest;
+          const lastSeen = seenMap[card.pageName] ? new Date(seenMap[card.pageName]).getTime() : 0;
+          next[card.pageName] = logs.filter((log) => {
+            const created = log?.createdAt ? new Date(log.createdAt).getTime() : 0;
+            return created > lastSeen;
+          }).length;
         });
         setChangeCountByPage(next);
+        setLatestByPage(nextLatest);
       } catch (error) {
         console.error('Failed to load page change counts:', error);
         setChangeCountByPage({});
+        setLatestByPage({});
       }
     };
 
@@ -51,6 +78,14 @@ const UpdatePages = () => {
       window.removeEventListener('HOME_UPDATED', loadPageChangeCounts);
     };
   }, []);
+
+  const handleOpenPageChanges = (pageName) => {
+    const seenMap = readSeenMap();
+    seenMap[pageName] = latestByPage[pageName] || new Date().toISOString();
+    writeSeenMap(seenMap);
+    setChangeCountByPage((prev) => ({ ...prev, [pageName]: 0 }));
+    navigate(`/admin/update-details/${encodeURIComponent(pageName)}`);
+  };
 
   return (
     <AdminLayout>
@@ -70,7 +105,7 @@ const UpdatePages = () => {
             return (
               <div
                 key={card.pageName}
-                onClick={() => navigate(`/admin/update-details/${encodeURIComponent(card.pageName)}`)}
+                onClick={() => handleOpenPageChanges(card.pageName)}
                 style={styles.card}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-4px)';

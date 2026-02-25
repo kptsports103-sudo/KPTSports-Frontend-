@@ -38,7 +38,11 @@ const ManageHistory = () => {
       activityLogService.logActivity(
         'Updated History Page Content',
         'History Page',
-        `Updated ${timeline.length} timeline entries`
+        `Updated ${timeline.length} timeline entries`,
+        [
+          { field: 'Timeline Entries', after: String(timeline.length) },
+          { field: 'Year Range', after: timeline.length ? `${timeline[0]?.year || '-'} to ${timeline[timeline.length - 1]?.year || '-'}` : '-' }
+        ]
       );
     } catch {
       alert('Save failed');

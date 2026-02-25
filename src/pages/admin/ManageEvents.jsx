@@ -107,7 +107,12 @@ const ManageEvents = () => {
       activityLogService.logActivity(
         'Updated Events Page',
         'Events Page',
-        `Updated ${cleanedHighlights.length} events`
+        `Updated ${cleanedHighlights.length} events`,
+        [
+          { field: 'About Section', after: String(boxContent || '-').slice(0, 120) },
+          { field: 'Events Count', after: String(cleanedHighlights.length) },
+          { field: 'Primary Event', after: cleanedHighlights[0]?.title || '-' }
+        ]
       );
     } catch (err) {
       console.error('Save error:', err.response?.data || err);

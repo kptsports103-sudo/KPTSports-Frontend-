@@ -319,7 +319,14 @@ const ManageResults = () => {
       await activityLogService.logActivity(
         'Updated Match Results',
         'Results Page',
-        editingId ? `Updated result for ${form.event}` : `Created new result for ${form.event}`
+        editingId ? `Updated result for ${form.event}` : `Created new result for ${form.event}`,
+        [
+          { field: 'Operation', after: editingId ? 'Update Individual Result' : 'Create Individual Result' },
+          { field: 'Player', after: form.name || '-' },
+          { field: 'Event', after: form.event || '-' },
+          { field: 'Year', after: String(form.year || '-') },
+          { field: 'Medal', after: form.medal || '-' }
+        ]
       );
       fetchResultsActivityLogs();
     } catch (error) {
@@ -536,7 +543,13 @@ const ManageResults = () => {
       await activityLogService.logActivity(
         'Updated Match Results',
         'Results Page',
-        `Created ${savedEventCount} result event(s) for year ${selectedYear}`
+        `Created ${savedEventCount} result event(s) for year ${selectedYear}`,
+        [
+          { field: 'Operation', after: 'Bulk Create Individual Results' },
+          { field: 'Academic Year', after: String(selectedYear || '-') },
+          { field: 'Saved Events', after: String(savedEventCount) },
+          { field: 'Failed Players', after: failedPlayers.length ? failedPlayers.slice(0, 5).join(', ') : '0' }
+        ]
       );
       fetchResultsActivityLogs();
     } catch (error) {
@@ -723,7 +736,15 @@ const ManageResults = () => {
       await activityLogService.logActivity(
         'Updated Match Results',
         'Results Page',
-        editingGroupId ? `Updated group result for ${groupForm.event}` : `Created new group result for ${groupForm.event}`
+        editingGroupId ? `Updated group result for ${groupForm.event}` : `Created new group result for ${groupForm.event}`,
+        [
+          { field: 'Operation', after: editingGroupId ? 'Update Group Result' : 'Create Group Result' },
+          { field: 'Team', after: groupForm.teamName || '-' },
+          { field: 'Event', after: groupForm.event || '-' },
+          { field: 'Year', after: String(groupForm.year || '-') },
+          { field: 'Medal', after: groupForm.medal || '-' },
+          { field: 'Members', after: String((groupForm.manualMembers || []).filter((m) => (m?.name || '').trim()).length) }
+        ]
       );
       fetchResultsActivityLogs();
     } catch (error) {
