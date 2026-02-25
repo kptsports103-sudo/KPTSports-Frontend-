@@ -81,7 +81,7 @@ const MediaPerformanceCard = () => {
         <div className="mt-5 grid grid-cols-1 gap-6 xl:grid-cols-2">
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <h3 className="text-base font-semibold text-slate-900">Storage Usage (1 GB Limit)</h3>
-            <div className="h-[260px] mt-2">
+            <div className="h-[260px] w-full min-w-[300px] mt-2" style={{ minHeight: '260px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={storageData} dataKey="value" outerRadius={90} label>
@@ -111,7 +111,7 @@ const MediaPerformanceCard = () => {
 
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <h3 className="text-base font-semibold text-slate-900">Real-time Bandwidth Trend</h3>
-            <div className="h-[260px] mt-2">
+            <div className="h-[260px] w-full min-w-[300px] mt-2" style={{ minHeight: '260px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={history}>
                   <XAxis dataKey="time" tick={{ fontSize: 11 }} />
