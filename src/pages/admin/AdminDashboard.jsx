@@ -892,6 +892,9 @@ const AdminDashboard = () => {
     ? medalData.find((m) => String(m.year) === String(selectedYear)) || medalData[0]
     : null;
 
+  // Animated counter for total points
+  const animatedPoints = useAnimatedCounter(selectedStats?.totalPoints || 0);
+
   // Calculate trend data for storytelling
   const calculateTrend = (current, previous) => {
     if (!previous || previous === 0) return { percent: 0, direction: 'neutral', label: 'No data' };
