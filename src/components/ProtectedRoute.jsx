@@ -11,16 +11,16 @@ export default function ProtectedRoute({ role, roles, exactRoles, children }) {
     : [];
   const strictlyAllowedRoles = Array.isArray(exactRoles) ? exactRoles : [];
 
-  if (!user) return <Navigate to="/login" />;
+  if (!user) return <Navigate to="/login" replace />;
   if (strictlyAllowedRoles.length > 0) {
     const currentRole = normalizeRole(user.role);
     const normalizedExactRoles = strictlyAllowedRoles.map(normalizeRole);
     if (!normalizedExactRoles.includes(currentRole)) {
-      return <Navigate to="/login" />;
+      return <Navigate to="/login" replace />;
     }
   }
   if (allowedRoles.length > 0 && !hasRequiredRole(user.role, allowedRoles)) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
   return children;

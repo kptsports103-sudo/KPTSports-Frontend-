@@ -46,7 +46,7 @@ const Navbar = () => {
     setMobileOpen(false);
   }, [location.pathname]);
 
-  const goToLogin = () => navigate('/login');
+  const goToLogin = () => navigate('/login', { replace: true });
 
   const toggleDarkMode = () => {
     const next = !darkMode;

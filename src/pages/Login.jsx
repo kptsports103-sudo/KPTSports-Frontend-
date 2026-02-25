@@ -55,16 +55,16 @@ export default function Login() {
   const handleLoginSuccess = (userRole) => {
     switch (userRole) {
       case 'creator':
-        navigate('/admin/creator-dashboard');
+        navigate('/admin/creator-dashboard', { replace: true });
         break;
       case 'superadmin':
-        navigate('/admin/super-admin-dashboard');
+        navigate('/admin/super-admin-dashboard', { replace: true });
         break;
       case 'admin':
-        navigate('/admin/dashboard');
+        navigate('/admin/dashboard', { replace: true });
         break;
       default:
-        navigate('/');
+        navigate('/', { replace: true });
     }
   };
 

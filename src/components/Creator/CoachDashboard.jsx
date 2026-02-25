@@ -72,7 +72,7 @@ const CoachDashboard = () => {
           <button
             onClick={() => {
               logout();
-              navigate('/');
+              navigate('/', { replace: true });
             }}
             className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4 rounded-lg hover:from-red-700 hover:to-red-800 transition duration-300 mb-8 shadow-lg font-semibold"
           >

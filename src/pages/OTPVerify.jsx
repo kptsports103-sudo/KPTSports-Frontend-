@@ -35,15 +35,15 @@ const OTPVerify = () => {
 
       if (role === 'creator') {
 
-        navigate('/admin/creator-dashboard');
+        navigate('/admin/creator-dashboard', { replace: true });
 
       } else if (role === 'superadmin') {
 
-        navigate('/admin/super-admin-dashboard');
+        navigate('/admin/super-admin-dashboard', { replace: true });
 
       } else {
 
-        navigate('/admin/dashboard');
+        navigate('/admin/dashboard', { replace: true });
 
       }
 

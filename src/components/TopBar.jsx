@@ -8,7 +8,7 @@ const TopBar = ({ toggleTheme }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   return (
