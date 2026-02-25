@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import VisitorsComparisonChart from "../../admin/components/VisitorsComparisonChart";
 import { useRealtimeAnalytics } from "../../hooks/useRealtimeAnalytics";
 import { useAdminAlerts } from "../../hooks/useAdminAlerts";
+import useAnimatedCounter from "../../hooks/useAnimatedCounter";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import QRCode from "qrcode";
@@ -87,31 +88,6 @@ const normalizeMedalKey = (medal = "") => {
   if (value === "silver") return "silver";
   if (value === "bronze") return "bronze";
   return null;
-};
-
-// ============================================
-// ANIMATED COUNTER HOOK
-// ============================================
-const useAnimatedCounter = (value, duration = 800) => {
-  const [display, setDisplay] = useState(0);
-
-  useEffect(() => {
-    let start = 0;
-    const increment = value / (duration / 16);
-    const interval = setInterval(() => {
-      start += increment;
-      if (start >= value) {
-        setDisplay(value);
-        clearInterval(interval);
-      } else {
-        setDisplay(Math.floor(start));
-      }
-    }, 16);
-
-    return () => clearInterval(interval);
-  }, [value, duration]);
-
-  return display;
 };
 
 const AdminDashboard = () => {

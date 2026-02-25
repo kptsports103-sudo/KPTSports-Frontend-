@@ -10,4 +10,7 @@ export default defineConfig({
     cors: true,
     historyApiFallback: true
   },
+  build: {
+    sourcemap: true
+  }
 });
