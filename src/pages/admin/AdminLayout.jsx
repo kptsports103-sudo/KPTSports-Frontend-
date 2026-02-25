@@ -2,7 +2,18 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import activityLogService from '../../services/activityLog.service';
+import { CMS_PAGE_UPDATED } from '../../utils/eventBus';
 import '../../admin.css';
+
+const CMS_SEEN_STORAGE_KEY = 'cms_page_last_seen_v1';
+const CMS_PAGES = [
+  'Home Page',
+  'About Page',
+  'History Page',
+  'Events Page',
+  'Gallery Page',
+  'Results Page'
+];
 
 const AdminLayout = ({ children }) => {
   const location = useLocation();
@@ -12,6 +23,41 @@ const AdminLayout = ({ children }) => {
   const [showActivityHistory, setShowActivityHistory] = useState(false);
   const [activityLogs, setActivityLogs] = useState([]);
   const [loadingActivity, setLoadingActivity] = useState(false);
+  const [cmsUnreadCount, setCmsUnreadCount] = useState(0);
+
+  const readSeenMap = () => {
+    try {
+      const raw = localStorage.getItem(CMS_SEEN_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const loadCmsUnreadCount = async () => {
+    try {
+      const seenMap = readSeenMap();
+      const responses = await Promise.all(
+        CMS_PAGES.map((page) => activityLogService.getPageActivityLogs(page, 50))
+      );
+
+      const unread = responses.reduce((sum, response, index) => {
+        const pageName = CMS_PAGES[index];
+        const logs = Array.isArray(response?.data) ? response.data : [];
+        const lastSeen = seenMap[pageName] ? new Date(seenMap[pageName]).getTime() : 0;
+        const pageUnread = logs.filter((log) => {
+          const created = log?.createdAt ? new Date(log.createdAt).getTime() : 0;
+          return created > lastSeen;
+        }).length;
+        return sum + pageUnread;
+      }, 0);
+
+      setCmsUnreadCount(unread);
+    } catch (error) {
+      console.error('Failed to load CMS unread count:', error);
+      setCmsUnreadCount(0);
+    }
+  };
 
   // Fetch activity logs when profile is clicked
   const fetchActivityLogs = async () => {
@@ -41,6 +87,19 @@ const AdminLayout = ({ children }) => {
       refreshUser();
     }
   }, []);
+
+  useEffect(() => {
+    loadCmsUnreadCount();
+
+    const refreshCounts = () => loadCmsUnreadCount();
+    window.addEventListener(CMS_PAGE_UPDATED, refreshCounts);
+    window.addEventListener('HOME_UPDATED', refreshCounts);
+
+    return () => {
+      window.removeEventListener(CMS_PAGE_UPDATED, refreshCounts);
+      window.removeEventListener('HOME_UPDATED', refreshCounts);
+    };
+  }, [location.pathname]);
   const isCreator = user?.role === 'creator';
 
   const adminMenuItems = [
@@ -227,9 +286,31 @@ const AdminLayout = ({ children }) => {
               key={item.path}
               to={item.path}
               className={`menu-item ${location.pathname === item.path ? 'active' : ''}`}
+              style={{ position: 'relative' }}
             >
               <span style={{ marginRight: 10 }}>{item.icon}</span>
               {isSidebarOpen && item.label}
+              {item.path === '/admin/update-pages' && cmsUnreadCount > 0 ? (
+                <span
+                  style={{
+                    marginLeft: 'auto',
+                    minWidth: '20px',
+                    height: '20px',
+                    borderRadius: '999px',
+                    padding: '0 6px',
+                    background: '#dc2626',
+                    color: '#fff',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  title={`${cmsUnreadCount} unread content change${cmsUnreadCount > 1 ? 's' : ''}`}
+                >
+                  {cmsUnreadCount > 99 ? '99+' : cmsUnreadCount}
+                </span>
+              ) : null}
             </Link>
           ))}
         </div>
