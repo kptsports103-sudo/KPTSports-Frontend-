@@ -3,6 +3,7 @@ import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
 import AdminLayout from './AdminLayout';
 import PageLatestChangeCard from '../../components/PageLatestChangeCard';
+import { CircleHelp, Pencil, Plus, Save, X } from 'lucide-react';
 
 const DEFAULT_STATE = {
   bannerImages: [{ image: '', year: '', fixed: false }],
@@ -70,8 +71,7 @@ const ManageAbout = () => {
       alert('Content updated successfully');
       setIsEditing(false);
       loadContent();
-      
-      // Log the activity
+
       activityLogService.logActivity(
         'Updated About Page Content',
         'About Page',
@@ -126,7 +126,10 @@ const ManageAbout = () => {
   return (
     <AdminLayout>
       <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
-        <h2 style={{ color: '#000', fontSize: '36px', fontWeight: 700, marginBottom: '6px' }}>ℹ️ Update About</h2>
+        <h2 style={{ color: '#000', fontSize: '36px', fontWeight: 700, marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <CircleHelp size={32} color="#0b3ea8" />
+          Update About
+        </h2>
         <p style={{ marginTop: 0, marginBottom: '12px', color: '#000' }}>Manage about page content</p>
         <PageLatestChangeCard pageName="About Page" />
         <button
@@ -144,14 +147,13 @@ const ManageAbout = () => {
           }}
         >
           {isEditing ? (
-            'Cancel'
+            <>
+              <X size={16} />
+              Cancel
+            </>
           ) : (
             <>
-              <img
-                src="/Edit button.png"
-                alt="Edit"
-                style={{ width: '16px', height: '16px' }}
-              />
+              <Pencil size={16} />
               Edit
             </>
           )}
@@ -246,7 +248,8 @@ const ManageAbout = () => {
                     gap: '8px'
                   }}
                 >
-                  + Add Banner
+                  <Plus size={16} />
+                  Add Banner
                 </button>
                 <p style={{ margin: '8px 0 0', color: '#666', fontSize: '14px' }}>
                   Click to add a new banner image
@@ -302,11 +305,7 @@ const ManageAbout = () => {
                   'Saving...'
                 ) : (
                   <>
-                    <img
-                      src="/Save button.png"
-                      alt="Save"
-                      style={{ width: '18px', height: '18px' }}
-                    />
+                    <Save size={18} />
                     Save
                   </>
                 )}
@@ -320,4 +319,3 @@ const ManageAbout = () => {
 };
 
 export default ManageAbout;
-

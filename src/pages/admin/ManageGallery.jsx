@@ -4,6 +4,7 @@ import activityLogService from '../../services/activityLog.service';
 import AdminLayout from './AdminLayout';
 import { confirmAction } from '../../utils/notify';
 import PageLatestChangeCard from '../../components/PageLatestChangeCard';
+import { Image as ImageIcon, Pencil, Trash2, Plus, Save, X } from 'lucide-react';
 
 const ManageGallery = () => {
   const [galleries, setGalleries] = useState([]);
@@ -218,7 +219,10 @@ const ManageGallery = () => {
   return (
     <AdminLayout>
       <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
-        <h3 style={{ fontSize: '34px', fontWeight: '700', marginBottom: '6px' }}>🖼️ Update Gallery</h3>
+        <h3 style={{ fontSize: '34px', fontWeight: '700', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <ImageIcon size={30} color="#0b3ea8" />
+          Update Gallery
+        </h3>
         <p style={{ marginTop: 0, marginBottom: '12px', color: '#000' }}>Manage gallery page content</p>
         <PageLatestChangeCard pageName="Gallery Page" />
 
@@ -237,11 +241,7 @@ const ManageGallery = () => {
                 gap: '8px'
               }}
             >
-              <img
-                src="/Edit button.png"
-                alt="Edit"
-                style={{ width: '16px', height: '16px' }}
-              />
+              <Pencil size={16} />
               Edit
             </button>
           ) : (
@@ -249,7 +249,7 @@ const ManageGallery = () => {
               onClick={resetForm}
               style={{ padding: '8px 14px', background: '#dee2e6', color: '#000', border: '1px solid #adb5bd' }}
             >
-              ❌ Cancel
+              <X size={16} style={{ marginRight: '6px' }} /> Cancel
             </button>
           )}
         </div>
@@ -286,7 +286,7 @@ const ManageGallery = () => {
                       title="Edit"
                       aria-label="Edit"
                     >
-                      <img src="/Edit button.png" alt="Edit" style={{ width: '28px', height: '28px' }} />
+                      <Pencil size={20} color="#1f2937" />
                     </button>
                     <button
                       style={{ background: 'none', border: 'none', padding: 0, marginLeft: '10px', cursor: 'pointer', verticalAlign: 'middle' }}
@@ -294,7 +294,7 @@ const ManageGallery = () => {
                       title="Delete"
                       aria-label="Delete"
                     >
-                      <img src="/Delete button.png" alt="Delete" style={{ width: '28px', height: '28px' }} />
+                      <Trash2 size={20} color="#dc2626" />
                     </button>
                   </td>
                 </tr>
@@ -388,11 +388,7 @@ const ManageGallery = () => {
                         fontSize: 14
                       }}
                     >
-                      <img
-                        src="/Add button.png"
-                        alt="Add"
-                        style={{ width: '16px', height: '16px' }}
-                      />
+                      <Plus size={16} />
                       Add Row
                     </button>
                   </td>
@@ -426,11 +422,7 @@ const ManageGallery = () => {
                   justifyContent: 'center'
                 }}
               >
-                <img
-                  src="/Save button.png"
-                  alt="Save"
-                  style={{ width: '18px', height: '18px' }}
-                />
+                <Save size={18} />
                 Save Gallery
               </button>
             </div>
@@ -520,4 +512,6 @@ const ManageGallery = () => {
 };
 
 export default ManageGallery;
+
+
 

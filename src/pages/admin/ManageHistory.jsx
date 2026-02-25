@@ -3,6 +3,7 @@ import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
 import AdminLayout from './AdminLayout';
 import PageLatestChangeCard from '../../components/PageLatestChangeCard';
+import { History, Pencil, Plus, Save, X } from 'lucide-react';
 
 const ManageHistory = () => {
   const [timeline, setTimeline] = useState([]);
@@ -33,8 +34,7 @@ const ManageHistory = () => {
       alert('Timeline updated');
       setIsEditing(false);
       loadTimeline();
-      
-      // Log the activity
+
       activityLogService.logActivity(
         'Updated History Page Content',
         'History Page',
@@ -71,7 +71,10 @@ const ManageHistory = () => {
         <PageLatestChangeCard pageName="History Page" />
         <header style={header}>
           <div>
-            <h2 style={{ ...title, margin: 0 }}>📜 Update History</h2>
+            <h2 style={{ ...title, margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <History size={26} />
+              Update History
+            </h2>
             <p style={{ margin: '6px 0 0 0', color: '#000' }}>Manage history page content</p>
           </div>
           <button
@@ -86,23 +89,19 @@ const ManageHistory = () => {
           >
             {!isEditing ? (
               <>
-                <img
-                  src="/Edit button.png"
-                  alt="Edit"
-                  style={{ width: '16px', height: '16px' }}
-                />
+                <Pencil size={16} />
                 Edit
               </>
             ) : (
               <>
-                ❌ Cancel
+                <X size={16} />
+                Cancel
               </>
             )}
           </button>
         </header>
 
         {!isEditing ? (
-          /* ================= VIEW MODE ================= */
           <table style={table}>
             <thead>
               <tr style={thead}>
@@ -124,7 +123,6 @@ const ManageHistory = () => {
             </tbody>
           </table>
         ) : (
-          /* ================= EDIT MODE ================= */
           <form onSubmit={saveTimeline}>
             <table style={table}>
               <thead>
@@ -186,11 +184,7 @@ const ManageHistory = () => {
                   gap: '8px'
                 }}
               >
-                <img
-                  src="/Add button.png"
-                  alt="Add"
-                  style={{ width: '18px', height: '18px' }}
-                />
+                <Plus size={18} />
                 Add Row
               </button>
               <button
@@ -207,11 +201,7 @@ const ManageHistory = () => {
                   'Saving...'
                 ) : (
                   <>
-                    <img
-                      src="/Save button.png"
-                      alt="Save"
-                      style={{ width: '18px', height: '18px' }}
-                    />
+                    <Save size={18} />
                     Save Changes
                   </>
                 )}
@@ -223,8 +213,6 @@ const ManageHistory = () => {
     </AdminLayout>
   );
 };
-
-/* ===================== STYLES ===================== */
 
 const page = {
   background: '#f4f6f8',
@@ -286,14 +274,13 @@ const tdVenue = { ...td };
 const rowEven = { background: '#ffffff' };
 const rowOdd = { background: '#f5f7fa' };
 
-/* 🔥 FIXED INPUT STYLE 🔥 */
 const input = {
   width: '100%',
   padding: '6px 8px',
   border: '1px solid #000',
   borderRadius: '4px',
-  color: '#000000f0',              // ✅ TEXT COLOR BLACK
-  backgroundColor: '#fff',    // ✅ WHITE BACKGROUND
+  color: '#000000f0',
+  backgroundColor: '#fff',
   fontSize: '18px'
 };
 
@@ -347,4 +334,3 @@ const btnRemove = {
 };
 
 export default ManageHistory;
-

@@ -3,6 +3,7 @@ import AdminLayout from './AdminLayout';
 import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
 import PageLatestChangeCard from '../../components/PageLatestChangeCard';
+import { CalendarDays, Pencil, Plus, Save } from 'lucide-react';
 
 const ManageEvents = () => {
   const [boxContent, setBoxContent] = useState('');
@@ -127,7 +128,10 @@ const ManageEvents = () => {
     return (
       <AdminLayout>
         <div style={pageStyle}>
-          <h1 style={pageTitle}>📅 Update Events</h1>
+          <h1 style={{ ...pageTitle, display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <CalendarDays size={30} />
+          Update Events
+        </h1>
           <p style={{ marginTop: 0, marginBottom: '12px', color: '#000' }}>Manage events page content</p>
           <PageLatestChangeCard pageName="Events Page" />
           <p style={{ color: '#000' }}>Loading...</p>
@@ -140,7 +144,10 @@ const ManageEvents = () => {
   return (
     <AdminLayout>
       <div style={pageStyle}>
-        <h1 style={pageTitle}>📅 Update Events</h1>
+        <h1 style={{ ...pageTitle, display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <CalendarDays size={30} />
+          Update Events
+        </h1>
         <p style={{ marginTop: 0, marginBottom: '12px', color: '#000' }}>Manage events page content</p>
         <PageLatestChangeCard pageName="Events Page" />
 
@@ -158,11 +165,7 @@ const ManageEvents = () => {
                 gap: '8px'
               }}
             >
-              <img
-                src="/Edit button.png"
-                alt="Edit"
-                style={{ width: '16px', height: '16px' }}
-              />
+              <Pencil size={16} />
               Edit
             </button>
           )}
@@ -182,11 +185,7 @@ const ManageEvents = () => {
                   'Saving...'
                 ) : (
                   <>
-                    <img
-                      src="/Save button.png"
-                      alt="Save"
-                      style={{ width: '16px', height: '16px' }}
-                    />
+                    <Save size={16} />
                     Save All
                   </>
                 )}
@@ -293,11 +292,7 @@ const ManageEvents = () => {
                 gap: '8px'
               }}
             >
-              <img
-                src="/Add button.png"
-                alt="Add"
-                style={{ width: '16px', height: '16px' }}
-              />
+              <Plus size={16} />
               Add Row
             </button>
           )}
@@ -423,4 +418,6 @@ const errorBox = { background: '#f8d7da', color: '#721c24', padding: '10px', bor
 const successBox = { background: '#d4edda', color: '#155724', padding: '10px', borderRadius: '6px', marginBottom: '10px' };
 
 export default ManageEvents;
+
+
 
