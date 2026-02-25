@@ -12,28 +12,6 @@ import api from "../../services/api";
 import { Trophy, Award, Clock, Medal, CheckCircle, AlertCircle, TrendingUp, TrendingDown } from "lucide-react";
 
 // ============================================
-// MEDAL GRADIENT SYSTEM (Professional)
-// ============================================
-const medalGradients = {
-  gold: "linear-gradient(135deg, #eab308, #facc15)",
-  silver: "linear-gradient(135deg, #94a3b8, #cbd5e1)",
-  bronze: "linear-gradient(135deg, #b45309, #d97706)",
-};
-
-// Professional color system
-const colors = {
-  primary: "#2563EB",
-  success: "#16A34A",
-  warning: "#F59E0B",
-  danger: "#DC2626",
-  neutral900: "#0F172A",
-  neutral100: "#F1F5F9",
-  gold: "#EAB308",
-  silver: "#94A3B8",
-  bronze: "#B45309",
-};
-
-// ============================================
 // ENTERPRISE V5 - CERTIFICATE TEMPLATE ENGINE
 // ============================================
 // Multi-template support - templates stored in config object
