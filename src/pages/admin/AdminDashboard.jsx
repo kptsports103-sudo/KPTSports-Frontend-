@@ -1017,6 +1017,21 @@ const AdminDashboard = () => {
     }
   };
 
+  const toggleAdvancedAnalytics = () => {
+    setShowAdvanced((prev) => {
+      const next = !prev;
+      if (next) {
+        setTimeout(() => {
+          const section = document.getElementById("advanced-analytics");
+          if (section) {
+            section.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 0);
+      }
+      return next;
+    });
+  };
+
   const stats = [
     { title: "Update Pages", value: "Manage", icon: "??", link: "/admin/update-pages" },
     { title: "Media Files", value: totalMedia, icon: "???", link: "/admin/media" },
@@ -1306,13 +1321,13 @@ const AdminDashboard = () => {
               </div>
             )}
             <div className="analytics-actions">
-              <button className="analytics-btn" onClick={() => setShowAdvanced((prev) => !prev)}>
+              <button type="button" className="analytics-btn" onClick={toggleAdvancedAnalytics}>
                 {showAdvanced ? "Hide Analytics" : "View More Analytics"}
               </button>
             </div>
 
             {showAdvanced && (
-              <div className="advanced-analytics">
+              <div id="advanced-analytics" className="advanced-analytics">
                 <div className="advanced-card">
                   <h4>Certificate Generation Rate</h4>
                   <h2>{advancedCertificateInsights.generationRate}%</h2>
