@@ -80,8 +80,6 @@ const ManageResults = () => {
   });
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [resultsActivityLogs, setResultsActivityLogs] = useState([]);
-  const [loadingResultsActivity, setLoadingResultsActivity] = useState(false);
   const [groupMemberSelection, setGroupMemberSelection] = useState({});
   const [playerIntelligence, setPlayerIntelligence] = useState(null);
   const [groupIntelligence, setGroupIntelligence] = useState(null);
@@ -106,23 +104,7 @@ const ManageResults = () => {
     fetchResults();
     fetchGroupResults();
     fetchPlayers();
-    fetchResultsActivityLogs();
   }, []);
-
-  const fetchResultsActivityLogs = async () => {
-    try {
-      setLoadingResultsActivity(true);
-      const response = await activityLogService.getPageActivityLogs('Results Page', 15);
-      if (response?.success) {
-        setResultsActivityLogs(response.data || []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch results activity logs:', error);
-      setResultsActivityLogs([]);
-    } finally {
-      setLoadingResultsActivity(false);
-    }
-  };
 
   const fetchResults = async () => {
     try {
@@ -328,7 +310,6 @@ const ManageResults = () => {
           { field: 'Medal', after: form.medal || '-' }
         ]
       );
-      fetchResultsActivityLogs();
     } catch (error) {
       console.error('Save error:', error);
 
@@ -551,7 +532,6 @@ const ManageResults = () => {
           { field: 'Failed Players', after: failedPlayers.length ? failedPlayers.slice(0, 5).join(', ') : '0' }
         ]
       );
-      fetchResultsActivityLogs();
     } catch (error) {
       console.error('Bulk save error:', error);
       alert(error?.response?.data?.message || 'Bulk save failed');
@@ -746,7 +726,6 @@ const ManageResults = () => {
           { field: 'Members', after: String((groupForm.manualMembers || []).filter((m) => (m?.name || '').trim()).length) }
         ]
       );
-      fetchResultsActivityLogs();
     } catch (error) {
       console.error('Group save error:', error);
 
@@ -1038,41 +1017,6 @@ const ManageResults = () => {
         <h2 style={styles.title}>🏆 Update Results</h2>
         <p style={styles.activitySubtitle}>Manage results page content</p>
         <PageLatestChangeCard pageName="Results Page" />
-
-        <div style={styles.activitySection}>
-          <h3 style={styles.activityTitle}>Recent Results Page Changes</h3>
-          <p style={styles.activitySubtitle}>Visible details: change, admin name, admin email, and time.</p>
-          {loadingResultsActivity ? (
-            <div style={styles.activityEmpty}>Loading activity...</div>
-          ) : resultsActivityLogs.length === 0 ? (
-            <div style={styles.activityEmpty}>No Results page updates yet.</div>
-          ) : (
-            <div style={styles.tableContainer}>
-              <table style={styles.table}>
-                <thead>
-                  <tr style={styles.headerRow}>
-                    <th style={styles.headerCell}>Change</th>
-                    <th style={styles.headerCell}>Admin Name</th>
-                    <th style={styles.headerCell}>Admin Email</th>
-                    <th style={styles.headerCell}>Updated At</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {resultsActivityLogs.map((log) => (
-                    <tr key={log._id} style={styles.bodyRow}>
-                      <td style={styles.cell}>{log.details || log.action}</td>
-                      <td style={styles.cell}>{log.adminName || '-'}</td>
-                      <td style={styles.cell}>{log.adminEmail || '-'}</td>
-                      <td style={styles.cell}>
-                        {log.createdAt ? new Date(log.createdAt).toLocaleString() : '-'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
 
         {/* YEAR SELECT (TOP CENTER like Players) */}
         <div style={{ textAlign: 'center', marginBottom: 16 }}>
