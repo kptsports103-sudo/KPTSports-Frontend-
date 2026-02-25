@@ -89,6 +89,31 @@ const normalizeMedalKey = (medal = "") => {
   return null;
 };
 
+// ============================================
+// ANIMATED COUNTER HOOK
+// ============================================
+const useAnimatedCounter = (value, duration = 800) => {
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+    const increment = value / (duration / 16);
+    const interval = setInterval(() => {
+      start += increment;
+      if (start >= value) {
+        setDisplay(value);
+        clearInterval(interval);
+      } else {
+        setDisplay(Math.floor(start));
+      }
+    }, 16);
+
+    return () => clearInterval(interval);
+  }, [value, duration]);
+
+  return display;
+};
+
 const AdminDashboard = () => {
   const [totalMedia, setTotalMedia] = useState(0);
   const [certificateRows, setCertificateRows] = useState([]);
@@ -103,31 +128,6 @@ const AdminDashboard = () => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
 
-  // ============================================
-  // ANIMATED COUNTER HOOK
-  // ============================================
-  const useAnimatedCounter = (value, duration = 800) => {
-    const [display, setDisplay] = useState(0);
-
-    useEffect(() => {
-      let start = 0;
-      const increment = value / (duration / 16);
-      const interval = setInterval(() => {
-        start += increment;
-        if (start >= value) {
-          setDisplay(value);
-          clearInterval(interval);
-        } else {
-          setDisplay(Math.floor(start));
-        }
-      }, 16);
-
-      return () => clearInterval(interval);
-    }, [value, duration]);
-
-    return display;
-  };
-  
   // ============================================
   // ENTERPRISE V5 - TEMPLATE STATE
   // ============================================
@@ -892,7 +892,7 @@ const AdminDashboard = () => {
     ? medalData.find((m) => String(m.year) === String(selectedYear)) || medalData[0]
     : null;
 
-  // Animated counter for total points
+  // Animated counter for total points - using useMemo to prevent circular dependencies
   const animatedPoints = useAnimatedCounter(selectedStats?.totalPoints || 0);
 
   // Calculate trend data for storytelling
