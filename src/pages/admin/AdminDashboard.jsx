@@ -1192,73 +1192,58 @@ const AdminDashboard = () => {
                       <div className="qs-title-sub">Total Points (Individual + Group)</div>
 
                       <div className="qs-mini-row">
-                        <div className="qs-mini blue">
-                          <div className="qs-mini-num">{selectedStats?.individualPoints || 0}</div>
+                        <div className="qs-mini-wrap">
+                          <div className="qs-mini blue">
+                            <div className="qs-mini-num">{selectedStats?.individualPoints || 0}</div>
+                          </div>
                           <div className="qs-mini-label">Individual</div>
                         </div>
-                        <div className="qs-mini green">
-                          <div className="qs-mini-num">{selectedStats?.groupPoints || 0}</div>
+                        <div className="qs-mini-wrap">
+                          <div className="qs-mini green">
+                            <div className="qs-mini-num">{selectedStats?.groupPoints || 0}</div>
+                          </div>
                           <div className="qs-mini-label">Group</div>
                         </div>
-                        <div className="qs-mini orange">
-                          <div className="qs-mini-num">{selectedStats?.totalPoints || 0}</div>
+                        <div className="qs-mini-wrap">
+                          <div className="qs-mini orange">
+                            <div className="qs-mini-num">{selectedStats?.totalPoints || 0}</div>
+                          </div>
                           <div className="qs-mini-label">Total</div>
                         </div>
                       </div>
 
-                      <div className="qs-weights">Weights: Individual 5/3/1 - Group 10/7/4</div>
+                      <div className="qs-weights">Weights: Individual 5/3/1 • Group 10/7/4</div>
                     </div>
                   </div>
 
                   <div className="qs-divider" />
 
-                  <div className="qs-chart">
+                  <div className="qs-bars">
                     {(() => {
                       const yearsAsc = [...medalData].sort((a, b) => a.year - b.year);
                       const allPoints = yearsAsc.reduce((s, y) => s + (y.totalPoints || 0), 0);
                       const chartData = [...yearsAsc, { year: "All", totalPoints: allPoints }];
-                      const max = Math.max(1, ...chartData.map((d) => d.totalPoints || 0));
-                      const ticks = [0, 20, 40, 60, 80, 100, 110, 120];
+                      const max = Math.max(1, ...yearsAsc.map((d) => d.totalPoints || 0));
 
-                      return (
-                        <>
-                          <div className="qs-y">
-                            {ticks.map((tick) => (
-                              <div key={tick} className="qs-y-row">
-                                <span>{tick}</span>
-                              </div>
-                            ))}
-                          </div>
+                      return chartData.map((d) => {
+                        const h = Math.round(((d.totalPoints || 0) / max) * 100);
+                        const isSelected = String(d.year) === String(selectedStats?.year);
+                        const isAll = d.year === "All";
 
-                          <div className="qs-bars-area">
-                            <div className="qs-grid">
-                              {ticks.slice(1).map((tick) => (
-                                <div key={tick} className="qs-grid-line" />
-                              ))}
+                        return (
+                          <div key={String(d.year)} className="qs-bar-col">
+                            <div className="qs-bar-value">{d.totalPoints || 0}</div>
+                            <div className="qs-bar-track">
+                              <div
+                                className={["qs-bar-fill", isAll ? "all" : "", isSelected ? "selected" : ""].join(" ")}
+                                style={{ height: `${Math.max(Math.min(h, 100), 10)}%` }}
+                                title={`${d.year}: ${d.totalPoints || 0} points`}
+                              />
                             </div>
-
-                            <div className="qs-bars">
-                              {chartData.map((d) => {
-                                const h = Math.round(((d.totalPoints || 0) / max) * 100);
-                                const isSelected = String(d.year) === String(selectedStats?.year);
-                                const isAll = d.year === "All";
-
-                                return (
-                                  <div key={String(d.year)} className="qs-bar-col">
-                                    <div className="qs-bar-value">{d.totalPoints || 0}</div>
-                                    <div
-                                      className={["qs-bar-fill", isAll ? "all" : "", isSelected ? "selected" : ""].join(" ")}
-                                      style={{ height: `${Math.max(h, 10)}%` }}
-                                      title={`${d.year}: ${d.totalPoints || 0} points`}
-                                    />
-                                    <div className="qs-bar-year">{d.year}</div>
-                                  </div>
-                                );
-                              })}
-                            </div>
+                            <div className="qs-bar-year">{d.year}</div>
                           </div>
-                        </>
-                      );
+                        );
+                      });
                     })()}
                   </div>
                 </div>
