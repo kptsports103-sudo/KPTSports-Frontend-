@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import api from '../../services/api';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import { FaPlusCircle } from 'react-icons/fa';
+import { Save, Trash2 } from 'lucide-react';
 
 const Players = ({ isStudent = false }) => {
   const [data, setData] = useState([]);
@@ -936,12 +937,7 @@ const Players = ({ isStudent = false }) => {
                                           style={styles.actionBtn}
                                           title="Save Row"
                                         >
-                                          <img
-                                            src="/Save button.png"
-                                            width={20}
-                                            height={20}
-                                            alt="Save Row"
-                                          />
+                                          <Save size={18} />
                                         </button>
                                         <button
                                           type="button"
@@ -952,12 +948,7 @@ const Players = ({ isStudent = false }) => {
                                           style={styles.actionBtn}
                                           title="Delete Row"
                                         >
-                                          <img
-                                            src="/Delete button.png"
-                                            width={20}
-                                            height={20}
-                                            alt="Delete Row"
-                                          />
+                                          <Trash2 size={18} color="#dc2626" />
                                         </button>
                                       </div>
                                     )

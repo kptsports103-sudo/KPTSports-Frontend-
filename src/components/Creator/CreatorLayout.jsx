@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { CheckCircle, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import activityLogService from '../../services/activityLog.service';
 import '../../admin.css';
@@ -44,8 +45,8 @@ const CreatorLayout = ({ children }) => {
 
   const creatorMenuItems = [
     { path: '/admin/creator-dashboard?tab=overview', label: 'Dashboard', icon: 'D' },
-    { path: '/admin/creator-dashboard?tab=players', label: 'Players', icon: '👥' },
-    { path: '/admin/creator-dashboard?tab=attendance', label: 'Attendance', icon: '✅' },
+    { path: '/admin/creator-dashboard?tab=players', label: 'Players', icon: <Users size={18} /> },
+    { path: '/admin/creator-dashboard?tab=attendance', label: 'Attendance', icon: <CheckCircle size={18} /> },
     { path: '/admin/creator-dashboard?tab=performance', label: 'Performance Analysis', icon: '📊' },
     { path: '/admin/creator-dashboard?tab=player-intelligence', label: 'Player Intelligence', icon: '🧠' },
     { path: '/admin/users-manage', label: 'Users Management', icon: 'U' },
@@ -255,6 +256,7 @@ const CreatorLayout = ({ children }) => {
 };
 
 export default CreatorLayout;
+
 
 
 

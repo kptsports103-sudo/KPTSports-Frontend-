@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Save, Trash2 } from 'lucide-react';
 
 const Attendance = ({ isStudent = false }) => {
   const currentYear = new Date().getFullYear();
@@ -351,7 +352,7 @@ const Attendance = ({ isStudent = false }) => {
                           style={styles.iconBtn}
                           title="Save Row"
                         >
-                          <img src="/Save button.png" width={20} height={20} alt="Save Row" />
+                          <Save size={18} />
                         </button>
                         <button
                           onClick={() => {
@@ -361,7 +362,7 @@ const Attendance = ({ isStudent = false }) => {
                           style={styles.iconBtn}
                           title="Delete Row"
                         >
-                          <img src="/Delete button.png" width={20} height={20} alt="Delete Row" />
+                          <Trash2 size={18} color="#dc2626" />
                         </button>
                       </>
                     )
