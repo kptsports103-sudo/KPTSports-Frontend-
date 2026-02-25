@@ -988,6 +988,14 @@
   flex: 1;
 }
 
+.kpi-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
 .stats-center {
   display: flex;
   flex-direction: column;
