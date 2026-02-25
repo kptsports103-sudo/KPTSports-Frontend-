@@ -996,6 +996,59 @@
   opacity: 0.9;
 }
 
+/* Typography Scale - Professional */
+:root {
+  --font-size-caption: 12px;
+  --font-size-secondary: 14px;
+  --font-size-kpi: 32px;
+  --font-size-section: 18px;
+  --font-size-page: 28px;
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
+
+/* Page Title */
+.analytics-page-title,
+.enterprise-analytics-title {
+  font-size: var(--font-size-page);
+  font-weight: var(--font-weight-semibold);
+  color: #0F172A;
+  margin: 0 0 8px;
+}
+
+/* Section Titles */
+.analytics-section-title,
+h3.stats-center-title {
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-semibold);
+  color: #0F172A;
+}
+
+/* KPI Numbers */
+.kpi-card h2,
+.stats-circle-inner {
+  font-size: var(--font-size-kpi);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Secondary Text */
+.kpi-card p,
+.kpi-trend,
+.stats-note {
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-normal);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Caption */
+.caption,
+.stats-mini-label {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-normal);
+  color: #64748B;
+}
+
 .stats-center {
   display: flex;
   flex-direction: column;

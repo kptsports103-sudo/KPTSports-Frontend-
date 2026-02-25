@@ -12,24 +12,6 @@ import api from "../../services/api";
 import { Trophy, Award, Clock, Medal, CheckCircle, AlertCircle, TrendingUp, TrendingDown } from "lucide-react";
 
 // ============================================
-// ENTERPRISE V5 - ANIMATED COUNTER (Utility Function)
-// ============================================
-// Note: Using requestAnimationFrame for smooth animations
-const animateValue = (start, end, duration, callback) => {
-  let startTimestamp = null;
-  const step = (timestamp) => {
-    if (!startTimestamp) startTimestamp = timestamp;
-    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-    const value = Math.floor(progress * (end - start) + start);
-    callback(value);
-    if (progress < 1) {
-      window.requestAnimationFrame(step);
-    }
-  };
-  window.requestAnimationFrame(step);
-};
-
-// ============================================
 // MEDAL GRADIENT SYSTEM (Professional)
 // ============================================
 const medalGradients = {
@@ -895,6 +877,24 @@ const AdminDashboard = () => {
   const topYears = [...medalData]
     .sort((a, b) => b.totalPoints - a.totalPoints)
     .slice(0, 5);
+
+  // Calculate best performance streak
+  const yearsWithData = medalData.map(m => m.year).sort();
+  const currentYear = new Date().getFullYear();
+  let bestStreak = 0;
+  let tempStreak = 0;
+  for (let i = 0; i < yearsWithData.length; i++) {
+    if (i === 0 || yearsWithData[i] === yearsWithData[i-1] + 1) {
+      tempStreak++;
+    } else {
+      tempStreak = 1;
+    }
+    if (tempStreak > bestStreak) bestStreak = tempStreak;
+  }
+  const bestPerformanceMessage = bestStreak > 1 
+    ? `Best streak: ${bestStreak} years` 
+    : medalData.length > 1 ? `Top in ${medalData.length} years` : "First year";
+
   const maxIndividualPoints = medalData.reduce((m, i) => Math.max(m, i.individualPoints || 0), 0);
   const maxGroupPoints = medalData.reduce((m, i) => Math.max(m, i.groupPoints || 0), 0);
   const maxTotalPoints = medalData.reduce((m, i) => Math.max(m, i.totalPoints || 0), 0);
@@ -1321,7 +1321,7 @@ const AdminDashboard = () => {
                       <h4>Best Performing Year</h4>
                       <h2>{topYears[0]?.year || "-"}</h2>
                       <p className="kpi-trend">
-                        {topYears[0]?.totalPoints || 0} Points
+                        {topYears[0]?.totalPoints || 0} Points - {bestPerformanceMessage}
                       </p>
                     </div>
                   </div>
