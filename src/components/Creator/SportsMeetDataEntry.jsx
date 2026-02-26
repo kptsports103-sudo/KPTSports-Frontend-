@@ -11,7 +11,7 @@ const initialForm = {
   level: 'Open',
   gender: 'Mixed',
   venue: '',
-  date: '',
+  eventDate: '',
   eventTime: '',
   registrationStartDate: '',
   registrationEndDate: '',
@@ -34,7 +34,7 @@ const normalizeEvent = (item) => ({
   level: item.level || 'Open',
   gender: item.gender || 'Mixed',
   venue: item.venue || '',
-  date: item.date || '',
+  eventDate: item.eventDate || item.date || '',
   eventTime: item.eventTime || '',
   registrationStartDate: item.registrationStartDate || '',
   registrationEndDate: item.registrationEndDate || '',
@@ -103,8 +103,9 @@ const SportsMeetDataEntry = () => {
       event_level: form.level,
       gender: form.gender,
       venue: form.venue.trim(),
-      date: form.date,
-      event_date: form.date,
+      eventDate: form.eventDate,
+      date: form.eventDate,
+      event_date: form.eventDate,
       eventTime: form.eventTime,
       registrationStartDate: form.registrationStartDate,
       registrationEndDate: form.registrationEndDate,
@@ -154,7 +155,7 @@ const SportsMeetDataEntry = () => {
       level: item.level || 'Open',
       gender: item.gender || 'Mixed',
       venue: item.venue || '',
-      date: item.date || '',
+      eventDate: item.eventDate || item.date || '',
       eventTime: item.eventTime || '',
       registrationStartDate: item.registrationStartDate || '',
       registrationEndDate: item.registrationEndDate || '',
@@ -256,7 +257,7 @@ const SportsMeetDataEntry = () => {
             onChange={onChange}
             placeholder="Venue"
           />
-          <input style={styles.input} type="date" name="date" value={form.date} onChange={onChange} />
+          <input style={styles.input} type="date" name="eventDate" value={form.eventDate} onChange={onChange} />
         </div>
 
         <div style={styles.grid3}>
@@ -361,7 +362,7 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
                     ? `${item.teamSizeMin || '-'} - ${item.teamSizeMax || '-'}`
                     : '-'}
                 </td>
-                <td style={styles.td}>{item.date || 'TBA'}</td>
+                <td style={styles.td}>{item.eventDate || item.date || 'TBA'}</td>
                 <td style={styles.td}>{item.eventTime || '-'}</td>
                 <td style={styles.td}>{item.registrationStartDate || '-'}</td>
                 <td style={styles.td}>{item.registrationEndDate || '-'}</td>
