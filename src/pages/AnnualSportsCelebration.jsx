@@ -2,13 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import api from '../services/api';
 
 const initialForm = {
-  playerName: '',
-  branch: '',
+  eventId: '',
+  teamName: '',
+  teamHeadName: '',
   year: '1',
   sem: '1',
-  registerNumber: '',
-  eventId: '',
 };
+
+const blankMember = () => ({ name: '', branch: '', registerNumber: '' });
+
+const TEAM_EVENT_KEYWORDS = ['relay', 'cricket', 'kabaddi', 'volleyball', 'march past', 'marchpast'];
 
 const normalizeEvent = (item) => ({
   id: item._id || item.id,
@@ -16,22 +19,74 @@ const normalizeEvent = (item) => ({
   category: item.category || '',
   sportType: item.sportType || 'Athletics',
   eventType: item.eventType || 'Individual',
-  level: item.level || 'Open',
+  level: item.level || item.event_level || 'Open',
   gender: item.gender || 'Mixed',
   venue: item.venue || 'TBA',
-  date: item.date || 'TBA',
+  date: item.date || item.event_date || 'TBA',
+  teamSizeMin: item.teamSizeMin ?? null,
+  teamSizeMax: item.teamSizeMax ?? null,
+  registrationStatus: item.registrationStatus || item.status || 'Open',
 });
 
-const normalizeRegistration = (item) => ({
-  id: item._id || item.id,
-  playerName: item.playerName || '',
-  branch: item.branch || '',
-  year: item.year || '',
-  sem: item.sem || '',
-  registerNumber: item.registerNumber || '',
-  eventName: item.eventName || '',
-  status: item.status || 'Locked',
-});
+const normalizeRegistration = (item) => {
+  const members = Array.isArray(item.members)
+    ? item.members
+    : item.playerName
+      ? [
+          {
+            name: item.playerName || '',
+            branch: item.branch || '',
+            registerNumber: item.registerNumber || '',
+          },
+        ]
+      : [];
+
+  return {
+    id: item._id || item.id,
+    eventName: item.eventName || '',
+    teamName: item.teamName || '',
+    teamHeadName: item.teamHeadName || '',
+    year: item.year || '',
+    sem: item.sem || '',
+    status: item.status || 'Locked',
+    members,
+  };
+};
+
+const inferTeamEvent = (event) => {
+  const byType = (event.eventType || '').toLowerCase() === 'team';
+  if (byType) return true;
+  const name = (event.eventName || '').toLowerCase();
+  return TEAM_EVENT_KEYWORDS.some((keyword) => name.includes(keyword));
+};
+
+const getTeamSizeRules = (event) => {
+  if (!event) return { min: 1, max: 1, isTeam: false };
+  const isTeam = inferTeamEvent(event);
+  if (!isTeam) return { min: 1, max: 1, isTeam: false };
+
+  let min = Number(event.teamSizeMin);
+  let max = Number(event.teamSizeMax);
+  if (!Number.isFinite(min) || min < 2) min = 2;
+  if (!Number.isFinite(max) || max < min) max = min;
+  if (max > 30) max = 30;
+
+  const name = (event.eventName || '').toLowerCase();
+  if (!event.teamSizeMin && !event.teamSizeMax) {
+    if (name.includes('4x100') || name.includes('4 x 100') || name.includes('4x400') || name.includes('4 x 400')) {
+      min = 4;
+      max = 4;
+    } else if (name.includes('cricket')) {
+      min = 11;
+      max = 16;
+    } else if (name.includes('march past') || name.includes('marchpast')) {
+      min = 10;
+      max = 30;
+    }
+  }
+
+  return { min, max, isTeam: true };
+};
 
 const AnnualSportsCelebration = () => {
   const [events, setEvents] = useState([]);
@@ -39,12 +94,20 @@ const AnnualSportsCelebration = () => {
   const [showReg, setShowReg] = useState(false);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [loadingRegs, setLoadingRegs] = useState(false);
+
   const [form, setForm] = useState(initialForm);
+  const [members, setMembers] = useState([blankMember()]);
+  const [memberCount, setMemberCount] = useState(1);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState('');
-  const [branchFilter, setBranchFilter] = useState('all');
   const [yearFilter, setYearFilter] = useState('all');
+
+  const selectedEvent = useMemo(() => events.find((item) => item.id === form.eventId) || null, [events, form.eventId]);
+  const teamRule = useMemo(() => getTeamSizeRules(selectedEvent), [selectedEvent]);
+
+  const indoor = useMemo(() => events.filter((item) => item.category === 'Indoor'), [events]);
+  const outdoor = useMemo(() => events.filter((item) => item.category === 'Outdoor'), [events]);
 
   const loadEvents = async () => {
     try {
@@ -81,31 +144,50 @@ const AnnualSportsCelebration = () => {
     if (showReg) loadRegistrations();
   }, [showReg]);
 
-  const indoor = useMemo(() => events.filter((item) => item.category === 'Indoor'), [events]);
-  const outdoor = useMemo(() => events.filter((item) => item.category === 'Outdoor'), [events]);
+  useEffect(() => {
+    if (!selectedEvent) return;
+    const nextCount = teamRule.isTeam ? teamRule.min : 1;
+    setMemberCount(nextCount);
+    setMembers(Array.from({ length: nextCount }, () => blankMember()));
+    setForm((prev) => ({ ...prev, teamName: '' }));
+  }, [form.eventId, selectedEvent, teamRule.isTeam, teamRule.min]);
 
-  const branchOptions = useMemo(() => {
-    const set = new Set(registrations.map((r) => r.branch).filter(Boolean));
-    return ['all', ...Array.from(set)];
-  }, [registrations]);
+  useEffect(() => {
+    setMembers((prev) => {
+      const next = [...prev];
+      while (next.length < memberCount) next.push(blankMember());
+      next.length = memberCount;
+      return next;
+    });
+  }, [memberCount]);
 
   const filteredRegs = useMemo(() => {
     return registrations.filter((item) => {
       const q = search.trim().toLowerCase();
-      const matchesSearch =
+      const matchSearch =
         !q ||
-        item.playerName.toLowerCase().includes(q) ||
-        item.registerNumber.toLowerCase().includes(q) ||
-        item.eventName.toLowerCase().includes(q);
-      const matchesBranch = branchFilter === 'all' || item.branch === branchFilter;
-      const matchesYear = yearFilter === 'all' || item.year === yearFilter;
-      return matchesSearch && matchesBranch && matchesYear;
+        item.eventName.toLowerCase().includes(q) ||
+        item.teamName.toLowerCase().includes(q) ||
+        item.teamHeadName.toLowerCase().includes(q) ||
+        item.members.some(
+          (m) => m.name.toLowerCase().includes(q) || m.registerNumber.toLowerCase().includes(q) || m.branch.toLowerCase().includes(q)
+        );
+      const matchYear = yearFilter === 'all' || item.year === yearFilter;
+      return matchSearch && matchYear;
     });
-  }, [registrations, search, branchFilter, yearFilter]);
+  }, [registrations, search, yearFilter]);
 
-  const change = (event) => {
+  const changeForm = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const updateMember = (index, field, value) => {
+    setMembers((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
   };
 
   const submit = async (event) => {
@@ -113,24 +195,53 @@ const AnnualSportsCelebration = () => {
     setError('');
     setSubmitting(true);
 
-    const payload = {
-      playerName: form.playerName.trim(),
-      branch: form.branch.trim(),
-      year: form.year,
-      sem: form.sem,
-      registerNumber: form.registerNumber.trim(),
-      eventId: form.eventId,
-    };
-
-    if (!payload.playerName || !payload.branch || !payload.registerNumber || !payload.eventId) {
-      setError('Fill all required fields.');
+    if (!form.eventId || !form.teamHeadName.trim()) {
+      setError('Select event and enter Team Head Name.');
       setSubmitting(false);
       return;
     }
 
+    if (teamRule.isTeam && !form.teamName.trim()) {
+      setError('Team Name is required for team events.');
+      setSubmitting(false);
+      return;
+    }
+
+    const cleanedMembers = members.map((m) => ({
+      name: m.name.trim(),
+      branch: m.branch.trim(),
+      registerNumber: m.registerNumber.trim(),
+    }));
+
+    for (let i = 0; i < cleanedMembers.length; i += 1) {
+      const row = cleanedMembers[i];
+      if (!row.name || !row.branch || !row.registerNumber) {
+        setError(`Row ${i + 1}: fill Name, Branch, Register Number.`);
+        setSubmitting(false);
+        return;
+      }
+    }
+
+    const duplicateReg = cleanedMembers.map((m) => m.registerNumber.toLowerCase());
+    if (new Set(duplicateReg).size !== duplicateReg.length) {
+      setError('Duplicate Register Number inside roster.');
+      setSubmitting(false);
+      return;
+    }
+
+    const payload = {
+      eventId: form.eventId,
+      teamName: teamRule.isTeam ? form.teamName.trim() : '',
+      teamHeadName: form.teamHeadName.trim(),
+      year: form.year,
+      sem: form.sem,
+      members: cleanedMembers,
+    };
+
     try {
       await api.post('/registrations', payload);
-      setForm((prev) => ({ ...prev, playerName: '', branch: '', registerNumber: '' }));
+      setForm((prev) => ({ ...prev, teamName: '', teamHeadName: '' }));
+      setMembers(Array.from({ length: memberCount }, () => blankMember()));
       await loadRegistrations();
     } catch (submitError) {
       setError(submitError.response?.data?.error || 'Registration failed.');
@@ -168,9 +279,9 @@ const AnnualSportsCelebration = () => {
       {showReg ? (
         <section style={styles.regGrid}>
           <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Player Registration</h3>
+            <h3 style={styles.cardTitle}>Unified Registration</h3>
             <form onSubmit={submit} style={styles.form}>
-              <select name="eventId" value={form.eventId} onChange={change} style={styles.input} required>
+              <select name="eventId" value={form.eventId} onChange={changeForm} style={styles.input} required>
                 {events.length === 0 ? <option value="">Select Event...</option> : null}
                 {events.map((item) => (
                   <option key={item.id} value={item.id}>
@@ -178,50 +289,110 @@ const AnnualSportsCelebration = () => {
                   </option>
                 ))}
               </select>
+
+              <div style={styles.infoRow}>
+                Event Type: <strong>{teamRule.isTeam ? 'Team / Roster' : 'Individual'}</strong>
+              </div>
+
+              {teamRule.isTeam ? (
+                <input
+                  style={styles.input}
+                  name="teamName"
+                  value={form.teamName}
+                  onChange={changeForm}
+                  placeholder="Team Name (ex: CSE Team A)"
+                  required
+                />
+              ) : null}
+
               <input
                 style={styles.input}
-                name="playerName"
-                placeholder="Player Name"
-                value={form.playerName}
-                onChange={change}
+                name="teamHeadName"
+                value={form.teamHeadName}
+                onChange={changeForm}
+                placeholder={teamRule.isTeam ? 'Team Head Name' : 'Player Name'}
                 required
               />
-              <input
-                style={styles.input}
-                name="registerNumber"
-                placeholder="Register Number"
-                value={form.registerNumber}
-                onChange={change}
-                required
-              />
-              <div style={styles.sectionLine}>Player Details</div>
-              <input
-                style={styles.input}
-                name="branch"
-                placeholder="Branch (CSE / ECE)"
-                value={form.branch}
-                onChange={change}
-                required
-              />
+
               <div style={styles.inline2}>
-                <select name="year" value={form.year} onChange={change} style={styles.input}>
+                <select name="year" value={form.year} onChange={changeForm} style={styles.input}>
                   <option value="1">Year 1</option>
                   <option value="2">Year 2</option>
                   <option value="3">Year 3</option>
-                  <option value="4">Year 4</option>
                 </select>
-                <select name="sem" value={form.sem} onChange={change} style={styles.input}>
-                  {['1', '2', '3', '4', '5', '6', '7', '8'].map((n) => (
+                <select name="sem" value={form.sem} onChange={changeForm} style={styles.input}>
+                  {['1', '2', '3', '4', '5', '6'].map((n) => (
                     <option key={n} value={n}>
                       Sem {n}
                     </option>
                   ))}
                 </select>
               </div>
+
+              {teamRule.isTeam ? (
+                <select
+                  value={memberCount}
+                  onChange={(e) => setMemberCount(Number(e.target.value))}
+                  style={styles.input}
+                >
+                  {Array.from({ length: teamRule.max - teamRule.min + 1 }, (_, i) => teamRule.min + i).map((n) => (
+                    <option key={n} value={n}>
+                      {n} Players
+                    </option>
+                  ))}
+                </select>
+              ) : null}
+
+              <div style={styles.tableWrap}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={styles.th}>#</th>
+                      <th style={styles.th}>Player Name</th>
+                      <th style={styles.th}>Branch</th>
+                      <th style={styles.th}>Register Number</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {members.map((member, i) => (
+                      <tr key={`member-${i}`}>
+                        <td style={styles.td}>{i + 1}</td>
+                        <td style={styles.td}>
+                          <input
+                            style={styles.rowInput}
+                            value={member.name}
+                            onChange={(e) => updateMember(i, 'name', e.target.value)}
+                            placeholder="Player name"
+                          />
+                        </td>
+                        <td style={styles.td}>
+                          <input
+                            style={styles.rowInput}
+                            value={member.branch}
+                            onChange={(e) => updateMember(i, 'branch', e.target.value)}
+                            placeholder="Branch"
+                          />
+                        </td>
+                        <td style={styles.td}>
+                          <input
+                            style={styles.rowInput}
+                            value={member.registerNumber}
+                            onChange={(e) => updateMember(i, 'registerNumber', e.target.value)}
+                            placeholder="Register number"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
               <button type="submit" disabled={submitting} style={styles.submitBtn}>
                 {submitting ? 'Submitting...' : 'Submit Registration'}
               </button>
-              <div style={styles.fee}>Fee: Free | Status after submit: <strong>Locked</strong></div>
+              <div style={styles.fee}>
+                Fee: Free | Status after submit: <strong>Locked</strong>
+              </div>
               {error ? <div style={styles.error}>{error}</div> : null}
             </form>
           </div>
@@ -233,22 +404,13 @@ const AnnualSportsCelebration = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 style={styles.search}
-                placeholder="Search..."
+                placeholder="Search event / team / player..."
               />
-              <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)} style={styles.filter}>
-                <option value="all">All Branches</option>
-                {branchOptions.filter((b) => b !== 'all').map((b) => (
-                  <option key={b} value={b}>
-                    {b}
-                  </option>
-                ))}
-              </select>
               <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} style={styles.filter}>
                 <option value="all">All Years</option>
                 <option value="1">Year 1</option>
                 <option value="2">Year 2</option>
                 <option value="3">Year 3</option>
-                <option value="4">Year 4</option>
               </select>
             </div>
 
@@ -257,38 +419,42 @@ const AnnualSportsCelebration = () => {
                 <thead>
                   <tr>
                     <th style={styles.th}>#</th>
-                    <th style={styles.th}>Player</th>
-                    <th style={styles.th}>Branch</th>
-                    <th style={styles.th}>Year</th>
-                    <th style={styles.th}>Sem</th>
-                    <th style={styles.th}>Register No</th>
+                    <th style={styles.th}>Event</th>
+                    <th style={styles.th}>Head / Team</th>
+                    <th style={styles.th}>Roster Size</th>
+                    <th style={styles.th}>Year/Sem</th>
                     <th style={styles.th}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingRegs ? (
                     <tr>
-                      <td style={styles.td} colSpan={7}>Loading registrations...</td>
+                      <td style={styles.td} colSpan={6}>
+                        Loading registrations...
+                      </td>
                     </tr>
                   ) : filteredRegs.length === 0 ? (
                     <tr>
-                      <td style={styles.empty} colSpan={7}>
-                        <div style={styles.emptyIcon}>📄</div>
+                      <td style={styles.empty} colSpan={6}>
                         <div style={styles.emptyTitle}>No registrations submitted yet.</div>
-                        <div style={styles.emptyText}>Once you register, it will appear here.</div>
+                        <div style={styles.emptyText}>Once submitted, records appear here.</div>
                       </td>
                     </tr>
                   ) : (
-                    filteredRegs.map((r, idx) => (
-                      <tr key={r.id}>
+                    filteredRegs.map((row, idx) => (
+                      <tr key={row.id}>
                         <td style={styles.td}>{idx + 1}</td>
-                        <td style={styles.td}>{r.playerName}</td>
-                        <td style={styles.td}>{r.branch}</td>
-                        <td style={styles.td}>{r.year}</td>
-                        <td style={styles.td}>{r.sem}</td>
-                        <td style={styles.td}>{r.registerNumber}</td>
+                        <td style={styles.td}>{row.eventName}</td>
                         <td style={styles.td}>
-                          <span style={styles.badge}>{r.status}</span>
+                          <div>{row.teamHeadName || '-'}</div>
+                          <div style={styles.miniText}>{row.teamName || 'Individual'}</div>
+                        </td>
+                        <td style={styles.td}>{row.members.length}</td>
+                        <td style={styles.td}>
+                          {row.year} / {row.sem}
+                        </td>
+                        <td style={styles.td}>
+                          <span style={styles.badge}>{row.status}</span>
                         </td>
                       </tr>
                     ))
@@ -306,7 +472,9 @@ const AnnualSportsCelebration = () => {
 
 const Stat = ({ title, value, sub }) => (
   <div style={styles.statItem}>
-    <div style={styles.statValue}>{title}: {value}</div>
+    <div style={styles.statValue}>
+      {title}: {value}
+    </div>
     <div style={styles.statSub}>{sub || title}</div>
   </div>
 );
@@ -323,7 +491,9 @@ const EventCard = ({ title, items, loading }) => (
       items.slice(0, 3).map((ev) => (
         <div key={ev.id} style={styles.eventRow}>
           <strong>{ev.eventName}</strong>
-          <div style={styles.eventMeta}>{ev.level} | {ev.gender}</div>
+          <div style={styles.eventMeta}>
+            {ev.level} | {ev.gender} | {inferTeamEvent(ev) ? 'Team' : 'Individual'}
+          </div>
         </div>
       ))}
   </div>
@@ -374,12 +544,13 @@ const styles = {
     fontWeight: 600,
     cursor: 'pointer',
   },
-  regGrid: { display: 'grid', gap: 16, gridTemplateColumns: '0.85fr 1.15fr' },
+  regGrid: { display: 'grid', gap: 16, gridTemplateColumns: '0.95fr 1.05fr' },
   card: { background: '#fff', border: '1px solid #d1d5db', borderRadius: 16, padding: 16 },
-  cardTitle: { margin: 0, fontSize: '1.9rem', color: '#1e293b' },
+  cardTitle: { margin: 0, fontSize: '1.8rem', color: '#1e293b' },
   form: { marginTop: 12, display: 'grid', gap: 10 },
+  infoRow: { color: '#1f2937', fontSize: 14, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '10px 12px' },
   input: { border: '1px solid #c8d0dd', borderRadius: 10, padding: '12px 14px', fontSize: 16 },
-  sectionLine: { fontSize: 16, fontWeight: 700, color: '#1f2937', paddingTop: 6, borderBottom: '1px solid #e5e7eb' },
+  rowInput: { width: '100%', border: '1px solid #c8d0dd', borderRadius: 8, padding: '8px 10px', fontSize: 14 },
   inline2: { display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr' },
   submitBtn: {
     marginTop: 6,
@@ -394,7 +565,7 @@ const styles = {
   },
   fee: { color: '#334155', fontSize: 14 },
   error: { color: '#b91c1c', fontSize: 14 },
-  toolbar: { display: 'grid', gap: 8, gridTemplateColumns: '1fr 220px 180px', margin: '12px 0' },
+  toolbar: { display: 'grid', gap: 8, gridTemplateColumns: '1fr 180px', margin: '12px 0' },
   search: { border: '1px solid #c8d0dd', borderRadius: 10, padding: '10px 12px', fontSize: 15 },
   filter: { border: '1px solid #c8d0dd', borderRadius: 10, padding: '10px 12px', fontSize: 15 },
   tableWrap: { border: '1px solid #d7dce6', borderRadius: 12, overflowX: 'auto' },
@@ -407,11 +578,11 @@ const styles = {
     color: '#25324b',
     fontSize: 14,
   },
-  td: { padding: '10px', borderBottom: '1px solid #edf1f7', color: '#1f2937', fontSize: 14 },
-  empty: { padding: '40px 16px', textAlign: 'center' },
-  emptyIcon: { fontSize: 42, opacity: 0.6 },
-  emptyTitle: { marginTop: 8, fontSize: 20, fontWeight: 700, color: '#1f2d48' },
-  emptyText: { marginTop: 6, color: '#64748b', fontSize: 16 },
+  td: { padding: '10px', borderBottom: '1px solid #edf1f7', color: '#1f2937', fontSize: 14, verticalAlign: 'top' },
+  miniText: { marginTop: 4, color: '#64748b', fontSize: 12 },
+  empty: { padding: '28px 16px', textAlign: 'center' },
+  emptyTitle: { marginTop: 8, fontSize: 18, fontWeight: 700, color: '#1f2d48' },
+  emptyText: { marginTop: 6, color: '#64748b', fontSize: 14 },
   badge: {
     display: 'inline-block',
     padding: '4px 10px',

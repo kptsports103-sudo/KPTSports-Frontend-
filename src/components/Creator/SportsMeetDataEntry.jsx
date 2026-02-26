@@ -6,11 +6,13 @@ const initialForm = {
   category: 'Outdoor',
   sportType: 'Athletics',
   eventType: 'Individual',
+  teamSizeMin: '',
+  teamSizeMax: '',
   level: 'Open',
   gender: 'Mixed',
   venue: '',
   date: '',
-  status: 'Open',
+  registrationStatus: 'Open',
 };
 
 const sportsTypeOptions = ['Athletics', 'Team Sport', 'Mind Sport', 'Fitness'];
@@ -24,11 +26,13 @@ const normalizeEvent = (item) => ({
   category: item.category || 'Outdoor',
   sportType: item.sportType || 'Athletics',
   eventType: item.eventType || 'Individual',
+  teamSizeMin: item.teamSizeMin ?? '',
+  teamSizeMax: item.teamSizeMax ?? '',
   level: item.level || 'Open',
   gender: item.gender || 'Mixed',
   venue: item.venue || '',
   date: item.date || '',
-  status: item.status || 'Open',
+  registrationStatus: item.registrationStatus || item.status || 'Open',
 });
 
 const SportsMeetDataEntry = () => {
@@ -83,18 +87,33 @@ const SportsMeetDataEntry = () => {
 
     const payload = {
       eventName: form.eventName.trim(),
+      event_title: form.eventName.trim(),
       category: form.category,
       sportType: form.sportType,
       eventType: form.eventType,
+      teamSizeMin: form.eventType === 'Team' && form.teamSizeMin !== '' ? Number(form.teamSizeMin) : null,
+      teamSizeMax: form.eventType === 'Team' && form.teamSizeMax !== '' ? Number(form.teamSizeMax) : null,
       level: form.level,
+      event_level: form.level,
       gender: form.gender,
       venue: form.venue.trim(),
       date: form.date,
-      status: form.status,
+      event_date: form.date,
+      registrationStatus: form.registrationStatus,
+      status: form.registrationStatus,
     };
 
     if (!payload.eventName) {
       setError('Event Name is required.');
+      setSaving(false);
+      return;
+    }
+
+    if (
+      payload.eventType === 'Team' &&
+      (payload.teamSizeMin === null || payload.teamSizeMax === null || payload.teamSizeMin > payload.teamSizeMax)
+    ) {
+      setError('Team size range is invalid.');
       setSaving(false);
       return;
     }
@@ -121,11 +140,13 @@ const SportsMeetDataEntry = () => {
       category: item.category || 'Outdoor',
       sportType: item.sportType || 'Athletics',
       eventType: item.eventType || 'Individual',
+      teamSizeMin: item.teamSizeMin ?? '',
+      teamSizeMax: item.teamSizeMax ?? '',
       level: item.level || 'Open',
       gender: item.gender || 'Mixed',
       venue: item.venue || '',
       date: item.date || '',
-      status: item.status || 'Open',
+      registrationStatus: item.registrationStatus || item.status || 'Open',
     });
     setError('');
   };
@@ -190,6 +211,31 @@ const SportsMeetDataEntry = () => {
           </select>
         </div>
 
+        {form.eventType === 'Team' ? (
+          <div style={styles.grid2}>
+            <input
+              style={styles.input}
+              type="number"
+              min="2"
+              name="teamSizeMin"
+              value={form.teamSizeMin}
+              onChange={onChange}
+              placeholder="Team Size Min"
+              required
+            />
+            <input
+              style={styles.input}
+              type="number"
+              min={form.teamSizeMin || 2}
+              name="teamSizeMax"
+              value={form.teamSizeMax}
+              onChange={onChange}
+              placeholder="Team Size Max"
+              required
+            />
+          </div>
+        ) : null}
+
         <div style={styles.grid2}>
           <input
             style={styles.input}
@@ -202,7 +248,12 @@ const SportsMeetDataEntry = () => {
         </div>
 
         <div style={styles.grid2}>
-          <select style={styles.input} name="status" value={form.status} onChange={onChange}>
+          <select
+            style={styles.input}
+            name="registrationStatus"
+            value={form.registrationStatus}
+            onChange={onChange}
+          >
             <option value="Open">Open</option>
             <option value="Closed">Closed</option>
           </select>
@@ -242,6 +293,7 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
             <th style={styles.th}>Event</th>
             <th style={styles.th}>Type</th>
             <th style={styles.th}>Level</th>
+            <th style={styles.th}>Team Size</th>
             <th style={styles.th}>Date</th>
             <th style={styles.th}>Venue</th>
             <th style={styles.th}>Status</th>
@@ -251,7 +303,7 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
         <tbody>
           {items.length === 0 ? (
             <tr>
-              <td style={styles.empty} colSpan={7}>
+              <td style={styles.empty} colSpan={8}>
                 No events added
               </td>
             </tr>
@@ -264,9 +316,14 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
                 </td>
                 <td style={styles.td}>{item.eventType}</td>
                 <td style={styles.td}>{item.level}</td>
+                <td style={styles.td}>
+                  {item.eventType === 'Team'
+                    ? `${item.teamSizeMin || '-'} - ${item.teamSizeMax || '-'}`
+                    : '-'}
+                </td>
                 <td style={styles.td}>{item.date || 'TBA'}</td>
                 <td style={styles.td}>{item.venue || 'TBA'}</td>
-                <td style={styles.td}>{item.status}</td>
+                <td style={styles.td}>{item.registrationStatus}</td>
                 <td style={styles.td}>
                   <button type="button" style={styles.inlineBtn} onClick={() => onEdit(item)}>
                     Edit
