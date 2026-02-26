@@ -5,11 +5,9 @@ const initialForm = {
   eventId: '',
   teamName: '',
   teamHeadName: '',
-  year: '1',
-  sem: '1',
 };
 
-const blankMember = () => ({ name: '', branch: '', registerNumber: '' });
+const blankMember = () => ({ name: '', branch: '', registerNumber: '', year: '1', sem: '1' });
 
 const TEAM_EVENT_KEYWORDS = ['relay', 'cricket', 'kabaddi', 'volleyball', 'march past', 'marchpast'];
 
@@ -37,6 +35,8 @@ const normalizeRegistration = (item) => {
             name: item.playerName || '',
             branch: item.branch || '',
             registerNumber: item.registerNumber || '',
+            year: item.year || '1',
+            sem: item.sem || '1',
           },
         ]
       : [];
@@ -172,7 +172,10 @@ const AnnualSportsCelebration = () => {
         item.members.some(
           (m) => m.name.toLowerCase().includes(q) || m.registerNumber.toLowerCase().includes(q) || m.branch.toLowerCase().includes(q)
         );
-      const matchYear = yearFilter === 'all' || item.year === yearFilter;
+      const matchYear =
+        yearFilter === 'all' ||
+        item.year === yearFilter ||
+        item.members.some((member) => String(member.year || '') === yearFilter);
       return matchSearch && matchYear;
     });
   }, [registrations, search, yearFilter]);
@@ -211,12 +214,14 @@ const AnnualSportsCelebration = () => {
       name: m.name.trim(),
       branch: m.branch.trim(),
       registerNumber: m.registerNumber.trim(),
+      year: String(m.year || '').trim(),
+      sem: String(m.sem || '').trim(),
     }));
 
     for (let i = 0; i < cleanedMembers.length; i += 1) {
       const row = cleanedMembers[i];
-      if (!row.name || !row.branch || !row.registerNumber) {
-        setError(`Row ${i + 1}: fill Name, Branch, Register Number.`);
+      if (!row.name || !row.branch || !row.registerNumber || !row.year || !row.sem) {
+        setError(`Row ${i + 1}: fill Name, Branch, Register Number, Year, Sem.`);
         setSubmitting(false);
         return;
       }
@@ -233,8 +238,8 @@ const AnnualSportsCelebration = () => {
       eventId: form.eventId,
       teamName: teamRule.isTeam ? form.teamName.trim() : '',
       teamHeadName: form.teamHeadName.trim(),
-      year: form.year,
-      sem: form.sem,
+      year: cleanedMembers[0]?.year || '',
+      sem: cleanedMembers[0]?.sem || '',
       members: cleanedMembers,
     };
 
@@ -314,21 +319,6 @@ const AnnualSportsCelebration = () => {
                 required
               />
 
-              <div style={styles.inline2}>
-                <select name="year" value={form.year} onChange={changeForm} style={styles.input}>
-                  <option value="1">Year 1</option>
-                  <option value="2">Year 2</option>
-                  <option value="3">Year 3</option>
-                </select>
-                <select name="sem" value={form.sem} onChange={changeForm} style={styles.input}>
-                  {['1', '2', '3', '4', '5', '6'].map((n) => (
-                    <option key={n} value={n}>
-                      Sem {n}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               {teamRule.isTeam ? (
                 <select
                   value={memberCount}
@@ -351,6 +341,8 @@ const AnnualSportsCelebration = () => {
                       <th style={styles.th}>Player Name</th>
                       <th style={styles.th}>Branch</th>
                       <th style={styles.th}>Register Number</th>
+                      <th style={styles.th}>Year</th>
+                      <th style={styles.th}>Sem</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -380,6 +372,30 @@ const AnnualSportsCelebration = () => {
                             onChange={(e) => updateMember(i, 'registerNumber', e.target.value)}
                             placeholder="Register number"
                           />
+                        </td>
+                        <td style={styles.td}>
+                          <select
+                            style={styles.rowInput}
+                            value={member.year}
+                            onChange={(e) => updateMember(i, 'year', e.target.value)}
+                          >
+                            <option value="1">Year 1</option>
+                            <option value="2">Year 2</option>
+                            <option value="3">Year 3</option>
+                          </select>
+                        </td>
+                        <td style={styles.td}>
+                          <select
+                            style={styles.rowInput}
+                            value={member.sem}
+                            onChange={(e) => updateMember(i, 'sem', e.target.value)}
+                          >
+                            {['1', '2', '3', '4', '5', '6'].map((n) => (
+                              <option key={n} value={n}>
+                                Sem {n}
+                              </option>
+                            ))}
+                          </select>
                         </td>
                       </tr>
                     ))}
@@ -451,7 +467,15 @@ const AnnualSportsCelebration = () => {
                         </td>
                         <td style={styles.td}>{row.members.length}</td>
                         <td style={styles.td}>
-                          {row.year} / {row.sem}
+                          {Array.from(
+                            new Set(
+                              row.members
+                                .map((member) =>
+                                  member.year && member.sem ? `Y${member.year}-S${member.sem}` : ''
+                                )
+                                .filter(Boolean)
+                            )
+                          ).join(', ') || `${row.year} / ${row.sem}`}
                         </td>
                         <td style={styles.td}>
                           <span style={styles.badge}>{row.status}</span>
