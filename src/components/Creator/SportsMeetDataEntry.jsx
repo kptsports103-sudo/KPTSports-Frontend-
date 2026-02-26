@@ -12,6 +12,9 @@ const initialForm = {
   gender: 'Mixed',
   venue: '',
   date: '',
+  eventTime: '',
+  registrationStartDate: '',
+  registrationEndDate: '',
   registrationStatus: 'Open',
 };
 
@@ -32,6 +35,9 @@ const normalizeEvent = (item) => ({
   gender: item.gender || 'Mixed',
   venue: item.venue || '',
   date: item.date || '',
+  eventTime: item.eventTime || '',
+  registrationStartDate: item.registrationStartDate || '',
+  registrationEndDate: item.registrationEndDate || '',
   registrationStatus: item.registrationStatus || item.status || 'Open',
 });
 
@@ -99,6 +105,9 @@ const SportsMeetDataEntry = () => {
       venue: form.venue.trim(),
       date: form.date,
       event_date: form.date,
+      eventTime: form.eventTime,
+      registrationStartDate: form.registrationStartDate,
+      registrationEndDate: form.registrationEndDate,
       registrationStatus: form.registrationStatus,
       status: form.registrationStatus,
     };
@@ -146,6 +155,9 @@ const SportsMeetDataEntry = () => {
       gender: item.gender || 'Mixed',
       venue: item.venue || '',
       date: item.date || '',
+      eventTime: item.eventTime || '',
+      registrationStartDate: item.registrationStartDate || '',
+      registrationEndDate: item.registrationEndDate || '',
       registrationStatus: item.registrationStatus || item.status || 'Open',
     });
     setError('');
@@ -247,6 +259,31 @@ const SportsMeetDataEntry = () => {
           <input style={styles.input} type="date" name="date" value={form.date} onChange={onChange} />
         </div>
 
+        <div style={styles.grid3}>
+          <input
+            style={styles.input}
+            type="time"
+            name="eventTime"
+            value={form.eventTime}
+            onChange={onChange}
+            placeholder="Event Time"
+          />
+          <input
+            style={styles.input}
+            type="date"
+            name="registrationStartDate"
+            value={form.registrationStartDate}
+            onChange={onChange}
+          />
+          <input
+            style={styles.input}
+            type="date"
+            name="registrationEndDate"
+            value={form.registrationEndDate}
+            onChange={onChange}
+          />
+        </div>
+
         <div style={styles.grid2}>
           <select
             style={styles.input}
@@ -295,6 +332,9 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
             <th style={styles.th}>Level</th>
             <th style={styles.th}>Team Size</th>
             <th style={styles.th}>Date</th>
+            <th style={styles.th}>Time</th>
+            <th style={styles.th}>Reg Start</th>
+            <th style={styles.th}>Reg End</th>
             <th style={styles.th}>Venue</th>
             <th style={styles.th}>Status</th>
             <th style={styles.th}>Actions</th>
@@ -303,7 +343,7 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
         <tbody>
           {items.length === 0 ? (
             <tr>
-              <td style={styles.empty} colSpan={8}>
+              <td style={styles.empty} colSpan={11}>
                 No events added
               </td>
             </tr>
@@ -322,6 +362,9 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
                     : '-'}
                 </td>
                 <td style={styles.td}>{item.date || 'TBA'}</td>
+                <td style={styles.td}>{item.eventTime || '-'}</td>
+                <td style={styles.td}>{item.registrationStartDate || '-'}</td>
+                <td style={styles.td}>{item.registrationEndDate || '-'}</td>
                 <td style={styles.td}>{item.venue || 'TBA'}</td>
                 <td style={styles.td}>{item.registrationStatus}</td>
                 <td style={styles.td}>
@@ -354,6 +397,7 @@ const styles = {
     gap: 10,
   },
   grid2: { display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' },
+  grid3: { display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' },
   grid4: { display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' },
   input: { border: '1px solid #d1d5db', borderRadius: 8, padding: '10px 12px', background: '#fff' },
   freeBox: {

@@ -89,6 +89,7 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/manage-events', label: 'Manage Events', icon: 'E' },
     { path: '/admin/manage-gallery', label: 'Manage Gallery', icon: 'G' },
     { path: '/admin/manage-results', label: 'Manage Results', icon: 'T' },
+    { path: '/admin/sports-meet-registrations', label: 'Sports Meet Registration', icon: 'R' },
   ];
 
   const creatorMenuItems = [
@@ -96,6 +97,7 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/users-manage', label: 'IAM Users', icon: 'U' },
     { path: '/admin/media', label: 'Media Management', icon: 'M' },
     { path: '/admin/manage-results', label: 'Manage Results', icon: 'T' },
+    { path: '/admin/sports-meet-registrations', label: 'Sports Meet Registration', icon: 'R' },
   ];
 
 
