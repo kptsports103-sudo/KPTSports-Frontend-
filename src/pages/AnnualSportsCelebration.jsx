@@ -11,6 +11,13 @@ const blankMember = () => ({ name: '', branch: '', registerNumber: '', year: '1'
 
 const TEAM_EVENT_KEYWORDS = ['relay', 'cricket', 'kabaddi', 'volleyball', 'march past', 'marchpast'];
 
+const getSemOptionsForYear = (year) => {
+  if (year === '1') return ['1', '2'];
+  if (year === '2') return ['3', '4'];
+  if (year === '3') return ['5', '6'];
+  return ['1', '2'];
+};
+
 const normalizeEvent = (item) => ({
   id: item._id || item.id,
   eventName: item.eventName || item.event_title || '',
@@ -188,7 +195,14 @@ const AnnualSportsCelebration = () => {
   const updateMember = (index, field, value) => {
     setMembers((prev) => {
       const next = [...prev];
-      next[index] = { ...next[index], [field]: value };
+      const current = { ...next[index], [field]: value };
+      if (field === 'year') {
+        const validSems = getSemOptionsForYear(value);
+        if (!validSems.includes(String(current.sem || ''))) {
+          current.sem = validSems[0];
+        }
+      }
+      next[index] = current;
       return next;
     });
   };
@@ -390,7 +404,7 @@ const AnnualSportsCelebration = () => {
                             value={member.sem}
                             onChange={(e) => updateMember(i, 'sem', e.target.value)}
                           >
-                            {['1', '2', '3', '4', '5', '6'].map((n) => (
+                            {getSemOptionsForYear(String(member.year || '1')).map((n) => (
                               <option key={n} value={n}>
                                 Sem {n}
                               </option>
