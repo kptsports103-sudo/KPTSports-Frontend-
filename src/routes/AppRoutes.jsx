@@ -13,6 +13,7 @@ import About from '../pages/About';
 import History from '../pages/History';
 
 import Events from '../pages/Events';
+import AnnualSportsCelebration from '../pages/AnnualSportsCelebration';
 
 import Gallery from '../pages/Gallery';
 
@@ -97,6 +98,7 @@ const AppContent = () => {
           <Route path="/about" element={<About />} />
           <Route path="/history" element={<History />} />
           <Route path="/events" element={<Events />} />
+          <Route path="/sports-celebration" element={<AnnualSportsCelebration />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/results" element={<Results />} />
           <Route path="/verify/:id" element={<VerifyCertificate />} />

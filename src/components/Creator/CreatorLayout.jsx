@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BarChart3, Brain, CheckCircle, LayoutDashboard, ShieldUser, Users } from 'lucide-react';
+import { BarChart3, Brain, CheckCircle, LayoutDashboard, ShieldUser, Trophy, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import '../../admin.css';
 
@@ -23,6 +23,7 @@ const CreatorLayout = ({ children }) => {
     { path: '/admin/creator-dashboard?tab=attendance', label: 'Attendance', icon: <CheckCircle size={18} /> },
     { path: '/admin/creator-dashboard?tab=performance', label: 'Performance Analysis', icon: <BarChart3 size={18} /> },
     { path: '/admin/creator-dashboard?tab=player-intelligence', label: 'Player Intelligence', icon: <Brain size={18} /> },
+    { path: '/admin/creator-dashboard?tab=sports-events', label: 'Sports Meet Data Entry', icon: <Trophy size={18} /> },
     { path: '/admin/users-manage', label: 'Users Management', icon: <ShieldUser size={18} /> },
   ];
 

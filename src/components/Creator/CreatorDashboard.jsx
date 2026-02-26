@@ -5,6 +5,7 @@ import Players from './Players';
 import Attendance from './Attendance';
 import PerformanceAnalysis from './PerformanceAnalysis';
 import PlayerIntelligence from './PlayerIntelligence';
+import SportsMeetDataEntry from './SportsMeetDataEntry';
 import api from '../../services/api';
 
 const CreatorOverview = ({ onNavigate }) => {
@@ -61,6 +62,15 @@ const CreatorOverview = ({ onNavigate }) => {
       color: '#ec4899',
       gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
       tab: 'performance',
+    },
+    {
+      id: 4,
+      title: 'Sports Meet Data Entry',
+      description: 'Manage annual sports celebration events for indoor and outdoor categories',
+      icon: 'S',
+      color: '#0ea5e9',
+      gradient: 'linear-gradient(135deg, #93c5fd 0%, #38bdf8 100%)',
+      tab: 'sports-events',
     },
   ];
 
@@ -143,6 +153,8 @@ const CreatorDashboard = () => {
         return <PerformanceAnalysis />;
       case 'player-intelligence':
         return <PlayerIntelligence />;
+      case 'sports-events':
+        return <SportsMeetDataEntry />;
       default:
         return <CreatorOverview onNavigate={handleTabChange} />;
     }
@@ -180,6 +192,7 @@ const CreatorDashboard = () => {
                 { key: 'player-intelligence', label: 'Player Intelligence' },
                 { key: 'attendance', label: 'Attendance' },
                 { key: 'performance', label: 'Performance Analysis' },
+                { key: 'sports-events', label: 'Sports Meet Data Entry' },
               ].map((tab) => (
                 <button
                   key={tab.key}
