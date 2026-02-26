@@ -1,19 +1,15 @@
-import { useMemo, useState } from 'react';
-import { readSportsMeetEvents, writeSportsMeetEvents } from '../../data/sportsMeetEvents';
+import { useEffect, useMemo, useState } from 'react';
+import api from '../../services/api';
 
 const initialForm = {
   eventName: '',
   category: 'Outdoor',
   sportType: 'Athletics',
-  entryFee: '',
+  eventType: 'Individual',
   level: 'Open',
   gender: 'Mixed',
-  eventType: 'Individual',
-  maxParticipants: '',
-  maxTeams: '',
-  date: '',
-  time: '',
   venue: '',
+  date: '',
   status: 'Open',
 };
 
@@ -21,13 +17,27 @@ const sportsTypeOptions = ['Athletics', 'Team Sport', 'Mind Sport', 'Fitness'];
 const levelOptions = ['Open', 'Beginner', 'Intermediate', 'Advanced'];
 const genderOptions = ['Male', 'Female', 'Mixed'];
 
-const normalizeText = (value) => value.trim().toLowerCase();
+const normalizeEvent = (item) => ({
+  ...item,
+  id: item._id || item.id,
+  eventName: item.eventName || item.event_title || '',
+  category: item.category || 'Outdoor',
+  sportType: item.sportType || 'Athletics',
+  eventType: item.eventType || 'Individual',
+  level: item.level || 'Open',
+  gender: item.gender || 'Mixed',
+  venue: item.venue || '',
+  date: item.date || '',
+  status: item.status || 'Open',
+});
 
 const SportsMeetDataEntry = () => {
-  const [events, setEvents] = useState(() => readSportsMeetEvents());
+  const [events, setEvents] = useState([]);
   const [form, setForm] = useState(initialForm);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const grouped = useMemo(
     () => ({
@@ -36,6 +46,24 @@ const SportsMeetDataEntry = () => {
     }),
     [events]
   );
+
+  const loadEvents = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const res = await api.get('/events');
+      const list = Array.isArray(res.data) ? res.data.map(normalizeEvent) : [];
+      setEvents(list);
+    } catch (loadError) {
+      setError(loadError.response?.data?.error || 'Unable to load events.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
 
   const onChange = (event) => {
     const { name, value } = event.target;
@@ -48,84 +76,75 @@ const SportsMeetDataEntry = () => {
     setError('');
   };
 
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     event.preventDefault();
     setError('');
-
-    if (!form.eventName.trim()) {
-      setError('Event Name is required.');
-      return;
-    }
-
-    const duplicate = events.some(
-      (item) =>
-        item.id !== editingId &&
-        item.category === form.category &&
-        normalizeText(item.eventName) === normalizeText(form.eventName)
-    );
-    if (duplicate) {
-      setError('This event already exists in the selected category.');
-      return;
-    }
+    setSaving(true);
 
     const payload = {
-      ...form,
       eventName: form.eventName.trim(),
+      category: form.category,
+      sportType: form.sportType,
+      eventType: form.eventType,
+      level: form.level,
+      gender: form.gender,
       venue: form.venue.trim(),
-      entryFee: form.entryFee === '' ? '' : Number(form.entryFee),
-      maxParticipants: form.eventType === 'Individual' ? form.maxParticipants : '',
-      maxTeams: form.eventType === 'Team' ? form.maxTeams : '',
+      date: form.date,
+      status: form.status,
     };
 
-    let next;
-    if (editingId) {
-      next = events.map((item) => (item.id === editingId ? { ...item, ...payload } : item));
-    } else {
-      next = [
-        ...events,
-        {
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-          ...payload,
-        },
-      ];
+    if (!payload.eventName) {
+      setError('Event Name is required.');
+      setSaving(false);
+      return;
     }
 
-    setEvents(next);
-    writeSportsMeetEvents(next);
-    reset();
+    try {
+      if (editingId) {
+        await api.put(`/events/${editingId}`, payload);
+      } else {
+        await api.post('/events', payload);
+      }
+      reset();
+      await loadEvents();
+    } catch (submitError) {
+      setError(submitError.response?.data?.error || 'Save failed.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const onEdit = (item) => {
     setEditingId(item.id);
     setForm({
-      eventName: item.eventName ?? '',
-      category: item.category ?? 'Outdoor',
-      sportType: item.sportType ?? 'Athletics',
-      entryFee: item.entryFee ?? '',
-      level: item.level ?? 'Open',
-      gender: item.gender ?? 'Mixed',
-      eventType: item.eventType ?? 'Individual',
-      maxParticipants: item.maxParticipants ?? '',
-      maxTeams: item.maxTeams ?? '',
-      date: item.date ?? '',
-      time: item.time ?? '',
-      venue: item.venue ?? '',
-      status: item.status ?? 'Open',
+      eventName: item.eventName || '',
+      category: item.category || 'Outdoor',
+      sportType: item.sportType || 'Athletics',
+      eventType: item.eventType || 'Individual',
+      level: item.level || 'Open',
+      gender: item.gender || 'Mixed',
+      venue: item.venue || '',
+      date: item.date || '',
+      status: item.status || 'Open',
     });
     setError('');
   };
 
-  const onDelete = (id) => {
-    const next = events.filter((item) => item.id !== id);
-    setEvents(next);
-    writeSportsMeetEvents(next);
-    if (editingId === id) reset();
+  const onDelete = async (id) => {
+    try {
+      setError('');
+      await api.delete(`/events/${id}`);
+      await loadEvents();
+      if (editingId === id) reset();
+    } catch (deleteError) {
+      setError(deleteError.response?.data?.error || 'Delete failed.');
+    }
   };
 
   return (
     <div>
       <h2 style={styles.heading}>Annual Sports Celebration Data Entry</h2>
-      <p style={styles.subHeading}>Add, edit, and delete indoor and outdoor events for the public page.</p>
+      <p style={styles.subHeading}>CreatorDashboard-managed events loaded from database.</p>
 
       <form onSubmit={onSubmit} style={styles.form}>
         <div style={styles.grid2}>
@@ -151,17 +170,10 @@ const SportsMeetDataEntry = () => {
               </option>
             ))}
           </select>
-
-          <input
-            style={styles.input}
-            type="number"
-            min="0"
-            name="entryFee"
-            value={form.entryFee}
-            onChange={onChange}
-            placeholder="Entry Fee"
-          />
-
+          <select style={styles.input} name="eventType" value={form.eventType} onChange={onChange}>
+            <option value="Individual">Individual</option>
+            <option value="Team">Team</option>
+          </select>
           <select style={styles.input} name="level" value={form.level} onChange={onChange}>
             {levelOptions.map((item) => (
               <option key={item} value={item}>
@@ -169,7 +181,6 @@ const SportsMeetDataEntry = () => {
               </option>
             ))}
           </select>
-
           <select style={styles.input} name="gender" value={form.gender} onChange={onChange}>
             {genderOptions.map((item) => (
               <option key={item} value={item}>
@@ -177,38 +188,6 @@ const SportsMeetDataEntry = () => {
               </option>
             ))}
           </select>
-        </div>
-
-        <div style={styles.grid4}>
-          <select style={styles.input} name="eventType" value={form.eventType} onChange={onChange}>
-            <option value="Individual">Individual</option>
-            <option value="Team">Team</option>
-          </select>
-
-          {form.eventType === 'Individual' ? (
-            <input
-              style={styles.input}
-              type="number"
-              min="1"
-              name="maxParticipants"
-              value={form.maxParticipants}
-              onChange={onChange}
-              placeholder="Max Participants"
-            />
-          ) : (
-            <input
-              style={styles.input}
-              type="number"
-              min="1"
-              name="maxTeams"
-              value={form.maxTeams}
-              onChange={onChange}
-              placeholder="Max Teams"
-            />
-          )}
-
-          <input style={styles.input} type="date" name="date" value={form.date} onChange={onChange} />
-          <input style={styles.input} type="time" name="time" value={form.time} onChange={onChange} />
         </div>
 
         <div style={styles.grid2}>
@@ -219,15 +198,20 @@ const SportsMeetDataEntry = () => {
             onChange={onChange}
             placeholder="Venue"
           />
+          <input style={styles.input} type="date" name="date" value={form.date} onChange={onChange} />
+        </div>
+
+        <div style={styles.grid2}>
           <select style={styles.input} name="status" value={form.status} onChange={onChange}>
             <option value="Open">Open</option>
             <option value="Closed">Closed</option>
           </select>
+          <div style={styles.freeBox}>Entry Fee: Free</div>
         </div>
 
         <div style={styles.actions}>
-          <button type="submit" style={styles.primaryBtn}>
-            {editingId ? 'Update Event' : 'Add Event'}
+          <button type="submit" style={styles.primaryBtn} disabled={saving}>
+            {saving ? 'Saving...' : editingId ? 'Update Event' : 'Add Event'}
           </button>
           {editingId && (
             <button type="button" style={styles.secondaryBtn} onClick={reset}>
@@ -237,6 +221,8 @@ const SportsMeetDataEntry = () => {
         </div>
         {error ? <p style={styles.error}>{error}</p> : null}
       </form>
+
+      {loading ? <p style={styles.loading}>Loading events...</p> : null}
 
       <div style={styles.tableGrid}>
         <EventsTable title="Indoor Events" items={grouped.indoor} onEdit={onEdit} onDelete={onDelete} />
@@ -254,8 +240,8 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
         <thead>
           <tr>
             <th style={styles.th}>Event</th>
-            <th style={styles.th}>Fee</th>
             <th style={styles.th}>Type</th>
+            <th style={styles.th}>Level</th>
             <th style={styles.th}>Date</th>
             <th style={styles.th}>Venue</th>
             <th style={styles.th}>Status</th>
@@ -276,10 +262,10 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
                   <strong>{item.eventName}</strong>
                   <div style={styles.meta}>{item.sportType}</div>
                 </td>
-                <td style={styles.td}>{item.entryFee === '' ? '-' : `Rs. ${item.entryFee}`}</td>
                 <td style={styles.td}>{item.eventType}</td>
-                <td style={styles.td}>{item.date || '-'}</td>
-                <td style={styles.td}>{item.venue || '-'}</td>
+                <td style={styles.td}>{item.level}</td>
+                <td style={styles.td}>{item.date || 'TBA'}</td>
+                <td style={styles.td}>{item.venue || 'TBA'}</td>
                 <td style={styles.td}>{item.status}</td>
                 <td style={styles.td}>
                   <button type="button" style={styles.inlineBtn} onClick={() => onEdit(item)}>
@@ -313,6 +299,14 @@ const styles = {
   grid2: { display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' },
   grid4: { display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' },
   input: { border: '1px solid #d1d5db', borderRadius: 8, padding: '10px 12px', background: '#fff' },
+  freeBox: {
+    border: '1px solid #d1d5db',
+    borderRadius: 8,
+    padding: '10px 12px',
+    background: '#fff',
+    color: '#111827',
+    fontWeight: 600,
+  },
   actions: { display: 'flex', gap: 10, marginTop: 4 },
   primaryBtn: {
     border: '1px solid #111827',
@@ -331,6 +325,7 @@ const styles = {
     cursor: 'pointer',
   },
   error: { color: '#b91c1c', margin: 0 },
+  loading: { color: '#4b5563', marginBottom: 12 },
   tableGrid: { display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))' },
   tableWrap: { border: '1px solid #e5e7eb', borderRadius: 10, background: '#fff' },
   tableTitle: { fontSize: '1.1rem', fontWeight: 700, padding: '12px 12px 0 12px', color: '#111827' },
