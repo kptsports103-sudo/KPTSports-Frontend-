@@ -35,16 +35,16 @@ const CERT_TEMPLATES = {
   default: {
     id: "default",
     name: "Default Certificate Template",
-    width: 1600,
-    height: 1000,
+    width: 1394,
+    height: 2048,
     slots: {
-      kpm: { x: 1200, y: 150, w: 150, h: 40, align: "left" },
-      name: { x: 300, y: 400, w: 500, h: 40, align: "center" },
-      semester: { x: 350, y: 460, w: 100, h: 40, align: "center" },
-      department: { x: 600, y: 460, w: 300, h: 40, align: "center" },
-      competition: { x: 450, y: 520, w: 200, h: 40, align: "center" },
-      year: { x: 700, y: 580, w: 150, h: 40, align: "center" },
-      position: { x: 400, y: 640, w: 200, h: 40, align: "center" },
+      kpm: { x: 250, y: 820, w: 380, h: 56, align: "left" },
+      name: { x: 640, y: 1115, w: 550, h: 62, align: "left" },
+      semester: { x: 525, y: 1265, w: 200, h: 56, align: "center" },
+      department: { x: 770, y: 1265, w: 360, h: 56, align: "center" },
+      competition: { x: 640, y: 1385, w: 460, h: 56, align: "center" },
+      year: { x: 1020, y: 1500, w: 220, h: 56, align: "center" },
+      position: { x: 740, y: 1610, w: 360, h: 56, align: "center" },
     },
   },
 };
@@ -460,10 +460,11 @@ const AdminDashboard = () => {
           font-weight: 700;
           white-space: nowrap;
           display: flex;
-          align-items: center;
+          align-items: flex-end;
           justify-content: center;
           line-height: 1;
           z-index: 2;
+          padding-bottom: 4px;
         }
         .qr-code {
           position: absolute;
