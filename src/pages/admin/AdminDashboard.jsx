@@ -42,9 +42,9 @@ const CERT_TEMPLATES = {
       name: { x: 640, y: 1130, w: 550, h: 62, align: "left" },
       semester: { x: 525, y: 1265, w: 200, h: 56, align: "center" },
       department: { x: 790, y: 1265, w: 360, h: 56, align: "center" },
-      competition: { x: 620, y: 1385, w: 360, h: 56, align: "left" },
+      competition: { x: 640, y: 1370, w: 360, h: 56, align: "left" },
       year: { x: 1040, y: 1480, w: 220, h: 56, align: "center" },
-      position: { x: 720, y: 1610, w: 230, h: 56, align: "left" },
+      position: { x: 735, y: 1595, w: 230, h: 56, align: "left" },
     },
   },
 };
@@ -432,8 +432,8 @@ const AdminDashboard = () => {
     // ENTERPRISE V5 - BINARY SEARCH AUTO FIT
     // ============================================
     // O(log n) instead of O(n) - 10x faster for long text
-    let fontSize = key === "name" ? 52 : 34;
-    const minFont = key === "name" ? 16 : 20;
+    let fontSize = key === "name" ? 52 : key === "competition" ? 28 : 34;
+    const minFont = key === "name" ? 16 : key === "competition" ? 14 : 20;
 
     div.style.fontSize = fontSize + "px";
 
@@ -535,7 +535,10 @@ const AdminDashboard = () => {
       // Supports ANY template with ANY slots - no hardcoding
       const template = getTemplate();
       Object.keys(template.slots).forEach((slotKey) => {
-        placeText(certNode, slotKey, row[slotKey] || "");
+        const value = slotKey === "kpm"
+          ? [row.kpmNo, certMeta?.certificateId].filter(Boolean).join(" / ")
+          : (row[slotKey] || "");
+        placeText(certNode, slotKey, value);
       });
     }
 
