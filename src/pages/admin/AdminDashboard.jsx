@@ -75,6 +75,7 @@ const SLOT_MAP = CERT_TEMPLATES.default.slots;
 
 // Certificate rendering settings
 const CERT_RENDER_SCALE = 2;
+const CERT_SLOT_DEBUG = String(import.meta.env.VITE_CERT_SLOT_DEBUG || "").toLowerCase() === "true";
 const CERT_BG_CANDIDATES = [
   "/certificate-template.png",
   "/certificate-template.jpg",
@@ -487,8 +488,8 @@ const AdminDashboard = () => {
           inset: 0;
           width: ${CERT_WIDTH}px;
           height: ${CERT_HEIGHT}px;
-          object-fit: cover;
-          object-position: center;
+          object-fit: fill;
+          object-position: 0 0;
           z-index: 1;
           user-select: none;
           pointer-events: none;
@@ -499,11 +500,13 @@ const AdminDashboard = () => {
           font-weight: 700;
           white-space: nowrap;
           display: flex;
-          align-items: flex-end;
+          align-items: center;
           justify-content: center;
           line-height: 1;
           z-index: 2;
-          padding-bottom: 4px;
+          padding-bottom: 0;
+          ${CERT_SLOT_DEBUG ? "outline: 1px dashed rgba(255,0,0,.6);" : ""}
+          ${CERT_SLOT_DEBUG ? "background: rgba(255,0,0,.06);" : ""}
         }
         .qr-code {
           position: absolute;

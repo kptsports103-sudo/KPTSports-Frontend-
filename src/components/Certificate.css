@@ -23,8 +23,8 @@
 .certificate-bg {
   width: 1123px;
   height: 794px;
-  object-fit: cover;
-  object-position: center;
+  object-fit: fill;
+  object-position: 0 0;
 }
 
 /* Common field styles */
