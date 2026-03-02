@@ -103,6 +103,14 @@ const normalizeMedalKey = (medal = "") => {
   return null;
 };
 
+const medalToPositionLabel = (medal = "") => {
+  const value = String(medal || "").trim().toLowerCase();
+  if (value === "gold") return "1st";
+  if (value === "silver") return "2nd";
+  if (value === "bronze") return "3rd";
+  return String(medal || "").trim();
+};
+
 // ============================================
 // PROFESSIONAL UI ENHANCEMENTS
 // ============================================
@@ -122,6 +130,7 @@ const AdminDashboard = () => {
   const [playerSearch, setPlayerSearch] = useState("");
   const [playerYear, setPlayerYear] = useState("all");
   const [certificateYear, setCertificateYear] = useState("all");
+  const [resultFallbackMap, setResultFallbackMap] = useState({});
   const [filterMode, setFilterMode] = useState("total");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
@@ -199,6 +208,7 @@ const AdminDashboard = () => {
     },
     onResultsUpdate: (results, groupResults) => {
       const statsMap = new Map();
+      const fallbackMap = {};
       const ensureYear = (year) => {
         if (!statsMap.has(year)) {
           statsMap.set(year, {
@@ -217,6 +227,19 @@ const AdminDashboard = () => {
         if (!medalKey) return;
         const entry = ensureYear(year);
         entry.individual[medalKey] += 1;
+
+        const playerId = String(item?.playerId || "").trim();
+        const nameKey = String(item?.name ?? "").trim().toLowerCase();
+        const fallback = {
+          competition: String(item?.event || "").trim(),
+          position: medalToPositionLabel(item?.medal),
+        };
+        if (playerId && !fallbackMap[`${playerId}|${year}`]) {
+          fallbackMap[`${playerId}|${year}`] = fallback;
+        }
+        if (nameKey && !fallbackMap[`name:${nameKey}|${year}`]) {
+          fallbackMap[`name:${nameKey}|${year}`] = fallback;
+        }
       });
 
       (Array.isArray(groupResults) ? groupResults : []).forEach((item) => {
@@ -230,11 +253,23 @@ const AdminDashboard = () => {
 
       const stats = Array.from(statsMap.values()).sort((a, b) => b.year - a.year);
       setYearlyStats(stats);
+      setResultFallbackMap(fallbackMap);
       setLastUpdateTime(Date.now());
     },
   });
 
   const normalizeKeyPart = (value) => String(value ?? "").trim().toLowerCase();
+
+  const getResultFallback = (row) => {
+    const playerId = String(row?.id ?? row?.playerId ?? "").trim();
+    const year = String(row?.year ?? "").trim();
+    const nameKey = normalizeKeyPart(row?.name);
+    return (
+      resultFallbackMap[`${playerId}|${year}`] ||
+      resultFallbackMap[`name:${nameKey}|${year}`] ||
+      null
+    );
+  };
 
   const getRowCertificateKey = (row) =>
     [
@@ -539,13 +574,14 @@ const AdminDashboard = () => {
       
       const issuedCertificate = issueResult?.certificate;
       const certificateId = issuedCertificate?.certificateId;
+      const resultFallback = getResultFallback(row);
       const certData = {
         name: issuedCertificate?.name || row.name || "",
         kpmNo: issuedCertificate?.kpmNo || row.kpmNo || "",
         semester: issuedCertificate?.semester || row.semester || "",
         department: issuedCertificate?.department || row.department || "",
-        competition: issuedCertificate?.competition || row.competition || "",
-        position: issuedCertificate?.position || row.position || "",
+        competition: issuedCertificate?.competition || row.competition || resultFallback?.competition || "",
+        position: issuedCertificate?.position || row.position || resultFallback?.position || "",
         year: issuedCertificate?.year || row.year || "",
       };
 
@@ -618,13 +654,14 @@ const AdminDashboard = () => {
       const issueResult = existingCertificate ? { certificate: existingCertificate } : await issueCertificate(row);
       const issuedCertificate = issueResult?.certificate;
       const certificateId = issuedCertificate?.certificateId;
+      const resultFallback = getResultFallback(row);
       const certData = {
         name: issuedCertificate?.name || row.name || "",
         kpmNo: issuedCertificate?.kpmNo || row.kpmNo || "",
         semester: issuedCertificate?.semester || row.semester || "",
         department: issuedCertificate?.department || row.department || "",
-        competition: issuedCertificate?.competition || row.competition || "",
-        position: issuedCertificate?.position || row.position || "",
+        competition: issuedCertificate?.competition || row.competition || resultFallback?.competition || "",
+        position: issuedCertificate?.position || row.position || resultFallback?.position || "",
         year: issuedCertificate?.year || row.year || "",
       };
       if (!certificateId) {
