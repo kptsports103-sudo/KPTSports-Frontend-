@@ -539,6 +539,15 @@ const AdminDashboard = () => {
       
       const issuedCertificate = issueResult?.certificate;
       const certificateId = issuedCertificate?.certificateId;
+      const certData = {
+        name: issuedCertificate?.name || row.name || "",
+        kpmNo: issuedCertificate?.kpmNo || row.kpmNo || "",
+        semester: issuedCertificate?.semester || row.semester || "",
+        department: issuedCertificate?.department || row.department || "",
+        competition: issuedCertificate?.competition || row.competition || "",
+        position: issuedCertificate?.position || row.position || "",
+        year: issuedCertificate?.year || row.year || "",
+      };
 
       if (!certificateId) {
         throw new Error("Could not issue certificate ID.");
@@ -556,13 +565,13 @@ const AdminDashboard = () => {
       // Call backend to generate PDF
       const response = await api.post("/certificates/generate-pdf", {
         certificateData: {
-          name: row.name,
-          kpmNo: row.kpmNo,
-          semester: row.semester,
-          department: row.department,
-          competition: row.competition,
-          position: row.position,
-          year: row.year,
+          name: certData.name,
+          kpmNo: certData.kpmNo,
+          semester: certData.semester,
+          department: certData.department,
+          competition: certData.competition,
+          position: certData.position,
+          year: certData.year,
           certificateId: certificateId,
           qrImage: qrImage,
           backgroundUrl: absoluteBackgroundUrl,
@@ -609,6 +618,15 @@ const AdminDashboard = () => {
       const issueResult = existingCertificate ? { certificate: existingCertificate } : await issueCertificate(row);
       const issuedCertificate = issueResult?.certificate;
       const certificateId = issuedCertificate?.certificateId;
+      const certData = {
+        name: issuedCertificate?.name || row.name || "",
+        kpmNo: issuedCertificate?.kpmNo || row.kpmNo || "",
+        semester: issuedCertificate?.semester || row.semester || "",
+        department: issuedCertificate?.department || row.department || "",
+        competition: issuedCertificate?.competition || row.competition || "",
+        position: issuedCertificate?.position || row.position || "",
+        year: issuedCertificate?.year || row.year || "",
+      };
       if (!certificateId) {
         throw new Error("Could not issue certificate ID.");
       }
@@ -622,7 +640,7 @@ const AdminDashboard = () => {
         await document.fonts.ready;
       }
 
-      certificateNode = buildCertificateNode(row, backgroundUrl, { certificateId, qrImage });
+      certificateNode = buildCertificateNode(certData, backgroundUrl, { certificateId, qrImage });
       document.body.appendChild(certificateNode);
       certificateNode.style.visibility = "visible";
       const cert = certificateNode.querySelector(".cert");
