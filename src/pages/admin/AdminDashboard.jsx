@@ -126,6 +126,7 @@ const AdminDashboard = () => {
   const [issuedCertificates, setIssuedCertificates] = useState([]);
   const [isGeneratingId, setIsGeneratingId] = useState(null);
   const [yearlyStats, setYearlyStats] = useState([]);
+  const [resultRows, setResultRows] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
   const [playerSearch, setPlayerSearch] = useState("");
   const [playerYear, setPlayerYear] = useState("all");
@@ -209,6 +210,7 @@ const AdminDashboard = () => {
     onResultsUpdate: (results, groupResults) => {
       const statsMap = new Map();
       const fallbackMap = {};
+      setResultRows(Array.isArray(results) ? results : []);
       const ensureYear = (year) => {
         if (!statsMap.has(year)) {
           statsMap.set(year, {
@@ -850,7 +852,7 @@ const AdminDashboard = () => {
 
   // Generate all certificates
   const handleGenerateAllCertificates = () => {
-    generateBatchCertificates(certificateRows);
+    generateBatchCertificates(certificateDataRows);
   };
 
   // Generate selected certificates (checkbox selected)
@@ -873,6 +875,54 @@ const AdminDashboard = () => {
     });
     return lookup;
   }, [issuedCertificates]);
+
+  const certificateDataRows = useMemo(() => {
+    const playersByIdYear = new Map();
+    const playersByNameYear = new Map();
+
+    certificateRows.forEach((row) => {
+      const yearKey = String(row?.year ?? "").trim();
+      const idKey = String(row?.id ?? row?.playerId ?? "").trim();
+      const nameKey = normalizeKeyPart(row?.name);
+
+      if (yearKey && idKey && !playersByIdYear.has(`${idKey}|${yearKey}`)) {
+        playersByIdYear.set(`${idKey}|${yearKey}`, row);
+      }
+      if (yearKey && nameKey && !playersByNameYear.has(`${nameKey}|${yearKey}`)) {
+        playersByNameYear.set(`${nameKey}|${yearKey}`, row);
+      }
+    });
+
+    return (Array.isArray(resultRows) ? resultRows : [])
+      .map((result, index) => {
+        const yearKey = String(result?.year ?? "").trim();
+        const playerId = String(result?.playerId || "").trim();
+        const playerMasterId = String(result?.playerMasterId || "").trim();
+        const nameKey = normalizeKeyPart(result?.name);
+        const base =
+          playersByIdYear.get(`${playerId}|${yearKey}`) ||
+          playersByNameYear.get(`${nameKey}|${yearKey}`) ||
+          {};
+
+        const competition = String(result?.event || "").trim();
+        const position = medalToPositionLabel(result?.medal);
+
+        return {
+          id: base.id || playerId || playerMasterId || `result-${index}`,
+          playerId: base.playerId || playerId || playerMasterId || "",
+          name: base.name || String(result?.name || "").trim(),
+          kpmNo: base.kpmNo || "",
+          semester: base.semester || "",
+          department: base.department || String(result?.branch || "").trim(),
+          competition,
+          position,
+          year: Number(result?.year) || base.year || "",
+          achievement: base.achievement || "",
+          diplomaYear: base.diplomaYear || "",
+        };
+      })
+      .filter((row) => row.name && row.competition && row.position && row.year);
+  }, [resultRows, certificateRows]);
 
   const medalData = yearlyStats.map((y) => {
     const individualPoints =
@@ -942,7 +992,7 @@ const AdminDashboard = () => {
 
   const availableCertificateYears = Array.from(
     new Set(
-      certificateRows
+      certificateDataRows
         .map((row) => String(row.year || "").trim())
         .filter(Boolean)
     )
@@ -999,7 +1049,7 @@ const AdminDashboard = () => {
     return matchesYear && (name.includes(term) || branch.includes(term));
   });
 
-  const filteredCertificateRows = certificateRows.filter((row) => {
+  const filteredCertificateRows = certificateDataRows.filter((row) => {
     return certificateYear === "all" || String(row.year) === String(certificateYear);
   });
 
@@ -1015,7 +1065,7 @@ const AdminDashboard = () => {
     const previousYear = currentYear ? currentYear - 1 : null;
     
     const currentYearCount = currentYear ? filteredCertificateRows.filter(r => r.year === currentYear).length : filteredCertificateRows.length;
-    const previousYearCount = previousYear ? certificateRows.filter(r => r.year === previousYear).length : Math.floor(currentYearCount * 0.8);
+    const previousYearCount = previousYear ? certificateDataRows.filter(r => r.year === previousYear).length : Math.floor(currentYearCount * 0.8);
     
     const trendPercent = previousYearCount > 0 ? ((currentYearCount - previousYearCount) / previousYearCount) * 100 : 0;
 
@@ -1027,7 +1077,7 @@ const AdminDashboard = () => {
       currentYearCount,
       previousYearCount,
     };
-  }, [filteredCertificateRows, issuedCertificateByRowKey, selectedCertificateYearLabel, certificateRows]);
+  }, [filteredCertificateRows, issuedCertificateByRowKey, selectedCertificateYearLabel, certificateDataRows]);
 
   const filteredCertificateRowsByStatus = useMemo(() => {
     return filteredCertificateRows.filter((row) => {
@@ -1586,7 +1636,7 @@ const AdminDashboard = () => {
         {/* ============================================
         ENTERPRISE V5 - BATCH CONTROLS
         ============================================ */}
-        {certificateRows.length > 0 && (
+        {certificateDataRows.length > 0 && (
           <div className="batch-controls table-stretch" style={{ 
             display: 'flex', 
             gap: '12px', 
@@ -1658,7 +1708,6 @@ const AdminDashboard = () => {
                   <th>Competition</th>
                   <th>Year</th>
                   <th>Position</th>
-                  <th>Achievement</th>
                   <th>Certificate ID</th>
                   <th>Verify Link</th>
                   <th>Actions</th>
@@ -1693,7 +1742,6 @@ const AdminDashboard = () => {
                       <td>{row.competition || "-"}</td>
                       <td>{row.year || "-"}</td>
                       <td>{row.position || "-"}</td>
-                      <td>{row.achievement || "-"}</td>
                       <td>{existingCertificate?.certificateId || "-"}</td>
                       <td>
                         {verifyUrl ? (
