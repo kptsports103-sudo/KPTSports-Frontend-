@@ -42,9 +42,9 @@ const CERT_TEMPLATES = {
       name: { x: 640, y: 1130, w: 550, h: 62, align: "left" },
       semester: { x: 525, y: 1265, w: 200, h: 56, align: "center" },
       department: { x: 790, y: 1265, w: 360, h: 56, align: "center" },
-      competition: { x: 640, y: 1370, w: 360, h: 56, align: "left" },
+      competition: { x: 655, y: 1370, w: 360, h: 56, align: "left" },
       year: { x: 1040, y: 1480, w: 220, h: 56, align: "center" },
-      position: { x: 735, y: 1595, w: 230, h: 56, align: "left" },
+      position: { x: 750, y: 1595, w: 230, h: 56, align: "left" },
     },
   },
 };
@@ -535,9 +535,7 @@ const AdminDashboard = () => {
       // Supports ANY template with ANY slots - no hardcoding
       const template = getTemplate();
       Object.keys(template.slots).forEach((slotKey) => {
-        const value = slotKey === "kpm"
-          ? [row.kpmNo, certMeta?.certificateId].filter(Boolean).join(" / ")
-          : (row[slotKey] || "");
+        const value = slotKey === "kpm" ? (row.kpmNo || "") : (row[slotKey] || "");
         placeText(certNode, slotKey, value);
       });
     }
