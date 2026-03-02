@@ -127,6 +127,7 @@ const AdminDashboard = () => {
   const [isGeneratingId, setIsGeneratingId] = useState(null);
   const [yearlyStats, setYearlyStats] = useState([]);
   const [resultRows, setResultRows] = useState([]);
+  const [groupResultRows, setGroupResultRows] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
   const [playerSearch, setPlayerSearch] = useState("");
   const [playerYear, setPlayerYear] = useState("all");
@@ -211,6 +212,7 @@ const AdminDashboard = () => {
       const statsMap = new Map();
       const fallbackMap = {};
       setResultRows(Array.isArray(results) ? results : []);
+      setGroupResultRows(Array.isArray(groupResults) ? groupResults : []);
       const ensureYear = (year) => {
         if (!statsMap.has(year)) {
           statsMap.set(year, {
@@ -893,7 +895,7 @@ const AdminDashboard = () => {
       }
     });
 
-    return (Array.isArray(resultRows) ? resultRows : [])
+    const individualRows = (Array.isArray(resultRows) ? resultRows : [])
       .map((result, index) => {
         const yearKey = String(result?.year ?? "").trim();
         const playerId = String(result?.playerId || "").trim();
@@ -922,7 +924,44 @@ const AdminDashboard = () => {
         };
       })
       .filter((row) => row.name && row.competition && row.position && row.year);
-  }, [resultRows, certificateRows]);
+
+    const teamRows = (Array.isArray(groupResultRows) ? groupResultRows : [])
+      .flatMap((group, groupIndex) => {
+        const yearKey = String(group?.year ?? "").trim();
+        const competition = String(group?.event || "").trim();
+        const position = medalToPositionLabel(group?.medal);
+        const members = Array.isArray(group?.members) ? group.members : [];
+
+        return members.map((member, memberIndex) => {
+          const memberPlayerId = String(member?.playerId || "").trim();
+          const memberMasterId = String(member?.playerMasterId || "").trim();
+          const memberName = String(member?.name || "").trim();
+          const nameKey = normalizeKeyPart(memberName);
+
+          const base =
+            playersByIdYear.get(`${memberPlayerId}|${yearKey}`) ||
+            playersByNameYear.get(`${nameKey}|${yearKey}`) ||
+            {};
+
+          return {
+            id: base.id || memberPlayerId || memberMasterId || `group-${groupIndex}-member-${memberIndex}`,
+            playerId: base.playerId || memberPlayerId || memberMasterId || "",
+            name: base.name || memberName,
+            kpmNo: base.kpmNo || "",
+            semester: base.semester || String(member?.semester || "").trim(),
+            department: base.department || "",
+            competition,
+            position,
+            year: Number(group?.year) || "",
+            achievement: base.achievement || "",
+            diplomaYear: base.diplomaYear || member?.diplomaYear || "",
+          };
+        });
+      })
+      .filter((row) => row.name && row.competition && row.position && row.year);
+
+    return [...individualRows, ...teamRows];
+  }, [resultRows, groupResultRows, certificateRows]);
 
   const medalData = yearlyStats.map((y) => {
     const individualPoints =
