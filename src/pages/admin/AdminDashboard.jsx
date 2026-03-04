@@ -35,16 +35,18 @@ const CERT_TEMPLATES = {
   default: {
     id: "default",
     name: "Default Certificate Template",
-    width: 1394,
-    height: 2048,
+    width: 1600,
+    height: 1000,
+    baseWidth: 1600,
+    baseHeight: 1000,
     slots: {
-      kpm: { x: 250, y: 835, w: 380, h: 56, align: "left" },
-      name: { x: 640, y: 1130, w: 550, h: 62, align: "left" },
-      semester: { x: 525, y: 1265, w: 200, h: 56, align: "center" },
-      department: { x: 790, y: 1265, w: 360, h: 56, align: "center" },
-      competition: { x: 675, y: 1370, w: 360, h: 56, align: "left" },
-      year: { x: 1040, y: 1480, w: 220, h: 56, align: "center" },
-      position: { x: 770, y: 1595, w: 230, h: 56, align: "left" },
+      kpm: { x: 1200, y: 150, w: 150, h: 40, align: "left" },
+      name: { x: 300, y: 400, w: 500, h: 40, align: "left" },
+      semester: { x: 350, y: 460, w: 100, h: 40, align: "center" },
+      department: { x: 600, y: 460, w: 300, h: 40, align: "center" },
+      competition: { x: 450, y: 520, w: 200, h: 40, align: "left" },
+      year: { x: 700, y: 580, w: 150, h: 40, align: "center" },
+      position: { x: 400, y: 640, w: 200, h: 40, align: "left" },
     },
   },
 };
@@ -92,9 +94,17 @@ const CERT_BG_CANDIDATES = [
 const getCertWidth = () => getTemplate().width;
 const getCertHeight = () => getTemplate().height;
 
-// Legacy compatibility - default values
-const CERT_WIDTH = CERT_TEMPLATES.default.width;
-const CERT_HEIGHT = CERT_TEMPLATES.default.height;
+const getScaledSlot = (template, slot) => {
+  const scaleX = template.width / (template.baseWidth || template.width || 1);
+  const scaleY = template.height / (template.baseHeight || template.height || 1);
+  return {
+    x: Math.round(slot.x * scaleX),
+    y: Math.round(slot.y * scaleY),
+    w: Math.round(slot.w * scaleX),
+    h: Math.round(slot.h * scaleY),
+    align: slot.align,
+  };
+};
 
 const normalizeMedalKey = (medal = "") => {
   const value = medal.trim().toLowerCase();
@@ -410,8 +420,9 @@ const AdminDashboard = () => {
 
   const placeText = (container, key, value) => {
     const template = getTemplate();
-    const slot = template.slots[key];
-    if (!slot) return;
+    const rawSlot = template.slots[key];
+    if (!rawSlot) return;
+    const slot = getScaledSlot(template, rawSlot);
 
     const div = document.createElement("div");
     div.className = "field";
@@ -461,33 +472,35 @@ const AdminDashboard = () => {
   };
 
   const buildCertificateNode = (row, backgroundUrl, certMeta) => {
+    const certWidth = getCertWidth();
+    const certHeight = getCertHeight();
     const wrapper = document.createElement("div");
     wrapper.style.position = "absolute";
     wrapper.style.left = "0";
     wrapper.style.top = "0";
     wrapper.style.visibility = "hidden";
     wrapper.style.pointerEvents = "none";
-    wrapper.style.width = `${CERT_WIDTH}px`;
-    wrapper.style.height = `${CERT_HEIGHT}px`;
+    wrapper.style.width = `${certWidth}px`;
+    wrapper.style.height = `${certHeight}px`;
     wrapper.style.zIndex = "-1";
 
     wrapper.innerHTML = `
       <style>
         .cert-wrap {
-          width: ${CERT_WIDTH}px;
-          height: ${CERT_HEIGHT}px;
+          width: ${certWidth}px;
+          height: ${certHeight}px;
           font-family: "Times New Roman", serif;
         }
         .cert {
-          width: ${CERT_WIDTH}px;
-          height: ${CERT_HEIGHT}px;
+          width: ${certWidth}px;
+          height: ${certHeight}px;
           position: relative;
         }
         .cert-bg {
           position: absolute;
           inset: 0;
-          width: ${CERT_WIDTH}px;
-          height: ${CERT_HEIGHT}px;
+          width: ${certWidth}px;
+          height: ${certHeight}px;
           object-fit: fill;
           object-position: 0 0;
           z-index: 1;
@@ -712,6 +725,9 @@ const AdminDashboard = () => {
         CERT_RENDER_SCALE,
         Math.max(1, Number(window.devicePixelRatio) || 1)
       );
+      const certWidth = getCertWidth();
+      const certHeight = getCertHeight();
+      const certOrientation = certWidth >= certHeight ? "landscape" : "portrait";
 
       const canvas = await html2canvas(cert, {
         scale: safeScale,
@@ -719,10 +735,10 @@ const AdminDashboard = () => {
         useCORS: true,
         allowTaint: false,
         backgroundColor: "#ffffff",
-        width: CERT_WIDTH,
-        height: CERT_HEIGHT,
-        windowWidth: CERT_WIDTH,
-        windowHeight: CERT_HEIGHT,
+        width: certWidth,
+        height: certHeight,
+        windowWidth: certWidth,
+        windowHeight: certHeight,
         imageTimeout: 30000,
         removeContainer: true,
         logging: false,
@@ -731,13 +747,13 @@ const AdminDashboard = () => {
       const imgData = canvas.toDataURL("image/png");
 
       const pdf = new jsPDF({
-        orientation: "portrait",
+        orientation: certOrientation,
         unit: "px",
-        format: [CERT_WIDTH, CERT_HEIGHT],
+        format: [certWidth, certHeight],
         compress: true,
       });
 
-      pdf.addImage(imgData, "PNG", 0, 0, CERT_WIDTH, CERT_HEIGHT);
+      pdf.addImage(imgData, "PNG", 0, 0, certWidth, certHeight);
 
       const safeName = (row.name || "student")
         .toLowerCase()
