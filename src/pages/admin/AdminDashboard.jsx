@@ -52,26 +52,7 @@ const CERT_TEMPLATES = {
 // ============================================
 // ENTERPRISE V5 - TEMPLATE MANAGEMENT
 // ============================================
-// Using ref pattern to bridge global functions with React state
-const templateRef = { current: CERT_TEMPLATES.default };
-
-// Get current template (works with React state via ref)
-const getTemplate = () => templateRef.current;
-
-// Switch template dynamically (for future admin UI)
-// Note: In component, use setActiveTemplate state instead for re-render
-const setTemplate = (templateId) => {
-  if (CERT_TEMPLATES[templateId]) {
-    templateRef.current = CERT_TEMPLATES[templateId];
-    return true;
-  }
-  return false;
-};
-
-// ============================================
-// LEGACY COMPATIBILITY - Keep SLOT_MAP for backward compatibility
-// ============================================
-const SLOT_MAP = CERT_TEMPLATES.default.slots;
+const getTemplate = () => CERT_TEMPLATES.default;
 
 // Certificate rendering settings
 const CERT_RENDER_SCALE = 2;
@@ -85,16 +66,10 @@ const CERT_BG_CANDIDATES = [
   "/certificate.jpeg",
 ];
 
-// ============================================
-// ENTERPRISE V5 - DYNAMIC DIMENSIONS
-// ============================================
-// Get dimensions from active template - works when switching templates
-const getCertWidth = () => getTemplate().width;
-const getCertHeight = () => getTemplate().height;
-
 // Legacy compatibility - default values
 const CERT_WIDTH = CERT_TEMPLATES.default.width;
 const CERT_HEIGHT = CERT_TEMPLATES.default.height;
+const OCR_API_BASE = String(import.meta.env.VITE_OCR_API_URL || "http://localhost:8000").replace(/\/+$/, "");
 
 const normalizeMedalKey = (medal = "") => {
   const value = medal.trim().toLowerCase();
@@ -137,29 +112,12 @@ const AdminDashboard = () => {
   const [filterMode, setFilterMode] = useState("total");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
+  const [ocrExtracting, setOcrExtracting] = useState(false);
+  const [ocrError, setOcrError] = useState("");
+  const [ocrRawText, setOcrRawText] = useState("");
+  const [ocrFields, setOcrFields] = useState(null);
+  const [ocrFileName, setOcrFileName] = useState("");
 
-  // ============================================
-  // ENTERPRISE V5 - TEMPLATE STATE
-  // ============================================
-  // React state for active template (triggers re-render on change)
-  const [activeTemplate, setActiveTemplate] = useState(CERT_TEMPLATES.default);
-  
-  // Sync with global ref for functions that use it
-  useEffect(() => {
-    templateRef.current = activeTemplate;
-  }, [activeTemplate]);
-  
-  // Update getTemplate to use React state and sync with ref
-  const getTemplate = () => activeTemplate;
-  const changeTemplate = (templateId) => {
-    if (CERT_TEMPLATES[templateId]) {
-      setActiveTemplate(CERT_TEMPLATES[templateId]);
-      templateRef.current = CERT_TEMPLATES[templateId];
-      return true;
-    }
-    return false;
-  };
-  
   // ============================================
   // ENTERPRISE V5 - SELECTION STATE
   // ============================================
@@ -559,94 +517,41 @@ const AdminDashboard = () => {
     }
   };
 
-  // ============================================
-  // ENTERPRISE V5 - BACKEND PDF GENERATION
-  // ============================================
-  // Uses server-side Puppeteer for better performance
-  // and unlimited batch generation
+  const extractCertificateFields = async (imageFile) => {
+    const form = new FormData();
+    form.append("file", imageFile);
 
-  const handleDownloadCertificateBackend = async (row, existingCertificate = null) => {
-    if (!row || !row.name) {
-      alert("Invalid certificate data");
-      return;
+    const response = await fetch(`${OCR_API_BASE}/extract-certificate`, {
+      method: "POST",
+      body: form,
+    });
+
+    if (!response.ok) {
+      throw new Error(`OCR API failed (${response.status})`);
     }
 
-    const actionKey = getActionKey(row);
-    setIsGeneratingId(actionKey);
+    return response.json();
+  };
+
+  const onCertificateOcrUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setOcrExtracting(true);
+    setOcrError("");
+    setOcrFields(null);
+    setOcrRawText("");
+    setOcrFileName(file.name || "");
 
     try {
-      // Issue certificate if not exists
-      const issueResult = existingCertificate 
-        ? { certificate: existingCertificate } 
-        : await issueCertificate(row);
-      
-      const issuedCertificate = issueResult?.certificate;
-      const certificateId = issuedCertificate?.certificateId;
-      const resultFallback = getResultFallback(row);
-      const certData = {
-        name: issuedCertificate?.name || row.name || "",
-        kpmNo: issuedCertificate?.kpmNo || row.kpmNo || "",
-        semester: issuedCertificate?.semester || row.semester || "",
-        department: issuedCertificate?.department || row.department || "",
-        competition: issuedCertificate?.competition || row.competition || resultFallback?.competition || "",
-        position: issuedCertificate?.position || row.position || resultFallback?.position || "",
-        year: issuedCertificate?.year || row.year || "",
-      };
-
-      if (!certificateId) {
-        throw new Error("Could not issue certificate ID.");
-      }
-
-      // Generate QR code
-      const qrImage = await generateCertificateQr(certificateId);
-
-      // Get background URL
-      const backgroundUrl = await preloadCertificateBackground();
-      const absoluteBackgroundUrl = backgroundUrl
-        ? new URL(backgroundUrl, window.location.origin).toString()
-        : "";
-
-      // Call backend to generate PDF
-      const response = await api.post("/certificates/generate-pdf", {
-        certificateData: {
-          name: certData.name,
-          kpmNo: certData.kpmNo,
-          semester: certData.semester,
-          department: certData.department,
-          competition: certData.competition,
-          position: certData.position,
-          year: certData.year,
-          certificateId: certificateId,
-          qrImage: qrImage,
-          backgroundUrl: absoluteBackgroundUrl,
-        },
-      }, {
-        responseType: 'blob',
-      });
-
-      // Download the PDF
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      const safeName = (row.name || "student")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-      const safeCertId = String(certificateId).toLowerCase().replace(/[^a-z0-9-]+/g, "");
-      link.download = `certificate-${safeName || "student"}-${safeCertId || "cert"}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      await fetchIssuedCertificates();
+      const data = await extractCertificateFields(file);
+      setOcrFields(data?.fields || null);
+      setOcrRawText(String(data?.rawText || ""));
     } catch (error) {
-      console.error("Failed to generate certificate PDF (backend):", error);
-      const reason = error?.response?.data?.message || error?.message || "Unknown error";
-      alert(`Failed to generate certificate: ${reason}`);
+      setOcrError(error?.message || "Certificate OCR failed.");
     } finally {
-      setIsGeneratingId(null);
+      setOcrExtracting(false);
+      event.target.value = "";
     }
   };
 
@@ -771,7 +676,7 @@ const AdminDashboard = () => {
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
   const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0 });
   
-  const generateBatchCertificates = async (rows, useBackend = false) => {
+  const generateBatchCertificates = async (rows) => {
     if (!rows || rows.length === 0) {
       alert("No certificates to generate");
       return;
@@ -785,58 +690,24 @@ const AdminDashboard = () => {
 
     let successCount = 0;
     let failCount = 0;
-    const useBackendMode = useBackend;
 
-    if (useBackendMode) {
-      // Limited concurrency for server-side rendering to improve batch speed
-      // while avoiding unbounded request spikes.
-      const maxConcurrent = 3;
-      let nextIndex = 0;
-      let completed = 0;
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      setBatchProgress({ current: i + 1, total: rows.length });
+      setIsGeneratingId(getActionKey(row));
 
-      const runWorker = async () => {
-        while (true) {
-          const currentIndex = nextIndex;
-          nextIndex += 1;
-          if (currentIndex >= rows.length) return;
-
-          const row = rows[currentIndex];
-          try {
-            const rowKey = getRowCertificateKey(row);
-            const existingCert = issuedCertificateByRowKey.get(rowKey);
-            await handleDownloadCertificateBackend(row, existingCert || null);
-            successCount++;
-          } catch (error) {
-            console.error(`Failed to generate certificate for ${row.name}:`, error);
-            failCount++;
-          } finally {
-            completed += 1;
-            setBatchProgress({ current: completed, total: rows.length });
-          }
-        }
-      };
-
-      const workerCount = Math.min(maxConcurrent, rows.length);
-      await Promise.all(Array.from({ length: workerCount }, () => runWorker()));
-    } else {
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        setBatchProgress({ current: i + 1, total: rows.length });
-        setIsGeneratingId(getActionKey(row));
-
-        try {
-          const rowKey = getRowCertificateKey(row);
-          const existingCert = issuedCertificateByRowKey.get(rowKey);
-          await handleDownloadCertificate(row, existingCert || null);
-          successCount++;
-        } catch (error) {
-          console.error(`Failed to generate certificate for ${row.name}:`, error);
-          failCount++;
-        }
-
-        // Small delay between frontend generations to prevent browser freeze.
-        await new Promise((resolve) => setTimeout(resolve, 500));
+      try {
+        const rowKey = getRowCertificateKey(row);
+        const existingCert = issuedCertificateByRowKey.get(rowKey);
+        await handleDownloadCertificate(row, existingCert || null);
+        successCount++;
+      } catch (error) {
+        console.error(`Failed to generate certificate for ${row.name}:`, error);
+        failCount++;
       }
+
+      // Small delay between frontend generations to prevent browser freeze.
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     setIsBatchGenerating(false);
@@ -854,16 +725,6 @@ const AdminDashboard = () => {
     );
     
     await fetchIssuedCertificates();
-  };
-
-  // Generate all certificates
-  const handleGenerateAllCertificates = () => {
-    generateBatchCertificates(certificateDataRows);
-  };
-
-  // Generate selected certificates (checkbox selected)
-  const handleGenerateSelectedCertificates = (selectedRows) => {
-    generateBatchCertificates(selectedRows);
   };
 
   const issuedCertificateByRowKey = useMemo(() => {
@@ -1656,7 +1517,7 @@ const AdminDashboard = () => {
         <div className="section-header compact table-stretch">
           <div className="section-header-left">
             <div className="section-title"><Award size={16} className="title-icon" /> Certificates</div>
-            <div className="section-subtitle">Generate and download student certificates</div>
+            <div className="section-subtitle">Generate, download, and OCR-extract certificate data</div>
           </div>
           <div className="table-filters">
             <label htmlFor="certificate-year-filter" style={srOnlyStyle}>Filter certificates by year</label>
@@ -1674,6 +1535,61 @@ const AdminDashboard = () => {
               ))}
             </select>
           </div>
+        </div>
+
+        <div
+          className="table-stretch"
+          style={{
+            marginBottom: "16px",
+            border: "1px solid #e2e8f0",
+            borderRadius: "10px",
+            padding: "12px",
+            background: "#f8fafc",
+          }}
+        >
+          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+            <label htmlFor="certificate-ocr-upload" className="download-btn" style={{ cursor: "pointer" }}>
+              {ocrExtracting ? "Extracting..." : "Upload Certificate for OCR"}
+            </label>
+            <input
+              id="certificate-ocr-upload"
+              type="file"
+              accept="image/*"
+              onChange={onCertificateOcrUpload}
+              disabled={ocrExtracting}
+              style={srOnlyStyle}
+            />
+            <span style={{ color: "#475467", fontSize: "0.9rem" }}>
+              {ocrFileName ? `File: ${ocrFileName}` : "Supports filled certificate images only"}
+            </span>
+          </div>
+          {ocrError && (
+            <div style={{ marginTop: "10px", color: "#b42318", fontWeight: 600 }}>
+              {ocrError}
+            </div>
+          )}
+          {ocrFields && (
+            <div style={{ marginTop: "10px", fontSize: "0.92rem", color: "#1d2939" }}>
+              <strong>Extracted:</strong>{" "}
+              {Object.entries(ocrFields)
+                .map(([key, value]) => `${key}: ${value || "-"}`)
+                .join(" | ")}
+            </div>
+          )}
+          {ocrRawText && (
+            <div
+              style={{
+                marginTop: "8px",
+                maxHeight: "110px",
+                overflow: "auto",
+                fontSize: "0.84rem",
+                color: "#475467",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {ocrRawText}
+            </div>
+          )}
         </div>
         
         {/* ============================================
