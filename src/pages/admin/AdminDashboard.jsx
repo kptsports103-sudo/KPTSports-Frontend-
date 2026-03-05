@@ -69,7 +69,7 @@ const CERT_BG_CANDIDATES = [
 // Legacy compatibility - default values
 const CERT_WIDTH = CERT_TEMPLATES.default.width;
 const CERT_HEIGHT = CERT_TEMPLATES.default.height;
-const OCR_API_BASE = String(import.meta.env.VITE_OCR_API_URL || "http://localhost:8000").replace(/\/+$/, "");
+const OCR_API_BASE = String(import.meta.env.VITE_OCR_API_URL || "").trim().replace(/\/+$/, "");
 
 const normalizeMedalKey = (medal = "") => {
   const value = medal.trim().toLowerCase();
@@ -531,13 +531,26 @@ const AdminDashboard = () => {
   };
 
   const extractCertificateFields = async (imageFile) => {
+    if (!OCR_API_BASE) {
+      throw new Error(
+        "OCR service is not configured. Set VITE_OCR_API_URL (example: http://localhost:8000) and restart the frontend."
+      );
+    }
+
     const form = new FormData();
     form.append("file", imageFile);
 
-    const response = await fetch(`${OCR_API_BASE}/extract-certificate`, {
-      method: "POST",
-      body: form,
-    });
+    let response;
+    try {
+      response = await fetch(`${OCR_API_BASE}/extract-certificate`, {
+        method: "POST",
+        body: form,
+      });
+    } catch (error) {
+      throw new Error(
+        `Could not reach OCR service at ${OCR_API_BASE}. Start the OCR server (uvicorn main:app --reload --port 8000) or update VITE_OCR_API_URL.`
+      );
+    }
 
     if (!response.ok) {
       throw new Error(`OCR API failed (${response.status})`);
