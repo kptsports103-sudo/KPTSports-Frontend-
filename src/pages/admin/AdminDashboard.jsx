@@ -34,17 +34,17 @@ import {
 const CERT_TEMPLATES = {
   default: {
     id: "default",
-    name: "Default Certificate Template",
-    width: 1394,
-    height: 2048,
+    name: "Certificate (1235x1600)",
+    width: 1235,
+    height: 1600,
     slots: {
-      kpm: { x: 250, y: 835, w: 380, h: 56, align: "left" },
-      name: { x: 640, y: 1130, w: 550, h: 62, align: "left" },
-      semester: { x: 525, y: 1265, w: 200, h: 56, align: "center" },
-      department: { x: 790, y: 1265, w: 360, h: 56, align: "center" },
-      competition: { x: 675, y: 1370, w: 360, h: 56, align: "left" },
-      year: { x: 1040, y: 1480, w: 220, h: 56, align: "center" },
-      position: { x: 770, y: 1595, w: 230, h: 56, align: "left" },
+      kpm: { x: 110, y: 610, w: 260, h: 45, align: "left" },
+      name: { x: 560, y: 910, w: 490, h: 65, align: "left" },
+      semester: { x: 350, y: 980, w: 175, h: 55, align: "center" },
+      department: { x: 840, y: 980, w: 290, h: 55, align: "center" },
+      competition: { x: 615, y: 1085, w: 215, h: 55, align: "left" },
+      year: { x: 985, y: 1170, w: 155, h: 55, align: "center" },
+      position: { x: 700, y: 1260, w: 175, h: 55, align: "left" },
     },
   },
 };
@@ -366,7 +366,7 @@ const AdminDashboard = () => {
 // Advanced auto-fit algorithm with better performance
 // Uses template-based slot configuration
 
-  const placeText = (container, key, value) => {
+  const placeText = (container, key, value, scaleX = 1, scaleY = 1) => {
     const template = getTemplate();
     const slot = template.slots[key];
     if (!slot) return;
@@ -377,29 +377,43 @@ const AdminDashboard = () => {
 
     // Apply slot positioning from template
     Object.assign(div.style, {
-      left: `${slot.x}px`,
-      top: `${slot.y}px`,
-      width: `${slot.w}px`,
-      height: `${slot.h}px`,
+      left: `${slot.x * scaleX}px`,
+      top: `${slot.y * scaleY}px`,
+      width: `${slot.w * scaleX}px`,
+      height: `${slot.h * scaleY}px`,
       textAlign: slot.align,
       justifyContent: slot.align === "left" ? "flex-start" : "center",
     });
 
+    // Slot label overlay (debug only)
+    if (CERT_SLOT_DEBUG) {
+      const label = document.createElement("span");
+      label.innerText = key;
+      Object.assign(label.style, {
+        position: "absolute",
+        top: "-18px",
+        left: "0",
+        fontSize: "10px",
+        color: "red",
+        fontWeight: "bold",
+        background: "rgba(255,255,255,0.7)",
+        padding: "1px 4px",
+        borderRadius: "3px",
+        pointerEvents: "none",
+      });
+      div.appendChild(label);
+    }
+
     container.appendChild(div);
 
-    // ============================================
-    // ENTERPRISE V5 - BINARY SEARCH AUTO FIT
-    // ============================================
-    // O(log n) instead of O(n) - 10x faster for long text
-    let fontSize = key === "name" ? 52 : key === "competition" ? 28 : 34;
+    // Binary search font auto-fit
+    const startFont = key === "name" ? 52 : key === "competition" ? 28 : 34;
     const minFont = key === "name" ? 16 : key === "competition" ? 14 : 20;
-
-    div.style.fontSize = fontSize + "px";
 
     // Binary search for optimal font size
     let low = minFont;
-    let high = fontSize;
-    let optimalSize = minFont;
+    let high = startFont;
+    let best = minFont;
 
     while (low <= high) {
       const mid = Math.floor((low + high) / 2);
@@ -408,26 +422,26 @@ const AdminDashboard = () => {
       const fits = div.scrollWidth <= div.clientWidth && div.scrollHeight <= div.clientHeight;
       
       if (fits) {
-        optimalSize = mid; // This size fits, try larger
+        best = mid;
         low = mid + 1;
       } else {
-        high = mid - 1; // Too big, try smaller
+        high = mid - 1;
       }
     }
 
-    div.style.fontSize = optimalSize + "px";
+    div.style.fontSize = best + "px";
   };
 
-  const buildCertificateNode = (row, backgroundUrl, certMeta) => {
+  const buildCertificateNode = (backgroundUrl, certMeta) => {
     const wrapper = document.createElement("div");
     wrapper.style.position = "absolute";
     wrapper.style.left = "0";
     wrapper.style.top = "0";
     wrapper.style.visibility = "hidden";
-    wrapper.style.pointerEvents = "none";
+    wrapper.style.pointerEvents = CERT_SLOT_DEBUG ? "auto" : "none";
     wrapper.style.width = `${CERT_WIDTH}px`;
     wrapper.style.height = `${CERT_HEIGHT}px`;
-    wrapper.style.zIndex = "-1";
+    wrapper.style.zIndex = CERT_SLOT_DEBUG ? "9999" : "-1";
 
     wrapper.innerHTML = `
       <style>
@@ -444,8 +458,8 @@ const AdminDashboard = () => {
         .cert-bg {
           position: absolute;
           inset: 0;
-          width: ${CERT_WIDTH}px;
-          height: ${CERT_HEIGHT}px;
+          width: 100%;
+          height: 100%;
           object-fit: fill;
           object-position: 0 0;
           z-index: 1;
@@ -462,9 +476,8 @@ const AdminDashboard = () => {
           justify-content: center;
           line-height: 1;
           z-index: 2;
-          padding-bottom: 0;
-          ${CERT_SLOT_DEBUG ? "outline: 1px dashed rgba(255,0,0,.6);" : ""}
-          ${CERT_SLOT_DEBUG ? "background: rgba(255,0,0,.06);" : ""}
+          ${CERT_SLOT_DEBUG ? "outline: 2px dashed red;" : ""}
+          ${CERT_SLOT_DEBUG ? "background: rgba(255,0,0,0.10);" : ""}
         }
         .qr-code {
           position: absolute;
@@ -487,18 +500,18 @@ const AdminDashboard = () => {
       </div>
     `;
 
-    const certNode = wrapper.querySelector(".cert");
-    if (certNode) {
-      // ============================================
-      // ENTERPRISE V5 - DYNAMIC SLOT LOOP
-      // ============================================
-      // Iterates through all slots in the template
-      // Supports ANY template with ANY slots - no hardcoding
-      const template = getTemplate();
-      Object.keys(template.slots).forEach((slotKey) => {
-        const value = slotKey === "kpm" ? (row.kpmNo || "") : (row[slotKey] || "");
-        placeText(certNode, slotKey, value);
-      });
+    // Click anywhere -> show X/Y (debug only)
+    if (CERT_SLOT_DEBUG) {
+      const cert = wrapper.querySelector(".cert");
+      if (cert) {
+        cert.addEventListener("click", (e) => {
+          const rect = cert.getBoundingClientRect();
+          const x = Math.round(e.clientX - rect.left);
+          const y = Math.round(e.clientY - rect.top);
+          console.log("CERT CLICK:", { x, y });
+          alert(`X: ${x}   Y: ${y}`);
+        });
+      }
     }
 
     return wrapper;
@@ -590,15 +603,46 @@ const AdminDashboard = () => {
         await document.fonts.ready;
       }
 
-      certificateNode = buildCertificateNode(certData, backgroundUrl, { certificateId, qrImage });
+      certificateNode = buildCertificateNode(backgroundUrl, { certificateId, qrImage });
       document.body.appendChild(certificateNode);
       certificateNode.style.visibility = "visible";
+      const certWrap = certificateNode.querySelector(".cert-wrap");
       const cert = certificateNode.querySelector(".cert");
       const certBg = certificateNode.querySelector(".cert-bg");
+      const qrCode = certificateNode.querySelector(".qr-code");
       const certBgLoaded = await waitForImage(certBg);
       if (!certBgLoaded) {
         throw new Error("Certificate background image failed to render.");
       }
+      if (!cert) {
+        throw new Error("Certificate container failed to render.");
+      }
+      const template = getTemplate();
+      const renderWidth = template.width;
+      const renderHeight = template.height;
+      const scaleX = 1;
+      const scaleY = 1;
+
+      if (certWrap) {
+        certWrap.style.width = `${renderWidth}px`;
+        certWrap.style.height = `${renderHeight}px`;
+      }
+      if (cert) {
+        cert.style.width = `${renderWidth}px`;
+        cert.style.height = `${renderHeight}px`;
+      }
+      if (qrCode) {
+        qrCode.style.width = "170px";
+        qrCode.style.height = "170px";
+        qrCode.style.right = "220px";
+        qrCode.style.bottom = "130px";
+        qrCode.style.borderWidth = "4px";
+      }
+
+      Object.keys(template.slots).forEach((slotKey) => {
+        const value = slotKey === "kpm" ? (certData.kpmNo || "") : (certData[slotKey] || "");
+        placeText(cert, slotKey, value, scaleX, scaleY);
+      });
 
       await new Promise((resolve) => requestAnimationFrame(resolve));
       await new Promise((resolve) => setTimeout(resolve, 50));
@@ -624,10 +668,10 @@ const AdminDashboard = () => {
         useCORS: true,
         allowTaint: false,
         backgroundColor: "#ffffff",
-        width: CERT_WIDTH,
-        height: CERT_HEIGHT,
-        windowWidth: CERT_WIDTH,
-        windowHeight: CERT_HEIGHT,
+        width: renderWidth,
+        height: renderHeight,
+        windowWidth: renderWidth,
+        windowHeight: renderHeight,
         imageTimeout: 30000,
         removeContainer: true,
         logging: false,
@@ -638,11 +682,11 @@ const AdminDashboard = () => {
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "px",
-        format: [CERT_WIDTH, CERT_HEIGHT],
+        format: [renderWidth, renderHeight],
         compress: true,
       });
 
-      pdf.addImage(imgData, "PNG", 0, 0, CERT_WIDTH, CERT_HEIGHT);
+      pdf.addImage(imgData, "PNG", 0, 0, renderWidth, renderHeight);
 
       const safeName = (row.name || "student")
         .toLowerCase()
