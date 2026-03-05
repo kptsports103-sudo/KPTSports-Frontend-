@@ -31,6 +31,11 @@ const ManagedInput = ({ id, name, placeholder, ...props }) => {
   return <input id={fieldId} name={fieldName} placeholder={placeholder} {...props} />;
 };
 
+const cleanLeadingIconText = (text) => {
+  const value = String(text || '');
+  return value.replace(/^[^A-Za-z0-9]+/, '').trim();
+};
+
 const ManageHome = () => {
   const [content, setContent] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -330,7 +335,7 @@ const ManageHome = () => {
                 {content.achievements.map((x, i) => (
                   <div key={i} className="mini-card">
                     <strong>{x.value}</strong>
-                    <p>{x.title}</p>
+                    <p>{cleanLeadingIconText(x.title)}</p>
                   </div>
                 ))}
               </div>
@@ -655,7 +660,7 @@ const ManageHome = () => {
                 {content.achievements.map((a, i) => (
                   <div key={i} className="preview-stat">
                     <h2>{a.value}</h2>
-                    <span>{a.title}</span>
+                    <span>{cleanLeadingIconText(a.title)}</span>
                   </div>
                 ))}
               </div>

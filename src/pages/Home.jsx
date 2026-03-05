@@ -26,6 +26,11 @@ const iconMap = {
 
 const fallbackIcons = [FaTrophy, FaUsers, FaCalendarCheck, FaMedal];
 
+const cleanLeadingIconText = (text) => {
+  const value = String(text || '');
+  return value.replace(/^[^A-Za-z0-9]+/, '').trim();
+};
+
 function Home() {
   const navigate = useNavigate();
   const clubsTrackRef = useRef(null);
@@ -136,7 +141,7 @@ function Home() {
                     <Icon />
                   </div>
                   <h2>{item.value}</h2>
-                  <p>{item.title}</p>
+                  <p>{cleanLeadingIconText(item.title)}</p>
                 </article>
               );
             })}
