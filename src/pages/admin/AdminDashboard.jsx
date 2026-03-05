@@ -1605,7 +1605,14 @@ const AdminDashboard = () => {
           }}
         >
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
-            <label htmlFor="certificate-ocr-upload" className="download-btn" style={{ cursor: "pointer" }}>
+            <label
+              htmlFor="certificate-ocr-upload"
+              className="download-btn"
+              style={{
+                cursor: OCR_API_BASE ? "pointer" : "not-allowed",
+                opacity: OCR_API_BASE ? 1 : 0.6,
+              }}
+            >
               {ocrExtracting ? "Extracting..." : "Upload Certificate for OCR"}
             </label>
             <input
@@ -1613,7 +1620,7 @@ const AdminDashboard = () => {
               type="file"
               accept="image/*"
               onChange={onCertificateOcrUpload}
-              disabled={ocrExtracting}
+              disabled={!OCR_API_BASE || ocrExtracting}
               style={srOnlyStyle}
             />
             <span style={{ color: "#475467", fontSize: "0.9rem" }}>
