@@ -1,40 +1,43 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../services/api";
 
 const Gallery = () => {
   const [galleries, setGalleries] = useState([]);
   const [activeImage, setActiveImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     api
       .get("/galleries")
-      .then(res => setGalleries(res.data.filter(g => g.visibility)))
-      .catch(console.error);
+      .then((res) => setGalleries(res.data.filter((g) => g.visibility)))
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
   }, []);
 
-  // Collect all media
-  const allMedia = galleries.flatMap(g => g.media);
+  const allMedia = useMemo(() => galleries.flatMap((g) => g.media), [galleries]);
 
-  // Group images as pairs (1-2, 3-4...)
-  const pairedMedia = [];
-  for (let i = 0; i < allMedia.length; i += 2) {
-    pairedMedia.push(allMedia.slice(i, i + 2));
-  }
+  const pairedMedia = useMemo(() => {
+    const grouped = [];
+    for (let i = 0; i < allMedia.length; i += 2) {
+      grouped.push(allMedia.slice(i, i + 2));
+    }
+    return grouped;
+  }, [allMedia]);
 
   return (
     <div style={styles.page}>
-      {/* Header */}
       <div style={styles.headerBox}>
-        <h1 style={styles.headerTitle}>ðŸ… KPT Sports Gallery</h1>
-        <p style={styles.headerSub}>
-          Athletic moments, victories & memories
-        </p>
+        <h1 style={styles.headerTitle}>KPT Sports Gallery</h1>
+        <p style={styles.headerSub}>Athletic moments, victories and memories</p>
       </div>
 
-      {/* Empty */}
-      {allMedia.length === 0 ? (
+      {isLoading ? (
         <div style={styles.emptyBox}>
-          <span style={styles.emptyIcon}>ðŸ“·</span>
+          <p style={styles.emptyText}>Loading gallery...</p>
+        </div>
+      ) : allMedia.length === 0 ? (
+        <div style={styles.emptyBox}>
+          <span style={styles.emptyIcon}>[Gallery]</span>
           <p style={styles.emptyText}>More images coming soon</p>
         </div>
       ) : (
@@ -43,41 +46,35 @@ const Gallery = () => {
             key={rowIndex}
             style={{
               ...styles.row,
-              background:
-                rowIndex % 2 === 0 ? "#ffffff" : "#f0f3f8", // table style
+              background: rowIndex % 2 === 0 ? "#ffffff" : "#f0f3f8",
             }}
           >
             {pair.map((media, index) => (
               <div key={index} style={styles.imageCard}>
                 <img
                   src={media.url}
-                  alt={media.overview || ""}
+                  alt={media.overview || "Gallery image"}
+                  loading="lazy"
+                  decoding="async"
+                  width="600"
+                  height="400"
                   style={styles.image}
                   onClick={() => setActiveImage(media)}
                 />
-                {media.overview && (
-                  <p style={styles.caption}>{media.overview}</p>
-                )}
+                {media.overview && <p style={styles.caption}>{media.overview}</p>}
               </div>
             ))}
           </div>
         ))
       )}
 
-      {/* LIGHTBOX POPUP */}
       {activeImage && (
         <div style={styles.lightbox} onClick={() => setActiveImage(null)}>
-          <div style={styles.lightboxContent} onClick={e => e.stopPropagation()}>
-            <img
-              src={activeImage.url}
-              alt=""
-              style={styles.lightboxImage}
-            />
-            {activeImage.overview && (
-              <p style={styles.lightboxText}>{activeImage.overview}</p>
-            )}
+          <div style={styles.lightboxContent} onClick={(e) => e.stopPropagation()}>
+            <img src={activeImage.url} alt="" style={styles.lightboxImage} />
+            {activeImage.overview && <p style={styles.lightboxText}>{activeImage.overview}</p>}
             <button style={styles.closeBtn} onClick={() => setActiveImage(null)}>
-              âœ–
+              X
             </button>
           </div>
         </div>
@@ -87,8 +84,6 @@ const Gallery = () => {
 };
 
 export default Gallery;
-
-/* ===================== STYLES ===================== */
 
 const styles = {
   page: {
@@ -130,10 +125,9 @@ const styles = {
     background: "#fff",
   },
 
-  emptyIcon: { fontSize: "3rem" },
+  emptyIcon: { fontSize: "1.8rem" },
   emptyText: { fontSize: "1.2rem", marginTop: "1rem" },
 
-  /* TABLE ROW STYLE */
   row: {
     display: "flex",
     justifyContent: "center",
@@ -168,7 +162,6 @@ const styles = {
     fontWeight: "500",
   },
 
-  /* LIGHTBOX */
   lightbox: {
     position: "fixed",
     inset: 0,

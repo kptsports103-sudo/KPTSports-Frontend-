@@ -124,18 +124,21 @@ function Home() {
             ) : null}
           </div>
 
-          {heroImage ? (
-            <div className="home-hero__media">
+          <div className="home-hero__media" aria-hidden={!heroImage}>
+            {heroImage ? (
               <img
                 src={heroImage}
                 alt="Sports highlight"
                 fetchPriority="high"
+                loading="eager"
                 decoding="async"
                 width="540"
                 height="420"
               />
-            </div>
-          ) : null}
+            ) : (
+              <div className="home-hero__media-placeholder" />
+            )}
+          </div>
         </div>
 
         {content.achievements.length > 0 ? (
