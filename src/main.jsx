@@ -3,6 +3,17 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 
+window.addEventListener('unhandledrejection', (event) => {
+  const message = String(event?.reason?.message || event?.reason || '')
+  if (
+    message.includes(
+      'A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received',
+    )
+  ) {
+    event.preventDefault()
+  }
+})
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />
