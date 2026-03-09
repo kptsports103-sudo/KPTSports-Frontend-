@@ -315,26 +315,65 @@ const SportsMeetDataEntry = () => {
 
         <div style={styles.grid2}>
           <input style={styles.input} name="venue" value={form.venue} onChange={onChange} placeholder="Venue" />
-          <input style={styles.input} type="date" name="eventDate" value={form.eventDate} onChange={onChange} />
+          <div style={styles.fieldWrap}>
+            <label style={styles.fieldLabel} htmlFor="eventDate">
+              Event Date
+            </label>
+            <input
+              id="eventDate"
+              style={styles.input}
+              type="date"
+              name="eventDate"
+              value={form.eventDate}
+              onChange={onChange}
+            />
+          </div>
         </div>
 
         <div style={styles.grid3}>
-          <input style={styles.input} type="time" name="eventTime" value={form.eventTime} onChange={onChange} />
-          <input
-            style={styles.input}
-            type="date"
-            name="registrationStartDate"
-            value={form.registrationStartDate}
-            onChange={onChange}
-          />
-          <input
-            style={styles.input}
-            type="date"
-            name="registrationEndDate"
-            value={form.registrationEndDate}
-            onChange={onChange}
-          />
+          <div style={styles.fieldWrap}>
+            <label style={styles.fieldLabel} htmlFor="eventTime">
+              Event Time
+            </label>
+            <input
+              id="eventTime"
+              style={styles.input}
+              type="time"
+              name="eventTime"
+              value={form.eventTime}
+              onChange={onChange}
+            />
+          </div>
+          <div style={styles.fieldWrap}>
+            <label style={styles.fieldLabel} htmlFor="registrationStartDate">
+              Registration Start Date
+            </label>
+            <input
+              id="registrationStartDate"
+              style={styles.input}
+              type="date"
+              name="registrationStartDate"
+              value={form.registrationStartDate}
+              onChange={onChange}
+            />
+          </div>
+          <div style={styles.fieldWrap}>
+            <label style={styles.fieldLabel} htmlFor="registrationEndDate">
+              Registration End Date
+            </label>
+            <input
+              id="registrationEndDate"
+              style={styles.input}
+              type="date"
+              name="registrationEndDate"
+              value={form.registrationEndDate}
+              onChange={onChange}
+            />
+          </div>
         </div>
+        <p style={styles.fieldHint}>
+          Date format clue: use calendar picker (DD-MM-YYYY). Select start date and end date clearly, and choose event time.
+        </p>
 
         <div style={styles.grid2}>
           <select style={styles.input} name="registrationStatus" value={form.registrationStatus} onChange={onChange}>
@@ -558,6 +597,21 @@ const styles = {
     outline: 'none',
     fontSize: '0.96rem',
     color: '#0f172a',
+  },
+  fieldWrap: {
+    display: 'grid',
+    gap: 6,
+  },
+  fieldLabel: {
+    fontSize: '0.82rem',
+    fontWeight: 700,
+    color: '#334155',
+    paddingLeft: 2,
+  },
+  fieldHint: {
+    margin: '-4px 0 0',
+    fontSize: '0.84rem',
+    color: '#64748b',
   },
 
   freeBox: {
