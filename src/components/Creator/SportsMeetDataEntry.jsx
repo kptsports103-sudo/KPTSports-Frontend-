@@ -637,7 +637,7 @@ const styles = {
   tableGrid: {
     display: 'grid',
     gap: 14,
-    gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
+    gridTemplateColumns: '1fr',
   },
 
   tableWrap: {
