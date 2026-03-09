@@ -81,7 +81,6 @@
   position: absolute;
   inset: 0;
   background: radial-gradient(circle at 66% 18%, rgba(255, 213, 94, 0.3), transparent 28%);
-  animation: ambientPulse 8s ease-in-out infinite alternate;
 }
 
 .home-hero__layout {
@@ -96,7 +95,6 @@
 }
 
 .home-hero__content {
-  animation: fadeRise 800ms ease-out both;
   color: #fff;
 }
 
@@ -193,7 +191,6 @@
   backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 215, 120, 0.35);
   box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35), 0 0 28px rgba(255, 200, 80, 0.3);
-  animation: statsFloat 3.5s ease-in-out infinite;
 }
 
 .home-hero__stats-card {

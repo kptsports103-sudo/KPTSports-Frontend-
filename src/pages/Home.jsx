@@ -5,8 +5,8 @@ import api from '../services/api';
 import './Home.css';
 
 const createEmptyHomeContent = () => ({
-  heroTitle: '',
-  heroSubtitle: '',
+  heroTitle: 'KPT Sports',
+  heroSubtitle: 'Train hard, compete smart, and celebrate every achievement.',
   heroButtons: [],
   banners: [],
   achievements: [],
@@ -43,8 +43,8 @@ function Home() {
         const response = await api.get('/home');
         const data = response?.data ?? {};
         setContent({
-          heroTitle: data.heroTitle ?? '',
-          heroSubtitle: data.heroSubtitle ?? '',
+          heroTitle: data.heroTitle ?? 'KPT Sports',
+          heroSubtitle: data.heroSubtitle ?? 'Train hard, compete smart, and celebrate every achievement.',
           heroButtons: Array.isArray(data.heroButtons) ? data.heroButtons : [],
           banners: Array.isArray(data.banners) ? data.banners : [],
           achievements: Array.isArray(data.achievements) ? data.achievements : [],

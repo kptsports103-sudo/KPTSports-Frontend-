@@ -1,7 +1,7 @@
+import { useEffect, useState } from 'react';
 import AppRoutes from './routes/AppRoutes';
 import AuthProvider from './context/AuthContext';
 import { ClerkProvider } from '@clerk/clerk-react';
-import { Analytics } from '@vercel/analytics/react';
 import NotificationHost from './components/NotificationHost';
 import { Toaster } from 'react-hot-toast';
 
@@ -9,6 +9,41 @@ const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key");
+}
+
+function LazyAnalytics() {
+  const [AnalyticsComponent, setAnalyticsComponent] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadAnalytics = () => {
+      import('@vercel/analytics/react')
+        .then((mod) => {
+          if (!cancelled) {
+            setAnalyticsComponent(() => mod.Analytics);
+          }
+        })
+        .catch(() => {});
+    };
+
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(loadAnalytics, { timeout: 2000 });
+      return () => {
+        cancelled = true;
+        window.cancelIdleCallback(id);
+      };
+    }
+
+    const timeoutId = window.setTimeout(loadAnalytics, 1500);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
+  if (!AnalyticsComponent) return null;
+  return <AnalyticsComponent />;
 }
 
 function App() {
@@ -24,7 +59,7 @@ function App() {
           }}
         />
         <AppRoutes />
-        <Analytics />
+        <LazyAnalytics />
       </AuthProvider>
     </ClerkProvider>
   );
