@@ -343,36 +343,36 @@ const SportsMeetDataEntry = () => {
 
         <div style={styles.grid2}>
           <input style={styles.input} name="venue" value={form.venue} onChange={onChange} placeholder="Venue" />
-          <div style={styles.fieldWrap}>
-            <label style={styles.fieldLabel} htmlFor="eventDate">
-              Event Date
-            </label>
-            <input
-              id="eventDate"
-              style={styles.input}
-              type="date"
-              name="eventDate"
-              value={form.eventDate}
-              onChange={onChange}
-            />
+          <div style={styles.grid2}>
+            <div style={styles.fieldWrap}>
+              <label style={styles.fieldLabel} htmlFor="eventDate">
+                Event Date
+              </label>
+              <input
+                id="eventDate"
+                style={styles.input}
+                type="date"
+                name="eventDate"
+                value={form.eventDate}
+                onChange={onChange}
+              />
+            </div>
+            <div style={styles.fieldWrap}>
+              <label style={styles.fieldLabel} htmlFor="eventTime">
+                Event Time
+              </label>
+              <input
+                id="eventTime"
+                style={styles.input}
+                type="time"
+                name="eventTime"
+                value={form.eventTime}
+                onChange={onChange}
+              />
+            </div>
           </div>
         </div>
 
-        <div style={styles.grid3}>
-          <div style={styles.fieldWrap}>
-            <label style={styles.fieldLabel} htmlFor="eventTime">
-              Event Time
-            </label>
-            <input
-              id="eventTime"
-              style={styles.input}
-              type="time"
-              name="eventTime"
-              value={form.eventTime}
-              onChange={onChange}
-            />
-          </div>
-        </div>
         <p style={styles.fieldHint}>
           Date format clue: use calendar picker (DD-MM-YYYY). Select registration start/end dates in the top-right section.
         </p>
