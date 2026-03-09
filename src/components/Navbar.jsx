@@ -14,6 +14,7 @@ const NAV_ITEMS = [
 ];
 
 const READ_IDS_KEY = 'kpt_home_notifications_read_ids';
+const EXPLICIT_ID_KEYS = ['id', '_id', 'eventId', 'announcementId', 'uuid'];
 
 const getStoredReadIds = () => {
   try {
@@ -28,6 +29,17 @@ const getStoredReadIds = () => {
 
 const saveReadIds = (readIds) => {
   localStorage.setItem(READ_IDS_KEY, JSON.stringify(Array.from(readIds)));
+};
+
+const getExplicitId = (item) => {
+  if (!item || typeof item !== 'object') return '';
+  for (const key of EXPLICIT_ID_KEYS) {
+    const value = item[key];
+    if (value !== undefined && value !== null && String(value).trim()) {
+      return String(value).trim();
+    }
+  }
+  return '';
 };
 
 const Navbar = () => {
@@ -88,7 +100,10 @@ const Navbar = () => {
           const name = String(item?.name || '').trim();
           const date = String(item?.date || '').trim();
           const venue = String(item?.venue || '').trim();
-          const baseId = `event:${name}|${date}|${venue}`;
+          const explicitId = getExplicitId(item);
+          const baseId = explicitId
+            ? `event:id:${explicitId}`
+            : `event:${name}|${date}|${venue}`;
           return {
             id: toUniqueId(baseId),
             type: 'event',
@@ -98,10 +113,19 @@ const Navbar = () => {
         });
 
       const announcementNotifications = announcements
-        .filter((item) => String(item || '').trim())
+        .filter((item) => {
+          if (typeof item === 'string') return item.trim().length > 0;
+          return String(item?.message || item?.text || item?.title || '').trim().length > 0;
+        })
         .map((item) => {
-          const text = String(item).trim();
-          const baseId = `announcement:${text}`;
+          const text =
+            typeof item === 'string'
+              ? item.trim()
+              : String(item?.message || item?.text || item?.title || '').trim();
+          const explicitId = getExplicitId(item);
+          const baseId = explicitId
+            ? `announcement:id:${explicitId}`
+            : `announcement:${text}`;
           return {
             id: toUniqueId(baseId),
             type: 'announcement',
