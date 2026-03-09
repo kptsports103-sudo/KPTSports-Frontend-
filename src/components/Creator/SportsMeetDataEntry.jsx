@@ -235,7 +235,35 @@ const SportsMeetDataEntry = () => {
             <p style={styles.formHint}>Fill in the event details below.</p>
           </div>
 
-          {editingId ? <span style={styles.editBadge}>Editing mode</span> : null}
+          <div style={styles.formTopRight}>
+            <div style={styles.fieldWrap}>
+              <label style={styles.fieldLabel} htmlFor="registrationStartDate">
+                Registration Start Date
+              </label>
+              <input
+                id="registrationStartDate"
+                style={styles.input}
+                type="date"
+                name="registrationStartDate"
+                value={form.registrationStartDate}
+                onChange={onChange}
+              />
+            </div>
+            <div style={styles.fieldWrap}>
+              <label style={styles.fieldLabel} htmlFor="registrationEndDate">
+                Registration End Date
+              </label>
+              <input
+                id="registrationEndDate"
+                style={styles.input}
+                type="date"
+                name="registrationEndDate"
+                value={form.registrationEndDate}
+                onChange={onChange}
+              />
+            </div>
+            {editingId ? <span style={styles.editBadge}>Editing mode</span> : null}
+          </div>
         </div>
 
         <div style={styles.grid2}>
@@ -344,35 +372,9 @@ const SportsMeetDataEntry = () => {
               onChange={onChange}
             />
           </div>
-          <div style={styles.fieldWrap}>
-            <label style={styles.fieldLabel} htmlFor="registrationStartDate">
-              Registration Start Date
-            </label>
-            <input
-              id="registrationStartDate"
-              style={styles.input}
-              type="date"
-              name="registrationStartDate"
-              value={form.registrationStartDate}
-              onChange={onChange}
-            />
-          </div>
-          <div style={styles.fieldWrap}>
-            <label style={styles.fieldLabel} htmlFor="registrationEndDate">
-              Registration End Date
-            </label>
-            <input
-              id="registrationEndDate"
-              style={styles.input}
-              type="date"
-              name="registrationEndDate"
-              value={form.registrationEndDate}
-              onChange={onChange}
-            />
-          </div>
         </div>
         <p style={styles.fieldHint}>
-          Date format clue: use calendar picker (DD-MM-YYYY). Select start date and end date clearly, and choose event time.
+          Date format clue: use calendar picker (DD-MM-YYYY). Select registration start/end dates in the top-right section.
         </p>
 
         <div style={styles.grid2}>
@@ -433,8 +435,6 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
             <th style={styles.th}>Team Size</th>
             <th style={styles.th}>Date</th>
             <th style={styles.th}>Time</th>
-            <th style={styles.th}>Reg Start</th>
-            <th style={styles.th}>Reg End</th>
             <th style={styles.th}>Venue</th>
             <th style={styles.th}>Status</th>
             <th style={styles.th}>Actions</th>
@@ -444,7 +444,7 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
         <tbody>
           {items.length === 0 ? (
             <tr>
-              <td style={styles.empty} colSpan={11}>
+              <td style={styles.empty} colSpan={9}>
                 No events added
               </td>
             </tr>
@@ -460,8 +460,6 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
                 <td style={styles.td}>{getTeamSizeText(item)}</td>
                 <td style={styles.td}>{formatValue(item.eventDate)}</td>
                 <td style={styles.td}>{formatValue(item.eventTime, '-')}</td>
-                <td style={styles.td}>{formatValue(item.registrationStartDate, '-')}</td>
-                <td style={styles.td}>{formatValue(item.registrationEndDate, '-')}</td>
                 <td style={styles.td}>{formatValue(item.venue)}</td>
                 <td style={styles.td}>
                   <span
@@ -533,6 +531,13 @@ const styles = {
     gap: 12,
     flexWrap: 'wrap',
   },
+  formTopRight: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(180px, 1fr))',
+    gap: 10,
+    alignItems: 'start',
+    width: 'min(100%, 430px)',
+  },
 
   formTitle: {
     margin: 0,
@@ -555,6 +560,7 @@ const styles = {
     borderRadius: 999,
     fontSize: 12,
     fontWeight: 700,
+    width: 'fit-content',
   },
 
   card: {
