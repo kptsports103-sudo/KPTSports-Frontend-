@@ -1,74 +1,18 @@
-export default function EventsSection({ indoor, outdoor, loadingEvents, notifications, scheduleRows }) {
+export default function EventsSection({ indoor, outdoor, loadingEvents }) {
   return (
     <div style={styles.wrap}>
       <div style={styles.card}>
-        <h3 style={styles.title}>Notifications</h3>
-        {notifications.length === 0 ? <p style={styles.empty}>No notifications right now</p> : null}
-        {notifications.map((note, idx) => (
-          <div key={`note-${idx}`} style={styles.note}>
-            {note}
-          </div>
-        ))}
-      </div>
-
-      <div style={styles.card}>
-        <h3 style={styles.title}>Indoor Events</h3>
-        <EventsTable rows={indoor} loading={loadingEvents} />
-      </div>
-
-      <div style={styles.card}>
-        <h3 style={styles.title}>Outdoor Events</h3>
-        <EventsTable rows={outdoor} loading={loadingEvents} />
-      </div>
-
-      <div style={styles.card}>
         <h3 style={styles.title}>Event Schedule</h3>
-        <ScheduleTable rows={scheduleRows} />
+        <h4 style={styles.subTitle}>Indoor Events</h4>
+        <ScheduleTable rows={indoor} loading={loadingEvents} />
+        <h4 style={{ ...styles.subTitle, marginTop: 16 }}>Outdoor Events</h4>
+        <ScheduleTable rows={outdoor} loading={loadingEvents} />
       </div>
     </div>
   );
 }
 
-function EventsTable({ rows, loading }) {
-  return (
-    <div style={styles.tableWrap}>
-      <table style={styles.table}>
-        <thead>
-          <tr>
-            <th style={styles.th}>Event Name</th>
-            <th style={styles.th}>Reg Start</th>
-            <th style={styles.th}>Reg End</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <tr>
-              <td style={styles.td} colSpan={3}>
-                Loading...
-              </td>
-            </tr>
-          ) : rows.length === 0 ? (
-            <tr>
-              <td style={styles.td} colSpan={3}>
-                No events
-              </td>
-            </tr>
-          ) : (
-            rows.map((event) => (
-              <tr key={event.id}>
-                <td style={styles.td}>{event.eventName}</td>
-                <td style={styles.td}>{event.registrationStartDate || 'TBA'}</td>
-                <td style={styles.td}>{event.registrationEndDate || 'TBA'}</td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function ScheduleTable({ rows }) {
+function ScheduleTable({ rows, loading }) {
   return (
     <div style={styles.tableWrap}>
       <table style={styles.table}>
@@ -81,10 +25,16 @@ function ScheduleTable({ rows }) {
           </tr>
         </thead>
         <tbody>
-          {rows.length === 0 ? (
+          {loading ? (
             <tr>
               <td style={styles.td} colSpan={4}>
-                Schedule not published yet
+                Loading...
+              </td>
+            </tr>
+          ) : rows.length === 0 ? (
+            <tr>
+              <td style={styles.td} colSpan={4}>
+                No events
               </td>
             </tr>
           ) : (
@@ -107,6 +57,7 @@ const styles = {
   wrap: { marginTop: 16, display: 'grid', gap: 16 },
   card: { border: '1px solid #ddd', borderRadius: 14, padding: 14, background: '#fff' },
   title: { marginTop: 0, marginBottom: 10 },
+  subTitle: { marginTop: 0, marginBottom: 8, color: '#1f2937' },
   empty: { opacity: 0.75 },
   note: { border: '1px solid #e5e7eb', background: '#f8fafc', borderRadius: 8, padding: '8px 10px', marginBottom: 8 },
   tableWrap: { overflowX: 'auto' },

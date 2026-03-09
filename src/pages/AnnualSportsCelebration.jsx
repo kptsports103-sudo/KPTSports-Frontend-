@@ -69,22 +69,6 @@ const getTeamSizeRules = (event) => {
   return { min, max, isTeam: true };
 };
 
-const buildNotifications = (events) => {
-  const now = new Date();
-  const notes = [];
-  events.forEach((ev) => {
-    if (ev.registrationEndDate && ev.registrationEndDate !== 'TBA') {
-      const regEnd = new Date(`${ev.registrationEndDate}T23:59:59`);
-      if (now > regEnd) notes.push(`Registration closed: ${ev.eventName}`);
-    }
-    if (ev.eventDate && ev.eventDate !== 'TBA' && ev.eventTime && ev.eventTime !== 'TBA') {
-      const start = new Date(`${ev.eventDate}T${ev.eventTime}:00`);
-      if (now >= start) notes.push(`Event started: ${ev.eventName}`);
-    }
-  });
-  return notes.slice(0, 10);
-};
-
 export default function AnnualSportsCelebration() {
   const [searchParams] = useSearchParams();
   const [events, setEvents] = useState([]);
@@ -105,15 +89,6 @@ export default function AnnualSportsCelebration() {
   const outdoor = useMemo(() => events.filter((e) => e.category === 'Outdoor'), [events]);
   const selectedEvent = useMemo(() => events.find((e) => e.id === form.eventId) || null, [events, form.eventId]);
   const teamRule = useMemo(() => getTeamSizeRules(selectedEvent), [selectedEvent]);
-  const scheduleRows = useMemo(
-    () =>
-      events
-        .filter((e) => (e.eventDate && e.eventDate !== 'TBA') || (e.eventTime && e.eventTime !== 'TBA'))
-        .sort((a, b) => String(a.eventDate || '').localeCompare(String(b.eventDate || ''))),
-    [events]
-  );
-  const notifications = useMemo(() => buildNotifications(events), [events]);
-
   const filteredRegs = useMemo(() => {
     return registrations.filter((item) => {
       const q = search.trim().toLowerCase();
@@ -258,7 +233,7 @@ export default function AnnualSportsCelebration() {
       </header>
 
       {activeTab === 'events' ? (
-        <EventsSection indoor={indoor} outdoor={outdoor} loadingEvents={loadingEvents} notifications={notifications} scheduleRows={scheduleRows} />
+        <EventsSection indoor={indoor} outdoor={outdoor} loadingEvents={loadingEvents} />
       ) : (
         <RegistrationSection
           events={events}
