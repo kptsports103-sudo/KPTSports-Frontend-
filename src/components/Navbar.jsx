@@ -224,6 +224,9 @@ const Navbar = () => {
               <button type="button" onClick={() => navigate('/sports-celebration?tab=registration')}>
                 Register
               </button>
+              <button type="button" onClick={() => navigate('/results')}>
+                Winners
+              </button>
             </div>
           </li>
         </ul>
