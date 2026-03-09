@@ -144,6 +144,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  min-height: 48px;
+}
+
+.home-hero__actions--placeholder {
+  visibility: hidden;
 }
 
 .hero-btn {
@@ -197,6 +202,11 @@
   backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 215, 120, 0.35);
   box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35), 0 0 28px rgba(255, 200, 80, 0.3);
+  min-height: 210px;
+}
+
+.home-hero__stats--placeholder {
+  opacity: 0.35;
 }
 
 .home-hero__stats-card {
@@ -207,6 +217,12 @@
   text-align: center;
   box-shadow: 0 0 25px rgba(255, 200, 80, 0.4), inset 0 0 15px rgba(255, 200, 80, 0.2);
   transition: all 0.4s ease;
+}
+
+.home-hero__stats-card--placeholder {
+  min-height: 130px;
+  background: rgba(8, 26, 57, 0.45);
+  border-style: dashed;
 }
 
 .home-hero__stats-card:hover {

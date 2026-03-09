@@ -196,7 +196,7 @@ const Navbar = () => {
           role="button"
           tabIndex={0}
         >
-          <img src="/college-logo-left.png" alt="KPT logo" />
+          <img src="/college-logo-left.png" alt="KPT logo" width="42" height="42" />
           <span>KPT Sports</span>
         </div>
 
@@ -267,7 +267,7 @@ const Navbar = () => {
           </div>
 
           <div className="kpt-navbar__avatar-slot" aria-hidden="true">
-            <img src="/img1.png" alt="Profile" />
+            <img src="/img1.png" alt="Profile" width="40" height="40" />
           </div>
 
           <button type="button" className="kpt-navbar__cta" onClick={goToLogin}>

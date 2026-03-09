@@ -36,6 +36,9 @@ function Home() {
   const clubsTrackRef = useRef(null);
   const [content, setContent] = useState(createEmptyHomeContent());
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [showDeferredSections, setShowDeferredSections] = useState(false);
+  const activeBanner = content.banners[currentBannerIndex] ?? null;
+  const heroImage = activeBanner?.image || content.gallery[0]?.image || '';
 
   useEffect(() => {
     const fetchHomeContent = async () => {
@@ -76,8 +79,32 @@ function Home() {
     return () => window.clearInterval(id);
   }, [content.banners]);
 
-  const activeBanner = content.banners[currentBannerIndex] ?? null;
-  const heroImage = activeBanner?.image || content.gallery[0]?.image || '';
+  useEffect(() => {
+    let timeoutId;
+    if ('requestIdleCallback' in window) {
+      const idleId = window.requestIdleCallback(() => setShowDeferredSections(true), { timeout: 1500 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+    timeoutId = window.setTimeout(() => setShowDeferredSections(true), 700);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  useEffect(() => {
+    if (!heroImage) return undefined;
+    const existing = document.querySelector('link[data-kpt-preload="hero"]');
+    if (existing && existing.getAttribute('href') === heroImage) return undefined;
+
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = heroImage;
+    link.setAttribute('data-kpt-preload', 'hero');
+    document.head.appendChild(link);
+
+    return () => {
+      link.remove();
+    };
+  }, [heroImage]);
 
   const routeTo = (link) => {
     if (!link) return;
@@ -121,7 +148,7 @@ function Home() {
                   </button>
                 ))}
               </div>
-            ) : null}
+            ) : <div className="home-hero__actions home-hero__actions--placeholder" aria-hidden="true" />}
           </div>
 
           <div className="home-hero__media" aria-hidden={!heroImage}>
@@ -141,22 +168,25 @@ function Home() {
           </div>
         </div>
 
-        {content.achievements.length > 0 ? (
-          <div className="home-hero__stats">
-            {content.achievements.map((item, index) => {
-              const Icon = iconMap[item?.icon] || fallbackIcons[index % fallbackIcons.length];
+        <div className={`home-hero__stats ${content.achievements.length === 0 ? 'home-hero__stats--placeholder' : ''}`}>
+          {(content.achievements.length > 0 ? content.achievements : new Array(4).fill(null)).map((item, index) => {
+            if (!item) {
               return (
-                <article key={`${item.title}-${index}`} className="home-hero__stats-card">
-                  <div className="stat-icon">
-                    <Icon />
-                  </div>
-                  <h2>{item.value}</h2>
-                  <p>{cleanLeadingIconText(item.title)}</p>
-                </article>
+                <article key={`placeholder-${index}`} className="home-hero__stats-card home-hero__stats-card--placeholder" aria-hidden="true" />
               );
-            })}
-          </div>
-        ) : null}
+            }
+            const Icon = iconMap[item?.icon] || fallbackIcons[index % fallbackIcons.length];
+            return (
+              <article key={`${item.title}-${index}`} className="home-hero__stats-card">
+                <div className="stat-icon">
+                  <Icon />
+                </div>
+                <h2>{item.value}</h2>
+                <p>{cleanLeadingIconText(item.title)}</p>
+              </article>
+            );
+          })}
+        </div>
 
         <div className="home-hero__scroll-indicator">
           <span>Scroll</span>
@@ -164,7 +194,7 @@ function Home() {
         </div>
       </section>
 
-      {content.announcements.length > 0 ? (
+      {showDeferredSections && content.announcements.length > 0 ? (
         <section id="announcements" className="section-shell">
           <header className="section-header">
             <h2>Latest Announcements</h2>
@@ -180,7 +210,7 @@ function Home() {
         </section>
       ) : null}
 
-      {content.sportsCategories.length > 0 ? (
+      {showDeferredSections && content.sportsCategories.length > 0 ? (
         <section id="sports-categories" className="section-shell">
           <header className="section-header">
             <h2>Sports Categories</h2>
@@ -204,7 +234,7 @@ function Home() {
         </section>
       ) : null}
 
-      {content.clubs.length > 0 ? (
+      {showDeferredSections && content.clubs.length > 0 ? (
         <section id="clubs" className="section-shell club-section">
           <header className="section-header">
             <h2>Clubs and Activities</h2>
@@ -240,7 +270,7 @@ function Home() {
         </section>
       ) : null}
 
-      {content.gallery.length > 0 ? (
+      {showDeferredSections && content.gallery.length > 0 ? (
         <section id="gallery" className="section-shell">
           <header className="section-header section-header--with-action">
             <h2>Photo Gallery Preview</h2>
@@ -266,7 +296,7 @@ function Home() {
         </section>
       ) : null}
 
-      {content.upcomingEvents.length > 0 ? (
+      {showDeferredSections && content.upcomingEvents.length > 0 ? (
         <section id="events" className="section-shell">
           <header className="section-header">
             <h2>Upcoming Events</h2>
