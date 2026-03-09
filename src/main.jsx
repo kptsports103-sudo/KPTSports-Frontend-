@@ -64,13 +64,24 @@ const startWebVitalsLogging = async () => {
   }
 }
 
+const isClosedMessageChannelNoise = (value) => {
+  const message = String(value || '').toLowerCase()
+  return (
+    message.includes('listener indicated an asynchronous response') &&
+    message.includes('message channel closed')
+  )
+}
+
 window.addEventListener('unhandledrejection', (event) => {
-  const message = String(event?.reason?.message || event?.reason || '')
-  if (
-    message.includes(
-      'A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received',
-    )
-  ) {
+  const message = event?.reason?.message || event?.reason || ''
+  if (isClosedMessageChannelNoise(message)) {
+    event.preventDefault()
+  }
+})
+
+window.addEventListener('error', (event) => {
+  const message = event?.message || event?.error?.message || ''
+  if (isClosedMessageChannelNoise(message)) {
     event.preventDefault()
   }
 })
