@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../services/api';
-import GamesSection from './sports-celebration/GamesSection';
+import EventsSection from './sports-celebration/EventsSection';
 import RegistrationSection from './sports-celebration/RegistrationSection';
 
 const initialForm = { eventId: '', teamName: '', teamHeadName: '' };
@@ -85,9 +86,10 @@ const buildNotifications = (events) => {
 };
 
 export default function AnnualSportsCelebration() {
+  const [searchParams] = useSearchParams();
   const [events, setEvents] = useState([]);
   const [registrations, setRegistrations] = useState([]);
-  const [activeTab, setActiveTab] = useState('games');
+  const [activeTab, setActiveTab] = useState('events');
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [loadingRegs, setLoadingRegs] = useState(false);
 
@@ -125,6 +127,17 @@ export default function AnnualSportsCelebration() {
       return matchSearch && matchYear;
     });
   }, [registrations, search, yearFilter]);
+
+  useEffect(() => {
+    const tab = String(searchParams.get('tab') || '').toLowerCase();
+    if (tab === 'registration' || tab === 'register') {
+      setActiveTab('registration');
+      return;
+    }
+    if (tab === 'events' || tab === 'games') {
+      setActiveTab('events');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const run = async () => {
@@ -235,8 +248,8 @@ export default function AnnualSportsCelebration() {
           Events are managed from CreatorDashboard. Registration is <b>Free</b>.
         </p>
         <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-          <button style={activeTab === 'games' ? styles.btnActive : styles.btn} onClick={() => setActiveTab('games')}>
-            Games
+          <button style={activeTab === 'events' ? styles.btnActive : styles.btn} onClick={() => setActiveTab('events')}>
+            Events
           </button>
           <button style={activeTab === 'registration' ? styles.btnActive : styles.btn} onClick={() => setActiveTab('registration')}>
             Registration
@@ -244,8 +257,8 @@ export default function AnnualSportsCelebration() {
         </div>
       </header>
 
-      {activeTab === 'games' ? (
-        <GamesSection indoor={indoor} outdoor={outdoor} loadingEvents={loadingEvents} notifications={notifications} scheduleRows={scheduleRows} />
+      {activeTab === 'events' ? (
+        <EventsSection indoor={indoor} outdoor={outdoor} loadingEvents={loadingEvents} notifications={notifications} scheduleRows={scheduleRows} />
       ) : (
         <RegistrationSection
           events={events}

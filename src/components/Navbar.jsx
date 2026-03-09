@@ -8,7 +8,6 @@ const NAV_ITEMS = [
   { to: '/', label: 'Home' },
   { to: '/about', label: 'About' },
   { to: '/history', label: 'History' },
-  { to: '/sports-celebration', label: 'Annual Sports Celebration' },
   { to: '/gallery', label: 'Gallery' },
   { to: '/results', label: 'Results' }
 ];
@@ -211,23 +210,20 @@ const Navbar = () => {
               </NavLink>
             </li>
           ))}
-          <li className="kpt-navbar__mega">
-            <button type="button" className="kpt-navbar__link kpt-navbar__mega-trigger">
-              Events
-            </button>
-            <div className="kpt-navbar__mega-menu">
-              <div>
-                <h4>Sports</h4>
-                <button type="button" onClick={() => navigate('/events')}>Football</button>
-                <button type="button" onClick={() => navigate('/events')}>Cricket</button>
-                <button type="button" onClick={() => navigate('/events')}>Athletics</button>
-              </div>
-              <div>
-                <h4>Indoor</h4>
-                <button type="button" onClick={() => navigate('/events')}>Chess</button>
-                <button type="button" onClick={() => navigate('/events')}>Carrom</button>
-                <button type="button" onClick={() => navigate('/events')}>Table Tennis</button>
-              </div>
+          <li className="kpt-navbar__dropdown">
+            <NavLink
+              to="/sports-celebration"
+              className={({ isActive }) => (isActive ? 'kpt-navbar__link is-active' : 'kpt-navbar__link')}
+            >
+              Annual Sports Celebration
+            </NavLink>
+            <div className="kpt-navbar__dropdown-menu">
+              <button type="button" onClick={() => navigate('/sports-celebration?tab=events')}>
+                Events
+              </button>
+              <button type="button" onClick={() => navigate('/sports-celebration?tab=registration')}>
+                Register
+              </button>
             </div>
           </li>
         </ul>

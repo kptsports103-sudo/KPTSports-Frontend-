@@ -1,4 +1,4 @@
-export default function GamesSection({ indoor, outdoor, loadingEvents, notifications, scheduleRows }) {
+export default function EventsSection({ indoor, outdoor, loadingEvents, notifications, scheduleRows }) {
   return (
     <div style={styles.wrap}>
       <div style={styles.card}>
@@ -12,13 +12,13 @@ export default function GamesSection({ indoor, outdoor, loadingEvents, notificat
       </div>
 
       <div style={styles.card}>
-        <h3 style={styles.title}>Indoor Games</h3>
-        <GamesTable rows={indoor} loading={loadingEvents} />
+        <h3 style={styles.title}>Indoor Events</h3>
+        <EventsTable rows={indoor} loading={loadingEvents} />
       </div>
 
       <div style={styles.card}>
-        <h3 style={styles.title}>Outdoor Games</h3>
-        <GamesTable rows={outdoor} loading={loadingEvents} />
+        <h3 style={styles.title}>Outdoor Events</h3>
+        <EventsTable rows={outdoor} loading={loadingEvents} />
       </div>
 
       <div style={styles.card}>
@@ -29,13 +29,13 @@ export default function GamesSection({ indoor, outdoor, loadingEvents, notificat
   );
 }
 
-function GamesTable({ rows, loading }) {
+function EventsTable({ rows, loading }) {
   return (
     <div style={styles.tableWrap}>
       <table style={styles.table}>
         <thead>
           <tr>
-            <th style={styles.th}>Game Name</th>
+            <th style={styles.th}>Event Name</th>
             <th style={styles.th}>Reg Start</th>
             <th style={styles.th}>Reg End</th>
           </tr>
@@ -50,7 +50,7 @@ function GamesTable({ rows, loading }) {
           ) : rows.length === 0 ? (
             <tr>
               <td style={styles.td} colSpan={3}>
-                No games
+                No events
               </td>
             </tr>
           ) : (
