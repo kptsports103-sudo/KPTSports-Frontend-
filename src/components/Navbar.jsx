@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Bell, Menu, Moon, Sun, X } from 'lucide-react';
+import api from '../services/api';
 import './Navbar.css';
 
 const NAV_ITEMS = [
@@ -12,11 +13,30 @@ const NAV_ITEMS = [
   { to: '/results', label: 'Results' }
 ];
 
+const READ_IDS_KEY = 'kpt_home_notifications_read_ids';
+
+const getStoredReadIds = () => {
+  try {
+    const raw = localStorage.getItem(READ_IDS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return new Set();
+    return new Set(parsed.map((id) => String(id)));
+  } catch {
+    return new Set();
+  }
+};
+
+const saveReadIds = (readIds) => {
+  localStorage.setItem(READ_IDS_KEY, JSON.stringify(Array.from(readIds)));
+};
+
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [homeNotifications, setHomeNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
   const notifyRef = useRef(null);
@@ -48,6 +68,78 @@ const Navbar = () => {
     setMobileOpen(false);
   }, [location.pathname]);
 
+  const fetchHomeNotifications = async () => {
+    try {
+      const res = await api.get('/home');
+      const data = res?.data || {};
+
+      const upcomingEvents = Array.isArray(data.upcomingEvents) ? data.upcomingEvents : [];
+      const announcements = Array.isArray(data.announcements) ? data.announcements : [];
+      const seenCounts = new Map();
+      const toUniqueId = (baseId) => {
+        const nextCount = (seenCounts.get(baseId) || 0) + 1;
+        seenCounts.set(baseId, nextCount);
+        return nextCount === 1 ? baseId : `${baseId}#${nextCount}`;
+      };
+
+      const eventNotifications = upcomingEvents
+        .filter((item) => String(item?.name || '').trim())
+        .map((item) => {
+          const name = String(item?.name || '').trim();
+          const date = String(item?.date || '').trim();
+          const venue = String(item?.venue || '').trim();
+          const baseId = `event:${name}|${date}|${venue}`;
+          return {
+            id: toUniqueId(baseId),
+            type: 'event',
+            title: name,
+            message: `${item?.date || 'Date not set'}${item?.venue ? ` - ${item.venue}` : ''}`.trim(),
+          };
+        });
+
+      const announcementNotifications = announcements
+        .filter((item) => String(item || '').trim())
+        .map((item) => {
+          const text = String(item).trim();
+          const baseId = `announcement:${text}`;
+          return {
+            id: toUniqueId(baseId),
+            type: 'announcement',
+            title: 'Latest Announcement',
+            message: text,
+          };
+        });
+
+      const allNotifications = [...eventNotifications, ...announcementNotifications];
+      setHomeNotifications(allNotifications);
+
+      const currentIds = new Set(allNotifications.map((item) => item.id));
+      const storedReadIds = getStoredReadIds();
+      const prunedReadIds = new Set([...storedReadIds].filter((id) => currentIds.has(id)));
+      saveReadIds(prunedReadIds);
+
+      const unread = allNotifications.filter((item) => !prunedReadIds.has(item.id)).length;
+      setUnreadCount(unread);
+    } catch (error) {
+      console.error('Failed to load navbar notifications:', error);
+      setHomeNotifications([]);
+      setUnreadCount(0);
+    }
+  };
+
+  useEffect(() => {
+    fetchHomeNotifications();
+  }, []);
+
+  useEffect(() => {
+    const handleHomeUpdate = () => {
+      fetchHomeNotifications();
+    };
+
+    window.addEventListener('HOME_UPDATED', handleHomeUpdate);
+    return () => window.removeEventListener('HOME_UPDATED', handleHomeUpdate);
+  }, []);
+
   const goToLogin = () => navigate('/login', { replace: true });
 
   const toggleDarkMode = () => {
@@ -55,6 +147,20 @@ const Navbar = () => {
     setDarkMode(next);
     document.body.classList.toggle('dark-mode', next);
   };
+
+  const handleNotificationClick = () => {
+    const nextOpen = !notificationsOpen;
+    setNotificationsOpen(nextOpen);
+
+    if (!notificationsOpen) {
+      const storedReadIds = getStoredReadIds();
+      homeNotifications.forEach((item) => storedReadIds.add(item.id));
+      saveReadIds(storedReadIds);
+      setUnreadCount(0);
+    }
+  };
+
+  const visibleNotifications = useMemo(() => homeNotifications.slice(0, 6), [homeNotifications]);
 
   return (
     <>
@@ -110,17 +216,28 @@ const Navbar = () => {
             <button
               type="button"
               className="kpt-navbar__icon-btn"
-              onClick={() => setNotificationsOpen((v) => !v)}
+              onClick={handleNotificationClick}
               aria-label="Notifications"
             >
               <Bell size={18} />
-              <span className="kpt-navbar__badge">3</span>
+              {unreadCount > 0 && (
+                <span className="kpt-navbar__badge">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </button>
             {notificationsOpen && (
-              <div className="kpt-navbar__panel">
-                <p>Results sheet updated</p>
-                <p>2 new event announcements</p>
-                <p>Profile reminder pending</p>
+              <div className="kpt-navbar__panel kpt-navbar__panel--notifications">
+                {visibleNotifications.length > 0 ? (
+                  visibleNotifications.map((item) => (
+                    <div key={item.id} className="kpt-navbar__notification-item">
+                      <strong>{item.title}</strong>
+                      <p>{item.message}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p>No new notifications</p>
+                )}
               </div>
             )}
           </div>

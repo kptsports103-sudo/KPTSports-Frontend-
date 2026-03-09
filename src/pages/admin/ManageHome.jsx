@@ -164,7 +164,7 @@ const ManageHome = () => {
           { field: 'Gallery Items', after: String(payload.gallery.length) },
           { field: 'Upcoming Events', after: String(payload.upcomingEvents.length) },
           { field: 'Clubs', after: String(payload.clubs.length) },
-          { field: 'Announcements', after: String(payload.announcements.length) }
+          { field: 'Latest Announcements', after: String(payload.announcements.length) }
         ]
       );
       emitPageUpdate('Home Page');
@@ -254,7 +254,7 @@ const ManageHome = () => {
                       <td><a href="/#hero" className="table-link" target="_self">View on Home</a></td>
                     </tr>
                     <tr>
-                      <td><strong>Announcements</strong></td>
+                      <td><strong>Latest Announcements</strong></td>
                       <td>{content.announcements.length} items</td>
                       <td><span className={`status-badge ${content.announcements.length > 0 ? 'active' : 'inactive'}`}>
                         {content.announcements.length > 0 ? 'Active' : 'Empty'}
@@ -578,7 +578,7 @@ const ManageHome = () => {
                 </section>
 
                 <section className="admin-card">
-                  <h3>Announcements</h3>
+                  <h3>Latest Announcements</h3>
                   {content.announcements.map((text, i) => (
                     <div key={i} className="form-row single-row">
                       <ManagedInput

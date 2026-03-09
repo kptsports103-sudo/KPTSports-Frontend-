@@ -215,6 +215,35 @@
   font-size: 0.88rem;
 }
 
+.kpt-navbar__panel--notifications {
+  width: 300px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.kpt-navbar__notification-item {
+  padding: 10px 8px;
+  border-bottom: 1px solid #e6edf7;
+}
+
+.kpt-navbar__notification-item:last-child {
+  border-bottom: none;
+}
+
+.kpt-navbar__notification-item strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #16345f;
+  font-size: 0.9rem;
+}
+
+.kpt-navbar__notification-item p {
+  margin: 0;
+  color: #4a6288;
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
 .kpt-navbar__panel--profile button {
   width: 100%;
   border: none;
@@ -303,6 +332,18 @@ body.dark-mode .kpt-navbar__panel p,
 body.dark-mode .kpt-navbar__panel--profile button {
   color: #e6edff;
   background: transparent;
+}
+
+body.dark-mode .kpt-navbar__notification-item {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .kpt-navbar__notification-item strong {
+  color: #f2f6ff;
+}
+
+body.dark-mode .kpt-navbar__notification-item p {
+  color: #c8d6ef;
 }
 
 body.dark-mode .kpt-navbar__panel--profile button:hover {
