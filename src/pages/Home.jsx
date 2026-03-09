@@ -126,7 +126,14 @@ function Home() {
 
           {heroImage ? (
             <div className="home-hero__media">
-              <img src={heroImage} alt="Sports highlight" />
+              <img
+                src={heroImage}
+                alt="Sports highlight"
+                fetchPriority="high"
+                decoding="async"
+                width="540"
+                height="420"
+              />
             </div>
           ) : null}
         </div>
@@ -178,7 +185,14 @@ function Home() {
           <div className="sports-grid">
             {content.sportsCategories.map((category, index) => (
               <article key={`${category.name}-${index}`} className="sports-grid__item">
-                <img src={category.image} alt={category.name} />
+                <img
+                  src={category.image}
+                  alt={category.name}
+                  loading="lazy"
+                  decoding="async"
+                  width="400"
+                  height="210"
+                />
                 <div className="sports-grid__overlay" />
                 <h3>{category.name}</h3>
               </article>
@@ -199,7 +213,16 @@ function Home() {
             <div className="clubs-carousel" ref={clubsTrackRef}>
               {content.clubs.map((club, index) => (
                 <article key={`${club.name}-${index}`} className="club-card" onClick={() => routeTo(club.url)}>
-                  {club.image ? <img src={club.image} alt={club.name} /> : null}
+                  {club.image ? (
+                    <img
+                      src={club.image}
+                      alt={club.name}
+                      loading="lazy"
+                      decoding="async"
+                      width="320"
+                      height="164"
+                    />
+                  ) : null}
                   <div className="club-card__body">
                     <h3>{club.name}</h3>
                     <p>{club.description}</p>
@@ -225,7 +248,14 @@ function Home() {
           <div className="gallery-grid">
             {content.gallery.slice(0, 8).map((item, index) => (
               <figure key={`${item.image}-${index}`} className="gallery-card">
-                <img src={item.image} alt={item.caption || `Gallery ${index + 1}`} />
+                <img
+                  src={item.image}
+                  alt={item.caption || `Gallery ${index + 1}`}
+                  loading="lazy"
+                  decoding="async"
+                  width="320"
+                  height="220"
+                />
                 {item.caption ? <figcaption>{item.caption}</figcaption> : null}
               </figure>
             ))}
@@ -241,7 +271,16 @@ function Home() {
           <div className="events-grid">
             {content.upcomingEvents.map((event, index) => (
               <article key={`${event.name}-${index}`} className="event-card">
-                {event.image ? <img src={event.image} alt={event.name} /> : null}
+                {event.image ? (
+                  <img
+                    src={event.image}
+                    alt={event.name}
+                    loading="lazy"
+                    decoding="async"
+                    width="600"
+                    height="180"
+                  />
+                ) : null}
                 <div className="event-card__body">
                   <h3>{event.name}</h3>
                   {event.date ? (
