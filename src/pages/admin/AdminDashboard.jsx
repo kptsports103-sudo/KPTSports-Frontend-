@@ -400,7 +400,7 @@ const AdminDashboard = () => {
     container.appendChild(div);
 
     // Binary search font auto-fit
-    const startFont = key === "name" ? 52 : key === "competition" ? 28 : 34;
+    const startFont = key === "name" ? 46 : key === "competition" ? 28 : 34;
     const minFont = key === "name" ? 16 : key === "competition" ? 14 : 20;
 
     // Binary search for optimal font size

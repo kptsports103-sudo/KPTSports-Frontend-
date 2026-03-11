@@ -3,7 +3,7 @@ export const CERT_TEMPLATE = {
   height: 1600,
   slots: {
     kpm: { x: 250, y: 685, w: 200, h: 40, align: "left" },
-    name: { x: 540, y: 892, w: 500, h: 66, align: "center" },
+    name: { x: 540, y: 882, w: 500, h: 66, align: "center" },
     semester: { x: 520, y: 983, w: 140, h: 55, align: "center" },
     department: { x: 835, y: 983, w: 160, h: 55, align: "center" },
     competition: { x: 615, y: 1070, w: 210, h: 55, align: "center" },
