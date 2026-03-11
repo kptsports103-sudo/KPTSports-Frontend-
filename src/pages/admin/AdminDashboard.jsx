@@ -475,7 +475,7 @@ const AdminDashboard = () => {
         .qr-code {
           position: absolute;
           bottom: 130px;
-          right: 220px;
+          right: 140px;
           width: 170px;
           height: 170px;
           z-index: 2;
@@ -640,7 +640,7 @@ const AdminDashboard = () => {
       if (qrCode) {
         qrCode.style.width = "170px";
         qrCode.style.height = "170px";
-        qrCode.style.right = "220px";
+        qrCode.style.right = "140px";
         qrCode.style.bottom = "130px";
         qrCode.style.borderWidth = "4px";
       }

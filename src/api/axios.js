@@ -11,6 +11,9 @@ const api = axios.create({
 api.interceptors.request.use(config => {
   const token = getAccessToken();
   if (token && config.headers) config.headers.Authorization = `Bearer ${token}`;
+  if (typeof window !== 'undefined' && config.headers) {
+    config.headers['X-Client-Path'] = window.location.pathname || '/';
+  }
   return config;
 });
 

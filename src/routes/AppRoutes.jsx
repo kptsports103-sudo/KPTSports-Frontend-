@@ -1,10 +1,12 @@
-import { Suspense, lazy, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 
 import TopBar from '../components/TopBar';
 import Navbar from '../components/Navbar';
 
 import Footer from '../components/Footer';
+import { useAuth } from '../context/AuthContext';
+import activityLogService from '../services/activityLog.service';
 
 const Home = lazy(() => import('../pages/Home'));
 const About = lazy(() => import('../pages/About'));
@@ -54,6 +56,7 @@ const AppRoutes = () => {
 
 const AppContent = () => {
   const [darkMode, setDarkMode] = useState(true);
+  const { user, isLoaded } = useAuth();
   const toggleTheme = () => {
     setDarkMode(!darkMode);
     document.body.classList.toggle('dark-mode');
@@ -63,6 +66,11 @@ const AppContent = () => {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/otp-verify';
   const isAdmin = location.pathname.startsWith('/admin');
   const isDashboard = location.pathname.startsWith('/dashboard') || isAdmin;
+
+  useEffect(() => {
+    if (!isLoaded || !user || isAuthPage) return;
+    activityLogService.logPageVisit(location.pathname);
+  }, [isAuthPage, isLoaded, location.pathname, user]);
 
   return (
     <div className="app-wrapper">

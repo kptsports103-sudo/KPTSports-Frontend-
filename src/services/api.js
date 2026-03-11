@@ -16,6 +16,10 @@ api.interceptors.request.use(config => {
 
   }
 
+  if (typeof window !== 'undefined') {
+    config.headers['X-Client-Path'] = window.location.pathname || '/';
+  }
+
   return config;
 
 });

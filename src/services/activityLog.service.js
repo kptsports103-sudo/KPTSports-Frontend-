@@ -1,37 +1,109 @@
 import api from './api';
 
-// Get user from localStorage
 const getUser = () => {
-  const userStr = localStorage.getItem('user');
-  if (userStr) {
-    return JSON.parse(userStr);
+  try {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      return JSON.parse(userStr);
+    }
+  } catch (error) {
+    console.error('Error reading user from localStorage:', error);
   }
   return null;
 };
 
-const ALLOWED_PAGE_ACTIONS = {
-  'Home Page': 'Home Page Updated',
-  'About Page': 'Updated About Page Content',
-  'History Page': 'Updated History Page Content',
-  'Events Page': 'Updated Events Page',
-  'Gallery Page': 'Updated Gallery',
-  'Results Page': 'Updated Match Results'
+const ROUTE_LABELS = [
+  [/^\/admin\/super-admin-dashboard$/, 'Super Admin Dashboard'],
+  [/^\/admin\/dashboard$/, 'Admin Dashboard'],
+  [/^\/admin\/creator-dashboard$/, 'Creator Dashboard'],
+  [/^\/dashboard\/coach$/, 'Coach Dashboard'],
+  [/^\/admin\/iam\/users$/, 'IAM Users'],
+  [/^\/admin\/users-manage$/, 'Users Management'],
+  [/^\/admin\/update-pages$/, 'Content Management Dashboard'],
+  [/^\/admin\/manage-home$/, 'Manage Home'],
+  [/^\/admin\/manage-about$/, 'Manage About'],
+  [/^\/admin\/manage-history$/, 'Manage History'],
+  [/^\/admin\/manage-events$/, 'Manage Events'],
+  [/^\/admin\/manage-gallery$/, 'Manage Gallery'],
+  [/^\/admin\/manage-results$/, 'Manage Results'],
+  [/^\/admin\/sports-meet-registrations$/, 'Sports Meet Registrations'],
+  [/^\/admin\/media$/, 'Media Management'],
+  [/^\/admin\/add-media$/, 'Add Media'],
+  [/^\/admin\/audit-logs$/, 'Audit Logs'],
+  [/^\/admin\/media-stats$/, 'Media Statistics'],
+  [/^\/admin\/login-activity$/, 'Login Activity'],
+  [/^\/admin\/errors$/, 'Error Dashboard'],
+  [/^\/admin\/approvals$/, 'Approvals'],
+  [/^\/admin\/abuse-logs$/, 'Abuse Logs'],
+  [/^\/sports-dashboard$/, 'Sports Dashboard'],
+  [/^\/verify\/.+$/, 'Certificate Verification'],
+  [/^\/results$/, 'Results'],
+  [/^\/gallery$/, 'Gallery'],
+  [/^\/events$/, 'Events'],
+  [/^\/history$/, 'History'],
+  [/^\/about$/, 'About'],
+  [/^\/(home|)$/, 'Home'],
+];
+
+const NAVIGATION_LOG_KEY = 'activity:last-navigation';
+
+const normalizeRole = (role) => String(role || '').trim().toLowerCase();
+
+const canTrackUser = (user) => Boolean(user && normalizeRole(user.role));
+
+export const resolvePageNameFromPath = (pathname = '') => {
+  const safePath = String(pathname || '').trim() || '/';
+  const matched = ROUTE_LABELS.find(([pattern]) => pattern.test(safePath));
+  if (matched) return matched[1];
+
+  const lastPart = safePath.replace(/\/+$/, '').split('/').filter(Boolean).pop();
+  if (!lastPart) return 'Dashboard';
+
+  return lastPart
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
 };
 
-// Log admin activity
-const logActivity = async (action, pageName, details = '', changes = []) => {
+const buildQueryString = (filters = {}) => {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      params.set(key, String(value));
+    }
+  });
+  const query = params.toString();
+  return query ? `&${query}` : '';
+};
+
+const writeNavigationState = (pathname) => {
+  try {
+    sessionStorage.setItem(NAVIGATION_LOG_KEY, JSON.stringify({
+      pathname,
+      loggedAt: Date.now(),
+    }));
+  } catch {
+    // Ignore storage issues - logging should remain best-effort.
+  }
+};
+
+const shouldSkipNavigationLog = (pathname) => {
+  try {
+    const raw = sessionStorage.getItem(NAVIGATION_LOG_KEY);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    if (parsed?.pathname !== pathname) return false;
+    return Date.now() - Number(parsed?.loggedAt || 0) < 4000;
+  } catch {
+    return false;
+  }
+};
+
+const logActivity = async (action, pageName, details = '', changes = [], extra = {}) => {
   try {
     const user = getUser();
-    if (!user) {
-      console.warn('No user found in localStorage, cannot log activity');
-      return null;
-    }
-
-    if (!['creator', 'admin', 'superadmin'].includes(String(user.role || '').toLowerCase())) {
-      return null;
-    }
-
-    if (ALLOWED_PAGE_ACTIONS[pageName] !== action) {
+    if (!canTrackUser(user)) {
       return null;
     }
 
@@ -39,7 +111,13 @@ const logActivity = async (action, pageName, details = '', changes = []) => {
       action,
       pageName,
       details,
-      changes: Array.isArray(changes) ? changes : []
+      changes: Array.isArray(changes) ? changes : [],
+      source: extra.source || 'manual',
+      method: extra.method || '',
+      route: extra.route || '',
+      clientPath: extra.clientPath || (typeof window !== 'undefined' ? window.location.pathname : ''),
+      statusCode: extra.statusCode || 0,
+      metadata: extra.metadata || {}
     };
 
     const response = await api.post('/admin-activity', payload);
@@ -49,6 +127,31 @@ const logActivity = async (action, pageName, details = '', changes = []) => {
     // Don't throw error - activity logging should not break main functionality
     return null;
   }
+};
+
+const logPageVisit = async (pathname, explicitPageName = '') => {
+  const safePath = String(pathname || '').trim() || '/';
+  const user = getUser();
+  if (!canTrackUser(user) || shouldSkipNavigationLog(safePath)) {
+    return null;
+  }
+
+  const pageName = explicitPageName || resolvePageNameFromPath(safePath);
+  const result = await logActivity(
+    'Visited Page',
+    pageName,
+    `Opened ${pageName}`,
+    [],
+    {
+      source: 'navigation',
+      method: 'NAVIGATE',
+      route: safePath,
+      clientPath: safePath,
+    }
+  );
+
+  writeNavigationState(safePath);
+  return result;
 };
 
 // Get current user's activity logs
@@ -66,14 +169,16 @@ const getMyActivityLogs = async (limit = 15, page = 1) => {
 const getAllActivityLogs = async (limit = 50, page = 1, filters = {}) => {
   try {
     let queryParams = `?limit=${limit}&page=${page}`;
-    
-    if (filters.from && filters.to) {
-      queryParams += `&from=${filters.from}&to=${filters.to}`;
-    }
-    
-    if (filters.search) {
-      queryParams += `&search=${filters.search}`;
-    }
+    queryParams += buildQueryString({
+      from: filters.from,
+      to: filters.to,
+      search: filters.search,
+      role: filters.role,
+      source: filters.source,
+      pageName: filters.pageName,
+      method: filters.method,
+      action: filters.action,
+    });
 
     const response = await api.get(`/admin-activity/all${queryParams}`);
     return response.data;
@@ -96,6 +201,7 @@ const getPageActivityLogs = async (pageName, limit = 20) => {
 
 export const activityLogService = {
   logActivity,
+  logPageVisit,
   getMyActivityLogs,
   getAllActivityLogs,
   getPageActivityLogs
