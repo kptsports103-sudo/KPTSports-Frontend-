@@ -1754,6 +1754,8 @@ const AdminDashboard = () => {
                       {showBatchControls && (
                         <td>
                           <input
+                            id={`certificate-select-${rowActionKey}`}
+                            name={`certificateSelect-${rowActionKey}`}
                             type="checkbox"
                             checked={isCertificateSelected(row)}
                             onChange={() => toggleCertificateSelection(row)}

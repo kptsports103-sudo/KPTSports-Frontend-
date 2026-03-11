@@ -317,6 +317,8 @@ const ManageGallery = () => {
                   <td style={{ ...tableStyles.cell, fontWeight: 600 }}>Title</td>
                   <td style={tableStyles.cell}>
                     <input
+                      id="gallery-title"
+                      name="title"
                       value={form.title}
                       onChange={e => setForm({ ...form, title: e.target.value })}
                       style={{ width: '100%', padding: '8px', border: '1px solid #ccc', color: '#000', fontSize: 14 }}
@@ -340,6 +342,8 @@ const ManageGallery = () => {
                         }}
                       >
                         <input
+                          id={`gallery-image-url-${i}`}
+                          name={`imageUrl-${i}`}
                           placeholder="Image URL"
                           value={img.url}
                           disabled={img.fixed}
@@ -348,6 +352,8 @@ const ManageGallery = () => {
                         />
 
                         <input
+                          id={`gallery-image-overview-${i}`}
+                          name={`imageOverview-${i}`}
                           placeholder="Overview"
                           value={img.overview}
                           disabled={img.fixed}
@@ -398,6 +404,8 @@ const ManageGallery = () => {
                   <td style={{ ...tableStyles.cell, fontWeight: 600 }}>Visible</td>
                   <td style={tableStyles.cell}>
                     <input
+                      id="gallery-visibility"
+                      name="visibility"
                       type="checkbox"
                       checked={form.visibility}
                       onChange={e => setForm({ ...form, visibility: e.target.checked })}

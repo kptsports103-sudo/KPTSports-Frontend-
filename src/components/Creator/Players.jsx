@@ -886,7 +886,12 @@ const Players = ({ isStudent = false }) => {
                                 </select>
                               </td>
                               <td style={{ padding: "10px 16px" }}>
+                                <label htmlFor={`player-semester-${yearData.year}-${originalIndex}`} style={srOnlyStyle}>
+                                  Semester for {yearData.year} Row {playerIndex + 1}
+                                </label>
                                 <select
+                                  id={`player-semester-${yearData.year}-${originalIndex}`}
+                                  name={`player-semester-${yearData.year}-${originalIndex}`}
                                   value={playerAtIndex?.semester || getSemOptions(playerAtIndex?.diplomaYear)[0]}
                                   onChange={(e) => updatePlayer(yearData.year, originalIndex, 'semester', e.target.value)}
                                   disabled={!isEditable}

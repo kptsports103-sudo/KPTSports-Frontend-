@@ -280,6 +280,8 @@ const ManageAbout = () => {
             />
 
             <textarea
+              id="big-text"
+              name="bigText"
               value={content.bigText}
               onChange={(e) => setContent({ ...content, bigText: e.target.value })}
               placeholder="Our Story text"

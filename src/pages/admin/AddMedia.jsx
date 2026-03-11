@@ -154,6 +154,8 @@ const AddMedia = () => {
                 <td style={{ padding: "10px", fontWeight: "bold" }}>Category *</td>
                 <td style={{ padding: "10px" }}>
                   <select
+                    id="add-media-category"
+                    name="category"
                     value={media.category}
                     disabled={media.locked}
                     onChange={(e) => handleChange("category", e.target.value)}
@@ -180,6 +182,8 @@ const AddMedia = () => {
                 <td style={{ padding: "10px", fontWeight: "bold" }}>Title</td>
                 <td style={{ padding: "10px" }}>
                   <input
+                    id="add-media-title"
+                    name="title"
                     value={media.title}
                     disabled={media.locked}
                     onChange={(e) => handleChange("title", e.target.value)}
@@ -199,6 +203,8 @@ const AddMedia = () => {
                 <td style={{ padding: "10px", fontWeight: "bold" }}>Description</td>
                 <td style={{ padding: "10px" }}>
                   <input
+                    id="add-media-description"
+                    name="description"
                     value={media.description}
                     disabled={media.locked}
                     onChange={(e) => handleChange("description", e.target.value)}
@@ -218,6 +224,8 @@ const AddMedia = () => {
                 <td style={{ padding: "10px", fontWeight: "bold" }}>Link (optional)</td>
                 <td style={{ padding: "10px" }}>
                   <input
+                    id="add-media-link"
+                    name="link"
                     value={media.link}
                     disabled={media.locked}
                     onChange={(e) => handleChange("link", e.target.value)}
@@ -237,6 +245,8 @@ const AddMedia = () => {
                 <td style={{ padding: "10px", fontWeight: "bold" }}>Choose Files (optional if link provided)</td>
                 <td style={{ padding: "10px" }}>
                   <input
+                    id="add-media-files"
+                    name="files"
                     type="file"
                     multiple
                     disabled={media.locked}

@@ -140,6 +140,8 @@ const ManageHistory = () => {
                     <td style={tdCenter}>{i + 1}</td>
                     <td style={td}>
                       <input
+                        id={`history-year-${i}`}
+                        name={`historyYear-${i}`}
                         value={row.year}
                         onChange={e => updateRow(i, 'year', e.target.value)}
                         style={input}
@@ -147,6 +149,8 @@ const ManageHistory = () => {
                     </td>
                     <td style={td}>
                       <input
+                        id={`history-host-${i}`}
+                        name={`historyHost-${i}`}
                         value={row.host}
                         onChange={e => updateRow(i, 'host', e.target.value)}
                         style={input}
@@ -154,6 +158,8 @@ const ManageHistory = () => {
                     </td>
                     <td style={td}>
                       <input
+                        id={`history-venue-${i}`}
+                        name={`historyVenue-${i}`}
                         value={row.venue}
                         onChange={e => updateRow(i, 'venue', e.target.value)}
                         style={input}

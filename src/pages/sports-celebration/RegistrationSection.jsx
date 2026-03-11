@@ -63,7 +63,13 @@ export default function RegistrationSection({
           />
 
           {teamRule.isTeam ? (
-            <select value={memberCount} onChange={(e) => setMemberCount(Number(e.target.value))} style={styles.input}>
+            <select
+              id="registration-member-count"
+              name="memberCount"
+              value={memberCount}
+              onChange={(e) => setMemberCount(Number(e.target.value))}
+              style={styles.input}
+            >
               {Array.from({ length: teamRule.max - teamRule.min + 1 }, (_, i) => teamRule.min + i).map((n) => (
                 <option key={n} value={n}>
                   {n} Players
@@ -89,23 +95,53 @@ export default function RegistrationSection({
                   <tr key={`member-${i}`}>
                     <td style={styles.td}>{i + 1}</td>
                     <td style={styles.td}>
-                      <input style={styles.rowInput} value={member.name} onChange={(e) => updateMember(i, 'name', e.target.value)} />
+                      <input
+                        id={`registration-member-name-${i}`}
+                        name={`memberName-${i}`}
+                        style={styles.rowInput}
+                        value={member.name}
+                        onChange={(e) => updateMember(i, 'name', e.target.value)}
+                      />
                     </td>
                     <td style={styles.td}>
-                      <input style={styles.rowInput} value={member.branch} onChange={(e) => updateMember(i, 'branch', e.target.value)} />
+                      <input
+                        id={`registration-member-branch-${i}`}
+                        name={`memberBranch-${i}`}
+                        style={styles.rowInput}
+                        value={member.branch}
+                        onChange={(e) => updateMember(i, 'branch', e.target.value)}
+                      />
                     </td>
                     <td style={styles.td}>
-                      <input style={styles.rowInput} value={member.registerNumber} onChange={(e) => updateMember(i, 'registerNumber', e.target.value)} />
+                      <input
+                        id={`registration-member-register-${i}`}
+                        name={`memberRegisterNumber-${i}`}
+                        style={styles.rowInput}
+                        value={member.registerNumber}
+                        onChange={(e) => updateMember(i, 'registerNumber', e.target.value)}
+                      />
                     </td>
                     <td style={styles.td}>
-                      <select style={styles.rowInput} value={member.year} onChange={(e) => updateMember(i, 'year', e.target.value)}>
+                      <select
+                        id={`registration-member-year-${i}`}
+                        name={`memberYear-${i}`}
+                        style={styles.rowInput}
+                        value={member.year}
+                        onChange={(e) => updateMember(i, 'year', e.target.value)}
+                      >
                         <option value="1">Year 1</option>
                         <option value="2">Year 2</option>
                         <option value="3">Year 3</option>
                       </select>
                     </td>
                     <td style={styles.td}>
-                      <select style={styles.rowInput} value={member.sem} onChange={(e) => updateMember(i, 'sem', e.target.value)}>
+                      <select
+                        id={`registration-member-sem-${i}`}
+                        name={`memberSem-${i}`}
+                        style={styles.rowInput}
+                        value={member.sem}
+                        onChange={(e) => updateMember(i, 'sem', e.target.value)}
+                      >
                         {getSemOptionsForYear(String(member.year || '1')).map((n) => (
                           <option key={n} value={n}>
                             Sem {n}
@@ -132,8 +168,21 @@ export default function RegistrationSection({
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>Registrations (Locked List)</h3>
         <div style={styles.toolbar}>
-          <input value={search} onChange={(e) => setSearch(e.target.value)} style={styles.search} placeholder="Search event / team / player..." />
-          <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} style={styles.filter}>
+          <input
+            id="registration-search"
+            name="registration-search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={styles.search}
+            placeholder="Search event / team / player..."
+          />
+          <select
+            id="registration-year-filter"
+            name="registrationYearFilter"
+            value={yearFilter}
+            onChange={(e) => setYearFilter(e.target.value)}
+            style={styles.filter}
+          >
             <option value="all">All Years</option>
             <option value="1">Year 1</option>
             <option value="2">Year 2</option>

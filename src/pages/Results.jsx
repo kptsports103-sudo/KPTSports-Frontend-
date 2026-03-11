@@ -190,6 +190,8 @@ const Results = () => {
                   </h3>
                   <div style={{ textAlign: 'center', marginBottom: 20 }}>
                     <input
+                      id="results-search"
+                      name="results-search"
                       type="text"
                       placeholder="Search by Name or Event"
                       value={searchTerm}

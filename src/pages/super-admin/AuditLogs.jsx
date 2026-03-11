@@ -107,6 +107,8 @@ const AuditLogs = () => {
         <div className="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
             <input
+              id="audit-logs-search"
+              name="auditLogsSearch"
               type="text"
               value={filters.search}
               onChange={(event) => handleFilterChange("search", event.target.value)}
@@ -114,6 +116,8 @@ const AuditLogs = () => {
               className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500"
             />
             <select
+              id="audit-logs-source"
+              name="auditLogsSource"
               value={filters.source}
               onChange={(event) => handleFilterChange("source", event.target.value)}
               className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500"
@@ -126,6 +130,8 @@ const AuditLogs = () => {
               <option value="system">System</option>
             </select>
             <select
+              id="audit-logs-role"
+              name="auditLogsRole"
               value={filters.role}
               onChange={(event) => handleFilterChange("role", event.target.value)}
               className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500"

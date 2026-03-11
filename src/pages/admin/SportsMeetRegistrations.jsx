@@ -165,13 +165,13 @@ const SportsMeetRegistrations = () => {
                   return (
                     <tr key={key}>
                       <td style={styles.td}>{row.eventName}</td>
-                      <td style={styles.td}>{isEditing ? <input style={styles.inp} value={data.teamName} onChange={(e) => setDraft((d) => ({ ...d, teamName: e.target.value }))} /> : row.teamName || 'Individual'}</td>
-                      <td style={styles.td}>{isEditing ? <input style={styles.inp} value={data.teamHeadName} onChange={(e) => setDraft((d) => ({ ...d, teamHeadName: e.target.value }))} /> : row.teamHeadName}</td>
-                      <td style={styles.td}>{isEditing ? <input style={styles.inp} value={data.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} /> : row.name}</td>
-                      <td style={styles.td}>{isEditing ? <input style={styles.inp} value={data.branch} onChange={(e) => setDraft((d) => ({ ...d, branch: e.target.value }))} /> : row.branch}</td>
-                      <td style={styles.td}>{isEditing ? <input style={styles.inp} value={data.registerNumber} onChange={(e) => setDraft((d) => ({ ...d, registerNumber: e.target.value }))} /> : row.registerNumber}</td>
-                      <td style={styles.td}>{isEditing ? <input style={styles.inp} value={data.year} onChange={(e) => setDraft((d) => ({ ...d, year: e.target.value }))} /> : row.year}</td>
-                      <td style={styles.td}>{isEditing ? <input style={styles.inp} value={data.sem} onChange={(e) => setDraft((d) => ({ ...d, sem: e.target.value }))} /> : row.sem}</td>
+                      <td style={styles.td}>{isEditing ? <input id={`sports-meet-team-name-${key}`} name={`teamName-${key}`} style={styles.inp} value={data.teamName} onChange={(e) => setDraft((d) => ({ ...d, teamName: e.target.value }))} /> : row.teamName || 'Individual'}</td>
+                      <td style={styles.td}>{isEditing ? <input id={`sports-meet-team-head-${key}`} name={`teamHeadName-${key}`} style={styles.inp} value={data.teamHeadName} onChange={(e) => setDraft((d) => ({ ...d, teamHeadName: e.target.value }))} /> : row.teamHeadName}</td>
+                      <td style={styles.td}>{isEditing ? <input id={`sports-meet-name-${key}`} name={`name-${key}`} style={styles.inp} value={data.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} /> : row.name}</td>
+                      <td style={styles.td}>{isEditing ? <input id={`sports-meet-branch-${key}`} name={`branch-${key}`} style={styles.inp} value={data.branch} onChange={(e) => setDraft((d) => ({ ...d, branch: e.target.value }))} /> : row.branch}</td>
+                      <td style={styles.td}>{isEditing ? <input id={`sports-meet-register-${key}`} name={`registerNumber-${key}`} style={styles.inp} value={data.registerNumber} onChange={(e) => setDraft((d) => ({ ...d, registerNumber: e.target.value }))} /> : row.registerNumber}</td>
+                      <td style={styles.td}>{isEditing ? <input id={`sports-meet-year-${key}`} name={`year-${key}`} style={styles.inp} value={data.year} onChange={(e) => setDraft((d) => ({ ...d, year: e.target.value }))} /> : row.year}</td>
+                      <td style={styles.td}>{isEditing ? <input id={`sports-meet-sem-${key}`} name={`sem-${key}`} style={styles.inp} value={data.sem} onChange={(e) => setDraft((d) => ({ ...d, sem: e.target.value }))} /> : row.sem}</td>
                       <td style={styles.td}>{row.status}</td>
                       <td style={styles.td}>
                         {isEditing ? (
