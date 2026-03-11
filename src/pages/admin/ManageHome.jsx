@@ -12,6 +12,12 @@ const createEmptyContent = () => ({
   heroButtons: [],
   banners: [],
   achievements: [],
+  achievementSettings: {
+    sportsMeetsConducted: '',
+    yearsOfExcellence: ''
+  },
+  achievementDisplayYear: '',
+  achievementDataStatus: null,
   sportsCategories: [],
   gallery: [],
   upcomingEvents: [],
@@ -35,6 +41,11 @@ const cleanLeadingIconText = (text) => {
   const value = String(text || '');
   return value.replace(/^[^A-Za-z0-9]+/, '').trim();
 };
+
+const defaultAchievementSettings = () => ({
+  sportsMeetsConducted: '',
+  yearsOfExcellence: ''
+});
 
 const ManageHome = () => {
   const [content, setContent] = useState(null);
@@ -62,6 +73,12 @@ const ManageHome = () => {
         heroButtons: Array.isArray(res.data.heroButtons) ? res.data.heroButtons : [],
         banners: Array.isArray(res.data.banners) ? res.data.banners : [],
         achievements: Array.isArray(res.data.achievements) ? res.data.achievements : [],
+        achievementSettings: {
+          ...defaultAchievementSettings(),
+          ...(res.data.achievementSettings || {})
+        },
+        achievementDisplayYear: String(res.data.achievementDisplayYear || ''),
+        achievementDataStatus: res.data.achievementDataStatus || null,
         sportsCategories: Array.isArray(res.data.sportsCategories) ? res.data.sportsCategories : [],
         gallery: Array.isArray(res.data.gallery) ? res.data.gallery : [],
         upcomingEvents: Array.isArray(res.data.upcomingEvents) ? res.data.upcomingEvents : [],
@@ -85,6 +102,22 @@ const ManageHome = () => {
 
   const updateRootField = (field, value) => {
     setContent((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const updateAchievementSetting = (field, value) => {
+    setContent((prev) => ({
+      ...prev,
+      achievementSettings: {
+        ...defaultAchievementSettings(),
+        ...(prev.achievementSettings || {}),
+        [field]: value
+      },
+      achievements: Array.isArray(prev.achievements)
+        ? prev.achievements.map((item) => (
+            item.key === field ? { ...item, value } : item
+          ))
+        : prev.achievements
+    }));
   };
 
   const addItem = (section, template) => {
@@ -117,9 +150,10 @@ const ManageHome = () => {
         banners: content.banners
           .filter((x) => x.image.trim())
           .map((x) => ({ image: x.image.trim(), year: x.year.trim() })),
-        achievements: content.achievements
-          .filter((x) => x.title.trim() && x.value.trim())
-          .map((x) => ({ title: x.title.trim(), value: x.value.trim() })),
+        achievementSettings: {
+          sportsMeetsConducted: String(content.achievementSettings?.sportsMeetsConducted || '').trim(),
+          yearsOfExcellence: String(content.achievementSettings?.yearsOfExcellence || '').trim()
+        },
         sportsCategories: content.sportsCategories
           .filter((x) => x.name.trim() && x.image.trim())
           .map((x) => ({ name: x.name.trim(), image: x.image.trim() })),
@@ -159,7 +193,8 @@ const ManageHome = () => {
           { field: 'Hero Subtitle', after: payload.heroSubtitle || '-' },
           { field: 'Hero Buttons', after: String(payload.heroButtons.length) },
           { field: 'Banners', after: String(payload.banners.length) },
-          { field: 'Achievements', after: String(payload.achievements.length) },
+          { field: 'Sports Meets Conducted', after: payload.achievementSettings.sportsMeetsConducted || '0' },
+          { field: 'Years of Excellence', after: payload.achievementSettings.yearsOfExcellence || '0' },
           { field: 'Sports Categories', after: String(payload.sportsCategories.length) },
           { field: 'Gallery Items', after: String(payload.gallery.length) },
           { field: 'Upcoming Events', after: String(payload.upcomingEvents.length) },
@@ -187,6 +222,13 @@ const ManageHome = () => {
       </AdminLayout>
     );
   }
+
+  const getAchievementCard = (key) =>
+    content.achievements.find((item) => item.key === key) || null;
+
+  const autoAchievementYearLabel = content.achievementDisplayYear
+    ? `Automatic data year: ${content.achievementDisplayYear}`
+    : 'Automatic data year: not available';
 
   return (
     <AdminLayout>
@@ -473,26 +515,36 @@ const ManageHome = () => {
 
                 <section className="admin-card">
                   <h3>Achievements</h3>
-                  {content.achievements.map((x, i) => (
-                    <div key={i} className="form-row two-col-row">
-                      <ManagedInput
-                        placeholder="Title"
-                        value={x.title}
-                        onChange={(e) => updateField('achievements', i, 'title', e.target.value)}
-                      />
-                      <ManagedInput
-                        placeholder="Value"
-                        value={x.value}
-                        onChange={(e) => updateField('achievements', i, 'value', e.target.value)}
-                      />
-                      <button type="button" className="danger-btn" onClick={() => removeItem('achievements', i)}>
-                        Remove
-                      </button>
+                  <p style={{ marginTop: 0, color: '#51627d' }}>
+                    `Total Prizes Won` and `Active Players` are filled automatically from backend data.
+                    Only `Sports Meets Conducted` and `Years of Excellence` are manual.
+                  </p>
+                  <p style={{ marginTop: '-4px', color: '#0f3b82', fontWeight: 600 }}>
+                    {autoAchievementYearLabel}
+                    {content.achievementDataStatus?.usingFallbackYear ? ' (latest entered year fallback)' : ''}
+                  </p>
+                  <div className="simple-grid">
+                    <div className="mini-card">
+                      <strong>{getAchievementCard('totalPrizesWon')?.value || '0'}</strong>
+                      <p>Total Prizes Won</p>
                     </div>
-                  ))}
-                  <button type="button" className="add-btn" onClick={() => addItem('achievements', { title: '', value: '' })}>
-                    Add Achievement
-                  </button>
+                    <div className="mini-card">
+                      <strong>{getAchievementCard('activePlayers')?.value || '0'}</strong>
+                      <p>Active Players</p>
+                    </div>
+                  </div>
+                  <div className="form-row two-col-row">
+                    <ManagedInput
+                      placeholder="Sports Meets Conducted"
+                      value={content.achievementSettings?.sportsMeetsConducted || ''}
+                      onChange={(e) => updateAchievementSetting('sportsMeetsConducted', e.target.value)}
+                    />
+                    <ManagedInput
+                      placeholder="Years of Excellence"
+                      value={content.achievementSettings?.yearsOfExcellence || ''}
+                      onChange={(e) => updateAchievementSetting('yearsOfExcellence', e.target.value)}
+                    />
+                  </div>
                 </section>
 
                 <section className="admin-card">
