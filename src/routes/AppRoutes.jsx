@@ -108,7 +108,7 @@ const AppContent = () => {
             <Route path="/admin/sports-meet-registrations" element={<ProtectedRoute roles={["creator", "admin", "superadmin"]}><SportsMeetRegistrations /></ProtectedRoute>} />
             <Route path="/admin/update-pages" element={<ProtectedRoute role="admin"><UpdatePages /></ProtectedRoute>} />
             <Route path="/admin/update-details/:pageName" element={<ProtectedRoute role="admin"><UpdateDetails /></ProtectedRoute>} />
-            <Route path="/admin/iam/users" element={<ProtectedRoute role="superadmin"><IAMUsers /></ProtectedRoute>} />
+            <Route path="/admin/iam/users" element={<ProtectedRoute roles={["admin", "superadmin"]}><IAMUsers /></ProtectedRoute>} />
             <Route path="/admin/users-manage" element={<ProtectedRoute exactRoles={["superadmin", "admin", "creator"]}><UsersManage /></ProtectedRoute>} />
             <Route path="/admin/iam/create" element={<ProtectedRoute role="superadmin"><CreateUser /></ProtectedRoute>} />
             <Route path="/admin/audit-logs" element={<ProtectedRoute role="superadmin"><AuditLogs /></ProtectedRoute>} />

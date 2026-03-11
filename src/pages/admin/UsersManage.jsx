@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import AdminLayout from "./AdminLayout";
 import SuperAdminLayout from "../super-admin/SuperAdminLayout";
 import CreatorLayout from "../../components/Creator/CreatorLayout";
@@ -75,7 +76,7 @@ const UsersManage = () => {
       return "This user has full system control, including IAM, security, and audit visibility.";
     }
     if (role === "admin") {
-      return "This user can manage operations, results, and content, but cannot manage system users.";
+      return "This user can manage operations, content, and limited IAM access for creator and viewer accounts.";
     }
     if (role === "creator") {
       return "This user can add and edit players/results and upload media, but cannot delete records.";
@@ -108,7 +109,7 @@ const UsersManage = () => {
     }
 
     if (currentRole === "admin") {
-      return normalizedTargetRole === "creator";
+      return normalizedTargetRole === "creator" || normalizedTargetRole === "viewer";
     }
 
     return false;
@@ -163,6 +164,7 @@ const UsersManage = () => {
   };
 
   const Layout = getPageLayout();
+  const canOpenIamCreator = user?.role === "superadmin" || user?.role === "admin";
 
   return (
     <Layout>
@@ -183,9 +185,27 @@ const UsersManage = () => {
             boxShadow: "0 8px 24px rgba(71, 85, 105, 0.12)",
           }}
         >
-          <div className="flex items-center gap-2 border-b pb-4 mb-6">
-            <img src="/group.png" className="w-6 h-6" />
-            <h2 className="text-xl font-semibold" style={{ color: "#000" }}>Users</h2>
+          <div className="flex items-center justify-between gap-4 border-b pb-4 mb-6">
+            <div className="flex items-center gap-2">
+              <img src="/group.png" className="w-6 h-6" />
+              <h2 className="text-xl font-semibold" style={{ color: "#000" }}>Users</h2>
+            </div>
+            {canOpenIamCreator && (
+              <Link
+                to="/admin/iam/users"
+                style={{
+                  padding: "10px 16px",
+                  borderRadius: "10px",
+                  background: "#2563eb",
+                  color: "#fff",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Create User
+              </Link>
+            )}
           </div>
 
           {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}

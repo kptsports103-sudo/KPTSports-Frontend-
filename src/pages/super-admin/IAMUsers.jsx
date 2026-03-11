@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import api from "../../services/api";
-import { IAMService } from "../../services/iam.service";
 import { useAuth } from "../../context/AuthContext";
-import { can } from "../../auth/permissions";
 
 const inputStyle = {
   width: "100%",
@@ -26,6 +24,25 @@ const IAMUsers = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const hasValidToken = token && token.trim() !== '';
+  const currentUserRole = String(user?.role || "").toLowerCase();
+
+  const roleOptions = currentUserRole === "superadmin"
+    ? [
+        { value: "superadmin", label: "Super Admin" },
+        { value: "admin", label: "Admin" },
+        { value: "creator", label: "Creator" },
+        { value: "viewer", label: "Viewer" },
+      ]
+    : currentUserRole === "admin"
+    ? [
+        { value: "creator", label: "Creator" },
+        { value: "viewer", label: "Viewer" },
+      ]
+    : [
+        { value: "creator", label: "Creator" },
+      ];
+  const defaultRole = roleOptions[0]?.value || "creator";
+  const isRoleAllowed = (role) => roleOptions.some((option) => option.value === role);
 
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
@@ -39,7 +56,7 @@ const IAMUsers = () => {
     role: "creator"
   });
   const [otpDeliveryMethod, setOtpDeliveryMethod] = useState("email"); // "email" or "sms"
-  const [selectedRole, setSelectedRole] = useState("creator");
+  const [selectedRole, setSelectedRole] = useState(defaultRole);
   const [code, setCode] = useState("");
   const [phoneCode, setPhoneCode] = useState("");
   const [createdUser, setCreatedUser] = useState(null);
@@ -52,19 +69,29 @@ const IAMUsers = () => {
     if (hasValidToken) {
       resolveToken();
     }
-  }, [hasValidToken]);
+  }, [defaultRole, hasValidToken]);
+
+  useEffect(() => {
+    if (isRoleAllowed(selectedRole)) return;
+    setSelectedRole(defaultRole);
+    setForm((current) => ({ ...current, role: defaultRole }));
+  }, [defaultRole, selectedRole]);
 
   const resolveToken = async () => {
     try {
       setLoading(true);
       const response = await api.get(`/iam/resolve-token?token=${token}`);
       const { phone, role } = response.data;
+      const resolvedRole = isRoleAllowed(role) ? role : defaultRole;
+      if (role && !isRoleAllowed(role)) {
+        setError("Your account can create creator or viewer users only.");
+      }
       setForm(f => ({
         ...f,
         phone: phone || "",
-        role: role || "creator"
+        role: resolvedRole
       }));
-      setSelectedRole(role || "creator");
+      setSelectedRole(resolvedRole);
     } catch (err) {
       setError("Invalid or expired invitation link");
       console.error(err);
@@ -269,11 +296,17 @@ const IAMUsers = () => {
                 onChange={(e) => setSelectedRole(e.target.value)}
                 style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #d1d5db", marginTop: "6px", color: "#000" }}
               >
-                <option value="superadmin" style={{ color: "#000" }}>Super Admin</option>
-                <option value="admin" style={{ color: "#000" }}>Admin</option>
-                <option value="creator" style={{ color: "#000" }}>Creator</option>
-                <option value="viewer" style={{ color: "#000" }}>Viewer</option>
+                {roleOptions.map((option) => (
+                  <option key={option.value} value={option.value} style={{ color: "#000" }}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
+              {currentUserRole === "admin" && (
+                <small style={{ color: "#6b7280" }}>
+                  Admins can create creator and viewer accounts here.
+                </small>
+              )}
             </div>
 
             <div style={{ marginBottom: "20px" }}>
