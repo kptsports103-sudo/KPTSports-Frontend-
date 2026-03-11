@@ -64,7 +64,10 @@ const AppContent = () => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/otp-verify';
   const isAdmin = location.pathname.startsWith('/admin');
-  const isDashboard = location.pathname.startsWith('/dashboard') || isAdmin;
+  const isDashboardRoute =
+    isAdmin ||
+    location.pathname.startsWith('/dashboard') ||
+    location.pathname.startsWith('/sports-dashboard');
 
   usePageSeo(location.pathname);
 
@@ -74,15 +77,20 @@ const AppContent = () => {
   }, [isAuthPage, isLoaded, location.pathname, user]);
 
   useEffect(() => {
+    if (isDashboardRoute) {
+      applyTheme(false, { persist: false, notify: false });
+      return;
+    }
+
     applyTheme(darkMode);
-  }, [darkMode]);
+  }, [darkMode, isDashboardRoute]);
 
   useEffect(() => subscribeToThemeChanges(setDarkMode), []);
 
   return (
     <div className="app-wrapper">
-      {!isAuthPage && !isDashboard && <TopBar toggleTheme={toggleTheme} />}
-      {!isAuthPage && !isAdmin && <Navbar />}
+      {!isAuthPage && !isDashboardRoute && <TopBar toggleTheme={toggleTheme} />}
+      {!isAuthPage && !isDashboardRoute && <Navbar />}
 
       <main className="app-content">
         <Suspense fallback={<div style={{ padding: '24px' }}>Loading...</div>}>
@@ -127,7 +135,7 @@ const AppContent = () => {
           </Routes>
         </Suspense>
       </main>
-      {!isAuthPage && !isAdmin && <Footer />}
+      {!isAuthPage && !isDashboardRoute && <Footer />}
     </div>
   );
 };

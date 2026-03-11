@@ -22,17 +22,20 @@ export const getThemePreference = () => {
   return false;
 };
 
-export const applyTheme = (darkMode) => {
+export const applyTheme = (darkMode, options = {}) => {
   if (typeof document === "undefined") return;
 
+  const { persist = true, notify = true } = options;
   document.body.classList.toggle("dark-mode", darkMode);
   document.documentElement.style.colorScheme = darkMode ? "dark" : "light";
 
-  try {
-    localStorage.setItem(STORAGE_KEY, String(darkMode));
-  } catch {}
+  if (persist) {
+    try {
+      localStorage.setItem(STORAGE_KEY, String(darkMode));
+    } catch {}
+  }
 
-  if (typeof window !== "undefined") {
+  if (notify && typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent(THEME_EVENT, { detail: { darkMode } }));
   }
 };
