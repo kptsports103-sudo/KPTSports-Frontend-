@@ -474,10 +474,10 @@ const AdminDashboard = () => {
         }
         .qr-code {
           position: absolute;
-          bottom: 130px;
-          right: 140px;
-          width: 170px;
-          height: 170px;
+          bottom: 170px;
+          right: 155px;
+          width: 120px;
+          height: 120px;
           z-index: 2;
           border: 4px solid #ffffff;
           border-radius: 6px;
@@ -638,10 +638,10 @@ const AdminDashboard = () => {
         cert.style.height = `${renderHeight}px`;
       }
       if (qrCode) {
-        qrCode.style.width = "170px";
-        qrCode.style.height = "170px";
-        qrCode.style.right = "140px";
-        qrCode.style.bottom = "130px";
+        qrCode.style.width = "120px";
+        qrCode.style.height = "120px";
+        qrCode.style.right = "155px";
+        qrCode.style.bottom = "170px";
         qrCode.style.borderWidth = "4px";
       }
 
