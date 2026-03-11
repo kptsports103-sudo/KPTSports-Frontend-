@@ -966,8 +966,13 @@ const AdminDashboard = () => {
       return;
     }
 
+    if (playerYear === "all") {
+      setPlayerYear(availablePlayerYears[0]);
+      return;
+    }
+
     if (playerYear !== "all" && !availablePlayerYears.includes(String(playerYear))) {
-      setPlayerYear(availablePlayerYears.includes(currentYear) ? currentYear : "all");
+      setPlayerYear(availablePlayerYears.includes(currentYear) ? currentYear : availablePlayerYears[0]);
     }
   }, [availablePlayerYears, playerYear]);
 
@@ -984,8 +989,13 @@ const AdminDashboard = () => {
       return;
     }
 
+    if (certificateYear === "all") {
+      setCertificateYear(availableCertificateYears[0]);
+      return;
+    }
+
     if (certificateYear !== "all" && !availableCertificateYears.includes(String(certificateYear))) {
-      setCertificateYear(availableCertificateYears.includes(currentYear) ? currentYear : "all");
+      setCertificateYear(availableCertificateYears.includes(currentYear) ? currentYear : availableCertificateYears[0]);
     }
   }, [availableCertificateYears, certificateYear]);
 

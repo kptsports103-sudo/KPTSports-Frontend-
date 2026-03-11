@@ -5,6 +5,7 @@ export default function StudentParticipationModal({ isOpen, onClose }) {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const currentYear = new Date().getFullYear();
+  const [displayYear, setDisplayYear] = useState(currentYear);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -12,11 +13,22 @@ export default function StudentParticipationModal({ isOpen, onClose }) {
     const fetchStudents = async () => {
       setLoading(true);
       try {
-        const res = await api.get(`/home/student-participation?year=${currentYear}`);
-        console.log('API Response:', res.data);
+        const playersRes = await api.get('/home/players');
+        const availableYears = Object.keys(playersRes.data || {})
+          .map((year) => Number(year))
+          .filter((year) => Number.isFinite(year))
+          .sort((a, b) => b - a);
+
+        const targetYear = availableYears.includes(currentYear)
+          ? currentYear
+          : (availableYears[0] || currentYear);
+
+        const res = await api.get(`/home/student-participation?year=${targetYear}`);
+        setDisplayYear(targetYear);
         setStudents(res.data.students || []);
       } catch (err) {
         console.error('Error fetching student participation:', err);
+        setDisplayYear(currentYear);
         setStudents([]);
       } finally {
         setLoading(false);
@@ -52,10 +64,9 @@ export default function StudentParticipationModal({ isOpen, onClose }) {
           overflow: 'auto'
         }}
       >
-        {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#007bff' }}>
-            Student Participation – {currentYear}
+            Student Participation - {displayYear}
           </h2>
           <button
             onClick={onClose}
@@ -68,11 +79,10 @@ export default function StudentParticipationModal({ isOpen, onClose }) {
               cursor: 'pointer'
             }}
           >
-            ✕ Exit
+            Close
           </button>
         </div>
 
-        {/* Table */}
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
             <thead>
@@ -101,7 +111,7 @@ export default function StudentParticipationModal({ isOpen, onClose }) {
                 students.map((s, i) => (
                   <tr key={s.id || i} style={{ borderBottom: '1px solid #ddd', background: i % 2 === 0 ? '#f9f9f9' : '#fff' }}>
                     <td style={{ padding: '12px' }}>{i + 1}</td>
-                    <td style={{ padding: '12px' }}>{currentYear}</td>
+                    <td style={{ padding: '12px' }}>{displayYear}</td>
                     <td style={{ padding: '12px' }}>{s.name}</td>
                     <td style={{ padding: '12px' }}>{s.branch}</td>
                     <td style={{ padding: '12px' }}>{s.diplomaYear}</td>

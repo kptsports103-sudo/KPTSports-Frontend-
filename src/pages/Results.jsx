@@ -63,10 +63,26 @@ const Results = () => {
   const allResults = [...results, ...groupResults];
   const availableYears = Array.from(
     new Set([
-      ...allResults.map((r) => Number(r.year)).filter(Boolean),
-      Number(currentYear)
+      ...allResults.map((r) => Number(r.year)).filter(Boolean)
     ])
   ).sort((a, b) => b - a);
+
+  useEffect(() => {
+    if (availableYears.length === 0) {
+      if (selectedYear !== currentYear) {
+        setSelectedYear(currentYear);
+      }
+      return;
+    }
+
+    const preferredYear = availableYears.includes(Number(currentYear))
+      ? currentYear
+      : String(availableYears[0]);
+
+    if (!availableYears.includes(Number(selectedYear)) || selectedYear === currentYear) {
+      setSelectedYear(preferredYear);
+    }
+  }, [availableYears, currentYear, selectedYear]);
 
   const filteredResults = allResults.filter((result) => String(result.year) === String(selectedYear));
 
