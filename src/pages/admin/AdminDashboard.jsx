@@ -39,12 +39,12 @@ const CERT_TEMPLATES = {
     height: 1600,
     slots: {
       kpm: { x: 110, y: 610, w: 260, h: 45, align: "left" },
-      name: { x: 560, y: 910, w: 490, h: 65, align: "left" },
-      semester: { x: 350, y: 980, w: 175, h: 55, align: "center" },
-      department: { x: 840, y: 980, w: 290, h: 55, align: "center" },
-      competition: { x: 615, y: 1085, w: 215, h: 55, align: "left" },
-      year: { x: 985, y: 1170, w: 155, h: 55, align: "center" },
-      position: { x: 700, y: 1260, w: 175, h: 55, align: "left" },
+      name: { x: 617, y: 880, w: 490, h: 65, align: "center" },
+      semester: { x: 350, y: 960, w: 175, h: 55, align: "center" },
+      department: { x: 617, y: 960, w: 290, h: 55, align: "center" },
+      competition: { x: 615, y: 1050, w: 215, h: 55, align: "left" },
+      year: { x: 985, y: 1140, w: 155, h: 55, align: "center" },
+      position: { x: 617, y: 1200, w: 175, h: 55, align: "center" },
     },
   },
 };

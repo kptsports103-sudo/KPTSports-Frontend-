@@ -3,9 +3,9 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import "./Certificate.css";
 
-// Certificate dimensions (matches template)
-const CERT_WIDTH = 1123;
-const CERT_HEIGHT = 794;
+// Certificate dimensions (matches template - 1235x1600 portrait)
+const CERT_WIDTH = 1235;
+const CERT_HEIGHT = 1600;
 
 const Certificate = forwardRef(({
   name,

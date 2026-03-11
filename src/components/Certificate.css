@@ -12,8 +12,8 @@
 /* Main certificate container - maintains aspect ratio */
 .certificate-container {
   position: relative;
-  width: 1123px;
-  height: 794px;
+  width: 1235px;
+  height: 1600px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   flex-shrink: 0;
@@ -21,8 +21,8 @@
 
 /* Background image */
 .certificate-bg {
-  width: 1123px;
-  height: 794px;
+  width: 1235px;
+  height: 1600px;
   object-fit: fill;
   object-position: 0 0;
 }
@@ -39,71 +39,75 @@
 
 /* KPM Number - Top left section */
 .kpm {
-  top: 240px;
-  left: 175px;
-  font-size: 18px;
-  font-weight: normal;
-  width: 140px;
+  top: 610px;
+  left: 110px;
+  font-size: 26px;
+  font-weight: 700;
+  width: 260px;
+  color: #243a8c;
 }
 
 /* Student Name - Center of certificate */
 .name {
-  top: 370px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 36px;
-  font-weight: bold;
+  top: 880px;
+  left: 617px;
+  font-size: 52px;
+  font-weight: 700;
+  width: 490px;
   text-align: center;
-  width: 800px;
-  letter-spacing: 3px;
+  color: #243a8c;
 }
 
 /* Semester - Below name, left side */
 .semester {
-  top: 460px;
-  left: 345px;
-  font-size: 22px;
-  width: 90px;
+  top: 960px;
+  left: 350px;
+  font-size: 34px;
+  width: 175px;
   text-align: center;
+  color: #243a8c;
 }
 
-/* Department - Below name, right side */
+/* Department - Below name, center aligned */
 .department {
-  top: 452px;
-  left: 530px;
-  font-size: 22px;
-  width: 280px;
+  top: 960px;
+  left: 617px;
+  font-size: 34px;
+  width: 290px;
   text-align: center;
+  color: #243a8c;
 }
 
 /* Competition Name - Below department */
 .competition {
-  top: 512px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 24px;
-  font-weight: bold;
-  width: 900px;
-  text-align: center;
+  top: 1050px;
+  left: 615px;
+  font-size: 28px;
+  font-weight: 700;
+  width: 215px;
+  text-align: left;
+  color: #243a8c;
 }
 
 /* Year - Bottom section */
 .year {
-  top: 592px;
-  left: 780px;
-  font-size: 20px;
-  width: 100px;
+  top: 1140px;
+  left: 985px;
+  font-size: 34px;
+  width: 155px;
   text-align: center;
+  color: #243a8c;
 }
 
-/* Position - Bottom section, right side */
+/* Position - Bottom section, center aligned */
 .position {
-  top: 690px;
-  left: 800px;
-  font-size: 28px;
-  font-weight: bold;
-  width: 200px;
+  top: 1200px;
+  left: 617px;
+  font-size: 34px;
+  font-weight: 700;
+  width: 175px;
   text-align: center;
+  color: #243a8c;
 }
 
 /* Download button styles */
@@ -154,6 +158,6 @@
 
 /* Ensure PDF export doesn't use transformed container */
 @page {
-  size: landscape;
+  size: portrait;
   margin: 0;
 }

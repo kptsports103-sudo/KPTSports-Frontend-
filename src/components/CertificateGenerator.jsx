@@ -4,9 +4,9 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import "./CertificateGenerator.css";
 
-// Certificate dimensions (matches template)
-const CERT_WIDTH = 1123;
-const CERT_HEIGHT = 794;
+// Certificate dimensions (matches template - 1235x1600 portrait)
+const CERT_WIDTH = 1235;
+const CERT_HEIGHT = 1600;
 
 const CertificateGenerator = () => {
   const [students, setStudents] = useState([
@@ -95,7 +95,7 @@ const CertificateGenerator = () => {
       const imgData = canvas.toDataURL("image/png", 1.0);
 
       const pdf = new jsPDF({
-        orientation: "landscape",
+        orientation: "portrait",
         unit: "px",
         format: [CERT_WIDTH, CERT_HEIGHT],
         compress: true,
