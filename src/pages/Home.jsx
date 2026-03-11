@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaCalendarCheck, FaMedal, FaTrophy, FaUsers } from 'react-icons/fa';
+import OptimizedImage from '../components/OptimizedImage';
 import api from '../services/api';
+import { optimizeCloudinaryUrl } from '../utils/cloudinaryOptimize';
 import './Home.css';
 
 const createEmptyHomeContent = () => ({
@@ -39,6 +41,7 @@ function Home() {
   const [showDeferredSections, setShowDeferredSections] = useState(false);
   const activeBanner = content.banners[currentBannerIndex] ?? null;
   const heroImage = activeBanner?.image || content.gallery[0]?.image || '';
+  const preloadedHeroImage = optimizeCloudinaryUrl(heroImage, { width: 1080, height: 840, crop: 'fill' });
 
   useEffect(() => {
     const fetchHomeContent = async () => {
@@ -90,21 +93,21 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    if (!heroImage) return undefined;
+    if (!preloadedHeroImage) return undefined;
     const existing = document.querySelector('link[data-kpt-preload="hero"]');
-    if (existing && existing.getAttribute('href') === heroImage) return undefined;
+    if (existing && existing.getAttribute('href') === preloadedHeroImage) return undefined;
 
     const link = document.createElement('link');
     link.rel = 'preload';
     link.as = 'image';
-    link.href = heroImage;
+    link.href = preloadedHeroImage;
     link.setAttribute('data-kpt-preload', 'hero');
     document.head.appendChild(link);
 
     return () => {
       link.remove();
     };
-  }, [heroImage]);
+  }, [preloadedHeroImage]);
 
   const routeTo = (link) => {
     if (!link) return;
@@ -153,14 +156,14 @@ function Home() {
 
           <div className="home-hero__media" aria-hidden={!heroImage}>
             {heroImage ? (
-              <img
+              <OptimizedImage
                 src={heroImage}
                 alt="Sports highlight"
                 fetchPriority="high"
                 loading="eager"
-                decoding="async"
-                width="540"
-                height="420"
+                width={540}
+                height={420}
+                sizes="(max-width: 1024px) 100vw, 540px"
               />
             ) : (
               <div className="home-hero__media-placeholder" />
@@ -218,13 +221,12 @@ function Home() {
           <div className="sports-grid">
             {content.sportsCategories.map((category, index) => (
               <article key={`${category.name}-${index}`} className="sports-grid__item">
-                <img
+                <OptimizedImage
                   src={category.image}
                   alt={category.name}
-                  loading="lazy"
-                  decoding="async"
-                  width="400"
-                  height="210"
+                  width={400}
+                  height={210}
+                  sizes="(max-width: 560px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
                 <div className="sports-grid__overlay" />
                 <h3>{category.name}</h3>
@@ -247,13 +249,12 @@ function Home() {
               {content.clubs.map((club, index) => (
                 <article key={`${club.name}-${index}`} className="club-card" onClick={() => routeTo(club.url)}>
                   {club.image ? (
-                    <img
+                    <OptimizedImage
                       src={club.image}
                       alt={club.name}
-                      loading="lazy"
-                      decoding="async"
-                      width="320"
-                      height="164"
+                      width={320}
+                      height={164}
+                      sizes="(max-width: 768px) 90vw, 320px"
                     />
                   ) : null}
                   <div className="club-card__body">
@@ -281,13 +282,12 @@ function Home() {
           <div className="gallery-grid">
             {content.gallery.slice(0, 8).map((item, index) => (
               <figure key={`${item.image}-${index}`} className="gallery-card">
-                <img
+                <OptimizedImage
                   src={item.image}
                   alt={item.caption || `Gallery ${index + 1}`}
-                  loading="lazy"
-                  decoding="async"
-                  width="320"
-                  height="220"
+                  width={320}
+                  height={220}
+                  sizes="(max-width: 560px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
                 {item.caption ? <figcaption>{item.caption}</figcaption> : null}
               </figure>
@@ -305,13 +305,12 @@ function Home() {
             {content.upcomingEvents.map((event, index) => (
               <article key={`${event.name}-${index}`} className="event-card">
                 {event.image ? (
-                  <img
+                  <OptimizedImage
                     src={event.image}
                     alt={event.name}
-                    loading="lazy"
-                    decoding="async"
-                    width="600"
-                    height="180"
+                    width={600}
+                    height={180}
+                    sizes="(max-width: 768px) 100vw, 50vw"
                   />
                 ) : null}
                 <div className="event-card__body">

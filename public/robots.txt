@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /sports-dashboard
+Disallow: /login
+Disallow: /otp-verify
+Disallow: /verify/
+
+Sitemap: https://kpt-sports-frontend.vercel.app/sitemap.xml

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import OptimizedImage from '../components/OptimizedImage';
 import api from '../services/api';
 
 const About = () => {
@@ -63,10 +64,15 @@ const About = () => {
             transition: 'transform 1s ease-in-out'
           }}>
             {content.bannerImages.map((banner, index) => (
-              <img
+              <OptimizedImage
                 key={index}
                 src={banner.image}
                 alt={`Banner ${index + 1}`}
+                width={1600}
+                height={900}
+                sizes="100vw"
+                loading={index === 0 ? 'eager' : 'lazy'}
+                fetchPriority={index === 0 ? 'high' : undefined}
                 style={{
                   minWidth: '100%',
                   height: '100%',

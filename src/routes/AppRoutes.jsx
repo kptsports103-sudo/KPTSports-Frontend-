@@ -5,6 +5,7 @@ import TopBar from '../components/TopBar';
 import Navbar from '../components/Navbar';
 
 import Footer from '../components/Footer';
+import { usePageSeo } from '../hooks/usePageSeo';
 import { useAuth } from '../context/AuthContext';
 import activityLogService from '../services/activityLog.service';
 import { applyTheme, getThemePreference, subscribeToThemeChanges } from '../utils/theme';
@@ -65,6 +66,8 @@ const AppContent = () => {
   const isAdmin = location.pathname.startsWith('/admin');
   const isDashboard = location.pathname.startsWith('/dashboard') || isAdmin;
 
+  usePageSeo(location.pathname);
+
   useEffect(() => {
     if (!isLoaded || !user || isAuthPage) return;
     activityLogService.logPageVisit(location.pathname);
@@ -85,7 +88,7 @@ const AppContent = () => {
         <Suspense fallback={<div style={{ padding: '24px' }}>Loading...</div>}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/home" element={<Home />} />
+            <Route path="/home" element={<Navigate to="/" replace />} />
             <Route path="/about" element={<About />} />
             <Route path="/history" element={<History />} />
             <Route path="/events" element={<Events />} />

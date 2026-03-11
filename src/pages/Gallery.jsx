@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import OptimizedImage from "../components/OptimizedImage";
 import api from "../services/api";
 
 const Gallery = () => {
@@ -47,17 +48,20 @@ const Gallery = () => {
             style={{
               ...styles.row,
               background: rowIndex % 2 === 0 ? "#ffffff" : "#f0f3f8",
+              contentVisibility: "auto",
+              containIntrinsicSize: "900px",
             }}
           >
             {pair.map((media, index) => (
               <div key={index} style={styles.imageCard}>
-                <img
+                <OptimizedImage
                   src={media.url}
                   alt={media.overview || "Gallery image"}
-                  loading="lazy"
-                  decoding="async"
-                  width="600"
-                  height="400"
+                  width={600}
+                  height={400}
+                  loading={rowIndex === 0 ? "eager" : "lazy"}
+                  fetchPriority={rowIndex === 0 && index === 0 ? "high" : undefined}
+                  sizes="(max-width: 900px) 100vw, 600px"
                   style={styles.image}
                   onClick={() => setActiveImage(media)}
                 />
@@ -71,7 +75,17 @@ const Gallery = () => {
       {activeImage && (
         <div style={styles.lightbox} onClick={() => setActiveImage(null)}>
           <div style={styles.lightboxContent} onClick={(e) => e.stopPropagation()}>
-            <img src={activeImage.url} alt="" style={styles.lightboxImage} />
+            <OptimizedImage
+              src={activeImage.url}
+              alt={activeImage.overview || "Selected gallery image"}
+              width={1440}
+              height={1080}
+              crop="limit"
+              loading="eager"
+              fetchPriority="high"
+              sizes="90vw"
+              style={styles.lightboxImage}
+            />
             {activeImage.overview && <p style={styles.lightboxText}>{activeImage.overview}</p>}
             <button style={styles.closeBtn} onClick={() => setActiveImage(null)}>
               X

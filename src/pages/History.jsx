@@ -31,7 +31,7 @@ const History = () => {
   return (
     <div style={page}>
       <h1 style={title}>KPT Sports History</h1>
-      <p style={subtitle}>Karnataka State Interâ€‘Polytechnic Timeline</p>
+      <p style={subtitle}>Karnataka State Inter-Polytechnic Timeline</p>
 
       <table style={table}>
         <thead>

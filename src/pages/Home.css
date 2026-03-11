@@ -17,6 +17,8 @@
   margin: 0 auto;
   padding: 90px 20px 24px;
   animation: sectionFadeIn 600ms ease-out both;
+  content-visibility: auto;
+  contain-intrinsic-size: 720px;
 }
 
 .section-header {

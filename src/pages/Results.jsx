@@ -1,5 +1,6 @@
 ﻿import { useEffect, useState } from 'react';
 
+import OptimizedImage from '../components/OptimizedImage';
 import api from '../services/api';
 
 const medalPriority = {
@@ -103,7 +104,7 @@ const Results = () => {
         textAlign: 'center',
         fontWeight: 'bold'
       }}>
-        ðŸ† KPT Sports Results
+        KPT Sports Results
       </h1>
 
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
@@ -169,7 +170,7 @@ const Results = () => {
                     color: '#2c3e50',
                     fontWeight: '600'
                   }}>
-                    ðŸ… Individual Results
+                    Individual Results
                   </h3>
                   <div style={{ textAlign: 'center', marginBottom: 20 }}>
                     <input
@@ -282,7 +283,7 @@ const Results = () => {
                                 fontWeight: '500'
                               }}
                             >
-                              ðŸ“· View Photo
+                              View Photo
                             </button>
                           )}
                         </div>
@@ -301,7 +302,7 @@ const Results = () => {
                     color: '#2c3e50',
                     fontWeight: '600'
                   }}>
-                    ðŸ§‘â€ðŸ¤â€ðŸ§‘ Team Results
+                    Team Results
                   </h3>
                   <div style={{
                     display: 'grid',
@@ -346,7 +347,7 @@ const Results = () => {
                               fontWeight: 'bold',
                               color: '#2c3e50'
                             }}>
-                              ðŸ† {result.teamName}
+                              {result.teamName}
                             </h3>
                             <p style={{
                               margin: '0.25rem 0',
@@ -427,7 +428,7 @@ const Results = () => {
                                 fontWeight: '500'
                               }}
                             >
-                              ðŸ“· View Photo
+                              View Photo
                             </button>
                           )}
                         </div>
@@ -465,9 +466,15 @@ const Results = () => {
             }}
             onClick={e => e.stopPropagation()}
           >
-            <img
+            <OptimizedImage
               src={activeImage.imageUrl}
-              alt=""
+              alt={activeImage.event || activeImage.teamName || activeImage.name || 'Result image'}
+              width={1280}
+              height={960}
+              crop="limit"
+              loading="eager"
+              fetchPriority="high"
+              sizes="90vw"
               style={{
                 width: '100%',
                 maxHeight: '52vh',

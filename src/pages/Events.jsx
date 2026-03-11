@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from 'react';
+import OptimizedImage from '../components/OptimizedImage';
 import api from '../services/api';
 
 const Events = () => {
@@ -70,9 +71,15 @@ const Events = () => {
             {/* FIXED IMAGE BOX */}
             <div style={imageBox}>
               {highlights[0].url ? (
-                <img
+                <OptimizedImage
                   src={highlights[0].url}
                   alt={highlights[0].title}
+                  width={960}
+                  height={340}
+                  crop="limit"
+                  loading="eager"
+                  fetchPriority="high"
+                  sizes="(max-width: 900px) 100vw, 40vw"
                   style={imageInside}
                 />
               ) : (
@@ -96,9 +103,13 @@ const Events = () => {
 
                 <div style={imageBoxSmall}>
                   {highlight.url ? (
-                    <img
+                    <OptimizedImage
                       src={highlight.url}
                       alt={highlight.title}
+                      width={720}
+                      height={320}
+                      crop="limit"
+                      sizes="(max-width: 900px) 100vw, 30vw"
                       style={imageInside}
                     />
                   ) : (
@@ -124,9 +135,13 @@ const Events = () => {
 
                 <div style={imageBoxSmall}>
                   {highlight.url ? (
-                    <img
+                    <OptimizedImage
                       src={highlight.url}
                       alt={highlight.title}
+                      width={720}
+                      height={320}
+                      crop="limit"
+                      sizes="(max-width: 900px) 100vw, 30vw"
                       style={imageInside}
                     />
                   ) : (
@@ -242,7 +257,7 @@ const overviewText = {
   color: '#000'
 };
 
-/* ðŸ”’ IMAGE BOX (FIXED) */
+/* IMAGE BOX */
 const imageBox = {
   width: '100%',
   height: '340px',
