@@ -10,6 +10,7 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import QRCode from "qrcode";
 import api from "../../services/api";
+import { CERT_TEMPLATE } from "../../components/certificateTemplate";
 import {
   Trophy,
   Award,
@@ -35,17 +36,9 @@ const CERT_TEMPLATES = {
   default: {
     id: "default",
     name: "Certificate (1235x1600)",
-    width: 1235,
-    height: 1600,
-    slots: {
-      kpm: { x: 140, y: 640, w: 260, h: 45, align: "left" },
-      name: { x: 370, y: 900, w: 500, h: 65, align: "center" },
-      semester: { x: 380, y: 1010, w: 200, h: 55, align: "center" },
-      department: { x: 640, y: 1010, w: 340, h: 55, align: "center" },
-      competition: { x: 520, y: 1120, w: 320, h: 55, align: "center" },
-      year: { x: 930, y: 1085, w: 140, h: 55, align: "center" },
-      position: { x: 620, y: 1225, w: 220, h: 55, align: "center" },
-    },
+    width: CERT_TEMPLATE.width,
+    height: CERT_TEMPLATE.height,
+    slots: CERT_TEMPLATE.slots,
   },
 };
 

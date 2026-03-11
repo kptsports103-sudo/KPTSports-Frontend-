@@ -2,10 +2,11 @@ import React, { forwardRef } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import "./Certificate.css";
+import { CERT_TEMPLATE } from "./certificateTemplate";
 
 // Certificate dimensions (matches template - 1235x1600 portrait)
-const CERT_WIDTH = 1235;
-const CERT_HEIGHT = 1600;
+const CERT_WIDTH = CERT_TEMPLATE.width;
+const CERT_HEIGHT = CERT_TEMPLATE.height;
 
 const Certificate = forwardRef(({
   name,
@@ -16,6 +17,18 @@ const Certificate = forwardRef(({
   position,
   kpmNo
 }, ref) => {
+  const getSlotStyle = (key) => {
+    const slot = CERT_TEMPLATE.slots[key];
+    return {
+      left: `${slot.x}px`,
+      top: `${slot.y}px`,
+      width: `${slot.w}px`,
+      height: `${slot.h}px`,
+      textAlign: slot.align,
+      justifyContent: slot.align === "left" ? "flex-start" : "center",
+    };
+  };
+
   const downloadPDF = async () => {
     const element = document.getElementById("certificate");
     if (!element) return;
@@ -61,6 +74,7 @@ const Certificate = forwardRef(({
       <div 
         className="certificate-container" 
         id="certificate"
+        ref={ref}
         style={{ width: CERT_WIDTH, height: CERT_HEIGHT }}
       >
         <img
@@ -72,25 +86,25 @@ const Certificate = forwardRef(({
         {/* Dynamic Fields - Positioned to match template blanks */}
         
         {/* KPM Number - Top left section */}
-        <div className="certificate-field kpm">{kpmNo}</div>
+        <div className="certificate-field kpm" style={getSlotStyle("kpm")}>{kpmNo}</div>
 
         {/* Student Name - Center of certificate */}
-        <div className="certificate-field name">{name}</div>
+        <div className="certificate-field name" style={getSlotStyle("name")}>{name}</div>
 
         {/* Semester - Below name, left side */}
-        <div className="certificate-field semester">{semester}</div>
+        <div className="certificate-field semester" style={getSlotStyle("semester")}>{semester}</div>
 
         {/* Department - Below name, right side */}
-        <div className="certificate-field department">{department}</div>
+        <div className="certificate-field department" style={getSlotStyle("department")}>{department}</div>
 
         {/* Competition Name - Below department */}
-        <div className="certificate-field competition">{competition}</div>
+        <div className="certificate-field competition" style={getSlotStyle("competition")}>{competition}</div>
 
         {/* Year - Bottom section */}
-        <div className="certificate-field year">{year}</div>
+        <div className="certificate-field year" style={getSlotStyle("year")}>{year}</div>
 
         {/* Position - Bottom section, right side */}
-        <div className="certificate-field position">{position}</div>
+        <div className="certificate-field position" style={getSlotStyle("position")}>{position}</div>
       </div>
 
       <div className="certificate-actions">

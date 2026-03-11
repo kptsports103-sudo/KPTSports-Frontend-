@@ -30,8 +30,12 @@
 /* Common field styles */
 .certificate-field {
   position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: "Times New Roman", Times, serif;
   color: #1a1a1a;
+  line-height: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -39,73 +43,52 @@
 
 /* KPM Number - Top left section */
 .kpm {
-  top: 640px;
-  left: 140px;
   font-size: 26px;
   font-weight: 700;
-  width: 260px;
   color: #243a8c;
 }
 
 /* Student Name - Center of certificate */
 .name {
-  top: 900px;
-  left: 370px;
   font-size: 52px;
   font-weight: 700;
-  width: 500px;
   text-align: center;
   color: #243a8c;
 }
 
 /* Semester - move right and slightly down */
 .semester {
-  top: 1010px !important;
-  left: 380px !important;
   font-size: 34px;
-  width: 200px;
   text-align: center;
   color: #243a8c;
 }
 
 /* Department - move right and slightly down */
 .department {
-  top: 1010px !important;
-  left: 640px !important;
   font-size: 34px;
-  width: 340px;
   text-align: center;
   color: #243a8c;
 }
 
 /* Competition - move a bit down */
 .competition {
-  top: 1120px !important;
-  left: 520px !important;
   font-size: 28px;
   font-weight: 700;
-  width: 320px;
   text-align: center;
   color: #243a8c;
 }
 
 /* Year - Bottom section */
 .year {
-  top: 1085px;
-  left: 930px;
   font-size: 34px;
-  width: 140px;
   text-align: center;
   color: #243a8c;
 }
 
 /* Position - move right and down */
 .position {
-  top: 1225px !important;
-  left: 620px !important;
   font-size: 34px;
   font-weight: 700;
-  width: 220px;
   text-align: center;
   color: #243a8c;
 }
