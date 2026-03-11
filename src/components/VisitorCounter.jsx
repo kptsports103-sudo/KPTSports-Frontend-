@@ -10,7 +10,6 @@ export default function VisitorCounter() {
     // Get visitor count (increments today's count)
     axios.get("https://kpt-sports-backend.vercel.app/api/visitor/count")
       .then(res => {
-        console.log("Visitor API response:", res.data);
         setToday(res.data.today || 0);
         setTotal(res.data.total || 0);
         setLoading(false);

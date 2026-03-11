@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { FaCalendarCheck, FaMedal, FaTrophy, FaUsers } from 'react-icons/fa';
 import OptimizedImage from '../components/OptimizedImage';
 import api from '../services/api';
-import { optimizeCloudinaryUrl } from '../utils/cloudinaryOptimize';
 import './Home.css';
 
 const createEmptyHomeContent = () => ({
@@ -41,7 +40,6 @@ function Home() {
   const [showDeferredSections, setShowDeferredSections] = useState(false);
   const activeBanner = content.banners[currentBannerIndex] ?? null;
   const heroImage = activeBanner?.image || content.gallery[0]?.image || '';
-  const preloadedHeroImage = optimizeCloudinaryUrl(heroImage, { width: 1080, height: 840, crop: 'fill' });
 
   useEffect(() => {
     const fetchHomeContent = async () => {
@@ -91,23 +89,6 @@ function Home() {
     timeoutId = window.setTimeout(() => setShowDeferredSections(true), 700);
     return () => window.clearTimeout(timeoutId);
   }, []);
-
-  useEffect(() => {
-    if (!preloadedHeroImage) return undefined;
-    const existing = document.querySelector('link[data-kpt-preload="hero"]');
-    if (existing && existing.getAttribute('href') === preloadedHeroImage) return undefined;
-
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.as = 'image';
-    link.href = preloadedHeroImage;
-    link.setAttribute('data-kpt-preload', 'hero');
-    document.head.appendChild(link);
-
-    return () => {
-      link.remove();
-    };
-  }, [preloadedHeroImage]);
 
   const routeTo = (link) => {
     if (!link) return;

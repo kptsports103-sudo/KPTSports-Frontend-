@@ -42,17 +42,10 @@ const sendWebVital = (metric) => {
   }).catch(() => {})
 }
 
-const startWebVitalsLogging = async () => {
+const startWebVitalsReporting = async () => {
   try {
     const { onCLS, onINP, onLCP, onFCP, onTTFB } = await import('web-vitals')
-    const report = (metric) => {
-      console.log(`[WebVitals] ${metric.name}:`, {
-        value: metric.value,
-        rating: metric.rating,
-        id: metric.id,
-      })
-      sendWebVital(metric)
-    }
+    const report = (metric) => sendWebVital(metric)
 
     onCLS(report)
     onINP(report)
@@ -86,7 +79,7 @@ window.addEventListener('error', (event) => {
   }
 })
 
-startWebVitalsLogging()
+startWebVitalsReporting()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
