@@ -9,30 +9,19 @@ const CERT_WIDTH = 1235;
 const CERT_HEIGHT = 1600;
 
 const CertificateGenerator = () => {
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      name: "Rahul Kumar",
-      semester: "5th",
-      department: "Mechanical",
-      competition: "Inter Polytechnic Football Tournament",
-      year: "2026",
-      position: "1st",
-      kpmNo: "KPM-2026-001",
-    },
-    {
-      id: 2,
-      name: "Priya Sharma",
-      semester: "3rd",
-      department: "Electronics",
-      competition: "Inter Polytechnic Chess Championship",
-      year: "2026",
-      position: "2nd",
-      kpmNo: "KPM-2026-002",
-    },
-  ]);
+  const [students, setStudents] = useState([]);
 
-  const [currentStudent, setCurrentStudent] = useState(students[0]);
+  const defaultStudent = {
+    name: "",
+    semester: "",
+    department: "",
+    competition: "",
+    year: "",
+    position: "",
+    kpmNo: "",
+  };
+
+  const [currentStudent, setCurrentStudent] = useState(defaultStudent);
   const [newStudent, setNewStudent] = useState({
     name: "",
     semester: "",

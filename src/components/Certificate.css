@@ -39,8 +39,8 @@
 
 /* KPM Number - Top left section */
 .kpm {
-  top: 610px;
-  left: 110px;
+  top: 640px;
+  left: 140px;
   font-size: 26px;
   font-weight: 700;
   width: 260px;
@@ -49,63 +49,63 @@
 
 /* Student Name - Center of certificate */
 .name {
-  top: 880px;
-  left: 617px;
+  top: 900px;
+  left: 370px;
   font-size: 52px;
   font-weight: 700;
-  width: 490px;
+  width: 500px;
   text-align: center;
   color: #243a8c;
 }
 
 /* Semester - Below name, left side */
 .semester {
-  top: 960px;
-  left: 350px;
+  top: 990px;
+  left: 320px;
   font-size: 34px;
-  width: 175px;
+  width: 200px;
   text-align: center;
   color: #243a8c;
 }
 
 /* Department - Below name, center aligned */
 .department {
-  top: 960px;
-  left: 617px;
+  top: 990px;
+  left: 560px;
   font-size: 34px;
-  width: 290px;
+  width: 340px;
   text-align: center;
   color: #243a8c;
 }
 
 /* Competition Name - Below department */
 .competition {
-  top: 1050px;
-  left: 615px;
+  top: 1085px;
+  left: 520px;
   font-size: 28px;
   font-weight: 700;
-  width: 215px;
-  text-align: left;
+  width: 320px;
+  text-align: center;
   color: #243a8c;
 }
 
 /* Year - Bottom section */
 .year {
-  top: 1140px;
-  left: 985px;
+  top: 1085px;
+  left: 930px;
   font-size: 34px;
-  width: 155px;
+  width: 140px;
   text-align: center;
   color: #243a8c;
 }
 
 /* Position - Bottom section, center aligned */
 .position {
-  top: 1200px;
-  left: 617px;
+  top: 1185px;
+  left: 540px;
   font-size: 34px;
   font-weight: 700;
-  width: 175px;
+  width: 220px;
   text-align: center;
   color: #243a8c;
 }
