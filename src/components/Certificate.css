@@ -40,15 +40,15 @@
 /* KPM Number - Top left section */
 .kpm {
   top: 240px;
-  left: 140px;
+  left: 175px;
   font-size: 18px;
   font-weight: normal;
-  width: 200px;
+  width: 140px;
 }
 
 /* Student Name - Center of certificate */
 .name {
-  top: 380px;
+  top: 370px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 36px;
@@ -61,15 +61,15 @@
 /* Semester - Below name, left side */
 .semester {
   top: 460px;
-  left: 380px;
+  left: 345px;
   font-size: 22px;
-  width: 150px;
+  width: 90px;
   text-align: center;
 }
 
 /* Department - Below name, right side */
 .department {
-  top: 460px;
+  top: 452px;
   left: 530px;
   font-size: 22px;
   width: 280px;
@@ -78,7 +78,7 @@
 
 /* Competition Name - Below department */
 .competition {
-  top: 520px;
+  top: 512px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 24px;
@@ -89,7 +89,7 @@
 
 /* Year - Bottom section */
 .year {
-  top: 600px;
+  top: 592px;
   left: 780px;
   font-size: 20px;
   width: 100px;
@@ -98,7 +98,7 @@
 
 /* Position - Bottom section, right side */
 .position {
-  top: 700px;
+  top: 690px;
   left: 800px;
   font-size: 28px;
   font-weight: bold;
