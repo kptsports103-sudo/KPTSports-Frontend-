@@ -10,6 +10,7 @@ import SmartPreloader from "../../components/SmartPreloader";
 import { autoOptimizeMedia } from "../../utils/mediaMiddleware";
 import { trackMediaUsage } from "../../utils/mediaTracker";
 import { Check, Clipboard, Pencil, Plus, Trash2, X } from "lucide-react";
+import { getAccessToken } from "../../context/tokenStorage";
 
 const Media = () => {
   const [media, setMedia] = useState([]);
@@ -113,7 +114,7 @@ const Media = () => {
       for (const f of item.files) {
         await axios.delete(`https://kpt-sports-backend.vercel.app/api/upload/${f.public_id}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+            Authorization: `Bearer ${getAccessToken()}`
           }
         });
       }

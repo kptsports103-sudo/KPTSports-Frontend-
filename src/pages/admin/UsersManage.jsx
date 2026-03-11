@@ -76,7 +76,7 @@ const UsersManage = () => {
       return "This user has full system control, including IAM, security, and audit visibility.";
     }
     if (role === "admin") {
-      return "This user can manage operations, content, and limited IAM access for creator and viewer accounts.";
+      return "This user can manage operations, content, and IAM creation for admin and creator accounts.";
     }
     if (role === "creator") {
       return "This user can add and edit players/results and upload media, but cannot delete records.";
@@ -109,7 +109,7 @@ const UsersManage = () => {
     }
 
     if (currentRole === "admin") {
-      return normalizedTargetRole === "creator" || normalizedTargetRole === "viewer";
+      return normalizedTargetRole === "creator";
     }
 
     return false;

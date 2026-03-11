@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { clearAuthStorage, getAccessToken } from '../context/tokenStorage';
 
 const api = axios.create({
 
@@ -8,7 +9,7 @@ const api = axios.create({
 
 api.interceptors.request.use(config => {
 
-  const token = localStorage.getItem('accessToken');
+  const token = getAccessToken();
 
   if (token) {
 
@@ -32,9 +33,7 @@ api.interceptors.response.use(
 
     if (error.response && error.response.status === 401) {
 
-      localStorage.removeItem('accessToken');
-
-      localStorage.removeItem('user');
+      clearAuthStorage();
 
       window.location.href = '/login';
 

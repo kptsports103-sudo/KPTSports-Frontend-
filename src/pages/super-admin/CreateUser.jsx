@@ -100,8 +100,6 @@ const CreateUser = () => {
                 onChange={e => setForm({ ...form, role: e.target.value })}>
                 <option value="creator">Creator</option>
                 <option value="admin">Admin</option>
-                <option value="viewer">Viewer</option>
-                <option value="superadmin">Super Admin</option>
               </select>
             </FormField>
 

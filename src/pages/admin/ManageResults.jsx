@@ -4,6 +4,7 @@ import activityLogService from '../../services/activityLog.service';
 import AdminLayout from './AdminLayout';
 import { confirmAction, notify } from '../../utils/notify';
 import PageLatestChangeCard from '../../components/PageLatestChangeCard';
+import { clearAuthStorage, getAccessToken, getParsedUser } from '../../context/tokenStorage';
 
 const MEDALS = ['Gold', 'Silver', 'Bronze', 'Participation'];
 
@@ -33,13 +34,7 @@ const getSemesterOptions = (diplomaYear) => {
 };
 
 const ManageResults = () => {
-  const currentUser = (() => {
-    try {
-      return JSON.parse(localStorage.getItem('user') || '{}');
-    } catch {
-      return {};
-    }
-  })();
+  const currentUser = getParsedUser() || {};
   const canDelete = ['admin', 'superadmin'].includes(String(currentUser?.role || '').toLowerCase());
 
   const currentYear = new Date().getFullYear();
@@ -86,8 +81,8 @@ const ManageResults = () => {
 
   // Check authentication on component mount
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    const user = localStorage.getItem('user');
+    const token = getAccessToken();
+    const user = getParsedUser();
 
     if (!token || !user) {
       console.error('No authentication found');
@@ -134,8 +129,7 @@ const ManageResults = () => {
 
       if (error.response?.status === 401) {
         alert('Authentication expired. Please log in again.');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('user');
+        clearAuthStorage();
         window.location.href = '/login';
       } else {
         alert('Failed to load results. Please try again.');

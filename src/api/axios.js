@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getAccessToken, setAccessToken } from '../context/tokenStorage';
+import { clearAuthStorage, getAccessToken, setAccessToken } from '../context/tokenStorage';
 
 // create an axios instance
 const api = axios.create({
@@ -36,6 +36,7 @@ api.interceptors.response.use(
           return accessToken;
         }).catch(e => {
           isRefreshing = false;
+          clearAuthStorage();
           throw e;
         });
       }

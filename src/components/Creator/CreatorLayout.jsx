@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BarChart3, Brain, CheckCircle, LayoutDashboard, ShieldUser, Trophy, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { clearAuthStorage } from '../../context/tokenStorage';
 import '../../admin.css';
 
 const CreatorLayout = ({ children }) => {
@@ -42,8 +43,7 @@ const CreatorLayout = ({ children }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
+    clearAuthStorage();
     navigate('/login', { replace: true });
   };
 

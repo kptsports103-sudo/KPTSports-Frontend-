@@ -1,7 +1,12 @@
 import { createContext, useContext, useMemo, useCallback, useState, useEffect } from "react";
 import { useUser, useClerk } from '@clerk/clerk-react';
 import api from '../api/axios';
-import { setAccessToken } from './tokenStorage';
+import {
+  clearAuthStorage,
+  getParsedUser,
+  setAccessToken,
+  setStoredUser,
+} from './tokenStorage';
 
 const AuthContext = createContext(null);
 
@@ -11,10 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [customUser, setCustomUser] = useState(null);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setCustomUser(JSON.parse(savedUser));
-    }
+    setCustomUser(getParsedUser());
   }, []);
 
   const user = customUser || (clerkUser ? {
@@ -28,7 +30,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.get('/me');
       const userData = response.data.user;
-      localStorage.setItem('user', JSON.stringify(userData));
+      setStoredUser(userData);
       setCustomUser(userData);
       return userData;
     } catch (error) {
@@ -59,7 +61,7 @@ export const AuthProvider = ({ children }) => {
       // ✅ Direct login for non-admin roles
       if (data.token) {
         setAccessToken(data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        setStoredUser(data.user);
         setCustomUser(data.user);
         return { requiresOTP: false, ...data };
       } else {
@@ -86,25 +88,23 @@ export const AuthProvider = ({ children }) => {
     const response = await api.post('/auth/verify-otp', { email, otp });
     const data = response.data;
     setAccessToken(data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
+    setStoredUser(data.user);
     setCustomUser(data.user);
     return data.user;
   }, []);
 
   const autoLoginFromToken = useCallback((token, user) => {
     setAccessToken(token);
-    localStorage.setItem('accessToken', token);
-    localStorage.setItem('user', JSON.stringify(user));
+    setStoredUser(user);
     setCustomUser(user);
   }, []);
 
   const logout = useCallback(async () => {
     if (clerkUser) {
       await signOut();
-    } else {
-      localStorage.removeItem('user');
-      setCustomUser(null);
     }
+    clearAuthStorage();
+    setCustomUser(null);
   }, [clerkUser, signOut]);
 
   const value = useMemo(() => ({ user, login, logout, verifyOTP, autoLoginFromToken, refreshUser, isLoaded: clerkLoaded }), [user, login, logout, verifyOTP, autoLoginFromToken, refreshUser, clerkLoaded]);

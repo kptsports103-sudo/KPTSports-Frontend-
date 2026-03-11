@@ -1,9 +1,10 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { hasRequiredRole, normalizeRole } from '../auth/roles';
+import { getParsedUser } from '../context/tokenStorage';
 
 export default function ProtectedRoute({ role, roles, exactRoles, children }) {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = getParsedUser();
   const allowedRoles = Array.isArray(roles)
     ? roles
     : role

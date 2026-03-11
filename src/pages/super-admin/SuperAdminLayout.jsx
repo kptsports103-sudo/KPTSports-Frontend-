@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { clearAuthStorage } from '../../context/tokenStorage';
 import '../../admin.css';
 
 const SuperAdminLayout = ({ children }) => {
@@ -29,8 +30,7 @@ const SuperAdminLayout = ({ children }) => {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
+    clearAuthStorage();
     navigate('/login', { replace: true });
   };
 

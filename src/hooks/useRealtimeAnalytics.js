@@ -29,6 +29,7 @@ export const useRealtimeAnalytics = ({
 
     const fetchAll = async () => {
       if (!isMounted || isFetching) return;
+      if (typeof navigator !== "undefined" && !navigator.onLine) return;
       isFetching = true;
 
       try {
@@ -45,7 +46,10 @@ export const useRealtimeAnalytics = ({
         callbacksRef.current.onCertificatesUpdate?.(certs.data);
         callbacksRef.current.onResultsUpdate?.(results.data, group.data);
       } catch (error) {
-        console.error("Realtime sync error:", error);
+        const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+        if (!isOffline) {
+          console.error("Realtime sync error:", error);
+        }
       } finally {
         isFetching = false;
       }
@@ -53,10 +57,12 @@ export const useRealtimeAnalytics = ({
 
     fetchAll();
     const timerId = window.setInterval(fetchAll, intervalMs);
+    window.addEventListener("online", fetchAll);
 
     return () => {
       isMounted = false;
       window.clearInterval(timerId);
+      window.removeEventListener("online", fetchAll);
     };
   }, [intervalMs]);
 };

@@ -1,13 +1,11 @@
 import api from './api';
+import { getParsedUser } from '../context/tokenStorage';
 
 const getUser = () => {
   try {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      return JSON.parse(userStr);
-    }
+    return getParsedUser();
   } catch (error) {
-    console.error('Error reading user from localStorage:', error);
+    console.error('Error reading user from storage:', error);
   }
   return null;
 };

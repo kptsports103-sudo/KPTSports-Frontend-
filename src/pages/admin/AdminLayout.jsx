@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import activityLogService from '../../services/activityLog.service';
+import { clearAuthStorage } from '../../context/tokenStorage';
 import { CMS_PAGE_UPDATED } from '../../utils/eventBus';
 import '../../admin.css';
 
@@ -104,8 +105,7 @@ const AdminLayout = ({ children }) => {
   const menuItems = isCreator ? creatorMenuItems : adminMenuItems;
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
+    clearAuthStorage();
     navigate('/login', { replace: true });
   };
 

@@ -26,22 +26,11 @@ const IAMUsers = () => {
   const hasValidToken = token && token.trim() !== '';
   const currentUserRole = String(user?.role || "").toLowerCase();
 
-  const roleOptions = currentUserRole === "superadmin"
-    ? [
-        { value: "superadmin", label: "Super Admin" },
-        { value: "admin", label: "Admin" },
-        { value: "creator", label: "Creator" },
-        { value: "viewer", label: "Viewer" },
-      ]
-    : currentUserRole === "admin"
-    ? [
-        { value: "creator", label: "Creator" },
-        { value: "viewer", label: "Viewer" },
-      ]
-    : [
-        { value: "creator", label: "Creator" },
-      ];
-  const defaultRole = roleOptions[0]?.value || "creator";
+  const roleOptions = [
+    { value: "creator", label: "Creator" },
+    { value: "admin", label: "Admin" },
+  ];
+  const defaultRole = "creator";
   const isRoleAllowed = (role) => roleOptions.some((option) => option.value === role);
 
   const [users, setUsers] = useState([]);
@@ -84,7 +73,7 @@ const IAMUsers = () => {
       const { phone, role } = response.data;
       const resolvedRole = isRoleAllowed(role) ? role : defaultRole;
       if (role && !isRoleAllowed(role)) {
-        setError("Your account can create creator or viewer users only.");
+        setError("Only admin and creator roles are available here.");
       }
       setForm(f => ({
         ...f,
@@ -302,9 +291,9 @@ const IAMUsers = () => {
                   </option>
                 ))}
               </select>
-              {currentUserRole === "admin" && (
+              {(currentUserRole === "admin" || currentUserRole === "superadmin") && (
                 <small style={{ color: "#6b7280" }}>
-                  Admins can create creator and viewer accounts here.
+                  Only admin and creator accounts can be created here.
                 </small>
               )}
             </div>

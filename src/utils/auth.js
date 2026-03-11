@@ -1,5 +1,6 @@
 // src/utils/auth.js
 import { users } from "../data/users";
+import { setStoredUser } from "../context/tokenStorage";
 
 export function login(email, password) {
   const user = users.find(
@@ -8,6 +9,6 @@ export function login(email, password) {
 
   if (!user) return null;
 
-  localStorage.setItem("user", JSON.stringify(user));
+  setStoredUser(user);
   return user;
 }
