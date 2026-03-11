@@ -58,29 +58,29 @@
   color: #243a8c;
 }
 
-/* Semester - Below name, left side */
+/* Semester - move right and slightly down */
 .semester {
-  top: 990px;
-  left: 320px;
+  top: 1010px;
+  left: 380px;
   font-size: 34px;
   width: 200px;
   text-align: center;
   color: #243a8c;
 }
 
-/* Department - Below name, center aligned */
+/* Department - move right and slightly down */
 .department {
-  top: 990px;
-  left: 560px;
+  top: 1010px;
+  left: 640px;
   font-size: 34px;
   width: 340px;
   text-align: center;
   color: #243a8c;
 }
 
-/* Competition Name - Below department */
+/* Competition - move a bit down */
 .competition {
-  top: 1085px;
+  top: 1120px;
   left: 520px;
   font-size: 28px;
   font-weight: 700;
@@ -99,10 +99,10 @@
   color: #243a8c;
 }
 
-/* Position - Bottom section, center aligned */
+/* Position - move right and down */
 .position {
-  top: 1185px;
-  left: 540px;
+  top: 1225px;
+  left: 620px;
   font-size: 34px;
   font-weight: 700;
   width: 220px;
