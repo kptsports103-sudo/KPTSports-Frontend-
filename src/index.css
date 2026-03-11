@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+:root {
+  color-scheme: light;
+  --app-bg: #f5f5f5;
+  --app-surface: #ffffff;
+  --app-surface-alt: #f3f4f6;
+  --app-surface-muted: #e8eefc;
+  --app-text: #172033;
+  --app-text-muted: #475467;
+  --app-border: #d7def2;
+  --app-shadow: 0 12px 28px rgba(10, 30, 90, 0.08);
+  --top-bar-bg: #2b2b2b;
+  --top-bar-border: #444444;
+  --top-bar-link: #ffffff;
+  --top-bar-button-bg: #555555;
+  --top-bar-button-text: #ffffff;
+}
+
+body.dark-mode {
+  color-scheme: dark;
+  --app-bg: #081120;
+  --app-surface: #101a2b;
+  --app-surface-alt: #172235;
+  --app-surface-muted: #22314b;
+  --app-text: #e8eef8;
+  --app-text-muted: #b8c5d9;
+  --app-border: #2a3953;
+  --app-shadow: 0 20px 42px rgba(0, 0, 0, 0.34);
+  --top-bar-bg: #0f1726;
+  --top-bar-border: #243247;
+  --top-bar-link: #f8fafc;
+  --top-bar-button-bg: #1e293b;
+  --top-bar-button-text: #f8fafc;
+}
+
 /* =====================
    GLOBAL LAYOUT - Sticky Footer Fix
 ===================== */
@@ -12,6 +46,9 @@ body {
   display: flex;
   flex-direction: column;
   overflow-x: hidden; /* prevents horizontal scrolling */
+  background: var(--app-bg);
+  color: var(--app-text);
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* App Layout Classes */
@@ -24,7 +61,9 @@ body {
 .app-content {
   flex: 1; /* THIS pushes footer to bottom */
   padding-bottom: 40px; /* prevents overlap */
-  background: #f5f5f5; /* consistent background */
+  background: var(--app-bg); /* consistent background */
+  color: var(--app-text);
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* =====================
@@ -138,18 +177,19 @@ code {
    TOP BAR
 ===================== */
 .top-bar {
-  background-color: #2b2b2b;
-  color: #ffffff;
+  background-color: var(--top-bar-bg);
+  color: var(--top-bar-link);
   font-size: 13px;
   padding: 6px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--top-bar-border);
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 
 .top-bar a {
-  color: white;
+  color: var(--top-bar-link);
   text-decoration: none;
   margin-right: 12px;
 }
@@ -159,12 +199,13 @@ code {
 }
 
 .top-bar button {
-  background: #555;
-  color: white;
+  background: var(--top-bar-button-bg);
+  color: var(--top-bar-button-text);
   border: none;
   margin-left: 5px;
   padding: 2px 6px;
   cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* LOGIN LINK */
@@ -174,7 +215,7 @@ code {
   gap: 6px;
   font-weight: 600;
   text-transform: uppercase;
-  color: white;
+  color: var(--top-bar-link);
   text-decoration: none;
 }
 

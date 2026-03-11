@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
 import activityLogService from '../services/activityLog.service';
+import { applyTheme, getThemePreference, subscribeToThemeChanges } from '../utils/theme';
 
 const Home = lazy(() => import('../pages/Home'));
 const About = lazy(() => import('../pages/About'));
@@ -55,12 +56,9 @@ const AppRoutes = () => {
 };
 
 const AppContent = () => {
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(() => getThemePreference());
   const { user, isLoaded } = useAuth();
-  const toggleTheme = () => {
-    setDarkMode(!darkMode);
-    document.body.classList.toggle('dark-mode');
-  };
+  const toggleTheme = () => setDarkMode((prev) => !prev);
 
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/otp-verify';
@@ -71,6 +69,12 @@ const AppContent = () => {
     if (!isLoaded || !user || isAuthPage) return;
     activityLogService.logPageVisit(location.pathname);
   }, [isAuthPage, isLoaded, location.pathname, user]);
+
+  useEffect(() => {
+    applyTheme(darkMode);
+  }, [darkMode]);
+
+  useEffect(() => subscribeToThemeChanges(setDarkMode), []);
 
   return (
     <div className="app-wrapper">

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Bell, Menu, Moon, Sun, X } from 'lucide-react';
 import api from '../services/api';
+import { applyTheme, getThemePreference, subscribeToThemeChanges } from '../utils/theme';
 import './Navbar.css';
 
 const NAV_ITEMS = [
@@ -45,7 +46,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => getThemePreference());
   const [homeNotifications, setHomeNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
@@ -61,9 +62,7 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
-    setDarkMode(document.body.classList.contains('dark-mode'));
-  }, []);
+  useEffect(() => subscribeToThemeChanges(setDarkMode), []);
 
   useEffect(() => {
     const onClickOutside = (event) => {
@@ -166,9 +165,11 @@ const Navbar = () => {
   const goToLogin = () => navigate('/login', { replace: true });
 
   const toggleDarkMode = () => {
-    const next = !darkMode;
-    setDarkMode(next);
-    document.body.classList.toggle('dark-mode', next);
+    setDarkMode((prev) => {
+      const next = !prev;
+      applyTheme(next);
+      return next;
+    });
   };
 
   const handleNotificationClick = () => {

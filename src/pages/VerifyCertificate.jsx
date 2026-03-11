@@ -1,24 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../services/api";
-
-const containerStyle = {
-  maxWidth: 760,
-  margin: "48px auto",
-  padding: "24px",
-  borderRadius: "16px",
-  border: "1px solid #d7def2",
-  background: "#ffffff",
-  boxShadow: "0 12px 28px rgba(10, 30, 90, 0.08)",
-};
-
-const rowStyle = {
-  display: "grid",
-  gridTemplateColumns: "180px 1fr",
-  gap: "12px",
-  padding: "10px 0",
-  borderBottom: "1px solid #eef2fb",
-};
+import "./VerifyCertificate.css";
 
 const VerifyCertificate = () => {
   const { certificateId = "", id = "" } = useParams();
@@ -60,17 +43,17 @@ const VerifyCertificate = () => {
 
   if (status === "loading") {
     return (
-      <div style={containerStyle}>
-        <h2>Checking certificate...</h2>
+      <div className="verify-certificate">
+        <h2 className="verify-certificate__title">Checking certificate...</h2>
       </div>
     );
   }
 
   if (status === "invalid") {
     return (
-      <div style={containerStyle}>
-        <h2 style={{ color: "#b42318", marginTop: 0 }}>Invalid Certificate</h2>
-        <p style={{ marginBottom: 0 }}>
+      <div className="verify-certificate">
+        <h2 className="verify-certificate__title verify-certificate__title--invalid">Invalid Certificate</h2>
+        <p className="verify-certificate__lead verify-certificate__lead--compact">
           The certificate ID <strong>{routeCertificateId || "-"}</strong> was not found.
         </p>
       </div>
@@ -78,41 +61,41 @@ const VerifyCertificate = () => {
   }
 
   return (
-    <div style={containerStyle}>
-      <h2 style={{ color: "#067647", marginTop: 0 }}>Certificate Verified</h2>
-      <p style={{ marginTop: 0, color: "#344054" }}>
+    <div className="verify-certificate">
+      <h2 className="verify-certificate__title verify-certificate__title--valid">Certificate Verified</h2>
+      <p className="verify-certificate__lead">
         This certificate is authentic and issued by KPT Sports.
       </p>
 
-      <div style={rowStyle}>
+      <div className="verify-certificate__row">
         <strong>Certificate ID</strong>
         <span>{data.certificateId || "-"}</span>
       </div>
-      <div style={rowStyle}>
+      <div className="verify-certificate__row">
         <strong>Student Name</strong>
         <span>{data.name || "-"}</span>
       </div>
-      <div style={rowStyle}>
+      <div className="verify-certificate__row">
         <strong>KPM No.</strong>
         <span>{data.kpmNo || "-"}</span>
       </div>
-      <div style={rowStyle}>
+      <div className="verify-certificate__row">
         <strong>Competition</strong>
         <span>{data.competition || "-"}</span>
       </div>
-      <div style={rowStyle}>
+      <div className="verify-certificate__row">
         <strong>Position</strong>
         <span>{data.position || "-"}</span>
       </div>
-      <div style={rowStyle}>
+      <div className="verify-certificate__row">
         <strong>Department</strong>
         <span>{data.department || "-"}</span>
       </div>
-      <div style={rowStyle}>
+      <div className="verify-certificate__row">
         <strong>Year</strong>
         <span>{data.year || "-"}</span>
       </div>
-      <div style={{ ...rowStyle, borderBottom: "none", paddingBottom: 0 }}>
+      <div className="verify-certificate__row verify-certificate__row--last">
         <strong>Issued On</strong>
         <span>{issuedDate}</span>
       </div>
