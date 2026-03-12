@@ -10,7 +10,6 @@ const UPDATE_CARDS = [
   { title: 'Update Home', icon: '🏠', description: 'Manage home page content', pageName: 'Home Page' },
   { title: 'Update About', icon: 'ℹ️', description: 'Manage about page content', pageName: 'About Page' },
   { title: 'Update History', icon: '📜', description: 'Manage history page content', pageName: 'History Page' },
-  { title: 'Update Events', icon: '📅', description: 'Manage events page content', pageName: 'Events Page' },
   { title: 'Update Gallery', icon: '🖼️', description: 'Manage gallery page content', pageName: 'Gallery Page' },
   { title: 'Update Results', icon: '🏆', description: 'Manage results page content', pageName: 'Results Page' }
 ];
@@ -238,5 +237,3 @@ const styles = {
 };
 
 export default UpdatePages;
-
-

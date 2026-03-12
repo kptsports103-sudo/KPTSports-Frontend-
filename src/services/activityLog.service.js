@@ -21,7 +21,6 @@ const ROUTE_LABELS = [
   [/^\/admin\/manage-home$/, 'Manage Home'],
   [/^\/admin\/manage-about$/, 'Manage About'],
   [/^\/admin\/manage-history$/, 'Manage History'],
-  [/^\/admin\/manage-events$/, 'Manage Events'],
   [/^\/admin\/manage-gallery$/, 'Manage Gallery'],
   [/^\/admin\/manage-results$/, 'Manage Results'],
   [/^\/admin\/sports-meet-registrations$/, 'Sports Meet Registrations'],

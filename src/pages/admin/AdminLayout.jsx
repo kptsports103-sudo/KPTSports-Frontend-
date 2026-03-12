@@ -1,9 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import activityLogService from '../../services/activityLog.service';
 import { clearAuthStorage } from '../../context/tokenStorage';
 import { CMS_PAGE_UPDATED } from '../../utils/eventBus';
+import {
+  BarChart3,
+  ClipboardList,
+  FilePenLine,
+  History,
+  House,
+  ImageIcon,
+  Images,
+  Info,
+  LayoutDashboard,
+  LogOut,
+  Trophy,
+  Users,
+} from 'lucide-react';
 import '../../admin.css';
 
 const CMS_SEEN_STORAGE_KEY = 'cms_page_last_seen_v1';
@@ -11,7 +25,6 @@ const CMS_PAGES = [
   'Home Page',
   'About Page',
   'History Page',
-  'Events Page',
   'Gallery Page',
   'Results Page'
 ];
@@ -20,7 +33,6 @@ const AdminLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [cmsUnreadCount, setCmsUnreadCount] = useState(0);
 
   const readSeenMap = () => {
@@ -79,26 +91,25 @@ const AdminLayout = ({ children }) => {
   const isCreator = user?.role === 'creator';
 
   const adminMenuItems = [
-    { path: '/admin/dashboard', label: 'Dashboard', icon: 'D' },
-    { path: '/admin/users-manage', label: 'IAM Users', icon: 'U' },
-    { path: '/admin/media-stats', label: 'Media Statistics & Calculator', icon: 'S' },
-    { path: '/admin/media', label: 'Media Management', icon: 'M' },
-    { path: '/admin/update-pages', label: 'Content Management Dashboard', icon: 'C' },
-    { path: '/admin/manage-home', label: 'Manage Home', icon: 'H' },
-    { path: '/admin/manage-about', label: 'Manage About', icon: 'I' },
-    { path: '/admin/manage-history', label: 'Manage History', icon: 'R' },
-    { path: '/admin/manage-events', label: 'Manage Events', icon: 'E' },
-    { path: '/admin/manage-gallery', label: 'Manage Gallery', icon: 'G' },
-    { path: '/admin/manage-results', label: 'Manage Results', icon: 'T' },
-    { path: '/admin/sports-meet-registrations', label: 'Sports Meet Registration', icon: 'R' },
+    { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/admin/users-manage', label: 'IAM Users', icon: Users },
+    { path: '/admin/media-stats', label: 'Media Statistics & Calculator', icon: BarChart3 },
+    { path: '/admin/media', label: 'Media Management', icon: ImageIcon },
+    { path: '/admin/update-pages', label: 'Content Management Dashboard', icon: FilePenLine },
+    { path: '/admin/manage-home', label: 'Manage Home', icon: House },
+    { path: '/admin/manage-about', label: 'Manage About', icon: Info },
+    { path: '/admin/manage-history', label: 'Manage History', icon: History },
+    { path: '/admin/manage-gallery', label: 'Manage Gallery', icon: Images },
+    { path: '/admin/manage-results', label: 'Manage Results', icon: Trophy },
+    { path: '/admin/sports-meet-registrations', label: 'Sports Meet Registration', icon: ClipboardList },
   ];
 
   const creatorMenuItems = [
-    { path: '/admin/dashboard', label: 'Dashboard', icon: 'D' },
-    { path: '/admin/users-manage', label: 'IAM Users', icon: 'U' },
-    { path: '/admin/media', label: 'Media Management', icon: 'M' },
-    { path: '/admin/manage-results', label: 'Manage Results', icon: 'T' },
-    { path: '/admin/sports-meet-registrations', label: 'Sports Meet Registration', icon: 'R' },
+    { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/admin/users-manage', label: 'IAM Users', icon: Users },
+    { path: '/admin/media', label: 'Media Management', icon: ImageIcon },
+    { path: '/admin/manage-results', label: 'Manage Results', icon: Trophy },
+    { path: '/admin/sports-meet-registrations', label: 'Sports Meet Registration', icon: ClipboardList },
   ];
 
 
@@ -110,105 +121,23 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className="dashboard-shell" style={{ '--sidebar-width': '350px' }}>
+    <div className="dashboard-shell dashboard-shell--admin-compact" style={{ '--sidebar-width': '92px' }}>
       {/* Sidebar */}
-      <div className="sidebar" style={{ width: '350px' }}>
-        
-        {/* Profile Section */}
-        <div
-          style={{
-            padding: '20px',
-            textAlign: 'center',
-            borderBottom: '1px solid #e5e7eb',
-            marginBottom: '20px',
-          }}
-        >
-          {/* Avatar */}
-          <img
-            src={user?.profileImage || '/avatar.png'}
-            alt="Profile"
-            style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: '8px',
-              objectFit: 'cover',
-              border: '2px solid #e5e7eb',
-              marginBottom: '15px'
-            }}
-          />
-
-          {/* User Info Table */}
-          <div style={{ textAlign: 'left', marginTop: '15px' }}>
-            <table style={{ width: '100%', fontSize: '14px' }}>
-              <tbody>
-                <tr>
-                  <td style={{ padding: '4px 0', fontWeight: 600, color: '#6b7280', width: '80px' }}>Name:</td>
-                  <td style={{ padding: '4px 0', fontWeight: 600 }}>{user?.name || 'Admin'}</td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '4px 0', fontWeight: 600, color: '#6b7280' }}>Email:</td>
-                  <td style={{ padding: '4px 0', fontSize: '13px' }}>{user?.email || 'N/A'}</td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '4px 0', fontWeight: 600, color: '#6b7280' }}>Role:</td>
-                  <td style={{ padding: '4px 0' }}>
-                    <span style={{
-                      padding: '2px 8px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      borderRadius: '12px',
-                      background:
-                        user?.role === 'admin' ? '#dbeafe' :
-                        user?.role === 'superadmin' ? '#fef3c7' :
-                        user?.role === 'creator' ? '#fce7f3' :
-                        user?.role === 'viewer' ? '#ecfeff' : '#f3f4f6',
-                      color:
-                        user?.role === 'admin' ? '#1e40af' :
-                        user?.role === 'superadmin' ? '#92400e' :
-                        user?.role === 'creator' ? '#9f1239' :
-                        user?.role === 'viewer' ? '#155e75' : '#374151',
-                      textTransform: 'uppercase'
-                    }}>
-                      {user?.role}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-
-        {/* Logout */}
-        <button className="logout-btn" onClick={handleLogout}>Logout</button>
-
-        {/* Menu */}
-        <div className="menu">
+      <div className="sidebar sidebar--admin-compact">
+        <div className="menu admin-sidebar__menu">
           {menuItems.map(item => (
             <Link
               key={item.path}
               to={item.path}
-              className={`menu-item ${location.pathname === item.path ? 'active' : ''}`}
-              style={{ position: 'relative' }}
+              className={`menu-item menu-item--icon ${location.pathname === item.path ? 'active' : ''}`}
+              data-label={item.label}
+              title={item.label}
+              aria-label={item.label}
             >
-              <span style={{ marginRight: 10 }}>{item.icon}</span>
-              {isSidebarOpen && item.label}
+              <item.icon size={20} strokeWidth={2.1} />
               {item.path === '/admin/update-pages' && cmsUnreadCount > 0 ? (
                 <span
-                  style={{
-                    marginLeft: 'auto',
-                    minWidth: '20px',
-                    height: '20px',
-                    borderRadius: '999px',
-                    padding: '0 6px',
-                    background: '#dc2626',
-                    color: '#fff',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
+                  className="admin-sidebar__badge"
                   title={`${cmsUnreadCount} unread content change${cmsUnreadCount > 1 ? 's' : ''}`}
                 >
                   {cmsUnreadCount > 99 ? '99+' : cmsUnreadCount}
@@ -217,6 +146,16 @@ const AdminLayout = ({ children }) => {
             </Link>
           ))}
         </div>
+        <button
+          className="logout-btn admin-sidebar__logout"
+          onClick={handleLogout}
+          type="button"
+          data-label="Logout"
+          title="Logout"
+          aria-label="Logout"
+        >
+          <LogOut size={20} strokeWidth={2.1} />
+        </button>
       </div>
 
       {/* Main Content */}

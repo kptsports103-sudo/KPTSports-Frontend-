@@ -22,7 +22,6 @@ const OTPVerify = lazy(() => import('../pages/OTPVerify'));
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'));
 const CoachDashboard = lazy(() => import('../components/Creator/CoachDashboard'));
 const CreatorDashboard = lazy(() => import('../components/Creator/CreatorDashboard'));
-const ManageEvents = lazy(() => import('../pages/admin/ManageEvents'));
 const ManageGallery = lazy(() => import('../pages/admin/ManageGallery'));
 const ManageResults = lazy(() => import('../pages/admin/ManageResults'));
 const SportsMeetRegistrations = lazy(() => import('../pages/admin/SportsMeetRegistrations'));
@@ -117,7 +116,6 @@ const AppContent = () => {
             <Route path="/admin/manage-home" element={<ProtectedRoute role="admin"><ManageHome /></ProtectedRoute>} />
             <Route path="/admin/manage-about" element={<ProtectedRoute role="admin"><ManageAbout /></ProtectedRoute>} />
             <Route path="/admin/manage-history" element={<ProtectedRoute role="admin"><ManageHistory /></ProtectedRoute>} />
-            <Route path="/admin/manage-events" element={<ProtectedRoute role="admin"><ManageEvents /></ProtectedRoute>} />
             <Route path="/admin/manage-gallery" element={<ProtectedRoute role="admin"><ManageGallery /></ProtectedRoute>} />
             <Route path="/admin/manage-results" element={<ProtectedRoute roles={["creator", "admin", "superadmin"]}><ManageResults /></ProtectedRoute>} />
             <Route path="/admin/sports-meet-registrations" element={<ProtectedRoute roles={["creator", "admin", "superadmin"]}><SportsMeetRegistrations /></ProtectedRoute>} />

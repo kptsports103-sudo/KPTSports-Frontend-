@@ -10,7 +10,6 @@ const PAGE_META = {
   'Home Page': { title: 'Update Home', description: 'Manage home page content' },
   'About Page': { title: 'Update About', description: 'Manage about page content' },
   'History Page': { title: 'Update History', description: 'Manage history page content' },
-  'Events Page': { title: 'Update Events', description: 'Manage events page content' },
   'Gallery Page': { title: 'Update Gallery', description: 'Manage gallery page content' },
   'Results Page': { title: 'Update Results', description: 'Manage results page content' }
 };
