@@ -198,7 +198,6 @@ const ManageHome = () => {
           { field: 'Sports Categories', after: String(payload.sportsCategories.length) },
           { field: 'Gallery Items', after: String(payload.gallery.length) },
           { field: 'Upcoming Events', after: String(payload.upcomingEvents.length) },
-          { field: 'Clubs', after: String(payload.clubs.length) },
           { field: 'Latest Announcements', after: String(payload.announcements.length) }
         ]
       );
@@ -310,14 +309,6 @@ const ManageHome = () => {
                         {content.sportsCategories.length > 0 ? 'Active' : 'Empty'}
                       </span></td>
                       <td><a href="/#sports-categories" className="table-link" target="_self">View on Home</a></td>
-                    </tr>
-                    <tr>
-                      <td><strong>Clubs and Activities</strong></td>
-                      <td>{content.clubs.length} clubs</td>
-                      <td><span className={`status-badge ${content.clubs.length > 0 ? 'active' : 'inactive'}`}>
-                        {content.clubs.length > 0 ? 'Active' : 'Empty'}
-                      </span></td>
-                      <td><a href="/#clubs" className="table-link" target="_self">View on Home</a></td>
                     </tr>
                     <tr>
                       <td><strong>Gallery</strong></td>
@@ -432,18 +423,6 @@ const ManageHome = () => {
               </div>
             </section>
 
-            <section className="admin-card">
-              <h3>Clubs and Activities</h3>
-              <div className="clubs-grid">
-                {content.clubs.map((club, i) => (
-                  <article key={i} className="club-preview">
-                    <h4>{club.name || 'Untitled Club'}</h4>
-                    <p>{club.description || 'No description yet'}</p>
-                    <span>{club.url || 'No URL yet'}</span>
-                  </article>
-                ))}
-              </div>
-            </section>
             </div>
             )}
           </>
@@ -649,45 +628,6 @@ const ManageHome = () => {
                   ))}
                   <button type="button" className="add-btn" onClick={() => addItem('announcements', '')}>
                     Add Announcement
-                  </button>
-                </section>
-
-                <section className="admin-card">
-                  <h3>Clubs and Activities</h3>
-                  {content.clubs.map((club, i) => (
-                    <div key={i} className="form-row club-row">
-                      <ManagedInput
-                        placeholder="Club Name"
-                        value={club.name}
-                        onChange={(e) => updateField('clubs', i, 'name', e.target.value)}
-                      />
-                      <ManagedInput
-                        placeholder="URL"
-                        value={club.url}
-                        onChange={(e) => updateField('clubs', i, 'url', e.target.value)}
-                      />
-                      <ManagedInput
-                        placeholder="Description"
-                        value={club.description}
-                        onChange={(e) => updateField('clubs', i, 'description', e.target.value)}
-                      />
-                      <ManagedInput
-                        placeholder="Image URL"
-                        value={club.image}
-                        onChange={(e) => updateField('clubs', i, 'image', e.target.value)}
-                      />
-                      <ManagedInput
-                        placeholder="Theme (blue, pink...)"
-                        value={club.theme}
-                        onChange={(e) => updateField('clubs', i, 'theme', e.target.value)}
-                      />
-                      <button type="button" className="danger-btn" onClick={() => removeItem('clubs', i)}>
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                  <button type="button" className="add-btn" onClick={() => addItem('clubs', { name: '', url: '', description: '', image: '', theme: 'blue' })}>
-                    Add Club
                   </button>
                 </section>
 

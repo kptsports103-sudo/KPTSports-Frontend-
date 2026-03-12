@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaCalendarCheck, FaMedal, FaTrophy, FaUsers } from 'react-icons/fa';
 import OptimizedImage from '../components/OptimizedImage';
@@ -34,7 +34,6 @@ const cleanLeadingIconText = (text) => {
 
 function Home() {
   const navigate = useNavigate();
-  const clubsTrackRef = useRef(null);
   const [content, setContent] = useState(createEmptyHomeContent());
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [showDeferredSections, setShowDeferredSections] = useState(false);
@@ -97,11 +96,6 @@ function Home() {
       return;
     }
     window.location.href = link;
-  };
-
-  const scrollClubs = (direction) => {
-    if (!clubsTrackRef.current) return;
-    clubsTrackRef.current.scrollBy({ left: direction * 320, behavior: 'smooth' });
   };
 
   return (
@@ -213,41 +207,6 @@ function Home() {
                 <h3>{category.name}</h3>
               </article>
             ))}
-          </div>
-        </section>
-      ) : null}
-
-      {showDeferredSections && content.clubs.length > 0 ? (
-        <section id="clubs" className="section-shell club-section">
-          <header className="section-header">
-            <h2>Clubs and Activities</h2>
-          </header>
-          <div className="clubs-carousel-shell">
-            <button className="arrow" type="button" onClick={() => scrollClubs(-1)}>
-              {'<'}
-            </button>
-            <div className="clubs-carousel" ref={clubsTrackRef}>
-              {content.clubs.map((club, index) => (
-                <article key={`${club.name}-${index}`} className="club-card" onClick={() => routeTo(club.url)}>
-                  {club.image ? (
-                    <OptimizedImage
-                      src={club.image}
-                      alt={club.name}
-                      width={320}
-                      height={164}
-                      sizes="(max-width: 768px) 90vw, 320px"
-                    />
-                  ) : null}
-                  <div className="club-card__body">
-                    <h3>{club.name}</h3>
-                    <p>{club.description}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
-            <button className="arrow" type="button" onClick={() => scrollClubs(1)}>
-              {'>'}
-            </button>
           </div>
         </section>
       ) : null}
