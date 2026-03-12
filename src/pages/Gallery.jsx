@@ -47,7 +47,7 @@ const Gallery = () => {
             key={rowIndex}
             style={{
               ...styles.row,
-              background: rowIndex % 2 === 0 ? "#ffffff" : "#f0f3f8",
+              background: rowIndex % 2 === 0 ? "var(--app-surface)" : "var(--app-surface-alt)",
               contentVisibility: "auto",
               containIntrinsicSize: "900px",
             }}
@@ -104,8 +104,10 @@ const styles = {
     padding: "2.5rem",
     maxWidth: "1400px",
     margin: "0 auto",
+    minHeight: "100vh",
     fontFamily: "Segoe UI, sans-serif",
-    background: "#eaeef3",
+    background: "var(--app-bg)",
+    color: "var(--app-text)",
   },
 
   headerBox: {
@@ -113,30 +115,33 @@ const styles = {
     padding: "2rem",
     marginBottom: "3rem",
     borderRadius: "16px",
-    background: "linear-gradient(135deg,#ffffff,#dde4ef)",
-    boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
+    background: "linear-gradient(135deg, var(--app-surface), var(--app-surface-muted))",
+    border: "1px solid var(--app-border)",
+    boxShadow: "var(--app-shadow)",
   },
 
   headerTitle: {
     fontSize: "2.6rem",
     margin: 0,
+    color: "var(--app-text)",
   },
 
   headerSub: {
     marginTop: "0.6rem",
     fontSize: "1.1rem",
-    color: "#555",
+    color: "var(--app-text-muted)",
   },
 
   emptyBox: {
     height: "50vh",
     display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    border: "2px dashed #ccc",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+    border: "2px dashed var(--app-border)",
     borderRadius: "14px",
-    background: "#fff",
+    background: "var(--app-surface)",
+    color: "var(--app-text)",
   },
 
   emptyIcon: { fontSize: "1.8rem" },
@@ -144,20 +149,25 @@ const styles = {
 
   row: {
     display: "flex",
+    flexWrap: "wrap",
     justifyContent: "center",
     gap: "3rem",
     padding: "2.5rem",
     marginBottom: "1.5rem",
     borderRadius: "14px",
-    boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
+    border: "1px solid var(--app-border)",
+    boxShadow: "var(--app-shadow)",
   },
 
   imageCard: {
-    width: "600px",
+    width: "100%",
+    maxWidth: "600px",
+    flex: "1 1 320px",
     borderRadius: "16px",
     overflow: "hidden",
-    background: "#fff",
-    boxShadow: "0 8px 22px rgba(0,0,0,0.08)",
+    background: "var(--app-surface)",
+    border: "1px solid var(--app-border)",
+    boxShadow: "var(--app-shadow)",
     cursor: "pointer",
   },
 
@@ -171,8 +181,8 @@ const styles = {
     padding: "0.9rem",
     fontSize: "1rem",
     textAlign: "center",
-    background: "#fff",
-    color: "#333",
+    background: "var(--app-surface)",
+    color: "var(--app-text)",
     fontWeight: "500",
   },
 
@@ -190,7 +200,8 @@ const styles = {
     position: "relative",
     maxWidth: "90%",
     maxHeight: "90%",
-    background: "#000",
+    background: "var(--app-surface)",
+    border: "1px solid var(--app-border)",
     borderRadius: "12px",
     padding: "1rem",
   },
@@ -202,7 +213,7 @@ const styles = {
   },
 
   lightboxText: {
-    color: "#fff",
+    color: "var(--app-text)",
     textAlign: "center",
     marginTop: "0.8rem",
     fontSize: "1.1rem",
@@ -212,13 +223,14 @@ const styles = {
     position: "absolute",
     top: "10px",
     right: "10px",
-    background: "#fff",
-    border: "none",
+    background: "var(--app-surface-alt)",
+    border: "1px solid var(--app-border)",
     borderRadius: "50%",
     width: "36px",
     height: "36px",
     cursor: "pointer",
     fontSize: "18px",
     fontWeight: "bold",
+    color: "var(--app-text)",
   },
 };

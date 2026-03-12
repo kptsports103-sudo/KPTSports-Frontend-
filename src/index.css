@@ -10,6 +10,10 @@
   --app-text-muted: #475467;
   --app-border: #d7def2;
   --app-shadow: 0 12px 28px rgba(10, 30, 90, 0.08);
+  --page-accent: #0b3ea8;
+  --page-accent-soft: #dbe7ff;
+  --page-accent-strong: #0a2f77;
+  --page-warm-surface: #fdf6e3;
   --top-bar-bg: #2b2b2b;
   --top-bar-border: #444444;
   --top-bar-link: #ffffff;
@@ -27,6 +31,10 @@ body.dark-mode {
   --app-text-muted: #b8c5d9;
   --app-border: #2a3953;
   --app-shadow: 0 20px 42px rgba(0, 0, 0, 0.34);
+  --page-accent: #8fb6ff;
+  --page-accent-soft: #16253d;
+  --page-accent-strong: #dce9ff;
+  --page-warm-surface: #101a2b;
   --top-bar-bg: #0f1726;
   --top-bar-border: #243247;
   --top-bar-link: #f8fafc;

@@ -6,10 +6,27 @@
   --gold-400: #f1ca63;
   --ink-700: #1b3056;
   --card-border: #d7e1f0;
+  --home-page-bg: #f3f6fc;
+  --home-surface: #ffffff;
+  --home-surface-alt: #eef4ff;
+  --home-text: #1f2d46;
+  --home-text-muted: #3a4e72;
+  --home-divider: #d4dff0;
   margin: 0;
-  background: #f3f6fc;
+  background: var(--home-page-bg);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: #1f2d46;
+  color: var(--home-text);
+}
+
+body.dark-mode .home-page {
+  --ink-700: #dce8ff;
+  --card-border: var(--app-border);
+  --home-page-bg: var(--app-bg);
+  --home-surface: var(--app-surface);
+  --home-surface-alt: var(--app-surface-alt);
+  --home-text: var(--app-text);
+  --home-text-muted: var(--app-text-muted);
+  --home-divider: var(--app-border);
 }
 
 .section-shell {
@@ -38,7 +55,7 @@
   justify-content: space-between;
   gap: 12px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #d4dff0;
+  border-bottom: 1px solid var(--home-divider);
 }
 
 .section-view-more {
@@ -294,7 +311,7 @@
 }
 
 .announcement-list {
-  background: #fff;
+  background: var(--home-surface);
   border: 1px solid var(--card-border);
   border-radius: 14px;
   padding: 14px;
@@ -309,7 +326,7 @@
 }
 
 .announcement-item + .announcement-item {
-  border-top: 1px solid #e4ecf8;
+  border-top: 1px solid var(--home-divider);
 }
 
 .announcement-dot {
@@ -323,7 +340,7 @@
 
 .announcement-item p {
   margin: 0;
-  color: #2e4165;
+  color: var(--home-text-muted);
   font-weight: 500;
 }
 
@@ -386,7 +403,7 @@
 }
 
 .home-story__content {
-  background: #fff;
+  background: var(--home-surface);
   border-radius: 14px;
   border: 1px solid var(--card-border);
   padding: 24px;
@@ -401,7 +418,7 @@
 .home-story__content p {
   margin: 0 0 20px;
   line-height: 1.65;
-  color: #31486e;
+  color: var(--home-text-muted);
 }
 
 .club-section .section-header {
@@ -427,7 +444,7 @@
 }
 
 .club-card {
-  background: #fff;
+  background: var(--home-surface);
   border-radius: 14px;
   border: 1px solid var(--card-border);
   overflow: hidden;
@@ -453,13 +470,13 @@
 
 .club-card__body h3 {
   margin: 0 0 8px;
-  color: #102f61;
+  color: var(--home-text);
   font-size: 22px;
 }
 
 .club-card__body p {
   margin: 0;
-  color: #3a4e72;
+  color: var(--home-text-muted);
   font-size: 0.94rem;
   line-height: 1.5;
 }
@@ -524,7 +541,7 @@
 }
 
 .event-card {
-  background: #fff;
+  background: var(--home-surface);
   border-radius: 14px;
   border: 1px solid var(--card-border);
   overflow: hidden;
@@ -543,7 +560,7 @@
 
 .event-card__body h3 {
   margin: 0 0 8px;
-  color: #102f61;
+  color: var(--home-text);
 }
 
 .event-card__body p {
@@ -552,11 +569,11 @@
   gap: 8px;
   padding: 6px 10px;
   border-radius: 999px;
-  background: #eef4ff;
-  border: 1px solid #d5e2f6;
+  background: var(--home-surface-alt);
+  border: 1px solid var(--card-border);
   margin: 0 0 6px;
   font-weight: 600;
-  color: #2f466c;
+  color: var(--home-text-muted);
 }
 
 .event-icon {
@@ -573,7 +590,7 @@
 }
 
 .event-card__body span {
-  color: #5d7598;
+  color: var(--home-text-muted);
 }
 
 .home-testimonials blockquote {

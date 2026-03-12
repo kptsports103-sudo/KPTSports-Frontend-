@@ -38,6 +38,20 @@ const medalColor = (medal) => {
   return '#2563eb';
 };
 
+const palette = {
+  bg: 'var(--app-bg)',
+  surface: 'var(--app-surface)',
+  surfaceAlt: 'var(--app-surface-alt)',
+  surfaceMuted: 'var(--app-surface-muted)',
+  text: 'var(--app-text)',
+  muted: 'var(--app-text-muted)',
+  border: 'var(--app-border)',
+  shadow: 'var(--app-shadow)',
+  accent: 'var(--page-accent)'
+};
+
+const cardHoverShadow = '0 18px 36px rgba(15, 23, 42, 0.22)';
+
 const Results = () => {
 
   const currentYear = String(new Date().getFullYear());
@@ -110,13 +124,16 @@ const Results = () => {
       padding: '2rem',
       maxWidth: '1200px',
       margin: '0 auto',
-      fontFamily: 'Arial, sans-serif'
+      fontFamily: 'Arial, sans-serif',
+      minHeight: '100vh',
+      color: palette.text,
+      background: palette.bg
     }}>
 
       <h1 style={{
         fontSize: '2.5rem',
         marginBottom: '2rem',
-        color: '#2c3e50',
+        color: palette.accent,
         textAlign: 'center',
         fontWeight: 'bold'
       }}>
@@ -124,7 +141,7 @@ const Results = () => {
       </h1>
 
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <label htmlFor="results-year-filter" style={{ marginRight: '10px', fontWeight: 600, color: '#2c3e50' }}>
+        <label htmlFor="results-year-filter" style={{ marginRight: '10px', fontWeight: 600, color: palette.text }}>
           Select Year:
         </label>
         <select
@@ -135,9 +152,9 @@ const Results = () => {
           style={{
             padding: '10px 14px',
             borderRadius: 8,
-            border: '1px solid #ced4da',
-            background: '#fff',
-            color: '#111827',
+            border: `1px solid ${palette.border}`,
+            background: palette.surface,
+            color: palette.text,
             minWidth: '140px',
             cursor: 'pointer',
             fontSize: '14px'
@@ -155,9 +172,10 @@ const Results = () => {
         <div style={{
           textAlign: 'center',
           padding: '3rem',
-          backgroundColor: '#f8f9fa',
+          backgroundColor: palette.surfaceAlt,
+          border: `1px solid ${palette.border}`,
           borderRadius: '10px',
-          color: '#6c757d'
+          color: palette.muted
         }}>
           <h3>No Results Available</h3>
           <p>Results will be displayed here once they are added by the administrator.</p>
@@ -170,8 +188,8 @@ const Results = () => {
               <h2 style={{
                 fontSize: '1.8rem',
                 marginBottom: '1rem',
-                color: '#0f3b2e',
-                borderBottom: '3px solid #0f3b2e',
+                color: palette.accent,
+                borderBottom: `3px solid ${palette.accent}`,
                 paddingBottom: '0.5rem'
               }}>
                 Year: {year}
@@ -183,7 +201,7 @@ const Results = () => {
                   <h3 style={{
                     fontSize: '1.3rem',
                     marginBottom: '1rem',
-                    color: '#2c3e50',
+                    color: palette.text,
                     fontWeight: '600'
                   }}>
                     Individual Results
@@ -200,10 +218,10 @@ const Results = () => {
                         padding: '10px 14px',
                         width: '280px',
                         borderRadius: 8,
-                        border: '2px solid #000000',
+                        border: `1px solid ${palette.border}`,
                         fontSize: 14,
-                        color: '#000000',
-                        backgroundColor: '#ffffff',
+                        color: palette.text,
+                        backgroundColor: palette.surface,
                         outline: 'none'
                       }}
                     />
@@ -224,20 +242,22 @@ const Results = () => {
                       <div
                         key={result._id}
                         style={{
-                          backgroundColor: '#fff',
-                          border: '2px solid #e9ecef',
+                          backgroundColor: palette.surface,
+                          border: `1px solid ${palette.border}`,
                           borderRadius: '12px',
                           padding: '1.5rem',
-                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                          transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                          boxShadow: palette.shadow,
+                          transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
                         }}
                         onMouseOver={(e) => {
                           e.currentTarget.style.transform = 'translateY(-5px)';
-                          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                          e.currentTarget.style.boxShadow = cardHoverShadow;
+                          e.currentTarget.style.borderColor = palette.accent;
                         }}
                         onMouseOut={(e) => {
                           e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                          e.currentTarget.style.boxShadow = palette.shadow;
+                          e.currentTarget.style.borderColor = palette.border;
                         }}
                       >
                         <div style={{
@@ -256,13 +276,13 @@ const Results = () => {
                               margin: 0,
                               fontSize: '1.2rem',
                               fontWeight: 'bold',
-                              color: '#2c3e50'
+                              color: palette.text
                             }}>
                               {result.name}
                             </h3>
                             <p style={{
                               margin: '0.25rem 0',
-                              color: '#6c757d',
+                              color: palette.muted,
                               fontSize: '0.9rem'
                             }}>
                               {result.event}
@@ -275,7 +295,7 @@ const Results = () => {
                           justifyContent: 'space-between',
                           alignItems: 'center',
                           paddingTop: '1rem',
-                          borderTop: '1px solid #e9ecef'
+                          borderTop: `1px solid ${palette.border}`
                         }}>
                           <span style={{
                             background: medalColor(result.medal),
@@ -295,7 +315,7 @@ const Results = () => {
                               style={{
                                 background: 'none',
                                 border: 'none',
-                                color: '#007bff',
+                                color: palette.accent,
                                 cursor: 'pointer',
                                 fontSize: '0.9rem',
                                 fontWeight: '500'
@@ -317,7 +337,7 @@ const Results = () => {
                   <h3 style={{
                     fontSize: '1.3rem',
                     marginBottom: '1rem',
-                    color: '#2c3e50',
+                    color: palette.text,
                     fontWeight: '600'
                   }}>
                     Team Results
@@ -331,20 +351,22 @@ const Results = () => {
                       <div
                         key={result._id}
                         style={{
-                          backgroundColor: '#fff',
-                          border: '2px solid #e9ecef',
+                          backgroundColor: palette.surface,
+                          border: `1px solid ${palette.border}`,
                           borderRadius: '12px',
                           padding: '1.5rem',
-                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                          transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                          boxShadow: palette.shadow,
+                          transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
                         }}
                         onMouseOver={(e) => {
                           e.currentTarget.style.transform = 'translateY(-5px)';
-                          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                          e.currentTarget.style.boxShadow = cardHoverShadow;
+                          e.currentTarget.style.borderColor = palette.accent;
                         }}
                         onMouseOut={(e) => {
                           e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                          e.currentTarget.style.boxShadow = palette.shadow;
+                          e.currentTarget.style.borderColor = palette.border;
                         }}
                       >
                         <div style={{
@@ -363,13 +385,13 @@ const Results = () => {
                               margin: 0,
                               fontSize: '1.2rem',
                               fontWeight: 'bold',
-                              color: '#2c3e50'
+                              color: palette.text
                             }}>
                               {result.teamName}
                             </h3>
                             <p style={{
                               margin: '0.25rem 0',
-                              color: '#6c757d',
+                              color: palette.muted,
                               fontSize: '0.9rem'
                             }}>
                               {result.event}
@@ -380,14 +402,15 @@ const Results = () => {
                         <div style={{
                           marginBottom: '1rem',
                           padding: '0.75rem',
-                          backgroundColor: '#f8f9fa',
+                          backgroundColor: palette.surfaceAlt,
+                          border: `1px solid ${palette.border}`,
                           borderRadius: '8px'
                         }}>
                           <p style={{
                             margin: '0 0 0.5rem 0',
                             fontSize: '0.85rem',
                             fontWeight: '600',
-                            color: '#495057'
+                            color: palette.text
                           }}>
                             Team Members:
                           </p>
@@ -401,7 +424,7 @@ const Results = () => {
                               const memberName = typeof member === 'string' ? member : (member.name || '');
                               return (
                               <span key={i} style={{
-                                background: '#007bff',
+                                background: palette.accent,
                                 color: '#fff',
                                 padding: '0.25rem 0.5rem',
                                 borderRadius: '12px',
@@ -420,7 +443,7 @@ const Results = () => {
                           justifyContent: 'space-between',
                           alignItems: 'center',
                           paddingTop: '1rem',
-                          borderTop: '1px solid #e9ecef'
+                          borderTop: `1px solid ${palette.border}`
                         }}>
                           <span style={{
                             background: medalColor(result.medal),
@@ -440,7 +463,7 @@ const Results = () => {
                               style={{
                                 background: 'none',
                                 border: 'none',
-                                color: '#007bff',
+                                color: palette.accent,
                                 cursor: 'pointer',
                                 fontSize: '0.9rem',
                                 fontWeight: '500'
@@ -478,7 +501,8 @@ const Results = () => {
               width: 'min(760px, 90vw)',
               maxHeight: '90vh',
               overflowY: 'auto',
-              background: '#0f172a',
+              background: palette.surface,
+              border: `1px solid ${palette.border}`,
               padding: '1rem 1rem 1.25rem',
               borderRadius: '12px'
             }}
@@ -499,24 +523,32 @@ const Results = () => {
                 objectFit: 'contain'
               }}
             />
-            <div style={{ marginTop: '14px', background: '#fff', borderRadius: '10px', overflow: 'hidden' }}>
+            <div
+              style={{
+                marginTop: '14px',
+                background: palette.surfaceAlt,
+                border: `1px solid ${palette.border}`,
+                borderRadius: '10px',
+                overflow: 'hidden'
+              }}
+            >
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ background: '#f3f4f6' }}>
-                    <th style={{ padding: '10px', textAlign: 'left', color: '#111827', borderBottom: '1px solid #e5e7eb' }}>Medal</th>
-                    <th style={{ padding: '10px', textAlign: 'left', color: '#111827', borderBottom: '1px solid #e5e7eb' }}>Points</th>
-                    <th style={{ padding: '10px', textAlign: 'left', color: '#111827', borderBottom: '1px solid #e5e7eb' }}>Year</th>
+                  <tr style={{ background: palette.surfaceMuted }}>
+                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Medal</th>
+                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Points</th>
+                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Year</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9', color: '#111827' }}>{activeImage.medal || '-'}</td>
-                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9', color: '#111827' }}>
+                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.medal || '-'}</td>
+                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>
                       {activeImage.teamName
                         ? (GROUP_POINTS[activeImage.medal] || 0)
                         : (INDIVIDUAL_POINTS[activeImage.medal] || 0)}
                     </td>
-                    <td style={{ padding: '10px', borderBottom: '1px solid #f1f5f9', color: '#111827' }}>{activeImage.year || '-'}</td>
+                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.year || '-'}</td>
                   </tr>
                 </tbody>
               </table>

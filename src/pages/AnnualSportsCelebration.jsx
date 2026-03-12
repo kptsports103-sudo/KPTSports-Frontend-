@@ -216,10 +216,19 @@ export default function AnnualSportsCelebration() {
   };
 
   return (
-    <div style={{ padding: 16, maxWidth: 1100, margin: '0 auto' }}>
+    <div
+      style={{
+        padding: 16,
+        maxWidth: 1100,
+        margin: '0 auto',
+        minHeight: '100vh',
+        color: 'var(--app-text)',
+        background: 'var(--app-bg)'
+      }}
+    >
       <header style={styles.card}>
         <h2 style={{ margin: 0 }}>Annual Sports Celebration (College Sports Meet)</h2>
-        <p style={{ marginTop: 8, opacity: 0.85 }}>
+        <p style={{ marginTop: 8, opacity: 0.85, color: 'var(--app-text-muted)' }}>
           Events are managed from CreatorDashboard. Registration is <b>Free</b>.
         </p>
         <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
@@ -260,7 +269,28 @@ export default function AnnualSportsCelebration() {
 }
 
 const styles = {
-  card: { border: '1px solid #ddd', borderRadius: 14, padding: 14, background: '#fff' },
-  btn: { padding: '10px 14px', borderRadius: 10, border: '1px solid #aaa', cursor: 'pointer', background: '#fff' },
-  btnActive: { padding: '10px 14px', borderRadius: 10, border: '1px solid #111', cursor: 'pointer', background: '#fff', fontWeight: 700 },
+  card: {
+    border: '1px solid var(--app-border)',
+    borderRadius: 14,
+    padding: 14,
+    background: 'var(--app-surface)',
+    boxShadow: 'var(--app-shadow)'
+  },
+  btn: {
+    padding: '10px 14px',
+    borderRadius: 10,
+    border: '1px solid var(--app-border)',
+    cursor: 'pointer',
+    background: 'var(--app-surface)',
+    color: 'var(--app-text)'
+  },
+  btnActive: {
+    padding: '10px 14px',
+    borderRadius: 10,
+    border: '1px solid var(--page-accent)',
+    cursor: 'pointer',
+    background: 'var(--page-accent-soft)',
+    color: 'var(--page-accent)',
+    fontWeight: 700
+  },
 };

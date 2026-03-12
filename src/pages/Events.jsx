@@ -181,14 +181,17 @@ const Events = () => {
 
 const page = {
   padding: '2.5rem',
-  background: '#f8faff',
-  minHeight: '100vh'
+  background: 'var(--app-bg)',
+  color: 'var(--app-text)',
+  minHeight: '100vh',
+  maxWidth: '1280px',
+  margin: '0 auto'
 };
 
 const mainTitle = {
   fontSize: '38px',
   fontWeight: '700',
-  color: '#0b3ea8',
+  color: 'var(--page-accent)',
   textAlign: 'center',
   marginBottom: '40px'
 };
@@ -197,44 +200,46 @@ const loader = {
   padding: '3rem',
   textAlign: 'center',
   fontSize: '18px',
-  color: '#000'
+  color: 'var(--app-text)'
 };
 
 /* ABOUT */
 const aboutBox = {
-  background: '#fff',
+  background: 'var(--app-surface)',
+  border: '1px solid var(--app-border)',
   borderRadius: '18px',
   padding: '32px',
-  boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
+  boxShadow: 'var(--app-shadow)',
   marginBottom: '40px'
 };
 
 const aboutText = {
   fontSize: '18px',
   lineHeight: '1.8',
-  color: '#000',
+  color: 'var(--app-text)',
   whiteSpace: 'pre-wrap'
 };
 
 /* HIGHLIGHT */
 const highlightBox = {
-  background: '#fff',
+  background: 'var(--app-surface)',
+  border: '1px solid var(--app-border)',
   borderRadius: '18px',
   padding: '36px',
-  boxShadow: '0 12px 30px rgba(0,0,0,0.08)'
+  boxShadow: 'var(--app-shadow)'
 };
 
 const highlightTitle = {
   fontSize: '34px',
   fontWeight: '700',
-  color: '#0b3ea8',
+  color: 'var(--page-accent)',
   textAlign: 'center',
   marginBottom: '30px'
 };
 
 const highlightContent = {
   display: 'grid',
-  gridTemplateColumns: '1.4fr 1fr',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
   gap: '40px',
   alignItems: 'center'
 };
@@ -242,26 +247,27 @@ const highlightContent = {
 const highlightText = {
   fontSize: '18px',
   lineHeight: '1.8',
-  color: '#000'
+  color: 'var(--app-text)'
 };
 
 const aboutTitle = {
   fontSize: '22px',
   fontWeight: '700',
   marginBottom: '14px',
-  color: '#000'
+  color: 'var(--app-text)'
 };
 
 const overviewText = {
   whiteSpace: 'pre-wrap',
-  color: '#000'
+  color: 'var(--app-text-muted)'
 };
 
 /* IMAGE BOX */
 const imageBox = {
   width: '100%',
   height: '340px',
-  background: '#f4f6fb',
+  background: 'var(--app-surface-alt)',
+  border: '1px solid var(--app-border)',
   borderRadius: '16px',
   display: 'flex',
   alignItems: 'center',
@@ -272,13 +278,13 @@ const imageBox = {
 const imageBoxSmall = {
   width: '100%',
   height: '320px',
-  background: '#f9fafc',
+  background: 'var(--app-surface-alt)',
   borderRadius: '14px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   overflow: 'hidden',
-  border: '1px solid #e3e6eb'
+  border: '1px solid var(--app-border)'
 };
 
 const imageInside = {
@@ -289,103 +295,108 @@ const imageInside = {
 };
 
 const placeholderImage = {
-  color: '#777',
+  color: 'var(--app-text-muted)',
   fontSize: '16px'
 };
 
 /* ADDITIONAL */
 const additionalHighlightsBox = {
-  background: '#fff',
+  background: 'var(--app-surface)',
+  border: '1px solid var(--app-border)',
   borderRadius: '18px',
   padding: '36px',
-  boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
+  boxShadow: 'var(--app-shadow)',
   marginTop: '40px'
 };
 
 const highlightsGrid = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
   gap: '30px'
 };
 
 const highlightCard = {
-  background: '#f8faff',
+  background: 'var(--app-surface-alt)',
+  border: '1px solid var(--app-border)',
   borderRadius: '14px',
   padding: '24px',
   display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
   gap: '24px',
   alignItems: 'center',
-  boxShadow: '0 6px 20px rgba(0,0,0,0.06)'
+  boxShadow: 'var(--app-shadow)'
 };
 
 const cardTitle = {
   fontSize: '22px',
   fontWeight: '600',
-  color: '#0b3ea8',
+  color: 'var(--page-accent)',
   marginBottom: '12px'
 };
 
 const cardOverview = {
   fontSize: '16px',
   lineHeight: '1.6',
-  color: '#000',
+  color: 'var(--app-text-muted)',
   whiteSpace: 'pre-wrap'
 };
 
 /* FIELD EVENTS */
 const fieldEventsBox = {
-  background: '#fff',
+  background: 'var(--app-surface)',
+  border: '1px solid var(--app-border)',
   borderRadius: '18px',
   padding: '36px',
-  boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
+  boxShadow: 'var(--app-shadow)',
   marginTop: '40px'
 };
 
 const fieldEventsGrid = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(600px, 1fr))',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
   gap: '30px'
 };
 
 const fieldEventCard = {
-  background: '#f8faff',
+  background: 'var(--app-surface-alt)',
+  border: '1px solid var(--app-border)',
   borderRadius: '14px',
   padding: '24px',
   display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
   gap: '24px',
   alignItems: 'center',
-  boxShadow: '0 6px 20px rgba(0,0,0,0.06)'
+  boxShadow: 'var(--app-shadow)'
 };
 
 const fieldTitle = {
   fontSize: '24px',
   fontWeight: '600',
-  color: '#0b3ea8',
+  color: 'var(--page-accent)',
   marginBottom: '12px'
 };
 
 const fieldOverview = {
   fontSize: '16px',
   lineHeight: '1.6',
-  color: '#000',
+  color: 'var(--app-text-muted)',
   whiteSpace: 'pre-wrap'
 };
 
 /* EVENTS */
 const eventsSection = {
-  background: '#fff',
+  background: 'var(--app-surface)',
+  border: '1px solid var(--app-border)',
   borderRadius: '18px',
   padding: '36px',
-  boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
+  boxShadow: 'var(--app-shadow)',
   marginTop: '40px'
 };
 
 const eventsTitle = {
   fontSize: '30px',
   fontWeight: '700',
-  color: '#0b3ea8',
+  color: 'var(--page-accent)',
   textAlign: 'center',
   marginBottom: '30px'
 };
@@ -396,23 +407,24 @@ const eventsList = {
 };
 
 const eventItem = {
-  background: '#f8faff',
+  background: 'var(--app-surface-alt)',
+  border: '1px solid var(--app-border)',
   borderRadius: '14px',
   padding: '24px',
-  boxShadow: '0 6px 20px rgba(0,0,0,0.06)'
+  boxShadow: 'var(--app-shadow)'
 };
 
 const eventTitle = {
   fontSize: '24px',
   fontWeight: '600',
-  color: '#0b3ea8',
+  color: 'var(--page-accent)',
   marginBottom: '12px'
 };
 
 const eventDetails = {
   fontSize: '16px',
   lineHeight: '1.6',
-  color: '#000'
+  color: 'var(--app-text)'
 };
 
 export default Events;

@@ -243,23 +243,97 @@ export default function RegistrationSection({
 }
 
 const styles = {
-  regGrid: { display: 'grid', gap: 16, gridTemplateColumns: '0.95fr 1.05fr', marginTop: 16 },
-  card: { border: '1px solid #ddd', borderRadius: 14, padding: 14, background: '#fff' },
-  cardTitle: { marginTop: 0, fontSize: '1.4rem' },
+  regGrid: { display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', marginTop: 16 },
+  card: {
+    border: '1px solid var(--app-border)',
+    borderRadius: 14,
+    padding: 14,
+    background: 'var(--app-surface)',
+    boxShadow: 'var(--app-shadow)',
+    color: 'var(--app-text)'
+  },
+  cardTitle: { marginTop: 0, fontSize: '1.4rem', color: 'var(--page-accent)' },
   form: { display: 'grid', gap: 10 },
-  infoRow: { color: '#1f2937', fontSize: 14, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '10px 12px' },
-  input: { border: '1px solid #c8d0dd', borderRadius: 10, padding: '12px 14px', fontSize: 16 },
-  rowInput: { width: '100%', border: '1px solid #c8d0dd', borderRadius: 8, padding: '8px 10px', fontSize: 14 },
-  tableWrap: { border: '1px solid #d7dce6', borderRadius: 12, overflowX: 'auto' },
+  infoRow: {
+    color: 'var(--app-text)',
+    fontSize: 14,
+    background: 'var(--app-surface-alt)',
+    border: '1px solid var(--app-border)',
+    borderRadius: 10,
+    padding: '10px 12px'
+  },
+  input: {
+    border: '1px solid var(--app-border)',
+    borderRadius: 10,
+    padding: '12px 14px',
+    fontSize: 16,
+    background: 'var(--app-surface)',
+    color: 'var(--app-text)'
+  },
+  rowInput: {
+    width: '100%',
+    border: '1px solid var(--app-border)',
+    borderRadius: 8,
+    padding: '8px 10px',
+    fontSize: 14,
+    background: 'var(--app-surface)',
+    color: 'var(--app-text)'
+  },
+  tableWrap: { border: '1px solid var(--app-border)', borderRadius: 12, overflowX: 'auto' },
   table: { width: '100%', minWidth: 780, borderCollapse: 'collapse' },
-  th: { textAlign: 'left', padding: '12px 10px', background: '#f2f5fa', borderBottom: '1px solid #dde3ee', color: '#25324b', fontSize: 14 },
-  td: { padding: '10px', borderBottom: '1px solid #edf1f7', color: '#1f2937', fontSize: 14, verticalAlign: 'top' },
-  miniText: { marginTop: 4, color: '#64748b', fontSize: 12 },
-  submitBtn: { padding: '12px 16px', borderRadius: 10, border: '1px solid #27416f', background: '#2d4b80', color: '#fff', fontSize: 16, fontWeight: 600, cursor: 'pointer' },
-  fee: { color: '#334155', fontSize: 14 },
-  error: { color: '#b91c1c', fontSize: 14 },
-  toolbar: { display: 'grid', gap: 8, gridTemplateColumns: '1fr 180px', margin: '12px 0' },
-  search: { border: '1px solid #c8d0dd', borderRadius: 10, padding: '10px 12px', fontSize: 15 },
-  filter: { border: '1px solid #c8d0dd', borderRadius: 10, padding: '10px 12px', fontSize: 15 },
-  badge: { display: 'inline-block', padding: '4px 10px', borderRadius: 999, border: '1px solid #334155', fontSize: 12, fontWeight: 600 },
+  th: {
+    textAlign: 'left',
+    padding: '12px 10px',
+    background: 'var(--app-surface-alt)',
+    borderBottom: '1px solid var(--app-border)',
+    color: 'var(--app-text)',
+    fontSize: 14
+  },
+  td: {
+    padding: '10px',
+    borderBottom: '1px solid var(--app-border)',
+    color: 'var(--app-text)',
+    fontSize: 14,
+    verticalAlign: 'top'
+  },
+  miniText: { marginTop: 4, color: 'var(--app-text-muted)', fontSize: 12 },
+  submitBtn: {
+    padding: '12px 16px',
+    borderRadius: 10,
+    border: '1px solid var(--page-accent)',
+    background: 'var(--page-accent)',
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 600,
+    cursor: 'pointer'
+  },
+  fee: { color: 'var(--app-text-muted)', fontSize: 14 },
+  error: { color: '#f97066', fontSize: 14 },
+  toolbar: { display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', margin: '12px 0' },
+  search: {
+    border: '1px solid var(--app-border)',
+    borderRadius: 10,
+    padding: '10px 12px',
+    fontSize: 15,
+    background: 'var(--app-surface)',
+    color: 'var(--app-text)'
+  },
+  filter: {
+    border: '1px solid var(--app-border)',
+    borderRadius: 10,
+    padding: '10px 12px',
+    fontSize: 15,
+    background: 'var(--app-surface)',
+    color: 'var(--app-text)'
+  },
+  badge: {
+    display: 'inline-block',
+    padding: '4px 10px',
+    borderRadius: 999,
+    border: '1px solid var(--page-accent)',
+    background: 'var(--page-accent-soft)',
+    color: 'var(--page-accent)',
+    fontSize: 12,
+    fontWeight: 600
+  },
 };

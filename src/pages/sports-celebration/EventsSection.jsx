@@ -55,13 +55,38 @@ function ScheduleTable({ rows, loading }) {
 
 const styles = {
   wrap: { marginTop: 16, display: 'grid', gap: 16 },
-  card: { border: '1px solid #ddd', borderRadius: 14, padding: 14, background: '#fff' },
-  title: { marginTop: 0, marginBottom: 10 },
-  subTitle: { marginTop: 0, marginBottom: 8, color: '#1f2937' },
+  card: {
+    border: '1px solid var(--app-border)',
+    borderRadius: 14,
+    padding: 14,
+    background: 'var(--app-surface)',
+    boxShadow: 'var(--app-shadow)',
+    color: 'var(--app-text)'
+  },
+  title: { marginTop: 0, marginBottom: 10, color: 'var(--page-accent)' },
+  subTitle: { marginTop: 0, marginBottom: 8, color: 'var(--app-text)' },
   empty: { opacity: 0.75 },
-  note: { border: '1px solid #e5e7eb', background: '#f8fafc', borderRadius: 8, padding: '8px 10px', marginBottom: 8 },
+  note: {
+    border: '1px solid var(--app-border)',
+    background: 'var(--app-surface-alt)',
+    borderRadius: 8,
+    padding: '8px 10px',
+    marginBottom: 8
+  },
   tableWrap: { overflowX: 'auto' },
   table: { width: '100%', borderCollapse: 'collapse', minWidth: 700 },
-  th: { textAlign: 'left', padding: 10, borderBottom: '1px solid #ddd', fontSize: 13 },
-  td: { padding: 10, borderBottom: '1px solid #eee', fontSize: 13 },
+  th: {
+    textAlign: 'left',
+    padding: 10,
+    borderBottom: '1px solid var(--app-border)',
+    fontSize: 13,
+    color: 'var(--app-text)',
+    background: 'var(--app-surface-alt)'
+  },
+  td: {
+    padding: 10,
+    borderBottom: '1px solid var(--app-border)',
+    fontSize: 13,
+    color: 'var(--app-text-muted)'
+  },
 };

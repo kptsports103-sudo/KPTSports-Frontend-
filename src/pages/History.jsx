@@ -62,21 +62,22 @@ const History = () => {
 const page = {
   padding: '2rem',
   paddingBottom: '6rem',
-  background: '#fffbe6',
+  background: 'var(--app-bg)',
+  color: 'var(--app-text)',
   minHeight: '100vh'
 };
 
 const title = {
   fontSize: '32px',
   fontWeight: '700',
-  color: '#0b3ea8',
+  color: 'var(--page-accent)',
   textAlign: 'center',
   marginBottom: '8px'
 };
 
 const subtitle = {
   fontSize: '18px',
-  color: '#666',
+  color: 'var(--app-text-muted)',
   textAlign: 'center',
   marginBottom: '32px'
 };
@@ -85,28 +86,32 @@ const table = {
   width: '100%',
   maxWidth: '1100px',
   margin: '0 auto',
-  borderCollapse: 'collapse',
-  background: '#fff',
+  borderCollapse: 'separate',
+  borderSpacing: 0,
+  background: 'var(--app-surface)',
+  border: '1px solid var(--app-border)',
   borderRadius: '12px',
   overflow: 'hidden',
-  boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+  boxShadow: 'var(--app-shadow)'
 };
 
 const thead = {
-  background: 'linear-gradient(90deg,#c7ddff,#dffcff)'
+  background: 'linear-gradient(90deg, var(--page-accent-soft), var(--app-surface-muted))'
 };
 
 const th = {
   padding: '16px',
   textAlign: 'left',
   fontWeight: '700',
-  color: '#000'
+  color: 'var(--app-text)',
+  borderBottom: '1px solid var(--app-border)'
 };
 
 const td = {
   padding: '14px',
   fontSize: '18px',
-  color: '#000'
+  color: 'var(--app-text)',
+  borderBottom: '1px solid var(--app-border)'
 };
 
 const tdCenter = {
@@ -115,7 +120,7 @@ const tdCenter = {
   fontWeight: '600'
 };
 
-const rowEven = { background: '#f7fcff' };
-const rowOdd = { background: '#fff4f8' };
+const rowEven = { background: 'var(--app-surface)' };
+const rowOdd = { background: 'var(--app-surface-alt)' };
 
 export default History;

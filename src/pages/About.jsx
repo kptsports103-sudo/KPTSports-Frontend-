@@ -1,11 +1,44 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import OptimizedImage from '../components/OptimizedImage';
 import api from '../services/api';
+import './About.css';
+
+const EMPTY_BOXES = ['', '', ''];
+
+const normalizeStorySegments = (text) => {
+  const cleaned = String(text || '').trim();
+  if (!cleaned) return [];
+
+  const paragraphs = cleaned
+    .split(/\n{2,}/)
+    .map((segment) => segment.replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+
+  if (paragraphs.length > 1) {
+    return paragraphs;
+  }
+
+  const sentences = cleaned
+    .split(/(?<=[.!?])\s+/)
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+
+  if (sentences.length <= 2) {
+    return [cleaned];
+  }
+
+  const grouped = [];
+  for (let index = 0; index < sentences.length; index += 2) {
+    grouped.push(sentences.slice(index, index + 2).join(' ').trim());
+  }
+
+  return grouped.filter(Boolean);
+};
 
 const About = () => {
   const [content, setContent] = useState({
     bannerImages: [],
-    boxes: ['', '', ''],
+    boxes: EMPTY_BOXES,
     bigHeader: '',
     bigText: ''
   });
@@ -20,17 +53,28 @@ const About = () => {
     if (content.bannerImages.length > 1) {
       const interval = setInterval(() => {
         setCurrentSlide((prev) => (prev + 1) % content.bannerImages.length);
-      }, 5000); // Change slide every 5 seconds
+      }, 5000);
+
       return () => clearInterval(interval);
     }
   }, [content.bannerImages.length]);
+
+  const storySegments = useMemo(
+    () =>
+      normalizeStorySegments(content.bigText).map((segment, index) => ({
+        id: index,
+        label: `Part ${String(index + 1).padStart(2, '0')}`,
+        body: segment
+      })),
+    [content.bigText]
+  );
 
   const loadContent = async () => {
     try {
       const { data } = await api.get('/home');
       setContent({
         bannerImages: Array.isArray(data.bannerImages) ? data.bannerImages : [],
-        boxes: Array.isArray(data.boxes) && data.boxes.length ? data.boxes : ['', '', ''],
+        boxes: Array.isArray(data.boxes) && data.boxes.length ? data.boxes : EMPTY_BOXES,
         bigHeader: data.bigHeader || '',
         bigText: data.bigText || ''
       });
@@ -43,125 +87,91 @@ const About = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        Loading...
+      <div className="about-page about-page--loading">
+        <div className="about-page__loader">Loading...</div>
       </div>
     );
   }
 
+  const storyTitle = content.bigHeader || 'Our Story';
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
-      <div style={{ textAlign: 'center', padding: '1.25rem 1rem 0', fontSize: '1.8rem', fontWeight: 700, color: '#1f2937' }}>
-        KPT Sports About
-      </div>
-      {/* Banner Images */}
+    <div className="about-page">
+      <section className="about-page__hero">
+        <p className="about-page__eyebrow">About KPT Sports</p>
+        <h1 className="about-page__title">KPT Sports About</h1>
+        <p className="about-page__intro">
+          Competition, discipline, and shared progress across Karnataka polytechnics.
+        </p>
+      </section>
+
       {content.bannerImages.length > 0 && (
-        <div style={{ position: 'relative', height: '70vh', overflow: 'hidden' }}>
-          <div style={{
-            display: 'flex',
-            height: '100%',
-            transform: `translateX(-${currentSlide * 100}%)`,
-            transition: 'transform 1s ease-in-out'
-          }}>
-            {content.bannerImages.map((banner, index) => (
-              <OptimizedImage
-                key={index}
-                src={banner.image}
-                alt={`Banner ${index + 1}`}
-                width={1600}
-                height={900}
-                sizes="100vw"
-                loading={index === 0 ? 'eager' : 'lazy'}
-                fetchPriority={index === 0 ? 'high' : undefined}
-                style={{
-                  minWidth: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  flexShrink: 0
-                }}
-              />
-            ))}
+        <section className="about-page__banner-wrap">
+          <div className="about-page__banner">
+            <div
+              className="about-page__slides"
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            >
+              {content.bannerImages.map((banner, index) => (
+                <OptimizedImage
+                  key={index}
+                  src={banner.image}
+                  alt={`Banner ${index + 1}`}
+                  width={1600}
+                  height={900}
+                  sizes="100vw"
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  fetchPriority={index === 0 ? 'high' : undefined}
+                  className="about-page__banner-image"
+                />
+              ))}
+            </div>
+
+            <div className="about-page__banner-year">
+              {content.bannerImages[currentSlide]?.year || 'KPT Sports'}
+            </div>
           </div>
-          {/* Year Overlay */}
-          <div style={{
-            position: 'absolute',
-            bottom: '20px',
-            right: '20px',
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            color: '#fff',
-            padding: '10px 20px',
-            borderRadius: '5px',
-            fontSize: '1.5rem',
-            fontWeight: 'bold'
-          }}>
-            {content.bannerImages.length > 0 && content.bannerImages[currentSlide].year}
-          </div>
-        </div>
+        </section>
       )}
 
-
-      {/* Boxes Section */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-around',
-        padding: '3rem 2rem 1rem',
-        backgroundColor: '#fdf6e3'
-      }}>
+      <section className="about-page__highlights">
         {content.boxes.map((box, index) => (
-          <div
-            key={index}
-            style={{
-              flex: 1,
-              margin: '0 1rem',
-              padding: '2rem',
-              backgroundColor: '#fdf6e3',
-              borderRadius: '8px',
-              textAlign: 'center',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-            }}
-          >
-            <p style={{ fontSize: '1.1rem', fontWeight: '500', color: '#333' }}>
-              {box || 'Content coming soon...'}
-            </p>
-          </div>
+          <article className="about-page__highlight-card" key={index}>
+            <span className="about-page__highlight-index">
+              Focus {String(index + 1).padStart(2, '0')}
+            </span>
+            <p>{box || 'Content coming soon...'}</p>
+          </article>
         ))}
-      </div>
+      </section>
 
-      {/* Big Content Section */}
-      <div style={{
-        padding: '2rem 2rem 4rem',
-        backgroundColor: '#fdf6e3',
-        textAlign: 'center'
-      }}>
-        {content.bigHeader && (
-          <h2 style={{
-            fontSize: '2.5rem',
-            fontWeight: '700',
-            marginBottom: '2rem',
-            color: '#333'
-          }}>
-            {content.bigHeader}
-          </h2>
-        )}
-        {content.bigText && (
-          <div style={{
-            fontSize: '1.2rem',
-            lineHeight: '1.8',
-            color: '#555',
-            maxWidth: '900px',
-            margin: '0 auto'
-          }}>
-            {content.bigText.split('\n\n').map((paragraph, index) => (
-              <p key={index} style={{
-                marginBottom: '1.5rem',
-                textAlign: 'justify'
-              }}>
-                {paragraph.trim()}
-              </p>
+      <section className="about-page__story">
+        <div className="about-page__story-heading">
+          <div>
+            <p className="about-page__eyebrow">Our Story</p>
+            <h2>{storyTitle}</h2>
+          </div>
+          <p className="about-page__story-summary">
+            The journey is split into clear parts so visitors can scan the story instead of reading one long wall of text.
+          </p>
+        </div>
+
+        {storySegments.length > 0 ? (
+          <div className="about-page__story-grid">
+            {storySegments.map((segment) => (
+              <article className="about-page__story-card" key={segment.id}>
+                <div className="about-page__story-card-top">
+                  <span className="about-page__story-label">{segment.label}</span>
+                  <span className="about-page__story-line" />
+                </div>
+                <p className="about-page__story-body">{segment.body}</p>
+              </article>
             ))}
           </div>
+        ) : (
+          <div className="about-page__story-empty">Story content coming soon.</div>
         )}
-      </div>
+      </section>
     </div>
   );
 };
