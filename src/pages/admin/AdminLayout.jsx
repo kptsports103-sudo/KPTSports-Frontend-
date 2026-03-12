@@ -4,20 +4,6 @@ import { useAuth } from '../../context/AuthContext';
 import activityLogService from '../../services/activityLog.service';
 import { clearAuthStorage } from '../../context/tokenStorage';
 import { CMS_PAGE_UPDATED } from '../../utils/eventBus';
-import {
-  BarChart3,
-  ClipboardList,
-  FilePenLine,
-  History,
-  House,
-  ImageIcon,
-  Images,
-  Info,
-  LayoutDashboard,
-  LogOut,
-  Trophy,
-  Users,
-} from 'lucide-react';
 import '../../admin.css';
 
 const CMS_SEEN_STORAGE_KEY = 'cms_page_last_seen_v1';
@@ -91,25 +77,25 @@ const AdminLayout = ({ children }) => {
   const isCreator = user?.role === 'creator';
 
   const adminMenuItems = [
-    { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/admin/users-manage', label: 'IAM Users', icon: Users },
-    { path: '/admin/media-stats', label: 'Media Statistics & Calculator', icon: BarChart3 },
-    { path: '/admin/media', label: 'Media Management', icon: ImageIcon },
-    { path: '/admin/update-pages', label: 'Content Management Dashboard', icon: FilePenLine },
-    { path: '/admin/manage-home', label: 'Manage Home', icon: House },
-    { path: '/admin/manage-about', label: 'Manage About', icon: Info },
-    { path: '/admin/manage-history', label: 'Manage History', icon: History },
-    { path: '/admin/manage-gallery', label: 'Manage Gallery', icon: Images },
-    { path: '/admin/manage-results', label: 'Manage Results', icon: Trophy },
-    { path: '/admin/sports-meet-registrations', label: 'Sports Meet Registration', icon: ClipboardList },
+    { path: '/admin/dashboard', label: 'Dashboard', marker: 'D' },
+    { path: '/admin/users-manage', label: 'IAM Users', marker: 'U' },
+    { path: '/admin/media-stats', label: 'Media Statistics & Calculator', marker: 'S' },
+    { path: '/admin/media', label: 'Media Management', marker: 'M' },
+    { path: '/admin/update-pages', label: 'Content Management Dashboard', marker: 'C' },
+    { path: '/admin/manage-home', label: 'Manage Home', marker: 'H' },
+    { path: '/admin/manage-about', label: 'Manage About', marker: 'I' },
+    { path: '/admin/manage-history', label: 'Manage History', marker: 'R' },
+    { path: '/admin/manage-gallery', label: 'Manage Gallery', marker: 'G' },
+    { path: '/admin/manage-results', label: 'Manage Results', marker: 'T' },
+    { path: '/admin/sports-meet-registrations', label: 'Sports Meet Registration', marker: 'R' },
   ];
 
   const creatorMenuItems = [
-    { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/admin/users-manage', label: 'IAM Users', icon: Users },
-    { path: '/admin/media', label: 'Media Management', icon: ImageIcon },
-    { path: '/admin/manage-results', label: 'Manage Results', icon: Trophy },
-    { path: '/admin/sports-meet-registrations', label: 'Sports Meet Registration', icon: ClipboardList },
+    { path: '/admin/dashboard', label: 'Dashboard', marker: 'D' },
+    { path: '/admin/users-manage', label: 'IAM Users', marker: 'U' },
+    { path: '/admin/media', label: 'Media Management', marker: 'M' },
+    { path: '/admin/manage-results', label: 'Manage Results', marker: 'T' },
+    { path: '/admin/sports-meet-registrations', label: 'Sports Meet Registration', marker: 'R' },
   ];
 
 
@@ -121,44 +107,60 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className="dashboard-shell dashboard-shell--admin-compact" style={{ '--sidebar-width': '92px' }}>
-      {/* Sidebar */}
-      <div className="sidebar sidebar--admin-compact">
-        <div className="menu admin-sidebar__menu">
+    <div className="dashboard-shell" style={{ '--sidebar-width': '324px' }}>
+      <div className="sidebar admin-sidebar-panel">
+        <div className="profile admin-sidebar-profile">
+          <img
+            src={user?.profileImage || '/avatar.png'}
+            alt="Profile"
+            className="admin-sidebar-profile__image"
+          />
+
+          <div className="admin-sidebar-profile__meta">
+            <div className="admin-sidebar-profile__row">
+              <span className="admin-sidebar-profile__label">Name:</span>
+              <span className="admin-sidebar-profile__value">{user?.name || 'Admin User'}</span>
+            </div>
+            <div className="admin-sidebar-profile__row">
+              <span className="admin-sidebar-profile__label">Email:</span>
+              <span className="admin-sidebar-profile__value admin-sidebar-profile__value--email">
+                {user?.email || '-'}
+              </span>
+            </div>
+            <div className="admin-sidebar-profile__row">
+              <span className="admin-sidebar-profile__label">Role:</span>
+              <span className="admin-sidebar-profile__badge">{user?.role || 'Admin'}</span>
+            </div>
+          </div>
+        </div>
+
+        <button
+          className="logout-btn admin-sidebar-panel__logout"
+          onClick={handleLogout}
+          type="button"
+        >
+          Logout
+        </button>
+
+        <div className="menu admin-sidebar-panel__menu">
           {menuItems.map(item => (
             <Link
               key={item.path}
               to={item.path}
-              className={`menu-item menu-item--icon ${location.pathname === item.path ? 'active' : ''}`}
-              data-label={item.label}
-              title={item.label}
-              aria-label={item.label}
+              className={`menu-item admin-sidebar-panel__item ${location.pathname === item.path ? 'active' : ''}`}
             >
-              <item.icon size={20} strokeWidth={2.1} />
+              <span className="admin-sidebar-panel__marker">{item.marker}</span>
+              <span className="admin-sidebar-panel__text">{item.label}</span>
               {item.path === '/admin/update-pages' && cmsUnreadCount > 0 ? (
-                <span
-                  className="admin-sidebar__badge"
-                  title={`${cmsUnreadCount} unread content change${cmsUnreadCount > 1 ? 's' : ''}`}
-                >
+                <span className="admin-sidebar-panel__badge" title={`${cmsUnreadCount} unread content change${cmsUnreadCount > 1 ? 's' : ''}`}>
                   {cmsUnreadCount > 99 ? '99+' : cmsUnreadCount}
                 </span>
               ) : null}
             </Link>
           ))}
         </div>
-        <button
-          className="logout-btn admin-sidebar__logout"
-          onClick={handleLogout}
-          type="button"
-          data-label="Logout"
-          title="Logout"
-          aria-label="Logout"
-        >
-          <LogOut size={20} strokeWidth={2.1} />
-        </button>
       </div>
 
-      {/* Main Content */}
       <div className="main-content">{children}</div>
     </div>
   );
