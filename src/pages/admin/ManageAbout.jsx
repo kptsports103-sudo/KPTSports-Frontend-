@@ -125,7 +125,7 @@ const ManageAbout = () => {
 
   return (
     <AdminLayout>
-      <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
+      <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000', width: '100%', minWidth: 0 }}>
         <h2 style={{ color: '#000', fontSize: '36px', fontWeight: 700, marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <CircleHelp size={32} color="#0b3ea8" />
           Update About

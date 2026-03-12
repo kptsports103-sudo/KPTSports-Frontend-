@@ -31,7 +31,7 @@ export default function Login() {
         handleLoginSuccess(result.user?.role);
       }
     } catch (e) {
-      setErr(e?.response?.data?.message || 'Invalid credentials');
+      setErr(e?.response?.data?.message || e?.message || 'Invalid credentials');
     } finally {
       setLoading(false);
     }
@@ -46,7 +46,7 @@ export default function Login() {
       const result = await verifyOTP(loginData.email, otp);
       handleLoginSuccess(result.role || loginData?.role);
     } catch (e) {
-      setErr(e?.response?.data?.message || 'Invalid OTP');
+      setErr(e?.response?.data?.message || e?.message || 'Invalid OTP');
     } finally {
       setLoading(false);
     }
@@ -126,7 +126,7 @@ export default function Login() {
                 inputMode="numeric"
                 placeholder="Enter OTP"
                 value={otp}
-                onChange={(e) => setOtp(e.target.value)}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 maxLength={6}
                 required
               />

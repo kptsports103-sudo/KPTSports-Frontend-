@@ -308,7 +308,9 @@ const pageStyle = {
   padding: '20px',
   background: '#f4f7ff',
   minHeight: '100vh',
-  color: '#000'
+  color: '#000',
+  width: '100%',
+  minWidth: 0
 };
 
 const pageTitle = {
@@ -330,7 +332,7 @@ const boxTitle = { marginBottom: '15px', color: '#000' };
 const tableContainerStyle = {
   background: '#fff',
   borderRadius: 16,
-  overflow: 'hidden',
+  overflowX: 'auto',
   boxShadow: '0 8px 24px rgba(71, 85, 105, 0.12)',
   marginBottom: 24,
   border: '1px solid #cfd6df',

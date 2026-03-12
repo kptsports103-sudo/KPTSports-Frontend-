@@ -35,7 +35,10 @@ const SuperAdminLayout = ({ children }) => {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div
+      className="dashboard-shell"
+      style={{ '--sidebar-width': isSidebarOpen ? '350px' : '60px' }}
+    >
       {/* Super Admin Sidebar */}
       <div className="sidebar" style={{ 
         width: isSidebarOpen ? '350px' : '60px',

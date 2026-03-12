@@ -493,6 +493,8 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
 const styles = {
   page: {
     padding: '8px 0 16px',
+    width: '100%',
+    minWidth: 0,
   },
 
   headerBlock: {
@@ -522,6 +524,8 @@ const styles = {
     display: 'grid',
     gap: 12,
     boxShadow: '0 4px 14px rgba(15, 23, 42, 0.04)',
+    width: '100%',
+    minWidth: 0,
   },
 
   formTop: {
@@ -706,6 +710,8 @@ const styles = {
     background: '#fff',
     overflow: 'hidden',
     boxShadow: '0 4px 14px rgba(15, 23, 42, 0.03)',
+    width: '100%',
+    minWidth: 0,
   },
 
   tableHeader: {

@@ -49,7 +49,7 @@ const OTPVerify = () => {
 
     } catch (error) {
 
-     alert('Invalid OTP');
+     alert(error?.response?.data?.message || error?.message || 'Invalid OTP');
 
    }
 
@@ -91,7 +91,7 @@ const OTPVerify = () => {
             <span style={{ color: '#2563EB', fontWeight: '600' }}>{email}</span>
           </p>
           <form onSubmit={handleSubmit}>
-            <OTPInput value={otp} onChange={(e) => setOtp(e.target.value)} />
+            <OTPInput value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} />
             <button type="submit" style={{
               width: '100%',
               padding: '12px',

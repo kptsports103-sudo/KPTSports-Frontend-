@@ -126,7 +126,7 @@ const SportsMeetRegistrations = () => {
 
   return (
     <AdminLayout>
-      <div style={{ padding: 20 }}>
+      <div style={{ padding: 20, width: '100%', minWidth: 0, minHeight: '100vh', background: '#f4f6f8' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <h1 style={{ margin: 0 }}>Sports Meet Registration</h1>
           <button onClick={exportPdf} style={styles.btn}>
@@ -202,7 +202,7 @@ const SportsMeetRegistrations = () => {
 };
 
 const styles = {
-  tableWrap: { border: '1px solid #d1d5db', borderRadius: 10, overflow: 'auto', background: '#fff' },
+  tableWrap: { width: '100%', border: '1px solid #d1d5db', borderRadius: 10, overflow: 'auto', background: '#fff' },
   table: { width: '100%', borderCollapse: 'collapse', minWidth: 1200 },
   th: { textAlign: 'left', padding: 10, background: '#f3f4f6', borderBottom: '1px solid #d1d5db' },
   td: { padding: 10, borderBottom: '1px solid #e5e7eb' },

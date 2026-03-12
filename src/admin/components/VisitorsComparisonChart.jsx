@@ -56,8 +56,8 @@ export default function VisitorsComparisonChart() {
       {data.length === 0 ? (
         <div style={styles.noData}>No visitor data available</div>
       ) : (
-        <div style={{ minHeight: 320 }}>
-          <ResponsiveContainer width="100%" height={320}>
+        <div style={{ width: "100%", minWidth: 0, minHeight: 320 }}>
+          <ResponsiveContainer width="100%" height={320} minWidth={0} debounce={100}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
             <XAxis 

@@ -241,8 +241,6 @@ const title = {
 
 const table = {
   width: '100%',
-  maxWidth: '1100px',
-  margin: '0 auto',
   borderCollapse: 'collapse',
   background: '#ffffff',
   borderRadius: '16px',
@@ -291,10 +289,12 @@ const input = {
 };
 
 const actions = {
-  maxWidth: '1100px',
-  margin: '20px auto',
+  width: '100%',
+  margin: '20px 0',
   display: 'flex',
-  justifyContent: 'space-between'
+  justifyContent: 'space-between',
+  gap: '12px',
+  flexWrap: 'wrap'
 };
 
 const btnEdit = {

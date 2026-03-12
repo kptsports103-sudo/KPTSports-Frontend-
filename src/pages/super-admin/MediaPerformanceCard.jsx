@@ -14,6 +14,7 @@ import {
 
 const COLORS = ["#ef4444", "#22c55e"];
 const POLL_INTERVAL_MS = 10000;
+const CHART_HEIGHT = 260;
 const toMb = (value) => (Number(value || 0) / 1024 / 1024).toFixed(2);
 
 const MediaPerformanceCard = () => {
@@ -79,10 +80,10 @@ const MediaPerformanceCard = () => {
         <p className="mt-4 text-sm text-slate-600">Loading...</p>
       ) : (
         <div className="mt-5 grid grid-cols-1 gap-6 xl:grid-cols-2">
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <div className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-4">
             <h3 className="text-base font-semibold text-slate-900">Storage Usage (1 GB Limit)</h3>
-            <div className="h-[260px] w-full min-w-[300px] mt-2" style={{ minHeight: '260px' }}>
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="mt-2 w-full min-w-0" style={{ height: CHART_HEIGHT, minHeight: CHART_HEIGHT, minWidth: 0 }}>
+              <ResponsiveContainer width="100%" height={CHART_HEIGHT} minWidth={0} debounce={100}>
                 <PieChart>
                   <Pie data={storageData} dataKey="value" outerRadius={90} label>
                     {storageData.map((entry, index) => (
@@ -109,10 +110,10 @@ const MediaPerformanceCard = () => {
             ) : null}
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <div className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-4">
             <h3 className="text-base font-semibold text-slate-900">Real-time Bandwidth Trend</h3>
-            <div className="h-[260px] w-full min-w-[300px] mt-2" style={{ minHeight: '260px' }}>
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="mt-2 w-full min-w-0" style={{ height: CHART_HEIGHT, minHeight: CHART_HEIGHT, minWidth: 0 }}>
+              <ResponsiveContainer width="100%" height={CHART_HEIGHT} minWidth={0} debounce={100}>
                 <LineChart data={history}>
                   <XAxis dataKey="time" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} />

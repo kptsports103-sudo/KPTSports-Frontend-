@@ -168,7 +168,7 @@ const UsersManage = () => {
 
   return (
     <Layout>
-      <div className="p-8 min-h-screen" style={{ background: "#f4f6f8" }}>
+      <div className="w-full min-w-0 p-8 min-h-screen" style={{ background: "#f4f6f8" }}>
         <div className="flex justify-center mb-8">
           <h1 className="text-3xl font-bold flex items-center gap-3" style={{ color: "#000" }}>
             <img src="/group.png" className="w-8 h-8" />

@@ -1,6 +1,6 @@
 const OTPInput = ({ value, onChange }) => {
   const handleInput = (e, index) => {
-    const newValue = e.target.value;
+    const newValue = e.target.value.replace(/\D/g, '');
     if (newValue.length > 1) return; // Only allow single digit
 
     const otpArray = value.split('');

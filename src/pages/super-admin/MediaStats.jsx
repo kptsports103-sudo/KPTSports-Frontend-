@@ -85,7 +85,7 @@ const MediaStats = () => {
 
   return (
     <Layout>
-      <div style={{ padding: '20px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+      <div style={{ padding: '20px', backgroundColor: '#f8f9fa', minHeight: '100vh', width: '100%', minWidth: 0 }}>
         <h2 style={{ color: '#333', marginBottom: '30px', fontSize: '28px', fontWeight: '700' }}>
           Media Statistics & Calculator
         </h2>

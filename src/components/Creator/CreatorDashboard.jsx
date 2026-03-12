@@ -229,6 +229,8 @@ const styles = {
     backgroundColor: '#f5f5f5',
     padding: '20px',
     boxSizing: 'border-box',
+    width: '100%',
+    minWidth: 0,
   },
   header: {
     textAlign: 'center',

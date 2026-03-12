@@ -110,7 +110,7 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div className="dashboard-shell" style={{ '--sidebar-width': '350px' }}>
       {/* Sidebar */}
       <div className="sidebar" style={{ width: '350px' }}>
         

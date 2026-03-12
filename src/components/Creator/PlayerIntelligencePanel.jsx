@@ -248,8 +248,8 @@ const PerformanceChart = ({ growthPercentage, latestParticipation, chartData }) 
     <h3 style={{ ...styles.h3, marginTop: 30 }}>Performance Chart</h3>
     <div style={styles.growth}>+{growthPercentage}% {"\u2022"} {latestParticipation}</div>
     <div style={styles.card}>
-      <div style={{ minHeight: 260 }}>
-        <ResponsiveContainer width="100%" height={260}>
+      <div style={{ width: "100%", minWidth: 0, minHeight: 260 }}>
+        <ResponsiveContainer width="100%" height={260} minWidth={0} debounce={100}>
         <AreaChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="year" />

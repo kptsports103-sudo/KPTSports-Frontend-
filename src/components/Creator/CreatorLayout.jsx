@@ -48,7 +48,10 @@ const CreatorLayout = ({ children }) => {
   };
 
   return (
-    <div className="dashboard-layout">
+    <div
+      className="dashboard-shell dashboard-layout"
+      style={{ '--sidebar-width': isSidebarOpen ? '350px' : '60px' }}
+    >
       {/* Creator Sidebar */}
       <div className="sidebar" style={{ 
         width: isSidebarOpen ? '350px' : '60px',

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import AdminLayout from "../admin/AdminLayout";
+import SuperAdminLayout from "./SuperAdminLayout";
 
 const inputStyle = {
   width: "100%",
@@ -17,6 +19,33 @@ const previewBox = {
   borderRadius: 8,
   marginBottom: 10,
   fontSize: 14
+};
+
+const flowShellStyle = {
+  width: "100%",
+  minWidth: 0,
+  minHeight: "100vh",
+  background: "#f0f4ff",
+  padding: "24px",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center"
+};
+
+const flowCardStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+  width: "100%",
+  maxWidth: "1280px",
+  background: "white",
+  borderRadius: "20px",
+  overflow: "hidden",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.1)"
+};
+
+const flowPanelStyle = {
+  padding: "40px",
+  minWidth: 0
 };
 
 const IAMUsers = () => {
@@ -53,6 +82,13 @@ const IAMUsers = () => {
   const [profileImagePreview, setProfileImagePreview] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const Layout = currentUserRole === "superadmin" ? SuperAdminLayout : AdminLayout;
+
+  const renderInLayout = (content) => (
+    <Layout>
+      <section style={flowShellStyle}>{content}</section>
+    </Layout>
+  );
 
   useEffect(() => {
     if (hasValidToken) {
@@ -238,31 +274,20 @@ const IAMUsers = () => {
   };
 
   if (loading && step === "email") {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Resolving invitation...</p>
-        </div>
+    return renderInLayout(
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Resolving invitation...</p>
       </div>
     );
   }
 
   if (step === "email") {
-    return (
-      <div style={{ background: "#f0f4ff", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", padding: "40px" }}>
-        <div style={{
-          display: "flex",
-          width: "100%",
-          maxWidth: "1100px",
-          background: "white",
-          borderRadius: "20px",
-          overflow: "hidden",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.1)"
-        }}>
+    return renderInLayout(
+        <div style={flowCardStyle}>
 
           {/* LEFT FORM */}
-          <div style={{ width: "45%", padding: "40px" }}>
+          <div style={flowPanelStyle}>
             <img src="/KPT 1.png" alt="KPT Logo" style={{ width: "120px", marginBottom: "20px" }} />
             <h2 style={{ fontSize: "28px", fontWeight: "700", marginBottom: "8px", color: "#000" }}>Verify Email</h2>
             <p style={{ color: "#6b7280", marginBottom: "24px" }}>
@@ -337,8 +362,7 @@ const IAMUsers = () => {
 
           {/* RIGHT STEPS PANEL */}
           <div style={{
-            width: "55%",
-            padding: "40px",
+            ...flowPanelStyle,
             color: "white",
             background: "linear-gradient(135deg, #0f1c2f, #1f4b7a)",
             position: "relative"
@@ -366,25 +390,15 @@ const IAMUsers = () => {
             </div>
           </div>
         </div>
-      </div>
     );
   }
 
   if (step === "otp") {
-    return (
-      <div style={{ background: "#f0f4ff", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", padding: "40px" }}>
-        <div style={{
-          display: "flex",
-          width: "100%",
-          maxWidth: "1100px",
-          background: "white",
-          borderRadius: "20px",
-          overflow: "hidden",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.1)"
-        }}>
+    return renderInLayout(
+        <div style={flowCardStyle}>
 
           {/* LEFT FORM */}
-          <div style={{ width: "45%", padding: "40px" }}>
+          <div style={flowPanelStyle}>
             <img src="/KPT 1.png" alt="KPT Logo" style={{ width: "120px", marginBottom: "20px" }} />
             <h2 style={{ fontSize: "28px", fontWeight: "700", marginBottom: "8px", color: "#000" }}>Enter Verification Code</h2>
             <p style={{ color: "#6b7280", marginBottom: "24px" }}>
@@ -443,8 +457,7 @@ const IAMUsers = () => {
 
           {/* RIGHT INFO PANEL */}
           <div style={{
-            width: "55%",
-            padding: "40px",
+            ...flowPanelStyle,
             color: "white",
             background: "linear-gradient(135deg, #0f1c2f, #1f4b7a)",
             display: "flex",
@@ -476,18 +489,15 @@ const IAMUsers = () => {
             </div>
           </div>
         </div>
-      </div>
     );
   }
 
   if (step === "profile") {
-    return (
-      <div style={{ background: "#f0f4ff", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-
-        <div style={{ display: "flex", width: "900px", background: "white", borderRadius: 20, overflow: "hidden", boxShadow: "0 12px 30px rgba(0,0,0,.1)" }}>
+    return renderInLayout(
+        <div style={{ ...flowCardStyle, maxWidth: "1180px" }}>
 
           {/* LEFT FORM */}
-          <div style={{ width: "55%", padding: 30 }}>
+          <div style={{ ...flowPanelStyle, padding: 30 }}>
             <div style={{ background: "#8b5cf6", color: "white", padding: 20, borderRadius: 12, textAlign: "center", marginBottom: 20 }}>
               <h2>Complete Profile</h2>
               <p>Set up your account details</p>
@@ -544,12 +554,13 @@ const IAMUsers = () => {
           </div>
 
           {/* RIGHT SIDEBAR PREVIEW */}
-          <div style={{ width: "45%", background: "#f8fafc", padding: 30 }}>
+          <div style={{ ...flowPanelStyle, background: "#f8fafc", padding: 30 }}>
             <h3 style={{ color: "#000" }}>Login Preview</h3>
 
             <div style={{ textAlign: "center", marginBottom: 20 }}>
               <img
                 src={profileImage || "/avatar.png"}
+                alt="Profile preview"
                 style={{ width: 100, height: 100, borderRadius: "50%", objectFit: "cover" }}
               />
             </div>
@@ -563,14 +574,12 @@ const IAMUsers = () => {
             </p>
           </div>
         </div>
-      </div>
     );
   }
 
   if (step === "phone-verify") {
-    return (
-      <div style={{ background: "#f0f4ff", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <div style={{ width: 420, background: "white", borderRadius: 16, boxShadow: "0 12px 30px rgba(0,0,0,.1)", overflow: "hidden" }}>
+    return renderInLayout(
+        <div style={{ width: "100%", maxWidth: 480, background: "white", borderRadius: 16, boxShadow: "0 12px 30px rgba(0,0,0,.1)", overflow: "hidden" }}>
 
           <div style={{ background: "#10b981", color: "white", padding: 24, textAlign: "center" }}>
             <h2>Verify Phone Number</h2>
@@ -619,15 +628,14 @@ const IAMUsers = () => {
             </div>
           </div>
         </div>
-      </div>
     );
   }
 
   if (step === "done") {
-    return (
-      <div style={{ background:"#f0f4ff", minHeight:"100vh", display:"flex", justifyContent:"center", alignItems:"center" }}>
+    return renderInLayout(
         <div style={{
-          width:420,
+          width:"100%",
+          maxWidth:480,
           background:"white",
           borderRadius:18,
           boxShadow:"0 12px 30px rgba(0,0,0,.12)",
@@ -712,7 +720,6 @@ const IAMUsers = () => {
             </div>
           </div>
         </div>
-      </div>
     );
   }
 

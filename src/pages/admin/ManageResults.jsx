@@ -1974,7 +1974,9 @@ const styles = {
     minHeight: '100vh',
     background: '#f6f8fb',
     padding: 20,
-    color: '#1f2937'
+    color: '#1f2937',
+    width: '100%',
+    minWidth: 0
   },
 
   title: {
@@ -2069,7 +2071,7 @@ const styles = {
   tableContainer: {
     background: '#fff',
     borderRadius: 16,
-    overflow: 'hidden',
+    overflowX: 'auto',
     boxShadow: '0 8px 24px rgba(71, 85, 105, 0.12)',
     marginBottom: 32,
     border: '1px solid #cfd6df'

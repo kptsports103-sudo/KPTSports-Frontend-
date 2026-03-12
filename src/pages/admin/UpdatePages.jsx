@@ -143,8 +143,7 @@ const styles = {
   page: {
     padding: '24px',
     color: '#111827',
-    maxWidth: '1400px',
-    margin: '0 auto'
+    width: '100%'
   },
   title: {
     margin: 0,

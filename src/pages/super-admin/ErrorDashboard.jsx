@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import AdminLayout from "../admin/AdminLayout";
+import SuperAdminLayout from "./SuperAdminLayout";
 
 const ErrorDashboard = () => {
   const [errors, setErrors] = useState([]);
@@ -19,51 +19,61 @@ const ErrorDashboard = () => {
   };
 
   return (
-    <AdminLayout>
-      <div className="dashboard-title">Error Dashboard</div>
-      <div className="dashboard-subtitle">Monitor and manage system errors</div>
+    <SuperAdminLayout>
+      <section className="w-full min-w-0 p-6 lg:p-8">
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-900">Error Dashboard</h1>
+          <p className="mt-2 text-slate-600">Monitor and manage system errors.</p>
+        </header>
 
-      <div style={{ backgroundColor: "#fff", padding: "20px", borderRadius: "8px", color: "#000" }}>
-        <h3>Recent Errors (Last 24 Hours)</h3>
-        {errors.length === 0 ? (
-          <p>No errors reported in the last 24 hours.</p>
-        ) : (
-          <div style={{ display: "grid", gap: "15px" }}>
-            {errors.map(err => (
-              <div key={err._id} style={{
-                border: "1px solid #ddd",
-                borderRadius: "8px",
-                padding: "15px",
-                backgroundColor: err.status === 'resolved' ? "#f0f8f0" : "#fff5f5"
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <strong style={{ color: err.type.includes('ERROR') ? "#e74c3c" : "#f39c12" }}>{err.type}</strong>
-                    <p style={{ margin: "5px 0" }}>{err.message}</p>
-                    <small style={{ color: "#666" }}>
-                      Route: {err.route} | User: {err.user} | Time: {new Date(err.createdAt).toLocaleString()}
-                    </small>
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-slate-900">Recent Errors (Last 24 Hours)</h2>
+
+          {errors.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-500">No errors reported in the last 24 hours.</p>
+          ) : (
+            <div className="mt-6 grid gap-4">
+              {errors.map((err) => (
+                <article
+                  key={err._id}
+                  className={`rounded-xl border p-5 ${
+                    err.status === "resolved"
+                      ? "border-emerald-200 bg-emerald-50"
+                      : "border-rose-200 bg-rose-50"
+                  }`}
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0">
+                      <p
+                        className={`text-sm font-semibold uppercase tracking-wide ${
+                          err.type.includes("ERROR") ? "text-rose-600" : "text-amber-600"
+                        }`}
+                      >
+                        {err.type}
+                      </p>
+                      <p className="mt-2 text-base font-medium text-slate-900">{err.message}</p>
+                      <p className="mt-2 text-sm text-slate-600">
+                        Route: {err.route} | User: {err.user} | Time: {new Date(err.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => toggleStatus(err._id)}
+                      className={`rounded-lg px-4 py-2 text-sm font-semibold text-white transition ${
+                        err.status === "resolved"
+                          ? "bg-emerald-600 hover:bg-emerald-700"
+                          : "bg-rose-600 hover:bg-rose-700"
+                      }`}
+                    >
+                      {err.status === "resolved" ? "Resolved" : "Mark Resolved"}
+                    </button>
                   </div>
-                  <button
-                    onClick={() => toggleStatus(err._id)}
-                    style={{
-                      padding: "8px 16px",
-                      backgroundColor: err.status === 'resolved' ? "#27ae60" : "#e74c3c",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer"
-                    }}
-                  >
-                    {err.status === 'resolved' ? 'Resolved' : 'Mark Resolved'}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </AdminLayout>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </SuperAdminLayout>
   );
 };
 

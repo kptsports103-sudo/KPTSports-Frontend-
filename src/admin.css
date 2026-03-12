@@ -200,8 +200,19 @@
 }
 
 /* ================= MAIN CONTENT ================= */
+.dashboard-shell {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  --sidebar-width: 350px;
+}
+
 .main-content {
-  margin-left: 350px;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: calc(100% - var(--sidebar-width, 350px));
+  max-width: calc(100% - var(--sidebar-width, 350px));
+  margin-left: var(--sidebar-width, 350px);
   padding: 32px 40px;
   background: var(--bg);
   min-height: calc(100vh - 200px); /* Account for footer height */
@@ -210,9 +221,15 @@
   padding-bottom: 220px; /* Space for fixed footer */
 }
 
+.main-content > * {
+  min-width: 0;
+}
+
 .dashboard-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  min-width: 0;
 }
 
 .stats-grid {
@@ -307,16 +324,21 @@
 
 /* ================= DASHBOARD LAYOUT ================= */
 .admin-dashboard {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  min-width: 0;
 }
 
 .creator-content-stretch {
-  width: min(1680px, calc(100vw - 430px));
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  min-width: 0;
 }
 
 .enterprise-dashboard {
+  width: 100%;
   padding: 32px;
   background: var(--bg-main);
   border-radius: 20px;
@@ -2382,6 +2404,10 @@ h3.stats-center-title {
 
 
 @media (max-width: 768px) {
+  .dashboard-shell {
+    display: block;
+  }
+
   .sidebar {
     position: relative;
     width: 100%;
@@ -2390,6 +2416,8 @@ h3.stats-center-title {
 
   .main-content {
     margin-left: 0;
+    width: 100%;
+    max-width: none;
     padding: 16px;
   }
 
@@ -2410,6 +2438,8 @@ h3.stats-center-title {
 /* ================= PERFORMANCE ANALYTICS ================= */
 .performance-page {
   padding: 0;
+  width: 100%;
+  min-width: 0;
 }
 
 .performance-page .page-title {

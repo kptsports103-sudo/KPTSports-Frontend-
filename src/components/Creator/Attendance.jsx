@@ -238,7 +238,8 @@ const Attendance = ({ isStudent = false }) => {
         )}
 
         {/* Table */}
-        <table style={styles.table}>
+        <div style={styles.tableWrap}>
+          <table style={styles.table}>
           <thead>
             <tr style={styles.headerRow}>
               <th style={{ textAlign: 'center' }}>SL.NO</th>
@@ -366,7 +367,8 @@ const Attendance = ({ isStudent = false }) => {
               </tr>
             )})}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -383,6 +385,8 @@ const styles = {
     padding: "15px",
     boxSizing: "border-box",
     color: "#111827", // Dark professional text
+    width: "100%",
+    minWidth: 0,
   },
 
   pageTitle: {
@@ -410,6 +414,8 @@ const styles = {
     padding: "16px",
     boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
     position: "relative",
+    width: "100%",
+    minWidth: 0,
   },
 
   cardHeader: {
@@ -489,6 +495,12 @@ const styles = {
     borderRadius: "0px", // fully pointy
     overflow: "hidden",
     boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+  },
+
+  tableWrap: {
+    width: "100%",
+    minWidth: 0,
+    overflowX: "auto",
   },
 
   headerRow: {

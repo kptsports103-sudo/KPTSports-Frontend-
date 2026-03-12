@@ -21,7 +21,7 @@ const ManageGallery = () => {
     tableContainer: {
       background: '#fff',
       borderRadius: 16,
-      overflow: 'hidden',
+      overflowX: 'auto',
       boxShadow: '0 8px 24px rgba(71, 85, 105, 0.12)',
       marginBottom: 24,
       border: '1px solid #cfd6df'
@@ -218,7 +218,7 @@ const ManageGallery = () => {
 
   return (
     <AdminLayout>
-      <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000' }}>
+      <div style={{ background: '#f4f6f8', minHeight: '100vh', padding: '20px', color: '#000', width: '100%', minWidth: 0 }}>
         <h3 style={{ fontSize: '34px', fontWeight: '700', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <ImageIcon size={30} color="#0b3ea8" />
           Update Gallery

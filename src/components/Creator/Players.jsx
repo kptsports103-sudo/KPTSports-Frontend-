@@ -780,7 +780,8 @@ const Players = ({ isStudent = false }) => {
 
               return (
                 <>
-                  <table style={styles.table}>
+                  <div style={styles.tableWrap}>
+                    <table style={styles.table}>
                     <thead style={styles.stickyHeader}>
                       <tr style={styles.headerRow}>
                         <th style={{ width: "60px", padding: "12px 16px", textAlign: "left" }}>SL.NO</th>
@@ -956,7 +957,8 @@ const Players = ({ isStudent = false }) => {
                         })
                       )}
                     </tbody>
-                  </table>
+                    </table>
+                  </div>
 
                   {totalPages > 1 && (
                     <div style={styles.pagination}>
@@ -1034,6 +1036,8 @@ const styles = {
     padding: "15px",
     boxSizing: "border-box",
     color: "#111827", // Dark professional text
+    width: "100%",
+    minWidth: 0,
   },
 
   pageTitle: {
@@ -1124,6 +1128,12 @@ const styles = {
     overflow: "hidden",
     marginBottom: "30px",
     boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+  },
+
+  tableWrap: {
+    width: "100%",
+    minWidth: 0,
+    overflowX: "auto",
   },
 
   headerRow: {

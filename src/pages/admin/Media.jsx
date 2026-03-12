@@ -11,6 +11,7 @@ import { autoOptimizeMedia } from "../../utils/mediaMiddleware";
 import { trackMediaUsage } from "../../utils/mediaTracker";
 import { Check, Clipboard, Pencil, Plus, Trash2, X } from "lucide-react";
 import { getAccessToken } from "../../context/tokenStorage";
+import "./Media.css";
 
 const Media = () => {
   const [media, setMedia] = useState([]);
@@ -188,24 +189,14 @@ const Media = () => {
   return (
     <AdminLayout>
       <SmartPreloader urls={predictedUrls} />
-      <div
-        style={{
-          minHeight: "100vh",
-          backgroundColor: "#f4f6f8",
-          padding: "20px",
-          color: "#000"
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: "15px"
-          }}
-        >
-          <h3 style={{ fontSize: "34px", fontWeight: "700", color: "#000" }}>KPT Sports Media</h3>
+      <div className="media-page">
+        <div className="media-page__toolbar">
+          <div className="media-page__title-block">
+            <h3 className="media-page__title">KPT Sports Media</h3>
+          </div>
           <Link
             to="/admin/add-media"
+            className="media-page__add"
             style={{
               backgroundColor: "#dee2e6",
               color: "#000",
@@ -229,21 +220,12 @@ const Media = () => {
           placeholder="Search by title or URL..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{
-            width: "100%",
-            height: "38px",
-            marginBottom: "15px",
-            padding: "0 10px",
-            borderRadius: "8px",
-            border: "2px solid #000000",
-            color: "#000",
-            backgroundColor: "#ffffff"
-          }}
+          className="media-page__search"
         />
 
-        <div style={{ marginBottom: "20px" }}>
+        <div className="media-page__filters">
           {["All", "Images", "Videos", "Audios", "PDF"].map((item) => (
-            <label key={item} htmlFor={`filter-${item.toLowerCase()}`} style={{ marginRight: "15px", color: "#000" }}>
+            <label key={item} htmlFor={`filter-${item.toLowerCase()}`} className="media-page__filter">
               <input
                 id={`filter-${item.toLowerCase()}`}
                 name="filter"
@@ -251,19 +233,13 @@ const Media = () => {
                 value={item}
                 checked={filter === item}
                 onChange={(e) => setFilter(e.target.value)}
-              />{" "}
+              />
               {item}
             </label>
           ))}
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "15px"
-          }}
-        >
+        <div className="media-grid">
           {filteredMedia.map((m, index) => {
             const isEditing = editing === m.id;
             const url =
@@ -272,21 +248,15 @@ const Media = () => {
                 : m.files && m.files[0]
                 ? m.files[0].url
                 : m.imageUrl || "";
-            const isImage = url.startsWith("data:image") || url.includes("cloudinary") && (url.includes("image") || url.match(/\.(jpg|jpeg|png|gif|webp)/i));
+            const mediaType = getType(m.category);
+            const isImage =
+              url.startsWith("data:image") ||
+              (url.includes("cloudinary") && (url.includes("image") || url.match(/\.(jpg|jpeg|png|gif|webp)/i)));
 
             return (
               <div
                 key={m.id}
-                style={{
-                  background: "#fff",
-                  color: "#000",
-                  padding: "15px",
-                  borderRadius: "12px",
-                  border: "1px solid #cfd6df",
-                  boxShadow: "0 8px 24px rgba(71, 85, 105, 0.12)",
-                  position: "relative",
-                  height: "180px"
-                }}
+                className={`media-card ${isEditing ? "media-card--editing" : ""}`}
               >
                 {isEditing ? (
                   <div>
@@ -312,7 +282,7 @@ const Media = () => {
                       style={{ width: "100%", marginBottom: "6px", border: "1px solid #000", color: "#000", background: "#fff" }}
                     />
 
-                    <div style={{ display: "flex", gap: "8px", marginTop: "6px" }}>
+                    <div className="media-card__edit-row">
                       <button
                         onClick={() => saveEdit(m.id)}
                         style={{
@@ -348,41 +318,42 @@ const Media = () => {
                   </div>
                 ) : (
                   <>
-                    <div style={{ fontWeight: "600", marginBottom: "5px" }}>
+                    <div className="media-card__title">
                       {index + 1}. {m.title || "Untitled"}
                     </div>
 
-                    {isImage && (
-                      <CloudImage
-                        url={url}
-                        mediaId={m.id || m._id || url}
-                        mediaType="image"
-                        width={400}
-                        height={200}
-                        alt={m.title || "Media image"}
-                        style={{
-                          height: "70px",
-                          borderRadius: "4px",
-                          cursor: "pointer"
-                        }}
-                        onClick={() =>
-                          trackMediaUsage(m.id || m._id || url, "image", "view", {
-                            mediaUrl: url,
-                          })
-                        }
-                      />
-                    )}
+                    <div className="media-card__preview">
+                      {isImage ? (
+                        <CloudImage
+                          url={url}
+                          mediaId={m.id || m._id || url}
+                          mediaType="image"
+                          width={640}
+                          height={360}
+                          alt={m.title || "Media image"}
+                          style={{
+                            height: "100%",
+                            cursor: "pointer"
+                          }}
+                          onClick={() =>
+                            trackMediaUsage(m.id || m._id || url, "image", "view", {
+                              mediaUrl: url,
+                            })
+                          }
+                        />
+                      ) : (
+                        <div className="media-card__placeholder">{mediaType}</div>
+                      )}
+                    </div>
 
-                    <div
-                      style={{
-                        position: "absolute",
-                        bottom: "10px",
-                        right: "10px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "14px"
-                      }}
-                    >
+                    <div className="media-card__meta">
+                      <p className="media-card__type">{mediaType}</p>
+                      <p className="media-card__url" title={url || "No URL available"}>
+                        {url || "No URL available"}
+                      </p>
+                    </div>
+
+                    <div className="media-card__actions">
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText(url);

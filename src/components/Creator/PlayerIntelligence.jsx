@@ -144,6 +144,8 @@ const PlayerIntelligence = () => {
       borderRadius: "16px",
       padding: "18px",
       boxShadow: "0 12px 30px rgba(15, 23, 42, 0.08)",
+      width: "100%",
+      minWidth: 0,
     },
     headerPanel: {
       textAlign: "center",
@@ -202,7 +204,7 @@ const PlayerIntelligence = () => {
     tableShell: {
       border: "1px solid #dbe3ef",
       borderRadius: "12px",
-      overflow: "hidden",
+      overflowX: "auto",
       background: "#ffffff",
       boxShadow: "0 10px 24px rgba(15, 23, 42, 0.06)",
     },

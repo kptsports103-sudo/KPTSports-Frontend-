@@ -9,6 +9,8 @@ import {
 } from './tokenStorage';
 
 const AuthContext = createContext(null);
+const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
+const normalizeOtp = (value) => String(value || "").replace(/\D/g, "").slice(0, 6);
 
 export const AuthProvider = ({ children }) => {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
@@ -40,14 +42,16 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = useCallback(async (email, password, role) => {
+    const normalizedEmail = normalizeEmail(email);
+
     console.log('=== FRONTEND LOGIN DEBUG ===');
-    console.log('Email:', email);
+    console.log('Email:', normalizedEmail);
     console.log('Password provided:', !!password);
     console.log('Role:', role);
-    console.log('Request data:', { email, password, role });
+    console.log('Request data:', { email: normalizedEmail, password, role });
     
     try {
-      const payload = role ? { email, password, role } : { email, password };
+      const payload = role ? { email: normalizedEmail, password, role } : { email: normalizedEmail, password };
       const response = await api.post('/auth/login', payload);
       const data = response.data;
       console.log('Response:', data);
@@ -55,7 +59,11 @@ export const AuthProvider = ({ children }) => {
       
       // ✅ Check if OTP is required for admin roles
       if (data.message && data.message.includes('OTP sent')) {
-        return { requiresOTP: true, email, role: data.user?.role || role };
+        return {
+          requiresOTP: true,
+          email: normalizeEmail(data.user?.email || normalizedEmail),
+          role: data.user?.role || role || null,
+        };
       }
       
       // ✅ Direct login for non-admin roles
@@ -85,7 +93,17 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const verifyOTP = useCallback(async (email, otp) => {
-    const response = await api.post('/auth/verify-otp', { email, otp });
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedOtp = normalizeOtp(otp);
+
+    if (normalizedOtp.length !== 6) {
+      throw new Error('Please enter a valid 6-digit OTP');
+    }
+
+    const response = await api.post('/auth/verify-otp', {
+      email: normalizedEmail,
+      otp: normalizedOtp,
+    });
     const data = response.data;
     setAccessToken(data.token);
     setStoredUser(data.user);
