@@ -89,6 +89,27 @@ const medalGradients = {
   bronze: "linear-gradient(135deg, #f97316, #b45309)",
 };
 
+const getStoredMediaAssetCount = () => {
+  try {
+    const stored = JSON.parse(localStorage.getItem("media") || "[]");
+    if (!Array.isArray(stored)) return 0;
+
+    return stored.reduce((count, item) => {
+      const fileCount = Array.isArray(item?.files) ? item.files.length : 0;
+      if (fileCount > 0) {
+        return count + fileCount;
+      }
+
+      const hasDirectLink = typeof item?.link === "string" && item.link.trim() !== "";
+      const hasLegacyImage = typeof item?.imageUrl === "string" && item.imageUrl.trim() !== "";
+      return count + (hasDirectLink || hasLegacyImage ? 1 : 0);
+    }, 0);
+  } catch (error) {
+    console.error("Failed to parse media from localStorage:", error);
+    return 0;
+  }
+};
+
 const AdminDashboard = () => {
   const [totalMedia, setTotalMedia] = useState(0);
   const [certificateRows, setCertificateRows] = useState([]);
@@ -128,6 +149,21 @@ const AdminDashboard = () => {
     whiteSpace: "nowrap",
     border: 0,
   };
+
+  useEffect(() => {
+    const syncMediaCount = () => {
+      setTotalMedia(getStoredMediaAssetCount());
+    };
+
+    syncMediaCount();
+    window.addEventListener("storage", syncMediaCount);
+    window.addEventListener("focus", syncMediaCount);
+
+    return () => {
+      window.removeEventListener("storage", syncMediaCount);
+      window.removeEventListener("focus", syncMediaCount);
+    };
+  }, []);
 
   useRealtimeAnalytics({
     onPlayersUpdate: (playersGrouped) => {
