@@ -131,6 +131,7 @@ const AdminDashboard = () => {
   const [ocrRawText, setOcrRawText] = useState("");
   const [ocrFields, setOcrFields] = useState(null);
   const [ocrFileName, setOcrFileName] = useState("");
+  const [certificateScrollNotice, setCertificateScrollNotice] = useState("");
 
   // ============================================
   // ENTERPRISE V5 - SELECTION STATE
@@ -1147,6 +1148,51 @@ const AdminDashboard = () => {
     }
   };
 
+  const scrollToCertificates = () => {
+    const element = document.getElementById("certificate-downloads");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleCertificateFilterChange = (mode) => {
+    setFilterMode(mode);
+    const nextLabel =
+      mode === "generated"
+        ? "Generated only"
+        : mode === "pending"
+          ? "Pending only"
+          : "All records";
+    setCertificateScrollNotice(`Auto-scrolled to Certificates. Showing ${nextLabel.toLowerCase()} for ${selectedCertificateYearLabel}.`);
+    setTimeout(() => {
+      scrollToCertificates();
+    }, 0);
+  };
+
+  const onFilterCardKeyDown = (event, mode) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleCertificateFilterChange(mode);
+    }
+  };
+
+  const activeCertificateFilterLabel =
+    filterMode === "generated"
+      ? "Generated only"
+      : filterMode === "pending"
+        ? "Pending only"
+        : "All records";
+
+  useEffect(() => {
+    if (!certificateScrollNotice) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setCertificateScrollNotice("");
+    }, 3000);
+
+    return () => window.clearTimeout(timer);
+  }, [certificateScrollNotice]);
+
   const toggleAdvancedAnalytics = () => {
     setShowAdvanced((prev) => {
       const next = !prev;
@@ -1203,15 +1249,36 @@ const AdminDashboard = () => {
         )}
 
         <div className="kpi-row">
-          <div className={`kpi-card ${filterMode === "total" ? "active" : ""}`} onClick={() => setFilterMode("total")}>
+          <div
+            className={`kpi-card clickable ${filterMode === "total" ? "active" : ""}`}
+            onClick={() => handleCertificateFilterChange("total")}
+            onKeyDown={(event) => onFilterCardKeyDown(event, "total")}
+            role="button"
+            tabIndex={0}
+            aria-pressed={filterMode === "total"}
+          >
             <span>Total Certificates ({selectedCertificateYearLabel})</span>
             <h2>{certificateStats.total}</h2>
           </div>
-          <div className={`kpi-card success ${filterMode === "generated" ? "active" : ""}`} onClick={() => setFilterMode("generated")}>
+          <div
+            className={`kpi-card success clickable ${filterMode === "generated" ? "active" : ""}`}
+            onClick={() => handleCertificateFilterChange("generated")}
+            onKeyDown={(event) => onFilterCardKeyDown(event, "generated")}
+            role="button"
+            tabIndex={0}
+            aria-pressed={filterMode === "generated"}
+          >
             <span>Generated</span>
             <h2>{certificateStats.generated}</h2>
           </div>
-          <div className={`kpi-card warning ${filterMode === "pending" ? "active" : ""}`} onClick={() => setFilterMode("pending")}>
+          <div
+            className={`kpi-card warning clickable ${filterMode === "pending" ? "active" : ""}`}
+            onClick={() => handleCertificateFilterChange("pending")}
+            onKeyDown={(event) => onFilterCardKeyDown(event, "pending")}
+            role="button"
+            tabIndex={0}
+            aria-pressed={filterMode === "pending"}
+          >
             <span>Pending</span>
             <h2>{certificateStats.pending}</h2>
           </div>
@@ -1405,7 +1472,11 @@ const AdminDashboard = () => {
 
                   <div
                     className={`qs-side-card total clickable ${filterMode === "total" ? "active" : ""}`}
-                    onClick={() => setFilterMode("total")}
+                    onClick={() => handleCertificateFilterChange("total")}
+                    onKeyDown={(event) => onFilterCardKeyDown(event, "total")}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={filterMode === "total"}
                   >
                     <div className="qs-side-head">
                       <Award size={18} />
@@ -1417,7 +1488,11 @@ const AdminDashboard = () => {
 
                   <div
                     className={`qs-side-card generated clickable ${filterMode === "generated" ? "active" : ""}`}
-                    onClick={() => setFilterMode("generated")}
+                    onClick={() => handleCertificateFilterChange("generated")}
+                    onKeyDown={(event) => onFilterCardKeyDown(event, "generated")}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={filterMode === "generated"}
                   >
                     <div className="qs-side-head">
                       <CheckCircle size={18} />
@@ -1429,7 +1504,11 @@ const AdminDashboard = () => {
 
                   <div
                     className={`qs-side-card pending clickable ${filterMode === "pending" ? "active" : ""}`}
-                    onClick={() => setFilterMode("pending")}
+                    onClick={() => handleCertificateFilterChange("pending")}
+                    onKeyDown={(event) => onFilterCardKeyDown(event, "pending")}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={filterMode === "pending"}
                   >
                     <div className="qs-side-head">
                       <Clock size={18} />
@@ -1610,10 +1689,17 @@ const AdminDashboard = () => {
         {/* =====================
             CERTIFICATE DOWNLOADS
         ====================== */}
-        <div className="section-header compact table-stretch">
+        <div id="certificate-downloads" className="section-header compact table-stretch">
           <div className="section-header-left">
             <div className="section-title"><Award size={16} className="title-icon" /> Certificates</div>
-            <div className="section-subtitle">Generate, download, and OCR-extract certificate data</div>
+            <div className="section-subtitle">
+              Generate, download, and OCR-extract certificate data. Showing {activeCertificateFilterLabel.toLowerCase()} for {selectedCertificateYearLabel}.
+            </div>
+            {certificateScrollNotice ? (
+              <div style={{ marginTop: 6, color: "#2563eb", fontSize: "0.9rem", fontWeight: 600 }}>
+                {certificateScrollNotice}
+              </div>
+            ) : null}
           </div>
           <div className="table-filters">
             <label htmlFor="certificate-year-filter" style={srOnlyStyle}>Filter certificates by year</label>
