@@ -3,6 +3,19 @@ import { jsPDF } from 'jspdf';
 import AdminLayout from './AdminLayout';
 import api from '../../services/api';
 
+const normalizeEvent = (item) => ({
+  id: item?._id || item?.id || '',
+  eventName: item?.eventName || item?.event_title || '',
+});
+
+const getRegistrationEventId = (registration) => {
+  const rawEventId = registration?.eventId;
+  if (rawEventId && typeof rawEventId === 'object') {
+    return rawEventId._id || rawEventId.id || '';
+  }
+  return rawEventId || '';
+};
+
 const toRows = (registrations) => {
   const rows = [];
   registrations.forEach((reg) => {
@@ -10,6 +23,7 @@ const toRows = (registrations) => {
     members.forEach((member, idx) => {
       rows.push({
         registrationId: reg._id || reg.id,
+        eventId: getRegistrationEventId(reg),
         memberIndex: idx,
         eventName: reg.eventName || '',
         teamName: reg.teamName || '',
@@ -27,21 +41,39 @@ const toRows = (registrations) => {
 };
 
 const SportsMeetRegistrations = () => {
+  const [events, setEvents] = useState([]);
   const [registrations, setRegistrations] = useState([]);
+  const [selectedEventId, setSelectedEventId] = useState('all');
   const [editingKey, setEditingKey] = useState('');
   const [draft, setDraft] = useState(null);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const rows = useMemo(() => toRows(registrations), [registrations]);
+  const filteredRows = useMemo(() => {
+    if (selectedEventId === 'all') return rows;
+    return rows.filter((row) => row.eventId === selectedEventId);
+  }, [rows, selectedEventId]);
+  const selectedEventName = useMemo(() => {
+    if (selectedEventId === 'all') return 'All Events';
+    return events.find((event) => event.id === selectedEventId)?.eventName || 'Selected Event';
+  }, [events, selectedEventId]);
 
   const load = async () => {
     try {
+      setLoading(true);
       setError('');
-      const res = await api.get('/registrations');
-      setRegistrations(Array.isArray(res.data) ? res.data : []);
+      const [registrationRes, eventRes] = await Promise.all([
+        api.get('/registrations'),
+        api.get('/events'),
+      ]);
+      setRegistrations(Array.isArray(registrationRes.data) ? registrationRes.data : []);
+      setEvents(Array.isArray(eventRes.data) ? eventRes.data.map(normalizeEvent) : []);
     } catch (loadError) {
       setError(loadError.response?.data?.error || 'Unable to load registrations');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,8 +108,11 @@ const SportsMeetRegistrations = () => {
         sem: draft.sem,
       };
       await api.put(`/registrations/${draft.registrationId}`, {
+        eventId: draft.eventId,
         teamName: draft.teamName,
         teamHeadName: draft.teamHeadName,
+        year: draft.year,
+        sem: draft.sem,
         members,
       });
       await load();
@@ -92,7 +127,7 @@ const SportsMeetRegistrations = () => {
   const exportPdf = () => {
     const doc = new jsPDF({ orientation: 'landscape' });
     doc.setFontSize(12);
-    doc.text('Sports Meet Registrations', 14, 12);
+    doc.text(`Sports Meet Registrations - ${selectedEventName}`, 14, 12);
     let y = 22;
     doc.setFontSize(9);
     doc.text('Event', 10, y);
@@ -105,7 +140,7 @@ const SportsMeetRegistrations = () => {
     doc.text('Sem', 255, y);
     doc.text('Status', 270, y);
     y += 6;
-    rows.forEach((row) => {
+    filteredRows.forEach((row) => {
       if (y > 190) {
         doc.addPage('a4', 'landscape');
         y = 20;
@@ -121,17 +156,42 @@ const SportsMeetRegistrations = () => {
       doc.text(String(row.status || '-'), 270, y);
       y += 6;
     });
-    doc.save('sports-meet-registrations.pdf');
+    const safeEventName = selectedEventName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    doc.save(`sports-meet-registrations${safeEventName && safeEventName !== 'all-events' ? `-${safeEventName}` : ''}.pdf`);
   };
 
   return (
     <AdminLayout>
       <div style={{ padding: 20, width: '100%', minWidth: 0, minHeight: '100vh', background: '#f4f6f8' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <h1 style={{ margin: 0 }}>Sports Meet Registration</h1>
-          <button onClick={exportPdf} style={styles.btn}>
-            Download PDF
-          </button>
+        <div style={styles.headerRow}>
+          <div>
+            <h1 style={{ margin: 0 }}>Sports Meet Registration</h1>
+            <div style={styles.subText}>{filteredRows.length} roster row{filteredRows.length === 1 ? '' : 's'} shown</div>
+          </div>
+          <div style={styles.headerActions}>
+            <div style={styles.filterGroup}>
+              <label htmlFor="sports-meet-select-event" style={styles.filterLabel}>
+                Select Event
+              </label>
+              <select
+                id="sports-meet-select-event"
+                name="sportsMeetSelectEvent"
+                value={selectedEventId}
+                onChange={(e) => setSelectedEventId(e.target.value)}
+                style={styles.select}
+              >
+                <option value="all">All Events</option>
+                {events.map((event) => (
+                  <option key={event.id} value={event.id}>
+                    {event.eventName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button onClick={exportPdf} style={styles.btn}>
+              Download PDF
+            </button>
+          </div>
         </div>
         {error ? <div style={styles.error}>{error}</div> : null}
         <div style={styles.tableWrap}>
@@ -151,20 +211,53 @@ const SportsMeetRegistrations = () => {
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td style={styles.td} colSpan={10}>
+                    Loading registration data...
+                  </td>
+                </tr>
+              ) : filteredRows.length === 0 ? (
                 <tr>
                   <td style={styles.td} colSpan={10}>
                     No registration data
                   </td>
                 </tr>
               ) : (
-                rows.map((row) => {
+                filteredRows.map((row) => {
                   const key = `${row.registrationId}-${row.memberIndex}`;
                   const isEditing = key === editingKey;
                   const data = isEditing ? draft : row;
                   return (
                     <tr key={key}>
-                      <td style={styles.td}>{row.eventName}</td>
+                      <td style={styles.td}>
+                        {isEditing ? (
+                          <select
+                            id={`sports-meet-event-${key}`}
+                            name={`eventId-${key}`}
+                            style={styles.inp}
+                            value={data.eventId}
+                            onChange={(e) => {
+                              const nextEventId = e.target.value;
+                              const nextEvent = events.find((item) => item.id === nextEventId);
+                              setDraft((current) => ({
+                                ...current,
+                                eventId: nextEventId,
+                                eventName: nextEvent?.eventName || current.eventName,
+                              }));
+                            }}
+                          >
+                            <option value="">Select Event</option>
+                            {events.map((event) => (
+                              <option key={event.id} value={event.id}>
+                                {event.eventName}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          row.eventName
+                        )}
+                      </td>
                       <td style={styles.td}>{isEditing ? <input id={`sports-meet-team-name-${key}`} name={`teamName-${key}`} style={styles.inp} value={data.teamName} onChange={(e) => setDraft((d) => ({ ...d, teamName: e.target.value }))} /> : row.teamName || 'Individual'}</td>
                       <td style={styles.td}>{isEditing ? <input id={`sports-meet-team-head-${key}`} name={`teamHeadName-${key}`} style={styles.inp} value={data.teamHeadName} onChange={(e) => setDraft((d) => ({ ...d, teamHeadName: e.target.value }))} /> : row.teamHeadName}</td>
                       <td style={styles.td}>{isEditing ? <input id={`sports-meet-name-${key}`} name={`name-${key}`} style={styles.inp} value={data.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} /> : row.name}</td>
@@ -202,6 +295,12 @@ const SportsMeetRegistrations = () => {
 };
 
 const styles = {
+  headerRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap', marginBottom: 12 },
+  headerActions: { display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' },
+  filterGroup: { display: 'grid', gap: 6, minWidth: 220 },
+  filterLabel: { fontSize: 13, fontWeight: 600, color: '#374151' },
+  select: { border: '1px solid #d1d5db', background: '#fff', color: '#111827', borderRadius: 8, padding: '8px 10px', minWidth: 220 },
+  subText: { marginTop: 6, color: '#6b7280', fontSize: 13 },
   tableWrap: { width: '100%', border: '1px solid #d1d5db', borderRadius: 10, overflow: 'auto', background: '#fff' },
   table: { width: '100%', borderCollapse: 'collapse', minWidth: 1200 },
   th: { textAlign: 'left', padding: 10, background: '#f3f4f6', borderBottom: '1px solid #d1d5db' },
