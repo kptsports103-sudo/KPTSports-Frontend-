@@ -533,6 +533,14 @@ export default function PointsTable() {
             ))}
           </select>
         </div>
+
+        {!loading && availableYears.length === 0 ? (
+          <div style={styles.syncNotice}>
+            Points Table is empty because it reads only Annual Sports Celebration result entries. Winner cards on the
+            KPT Sports Winners page do not create points by themselves. Add an Individual Result or Team Result in
+            Admin - Manage Results, then link the winner card if you want both pages to match.
+          </div>
+        ) : null}
       </section>
 
       {loading ? (
@@ -673,6 +681,16 @@ const styles = {
   yearOption: {
     backgroundColor: '#ffffff',
     color: '#0f172a'
+  },
+  syncNotice: {
+    marginTop: '0.9rem',
+    padding: '0.95rem 1rem',
+    borderRadius: '14px',
+    background: '#fff7ed',
+    border: '1px solid #fdba74',
+    color: '#9a3412',
+    fontSize: '0.95rem',
+    lineHeight: 1.5
   },
   emptyState: {
     textAlign: 'center',
