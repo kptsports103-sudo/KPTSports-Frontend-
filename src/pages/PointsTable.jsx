@@ -27,6 +27,8 @@ const palette = {
 
 const normalizeKey = (value) => String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
 
+const hasAnnualSportsEvent = (eventName, eventLookup) => eventLookup.has(normalizeKey(eventName));
+
 const buildEventLookup = (events) => {
   const lookup = new Map();
 
@@ -337,15 +339,27 @@ export default function PointsTable() {
     fetchPointsData();
   }, []);
 
+  const annualEventLookup = useMemo(() => buildEventLookup(events), [events]);
+
+  const annualResults = useMemo(
+    () => results.filter((result) => hasAnnualSportsEvent(result?.event, annualEventLookup)),
+    [annualEventLookup, results]
+  );
+
+  const annualGroupResults = useMemo(
+    () => groupResults.filter((groupResult) => hasAnnualSportsEvent(groupResult?.event, annualEventLookup)),
+    [annualEventLookup, groupResults]
+  );
+
   const availableYears = useMemo(() => {
     return Array.from(
       new Set(
-        [...results, ...groupResults]
+        [...annualResults, ...annualGroupResults]
           .map((item) => Number(item?.year))
           .filter(Boolean)
       )
     ).sort((left, right) => right - left);
-  }, [results, groupResults]);
+  }, [annualGroupResults, annualResults]);
 
   useEffect(() => {
     if (availableYears.length === 0) {
@@ -365,8 +379,8 @@ export default function PointsTable() {
   }, [availableYears, currentYear, selectedYear]);
 
   const summary = useMemo(
-    () => buildSummary({ results, groupResults, events, players, selectedYear }),
-    [events, groupResults, players, results, selectedYear]
+    () => buildSummary({ results: annualResults, groupResults: annualGroupResults, events, players, selectedYear }),
+    [annualGroupResults, annualResults, events, players, selectedYear]
   );
 
   return (
@@ -394,7 +408,7 @@ export default function PointsTable() {
         </p>
         <h1 style={{ margin: '0.55rem 0 0', fontSize: '2.5rem' }}>Points Table</h1>
         <p style={{ margin: '0.8rem 0 0', color: palette.muted, maxWidth: '820px', lineHeight: 1.7 }}>
-          Clear points information is shown here for Indoor Events and Outdoor Events. Individual games use 5, 3, 1 points and team games use 10, 7, 4 points.
+          This page counts only Annual Sports Celebration events. State Inter-Polytechnic results are not included. Indoor and Outdoor events are shown separately, with 5, 3, 1 points for single games and 10, 7, 4 points for team games.
         </p>
       </header>
 
@@ -472,17 +486,17 @@ export default function PointsTable() {
         <>
           <PointsSection
             title="Overall Points Table"
-            subtitle="Combined view of individual and team points for the selected year."
+            subtitle="Combined Annual Sports Celebration points for the selected year."
             rows={summary.overallRows}
           />
           <PointsSection
             title="Indoor Events"
-            subtitle="Points collected from Indoor events only."
+            subtitle="Annual Sports Celebration points collected from Indoor events only."
             rows={summary.indoorRows}
           />
           <PointsSection
             title="Outdoor Events"
-            subtitle="Points collected from Outdoor events only."
+            subtitle="Annual Sports Celebration points collected from Outdoor events only."
             rows={summary.outdoorRows}
           />
           {summary.unassignedRows.length > 0 ? (

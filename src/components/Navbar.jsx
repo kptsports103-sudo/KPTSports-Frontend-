@@ -10,7 +10,6 @@ const NAV_ITEMS = [
   { to: '/about', label: 'About' },
   { to: '/history', label: 'History' },
   { to: '/gallery', label: 'Gallery' },
-  { to: '/winners', label: 'Winners' },
   { to: '/results', label: 'Results' }
 ];
 
@@ -226,9 +225,7 @@ const Navbar = () => {
               <button type="button" onClick={() => navigate('/sports-celebration?tab=registration')}>
                 Register
               </button>
-              <button type="button" onClick={() => navigate('/results')}>
-                Results
-              </button>
+            
               <button type="button" onClick={() => navigate('/winners')}>
                 Winners
               </button>
