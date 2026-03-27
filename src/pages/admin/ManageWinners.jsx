@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { Camera, CheckCircle2, Copy, Pencil, QrCode, RefreshCcw, Save, Smartphone, Trash2, Trophy, Upload, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
@@ -151,6 +152,39 @@ const containerStyles = {
     alignItems: 'center',
     gap: 8,
     cursor: 'pointer',
+  },
+  infoCard: {
+    background: '#eff6ff',
+    borderRadius: 16,
+    border: '1px solid #bfdbfe',
+    boxShadow: '0 8px 20px rgba(37, 99, 235, 0.08)',
+    padding: '18px 20px',
+    marginBottom: '20px',
+  },
+  infoTitle: {
+    margin: 0,
+    fontSize: 16,
+    fontWeight: 800,
+    color: '#1d4ed8',
+  },
+  infoText: {
+    margin: '8px 0 0 0',
+    color: '#334155',
+    fontSize: 14,
+    lineHeight: 1.6,
+  },
+  infoLink: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    marginTop: 12,
+    padding: '10px 14px',
+    borderRadius: 10,
+    border: '1px solid #93c5fd',
+    background: '#ffffff',
+    color: '#0b3ea8',
+    fontSize: 14,
+    fontWeight: 700,
+    textDecoration: 'none',
   },
 };
 
@@ -539,6 +573,18 @@ const ManageWinners = () => {
         </p>
 
         <PageLatestChangeCard pageName="Winners Page" />
+
+        <div style={containerStyles.infoCard}>
+          <h4 style={containerStyles.infoTitle}>Winners page does not feed the Points Table</h4>
+          <p style={containerStyles.infoText}>
+            Entries saved here appear on the public Winners page only. They do not create result records for the
+            Results page or the Points Table. To show a medal inside the Points Table, add the same record in
+            Manage Results and make sure the event exists in the Annual Sports Celebration events list.
+          </p>
+          <Link to="/admin/manage-results" style={containerStyles.infoLink}>
+            Open Manage Results
+          </Link>
+        </div>
 
         <form onSubmit={handleSubmit} style={containerStyles.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>

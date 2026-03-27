@@ -361,26 +361,29 @@ export default function PointsTable() {
     ).sort((left, right) => right - left);
   }, [annualGroupResults, annualResults]);
 
-  useEffect(() => {
-    if (availableYears.length === 0) {
-      if (selectedYear !== currentYear) {
-        setSelectedYear(currentYear);
-      }
-      return;
+  const resolvedSelectedYear = useMemo(() => {
+    if (availableYears.length === 0) return '';
+
+    if (availableYears.some((year) => String(year) === String(selectedYear))) {
+      return String(selectedYear);
     }
 
-    const preferredYear = availableYears.includes(Number(currentYear))
-      ? currentYear
-      : String(availableYears[0]);
-
-    if (!availableYears.includes(Number(selectedYear)) || selectedYear === currentYear) {
-      setSelectedYear(preferredYear);
+    if (availableYears.includes(Number(currentYear))) {
+      return currentYear;
     }
+
+    return String(availableYears[0]);
   }, [availableYears, currentYear, selectedYear]);
 
+  useEffect(() => {
+    if (resolvedSelectedYear !== String(selectedYear || '')) {
+      setSelectedYear(resolvedSelectedYear);
+    }
+  }, [resolvedSelectedYear, selectedYear]);
+
   const summary = useMemo(
-    () => buildSummary({ results: annualResults, groupResults: annualGroupResults, events, players, selectedYear }),
-    [annualGroupResults, annualResults, events, players, selectedYear]
+    () => buildSummary({ results: annualResults, groupResults: annualGroupResults, events, players, selectedYear: resolvedSelectedYear }),
+    [annualGroupResults, annualResults, events, players, resolvedSelectedYear]
   );
 
   return (
@@ -458,19 +461,25 @@ export default function PointsTable() {
           </div>
         </div>
 
-        <div>
-          <label htmlFor="points-table-year" style={{ marginRight: 10, fontWeight: 700, color: palette.text }}>
+        <div style={styles.yearControl}>
+          <label htmlFor="points-table-year" style={styles.yearLabel}>
             Select Year:
           </label>
           <select
             id="points-table-year"
             name="points-table-year"
-            value={selectedYear}
+            value={resolvedSelectedYear}
             onChange={(event) => setSelectedYear(event.target.value)}
+            disabled={loading || availableYears.length === 0}
             style={styles.yearSelect}
           >
+            {loading || availableYears.length === 0 ? (
+              <option value="" style={styles.yearOption}>
+                {loading ? 'Loading years...' : 'No years available'}
+              </option>
+            ) : null}
             {availableYears.map((year) => (
-              <option key={year} value={String(year)}>
+              <option key={year} value={String(year)} style={styles.yearOption}>
                 {year}
               </option>
             ))}
@@ -550,15 +559,41 @@ const styles = {
     marginTop: '0.3rem',
     color: palette.muted
   },
+  yearControl: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: '0.75rem'
+  },
+  yearLabel: {
+    fontWeight: 700,
+    color: palette.text
+  },
   yearSelect: {
-    padding: '12px 14px',
-    borderRadius: '10px',
-    border: `1px solid ${palette.border}`,
-    background: palette.surface,
-    color: palette.text,
-    minWidth: '150px',
+    padding: '12px 44px 12px 14px',
+    borderRadius: '12px',
+    border: '1px solid #cbd5e1',
+    backgroundColor: '#ffffff',
+    color: '#0f172a',
+    minWidth: '180px',
     cursor: 'pointer',
-    fontSize: '14px'
+    fontSize: '14px',
+    fontWeight: 600,
+    lineHeight: 1.2,
+    outline: 'none',
+    boxShadow: '0 10px 24px rgba(15, 23, 42, 0.08)',
+    appearance: 'none',
+    WebkitAppearance: 'none',
+    MozAppearance: 'none',
+    colorScheme: 'light',
+    backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 20 20%27 fill=%27none%27 stroke=%27%230f172a%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M5 7.5 10 12.5 15 7.5%27/%3E%3C/svg%3E")',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 14px center',
+    backgroundSize: '16px'
+  },
+  yearOption: {
+    backgroundColor: '#ffffff',
+    color: '#0f172a'
   },
   emptyState: {
     textAlign: 'center',
