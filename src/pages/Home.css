@@ -498,6 +498,90 @@ body.dark-mode .home-page {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.winner-preview-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.winner-preview-card {
+  background: var(--home-surface);
+  border-radius: 18px;
+  border: 1px solid var(--card-border);
+  overflow: hidden;
+  box-shadow: 0 16px 28px rgba(10, 39, 82, 0.1);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.winner-preview-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 22px 34px rgba(10, 39, 82, 0.18);
+}
+
+.winner-preview-card__media {
+  position: relative;
+}
+
+.winner-preview-card__media img {
+  display: block;
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+}
+
+.winner-preview-card__medal {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2);
+}
+
+.winner-preview-card__medal--gold {
+  background: rgba(254, 240, 138, 0.96);
+  color: #8a5b00;
+}
+
+.winner-preview-card__medal--silver {
+  background: rgba(229, 231, 235, 0.96);
+  color: #334155;
+}
+
+.winner-preview-card__medal--bronze {
+  background: rgba(253, 186, 116, 0.96);
+  color: #9a3412;
+}
+
+.winner-preview-card__body {
+  padding: 18px;
+}
+
+.winner-preview-card__event {
+  margin: 0 0 8px;
+  color: #0b3ea8;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.winner-preview-card__body h3 {
+  margin: 0;
+  color: var(--home-text);
+  font-size: 1.4rem;
+}
+
+.winner-preview-card__description {
+  margin: 10px 0 0;
+  color: var(--home-text-muted);
+  line-height: 1.6;
+}
+
 .gallery-grid img {
   display: block;
   width: 100%;
@@ -647,7 +731,8 @@ body.dark-mode .home-page {
   }
 
   .sports-grid,
-  .gallery-grid {
+  .gallery-grid,
+  .winner-preview-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -694,6 +779,7 @@ body.dark-mode .home-page {
 @media (max-width: 560px) {
   .sports-grid,
   .gallery-grid,
+  .winner-preview-grid,
   .home-hero__stats {
     grid-template-columns: 1fr;
   }

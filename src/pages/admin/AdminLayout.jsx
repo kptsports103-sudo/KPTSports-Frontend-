@@ -87,6 +87,7 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/manage-history', label: 'Manage History', marker: 'R' },
     { path: '/admin/manage-gallery', label: 'Manage Gallery', marker: 'G' },
     { path: '/admin/manage-results', label: 'Manage Results', marker: 'T' },
+    { path: '/admin/manage-winners', label: 'Winners', marker: 'W' },
     { path: '/admin/sports-meet-registrations', label: 'Sports Meet Registration', marker: 'R' },
   ];
 
@@ -95,6 +96,7 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/users-manage', label: 'IAM Users', marker: 'U' },
     { path: '/admin/media', label: 'Media Management', marker: 'M' },
     { path: '/admin/manage-results', label: 'Manage Results', marker: 'T' },
+    { path: '/admin/manage-winners', label: 'Winners', marker: 'W' },
     { path: '/admin/sports-meet-registrations', label: 'Sports Meet Registration', marker: 'R' },
   ];
 

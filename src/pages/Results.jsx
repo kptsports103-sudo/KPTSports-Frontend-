@@ -57,20 +57,42 @@ const Results = () => {
   const currentYear = String(new Date().getFullYear());
   const [results, setResults] = useState([]);
   const [groupResults, setGroupResults] = useState([]);
+  const [winners, setWinners] = useState([]);
   const [activeImage, setActiveImage] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedYear, setSelectedYear] = useState(currentYear);
 
   useEffect(() => {
+    const fetchResultsData = async () => {
+      const [resultResponse, groupResponse, winnersResponse] = await Promise.allSettled([
+        api.get('/results'),
+        api.get('/group-results'),
+        api.get('/winners'),
+      ]);
 
-    // Fetch individual results
-    api.get('/results').then(res => setResults(res.data || []))
-      .catch(err => console.error('Failed to fetch individual results:', err));
+      if (resultResponse.status === 'fulfilled') {
+        setResults(resultResponse.value?.data || []);
+      } else {
+        console.error('Failed to fetch individual results:', resultResponse.reason);
+        setResults([]);
+      }
 
-    // Fetch group results
-    api.get('/group-results').then(res => setGroupResults(res.data || []))
-      .catch(err => console.error('Failed to fetch group results:', err));
+      if (groupResponse.status === 'fulfilled') {
+        setGroupResults(groupResponse.value?.data || []);
+      } else {
+        console.error('Failed to fetch group results:', groupResponse.reason);
+        setGroupResults([]);
+      }
 
+      if (winnersResponse.status === 'fulfilled') {
+        setWinners(winnersResponse.value?.data || []);
+      } else {
+        console.error('Failed to fetch winners:', winnersResponse.reason);
+        setWinners([]);
+      }
+    };
+
+    fetchResultsData();
   }, []);
 
   // Combine and group results by selected year
@@ -139,6 +161,102 @@ const Results = () => {
       }}>
         KPT Sports Results
       </h1>
+
+      {winners.length > 0 && (
+        <section style={{ marginBottom: '2.5rem' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '16px',
+            flexWrap: 'wrap',
+            marginBottom: '1rem'
+          }}>
+            <div>
+              <h2 style={{ margin: 0, color: palette.accent, fontSize: '1.75rem' }}>Winner Showcase</h2>
+              <p style={{ margin: '8px 0 0 0', color: palette.muted }}>
+                Added from the admin winners page and published automatically.
+              </p>
+            </div>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+            gap: '1.25rem'
+          }}>
+            {winners.map((winner) => (
+              <article
+                key={winner._id}
+                style={{
+                  backgroundColor: palette.surface,
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  boxShadow: palette.shadow
+                }}
+              >
+                <OptimizedImage
+                  src={winner.imageUrl}
+                  alt={winner.playerName || 'Winner'}
+                  width={640}
+                  height={420}
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  style={{
+                    width: '100%',
+                    height: '220px',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                />
+
+                <div style={{ padding: '1rem 1rem 1.2rem' }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '12px',
+                    marginBottom: '0.85rem'
+                  }}>
+                    <span style={{ fontSize: '1.7rem' }}>{medalIcon(winner.medal)}</span>
+                    <span style={{
+                      background: medalColor(winner.medal),
+                      color: '#fff',
+                      padding: '0.35rem 0.8rem',
+                      borderRadius: '999px',
+                      fontSize: '0.82rem',
+                      fontWeight: 'bold',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.28)'
+                    }}>
+                      {winner.medal} Medal
+                    </span>
+                  </div>
+
+                  <h3 style={{ margin: 0, color: palette.text, fontSize: '1.2rem' }}>{winner.playerName}</h3>
+                  <p style={{ margin: '0.45rem 0 0', color: palette.muted }}>{winner.eventName}</p>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveImage({ ...winner, source: 'winner' })}
+                    style={{
+                      marginTop: '1rem',
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      color: palette.accent,
+                      cursor: 'pointer',
+                      fontSize: '0.95rem',
+                      fontWeight: '600'
+                    }}
+                  >
+                    View Photo
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
         <label htmlFor="results-year-filter" style={{ marginRight: '10px', fontWeight: 600, color: palette.text }}>
@@ -510,7 +628,14 @@ const Results = () => {
           >
             <OptimizedImage
               src={activeImage.imageUrl}
-              alt={activeImage.event || activeImage.teamName || activeImage.name || 'Result image'}
+              alt={
+                activeImage.event ||
+                activeImage.eventName ||
+                activeImage.teamName ||
+                activeImage.name ||
+                activeImage.playerName ||
+                'Result image'
+              }
               width={1280}
               height={960}
               crop="limit"
@@ -523,36 +648,65 @@ const Results = () => {
                 objectFit: 'contain'
               }}
             />
-            <div
-              style={{
-                marginTop: '14px',
-                background: palette.surfaceAlt,
-                border: `1px solid ${palette.border}`,
-                borderRadius: '10px',
-                overflow: 'hidden'
-              }}
-            >
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: palette.surfaceMuted }}>
-                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Medal</th>
-                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Points</th>
-                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Year</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.medal || '-'}</td>
-                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>
-                      {activeImage.teamName
-                        ? (GROUP_POINTS[activeImage.medal] || 0)
-                        : (INDIVIDUAL_POINTS[activeImage.medal] || 0)}
-                    </td>
-                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.year || '-'}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            {activeImage.source === 'winner' ? (
+              <div
+                style={{
+                  marginTop: '14px',
+                  background: palette.surfaceAlt,
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: '10px',
+                  overflow: 'hidden'
+                }}
+              >
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: palette.surfaceMuted }}>
+                      <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Winner</th>
+                      <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Event</th>
+                      <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Medal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.playerName || '-'}</td>
+                      <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.eventName || '-'}</td>
+                      <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.medal || '-'}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div
+                style={{
+                  marginTop: '14px',
+                  background: palette.surfaceAlt,
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: '10px',
+                  overflow: 'hidden'
+                }}
+              >
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: palette.surfaceMuted }}>
+                      <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Medal</th>
+                      <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Points</th>
+                      <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Year</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.medal || '-'}</td>
+                      <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>
+                        {activeImage.teamName
+                          ? (GROUP_POINTS[activeImage.medal] || 0)
+                          : (INDIVIDUAL_POINTS[activeImage.medal] || 0)}
+                      </td>
+                      <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.year || '-'}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
             <button
               onClick={() => setActiveImage(null)}
               style={{

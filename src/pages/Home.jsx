@@ -35,6 +35,7 @@ const cleanLeadingIconText = (text) => {
 function Home() {
   const navigate = useNavigate();
   const [content, setContent] = useState(createEmptyHomeContent());
+  const [featuredWinners, setFeaturedWinners] = useState([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [showDeferredSections, setShowDeferredSections] = useState(false);
   const activeBanner = content.banners[currentBannerIndex] ?? null;
@@ -42,9 +43,13 @@ function Home() {
 
   useEffect(() => {
     const fetchHomeContent = async () => {
-      try {
-        const response = await api.get('/home');
-        const data = response?.data ?? {};
+      const [homeResult, winnersResult] = await Promise.allSettled([
+        api.get('/home'),
+        api.get('/winners?limit=3')
+      ]);
+
+      if (homeResult.status === 'fulfilled') {
+        const data = homeResult.value?.data ?? {};
         setContent({
           heroTitle: data.heroTitle ?? 'KPT Sports',
           heroSubtitle: data.heroSubtitle ?? 'Train hard, compete smart, and celebrate every achievement.',
@@ -57,9 +62,16 @@ function Home() {
           clubs: Array.isArray(data.clubs) ? data.clubs : [],
           announcements: Array.isArray(data.announcements) ? data.announcements : []
         });
-      } catch (error) {
-        console.error('Failed to fetch home content:', error);
+      } else {
+        console.error('Failed to fetch home content:', homeResult.reason);
         setContent(createEmptyHomeContent());
+      }
+
+      if (winnersResult.status === 'fulfilled') {
+        setFeaturedWinners(Array.isArray(winnersResult.value?.data) ? winnersResult.value.data : []);
+      } else {
+        console.error('Failed to fetch featured winners:', winnersResult.reason);
+        setFeaturedWinners([]);
       }
     };
 
@@ -205,6 +217,44 @@ function Home() {
                 />
                 <div className="sports-grid__overlay" />
                 <h3>{category.name}</h3>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {showDeferredSections && featuredWinners.length > 0 ? (
+        <section id="winners" className="section-shell">
+          <header className="section-header section-header--with-action">
+            <h2>Latest Winners</h2>
+            <button className="section-view-more" type="button" onClick={() => navigate('/results')}>
+              View All Winners
+            </button>
+          </header>
+
+          <div className="winner-preview-grid">
+            {featuredWinners.map((winner, index) => (
+              <article key={winner._id || `${winner.playerName}-${index}`} className="winner-preview-card">
+                <div className="winner-preview-card__media">
+                  <OptimizedImage
+                    src={winner.imageUrl}
+                    alt={winner.playerName || `Winner ${index + 1}`}
+                    width={520}
+                    height={340}
+                    sizes="(max-width: 560px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                  <span className={`winner-preview-card__medal winner-preview-card__medal--${String(winner.medal || '').toLowerCase()}`}>
+                    {winner.medal}
+                  </span>
+                </div>
+
+                <div className="winner-preview-card__body">
+                  <p className="winner-preview-card__event">{winner.eventName}</p>
+                  <h3>{winner.playerName}</h3>
+                  <p className="winner-preview-card__description">
+                    Honored for outstanding performance in {winner.eventName}.
+                  </p>
+                </div>
               </article>
             ))}
           </div>
