@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 
 const INDIVIDUAL_POINTS = {
@@ -142,6 +143,9 @@ const resolveTeamBranch = (groupResult, playerLookup) => {
     new Set(
       (Array.isArray(groupResult?.members) ? groupResult.members : [])
         .map((member) => {
+          const explicitBranch = String(member?.branch || '').trim();
+          if (explicitBranch) return explicitBranch;
+
           const masterId = String(member?.playerMasterId || '').trim();
           const playerId = String(member?.playerId || '').trim();
 
@@ -286,13 +290,15 @@ const PointsSection = ({ title, subtitle, rows }) => (
 );
 
 export default function PointsTable() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedYear = String(searchParams.get('year') || '').trim();
   const currentYear = String(new Date().getFullYear());
   const [results, setResults] = useState([]);
   const [groupResults, setGroupResults] = useState([]);
   const [events, setEvents] = useState([]);
   const [players, setPlayers] = useState({});
   const [loading, setLoading] = useState(true);
-  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedYear, setSelectedYear] = useState(requestedYear || currentYear);
 
   useEffect(() => {
     const fetchPointsData = async () => {
@@ -368,18 +374,40 @@ export default function PointsTable() {
       return String(selectedYear);
     }
 
+    if (requestedYear && availableYears.some((year) => String(year) === String(requestedYear))) {
+      return requestedYear;
+    }
+
     if (availableYears.includes(Number(currentYear))) {
       return currentYear;
     }
 
     return String(availableYears[0]);
-  }, [availableYears, currentYear, selectedYear]);
+  }, [availableYears, currentYear, requestedYear, selectedYear]);
 
   useEffect(() => {
     if (resolvedSelectedYear !== String(selectedYear || '')) {
       setSelectedYear(resolvedSelectedYear);
     }
   }, [resolvedSelectedYear, selectedYear]);
+
+  useEffect(() => {
+    if (requestedYear && requestedYear !== String(selectedYear || '')) {
+      setSelectedYear(requestedYear);
+    }
+  }, [requestedYear, selectedYear]);
+
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    if (resolvedSelectedYear) {
+      next.set('year', resolvedSelectedYear);
+    } else {
+      next.delete('year');
+    }
+    if (next.toString() !== searchParams.toString()) {
+      setSearchParams(next, { replace: true });
+    }
+  }, [resolvedSelectedYear, searchParams, setSearchParams]);
 
   const summary = useMemo(
     () => buildSummary({ results: annualResults, groupResults: annualGroupResults, events, players, selectedYear: resolvedSelectedYear }),
@@ -438,6 +466,26 @@ export default function PointsTable() {
           <div style={styles.summaryValue}>{summary.totalTeamPoints}</div>
           <div style={styles.summarySub}>Gold 10, Silver 7, Bronze 4</div>
         </div>
+      </section>
+
+      <section
+        style={{
+          marginTop: '1rem',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '1rem'
+        }}
+      >
+        {summary.overallRows.slice(0, 3).map((row, index) => (
+          <div key={`${row.label}-top-${index}`} style={styles.topStandingsCard}>
+            <div style={styles.topStandingsRank}>#{index + 1}</div>
+            <div style={styles.topStandingsLabel}>{row.label}</div>
+            <div style={styles.topStandingsPoints}>{row.totalPoints} pts</div>
+            <div style={styles.topStandingsMeta}>
+              Individual {row.individualPoints} | Team {row.teamPoints}
+            </div>
+          </div>
+        ))}
       </section>
 
       <section
@@ -543,6 +591,37 @@ const styles = {
     marginTop: '0.35rem',
     fontSize: '0.92rem',
     color: palette.accent
+  },
+  topStandingsCard: {
+    padding: '1rem 1.1rem',
+    borderRadius: '18px',
+    background: palette.surface,
+    border: `1px solid ${palette.border}`,
+    boxShadow: palette.shadow
+  },
+  topStandingsRank: {
+    fontSize: '0.82rem',
+    fontWeight: 800,
+    color: palette.accent,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em'
+  },
+  topStandingsLabel: {
+    marginTop: '0.45rem',
+    fontSize: '1.15rem',
+    fontWeight: 800,
+    color: palette.text
+  },
+  topStandingsPoints: {
+    marginTop: '0.4rem',
+    fontSize: '1.45rem',
+    fontWeight: 800,
+    color: palette.text
+  },
+  topStandingsMeta: {
+    marginTop: '0.3rem',
+    fontSize: '0.9rem',
+    color: palette.muted
   },
   ruleCard: {
     padding: '0.9rem 1rem',

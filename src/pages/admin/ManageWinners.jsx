@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import QRCode from 'qrcode';
 import { Camera, CheckCircle2, Copy, Pencil, QrCode, RefreshCcw, Save, Smartphone, Trash2, Trophy, Upload, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -41,10 +41,34 @@ const createEmptyForm = () => ({
   playerName: '',
   teamName: '',
   branch: '',
+  year: '',
   medal: 'Gold',
+  linkedResultType: 'manual',
+  linkedResultId: '',
   imageUrl: '',
   imagePublicId: '',
 });
+
+const getTeamWinnerLead = (groupResult) => {
+  const firstNamedMember = (Array.isArray(groupResult?.members) ? groupResult.members : []).find(
+    (member) => String(member?.name || '').trim()
+  );
+  return String(firstNamedMember?.name || groupResult?.teamName || '').trim();
+};
+
+const resolveTeamWinnerBranch = (groupResult) => {
+  const branches = Array.from(
+    new Set(
+      (Array.isArray(groupResult?.members) ? groupResult.members : [])
+        .map((member) => String(member?.branch || '').trim())
+        .filter(Boolean)
+    )
+  );
+
+  if (branches.length === 1) return branches[0];
+  if (branches.length > 1) return String(groupResult?.teamName || 'Mixed Team').trim();
+  return String(groupResult?.teamName || '').trim();
+};
 
 const containerStyles = {
   page: {
@@ -186,10 +210,45 @@ const containerStyles = {
     fontWeight: 700,
     textDecoration: 'none',
   },
+  sourceCard: {
+    marginBottom: 18,
+    padding: 16,
+    borderRadius: 14,
+    border: '1px solid #dbeafe',
+    background: '#f8fbff',
+  },
+  sourceTitle: {
+    margin: 0,
+    fontSize: 15,
+    fontWeight: 800,
+    color: '#1d4ed8',
+  },
+  sourceText: {
+    margin: '8px 0 0 0',
+    color: '#475569',
+    fontSize: 13,
+    lineHeight: 1.6,
+  },
+  sourcePill: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    padding: '6px 12px',
+    borderRadius: 999,
+    border: '1px solid #bfdbfe',
+    background: '#eff6ff',
+    color: '#1d4ed8',
+    fontSize: 12,
+    fontWeight: 700,
+    marginTop: 10,
+  },
 };
 
 const ManageWinners = () => {
+  const currentYear = String(new Date().getFullYear());
   const [winners, setWinners] = useState([]);
+  const [individualResults, setIndividualResults] = useState([]);
+  const [teamResults, setTeamResults] = useState([]);
   const [form, setForm] = useState(createEmptyForm());
   const [editingId, setEditingId] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -202,10 +261,49 @@ const ManageWinners = () => {
   const [captureStatus, setCaptureStatus] = useState('idle');
   const [captureMessage, setCaptureMessage] = useState('');
   const [isPreparingCapture, setIsPreparingCapture] = useState(false);
+  const [sourceYearFilter, setSourceYearFilter] = useState(currentYear);
 
   useEffect(() => {
     fetchWinners();
+    fetchResultSources();
   }, []);
+
+  const availableSourceYears = useMemo(() => {
+    return Array.from(
+      new Set(
+        [...individualResults, ...teamResults]
+          .map((item) => String(item?.year || '').trim())
+          .filter(Boolean)
+      )
+    ).sort((left, right) => Number(right) - Number(left));
+  }, [individualResults, teamResults]);
+
+  const filteredIndividualResults = useMemo(() => {
+    return individualResults
+      .filter((item) => !sourceYearFilter || String(item?.year || '') === String(sourceYearFilter))
+      .sort((left, right) => {
+        const leftLabel = `${left?.year || ''} ${left?.event || ''} ${left?.name || ''}`;
+        const rightLabel = `${right?.year || ''} ${right?.event || ''} ${right?.name || ''}`;
+        return leftLabel.localeCompare(rightLabel, 'en', { sensitivity: 'base' });
+      });
+  }, [individualResults, sourceYearFilter]);
+
+  const filteredTeamResults = useMemo(() => {
+    return teamResults
+      .filter((item) => !sourceYearFilter || String(item?.year || '') === String(sourceYearFilter))
+      .sort((left, right) => {
+        const leftLabel = `${left?.year || ''} ${left?.event || ''} ${left?.teamName || ''}`;
+        const rightLabel = `${right?.year || ''} ${right?.event || ''} ${right?.teamName || ''}`;
+        return leftLabel.localeCompare(rightLabel, 'en', { sensitivity: 'base' });
+      });
+  }, [sourceYearFilter, teamResults]);
+
+  useEffect(() => {
+    if (availableSourceYears.length === 0) return;
+    if (!availableSourceYears.includes(String(sourceYearFilter || ''))) {
+      setSourceYearFilter(availableSourceYears[0]);
+    }
+  }, [availableSourceYears, sourceYearFilter]);
 
   useEffect(() => {
     if (!selectedFile) {
@@ -278,6 +376,22 @@ const ManageWinners = () => {
     }
   };
 
+  const fetchResultSources = async () => {
+    try {
+      const [individualResponse, teamResponse] = await Promise.all([
+        api.get('/results'),
+        api.get('/group-results'),
+      ]);
+
+      setIndividualResults(Array.isArray(individualResponse?.data) ? individualResponse.data.filter((item) => MEDAL_OPTIONS.includes(item?.medal)) : []);
+      setTeamResults(Array.isArray(teamResponse?.data) ? teamResponse.data.filter((item) => MEDAL_OPTIONS.includes(item?.medal)) : []);
+    } catch (error) {
+      console.error('Failed to load result sources for winners:', error);
+      setIndividualResults([]);
+      setTeamResults([]);
+    }
+  };
+
   const clearCaptureUi = () => {
     setCaptureSession(null);
     setCaptureQrCode('');
@@ -316,6 +430,53 @@ const ManageWinners = () => {
     setEditingId(null);
     setSelectedFile(null);
     setPreviewUrl('');
+    setSourceYearFilter(currentYear);
+  };
+
+  const applyLinkedSource = (nextType, nextId) => {
+    if (nextType === 'manual' || !nextId) {
+      setForm((current) => ({
+        ...current,
+        linkedResultType: nextType,
+        linkedResultId: nextId,
+      }));
+      return;
+    }
+
+    if (nextType === 'individual') {
+      const linkedResult = individualResults.find((item) => String(item?._id || '') === String(nextId));
+      if (!linkedResult) return;
+
+      setSourceYearFilter(String(linkedResult?.year || currentYear));
+      setForm((current) => ({
+        ...current,
+        linkedResultType: 'individual',
+        linkedResultId: String(linkedResult._id || ''),
+        eventName: String(linkedResult.event || '').trim(),
+        playerName: String(linkedResult.name || '').trim(),
+        teamName: '',
+        branch: String(linkedResult.branch || '').trim(),
+        year: String(linkedResult.year || ''),
+        medal: linkedResult.medal || 'Gold',
+      }));
+      return;
+    }
+
+    const linkedTeamResult = teamResults.find((item) => String(item?._id || '') === String(nextId));
+    if (!linkedTeamResult) return;
+
+    setSourceYearFilter(String(linkedTeamResult?.year || currentYear));
+    setForm((current) => ({
+      ...current,
+      linkedResultType: 'team',
+      linkedResultId: String(linkedTeamResult._id || ''),
+      eventName: String(linkedTeamResult.event || '').trim(),
+      playerName: getTeamWinnerLead(linkedTeamResult),
+      teamName: String(linkedTeamResult.teamName || '').trim(),
+      branch: resolveTeamWinnerBranch(linkedTeamResult),
+      year: String(linkedTeamResult.year || ''),
+      medal: linkedTeamResult.medal || 'Gold',
+    }));
   };
 
   const handleEdit = (winner) => {
@@ -325,10 +486,14 @@ const ManageWinners = () => {
       playerName: winner.playerName || '',
       teamName: winner.teamName || '',
       branch: winner.branch || '',
+      year: winner.year ? String(winner.year) : '',
       medal: winner.medal || 'Gold',
+      linkedResultType: winner.linkedResultType || 'manual',
+      linkedResultId: winner.linkedResultId || '',
       imageUrl: winner.imageUrl || '',
       imagePublicId: winner.imagePublicId || '',
     });
+    setSourceYearFilter(String(winner.year || currentYear));
     setEditingId(winner._id);
     setSelectedFile(null);
     setPreviewUrl('');
@@ -455,13 +620,26 @@ const ManageWinners = () => {
       playerName: form.playerName.trim(),
       teamName: form.teamName.trim(),
       branch: form.branch.trim(),
+      year: form.year ? Number(form.year) : null,
       medal: form.medal,
+      linkedResultType: form.linkedResultType || 'manual',
+      linkedResultId: form.linkedResultId || '',
       imageUrl: form.imageUrl,
       imagePublicId: form.imagePublicId,
     };
 
-    if (!payload.eventName || !payload.playerName) {
-      alert('Event name and player name are required.');
+    if (!payload.playerName) {
+      alert('Player name is required.');
+      return;
+    }
+
+    if (payload.linkedResultType === 'manual' && !payload.eventName) {
+      alert('Event name is required for manual winners.');
+      return;
+    }
+
+    if (payload.linkedResultType !== 'manual' && !payload.linkedResultId) {
+      alert('Please select a linked result.');
       return;
     }
 
@@ -507,7 +685,9 @@ const ManageWinners = () => {
           { field: 'Player Name', after: payload.playerName || '-' },
           { field: 'Team Name', after: payload.teamName || '-' },
           { field: 'Branch', after: payload.branch || '-' },
+          { field: 'Year', after: payload.year ? String(payload.year) : '-' },
           { field: 'Medal', after: payload.medal || '-' },
+          { field: 'Result Source', after: payload.linkedResultType || 'manual' },
           { field: 'Operation', after: editingId ? 'Update' : 'Create' },
         ]
       );
@@ -540,6 +720,7 @@ const ManageWinners = () => {
           { field: 'Player Name', before: winner.playerName || '-', after: '-' },
           { field: 'Team Name', before: winner.teamName || '-', after: '-' },
           { field: 'Branch', before: winner.branch || '-', after: '-' },
+          { field: 'Year', before: winner.year ? String(winner.year) : '-', after: '-' },
           { field: 'Medal', before: winner.medal || '-', after: '-' },
           { field: 'Operation', after: 'Delete' },
         ]
@@ -552,6 +733,7 @@ const ManageWinners = () => {
 
   const currentPreview = previewUrl || capturedImage?.imageUrl || form.imageUrl || '';
   const isEditing = Boolean(editingId);
+  const isLinkedWinner = form.linkedResultType !== 'manual';
   const previewSourceLabel = previewUrl
     ? 'Photo selected from this device'
     : capturedImage?.imageUrl
@@ -605,6 +787,88 @@ const ManageWinners = () => {
             ) : null}
           </div>
 
+          <div style={containerStyles.sourceCard}>
+            <h5 style={containerStyles.sourceTitle}>Winner Source</h5>
+            <p style={containerStyles.sourceText}>
+              Link this winner to an Individual Result or Team Result from Annual Sports Celebration. That keeps the
+              event, medal, branch, and year aligned with the public Results page and the Points Table.
+            </p>
+            <div style={containerStyles.grid}>
+              <div>
+                <label htmlFor="winner-linked-type" style={containerStyles.label}>Source Type</label>
+                <select
+                  id="winner-linked-type"
+                  value={form.linkedResultType}
+                  onChange={(event) => {
+                    const nextType = event.target.value;
+                    if (nextType === 'manual') {
+                      applyLinkedSource('manual', '');
+                      return;
+                    }
+                    setForm((current) => ({
+                      ...current,
+                      linkedResultType: nextType,
+                      linkedResultId: '',
+                    }));
+                  }}
+                  style={containerStyles.input}
+                >
+                  <option value="manual">Manual Winner Card</option>
+                  <option value="individual">Link Individual Result</option>
+                  <option value="team">Link Team Result</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="winner-source-year" style={containerStyles.label}>Source Year</label>
+                <select
+                  id="winner-source-year"
+                  value={sourceYearFilter}
+                  onChange={(event) => setSourceYearFilter(event.target.value)}
+                  style={containerStyles.input}
+                  disabled={availableSourceYears.length === 0}
+                >
+                  {availableSourceYears.length === 0 ? <option value="">No result years</option> : null}
+                  {availableSourceYears.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="winner-linked-result" style={containerStyles.label}>Linked Result</label>
+                <select
+                  id="winner-linked-result"
+                  value={form.linkedResultId}
+                  onChange={(event) => applyLinkedSource(form.linkedResultType, event.target.value)}
+                  style={containerStyles.input}
+                  disabled={form.linkedResultType === 'manual'}
+                >
+                  <option value="">
+                    {form.linkedResultType === 'manual'
+                      ? 'Manual winner does not use linked results'
+                      : form.linkedResultType === 'individual'
+                        ? 'Select Individual Result'
+                        : 'Select Team Result'}
+                  </option>
+                  {(form.linkedResultType === 'individual' ? filteredIndividualResults : filteredTeamResults).map((item) => (
+                    <option key={item._id} value={item._id}>
+                      {form.linkedResultType === 'individual'
+                        ? `${item.year} | ${item.event} | ${item.name} | ${item.branch || '-'} | ${item.medal}`
+                        : `${item.year} | ${item.event} | ${item.teamName} | ${resolveTeamWinnerBranch(item) || '-'} | ${item.medal}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div style={containerStyles.sourcePill}>
+              <Trophy size={14} />
+              {isLinkedWinner
+                ? 'Linked winners sync event, branch, medal, and year from Manage Results'
+                : 'Manual mode lets you create a showcase card without linking a result'}
+            </div>
+          </div>
+
           <div style={containerStyles.grid}>
             <div>
               <label htmlFor="winner-event-name" style={containerStyles.label}>Event Name</label>
@@ -615,6 +879,7 @@ const ManageWinners = () => {
                 style={containerStyles.input}
                 placeholder="100m Sprint"
                 required
+                readOnly={isLinkedWinner}
               />
             </div>
 
@@ -637,6 +902,7 @@ const ManageWinners = () => {
                 value={form.medal}
                 onChange={(event) => setForm((current) => ({ ...current, medal: event.target.value }))}
                 style={containerStyles.input}
+                disabled={isLinkedWinner}
               >
                 {MEDAL_OPTIONS.map((medal) => (
                   <option key={medal} value={medal}>
@@ -654,6 +920,7 @@ const ManageWinners = () => {
                 onChange={(event) => setForm((current) => ({ ...current, teamName: event.target.value }))}
                 style={containerStyles.input}
                 placeholder="CSE Champions"
+                readOnly={isLinkedWinner}
               />
             </div>
 
@@ -665,6 +932,19 @@ const ManageWinners = () => {
                 onChange={(event) => setForm((current) => ({ ...current, branch: event.target.value }))}
                 style={containerStyles.input}
                 placeholder="Computer Science"
+                readOnly={isLinkedWinner}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="winner-year" style={containerStyles.label}>Year</label>
+              <input
+                id="winner-year"
+                value={form.year}
+                onChange={(event) => setForm((current) => ({ ...current, year: event.target.value }))}
+                style={containerStyles.input}
+                placeholder="2026"
+                readOnly={isLinkedWinner}
               />
             </div>
 
@@ -938,6 +1218,11 @@ const ManageWinners = () => {
                 <p style={{ margin: '8px 0 0 0', color: '#475569', fontSize: 16 }}>
                   {form.eventName || 'Event name will be shown here'}
                 </p>
+                {form.year ? (
+                  <p style={{ margin: '8px 0 0 0', color: '#0b3ea8', fontSize: 13, fontWeight: 700 }}>
+                    Year: {form.year}
+                  </p>
+                ) : null}
                 {form.teamName ? (
                   <p style={{ margin: '10px 0 0 0', color: '#0b3ea8', fontSize: 14, fontWeight: 700 }}>
                     Team: {form.teamName}
@@ -973,14 +1258,16 @@ const ManageWinners = () => {
                 <th style={{ ...containerStyles.headerCell, textAlign: 'left' }}>Team</th>
                 <th style={{ ...containerStyles.headerCell, textAlign: 'left' }}>Branch</th>
                 <th style={{ ...containerStyles.headerCell, textAlign: 'left' }}>Event</th>
+                <th style={{ ...containerStyles.headerCell, textAlign: 'left' }}>Year</th>
                 <th style={{ ...containerStyles.headerCell, textAlign: 'center' }}>Medal</th>
+                <th style={{ ...containerStyles.headerCell, textAlign: 'left' }}>Source</th>
                 <th style={{ ...containerStyles.headerCell, textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {winners.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ ...containerStyles.cell, textAlign: 'center', color: '#64748b', padding: '28px 16px' }}>
+                  <td colSpan={9} style={{ ...containerStyles.cell, textAlign: 'center', color: '#64748b', padding: '28px 16px' }}>
                     No winners added yet.
                   </td>
                 </tr>
@@ -1004,6 +1291,7 @@ const ManageWinners = () => {
                   <td style={containerStyles.cell}>{winner.teamName || '-'}</td>
                   <td style={containerStyles.cell}>{winner.branch || '-'}</td>
                   <td style={containerStyles.cell}>{winner.eventName}</td>
+                  <td style={containerStyles.cell}>{winner.year || '-'}</td>
                   <td style={{ ...containerStyles.cell, textAlign: 'center' }}>
                     <span
                       style={{
@@ -1022,6 +1310,13 @@ const ManageWinners = () => {
                     >
                       {winner.medal}
                     </span>
+                  </td>
+                  <td style={containerStyles.cell}>
+                    {winner.linkedResultType === 'team'
+                      ? 'Team Result'
+                      : winner.linkedResultType === 'individual'
+                        ? 'Individual Result'
+                        : 'Manual'}
                   </td>
                   <td style={{ ...containerStyles.cell, textAlign: 'right' }}>
                     <button

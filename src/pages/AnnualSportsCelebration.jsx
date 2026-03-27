@@ -239,6 +239,11 @@ export default function AnnualSportsCelebration() {
             Registration
           </button>
         </div>
+        <div style={styles.quickLinks}>
+          <a href="/winners" style={styles.quickLink}>Winners</a>
+          <a href="/results" style={styles.quickLink}>Results</a>
+          <a href="/points-table" style={styles.quickLink}>Points Table</a>
+        </div>
       </header>
 
       {activeTab === 'events' ? (
@@ -292,5 +297,22 @@ const styles = {
     background: 'var(--page-accent-soft)',
     color: 'var(--page-accent)',
     fontWeight: 700
+  },
+  quickLinks: {
+    display: 'flex',
+    gap: 10,
+    flexWrap: 'wrap',
+    marginTop: 12
+  },
+  quickLink: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '9px 13px',
+    borderRadius: 10,
+    border: '1px solid var(--app-border)',
+    background: 'var(--app-surface-alt)',
+    color: 'var(--app-text)',
+    textDecoration: 'none',
+    fontWeight: 600
   },
 };

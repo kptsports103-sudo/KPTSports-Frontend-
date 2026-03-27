@@ -35,6 +35,7 @@ const Winners = () => {
   const [activeImage, setActiveImage] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMedal, setSelectedMedal] = useState('All');
+  const [selectedYear, setSelectedYear] = useState('All');
 
   useEffect(() => {
     const fetchWinners = async () => {
@@ -57,13 +58,26 @@ const Winners = () => {
       const matchesSearch =
         !normalizedSearch ||
         String(winner.playerName || '').toLowerCase().includes(normalizedSearch) ||
-        String(winner.eventName || '').toLowerCase().includes(normalizedSearch);
+        String(winner.eventName || '').toLowerCase().includes(normalizedSearch) ||
+        String(winner.teamName || '').toLowerCase().includes(normalizedSearch) ||
+        String(winner.branch || '').toLowerCase().includes(normalizedSearch);
 
       const matchesMedal = selectedMedal === 'All' || winner.medal === selectedMedal;
+      const matchesYear = selectedYear === 'All' || String(winner.year || '') === String(selectedYear);
 
-      return matchesSearch && matchesMedal;
+      return matchesSearch && matchesMedal && matchesYear;
     });
-  }, [winners, searchTerm, selectedMedal]);
+  }, [winners, searchTerm, selectedMedal, selectedYear]);
+
+  const availableYears = useMemo(() => {
+    return Array.from(
+      new Set(
+        winners
+          .map((winner) => String(winner?.year || '').trim())
+          .filter(Boolean)
+      )
+    ).sort((left, right) => Number(right) - Number(left));
+  }, [winners]);
 
   return (
     <div
@@ -144,7 +158,7 @@ const Winners = () => {
           id="winners-search"
           name="winners-search"
           type="text"
-          placeholder="Search by winner name or event"
+          placeholder="Search by winner, event, team, or branch"
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
           style={{
@@ -178,6 +192,30 @@ const Winners = () => {
           {MEDAL_FILTERS.map((medal) => (
             <option key={medal} value={medal}>
               {medal === 'All' ? 'All Medals' : `${medal} Medal`}
+            </option>
+          ))}
+        </select>
+
+        <select
+          id="winners-year-filter"
+          name="winners-year-filter"
+          value={selectedYear}
+          onChange={(event) => setSelectedYear(event.target.value)}
+          style={{
+            minWidth: '170px',
+            padding: '12px 14px',
+            borderRadius: '10px',
+            border: `1px solid ${palette.border}`,
+            background: palette.surface,
+            color: palette.text,
+            fontSize: '14px',
+            cursor: 'pointer'
+          }}
+        >
+          <option value="All">All Years</option>
+          {availableYears.map((year) => (
+            <option key={year} value={year}>
+              {year}
             </option>
           ))}
         </select>
@@ -268,6 +306,20 @@ const Winners = () => {
                     Branch: {winner.branch}
                   </p>
                 ) : null}
+                {winner.year || winner.linkedResultType ? (
+                  <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                    {winner.year ? (
+                      <span style={{ padding: '0.25rem 0.6rem', borderRadius: '999px', background: palette.surfaceAlt, color: palette.text, fontSize: '0.8rem', fontWeight: 700 }}>
+                        Year {winner.year}
+                      </span>
+                    ) : null}
+                    {winner.linkedResultType ? (
+                      <span style={{ padding: '0.25rem 0.6rem', borderRadius: '999px', background: palette.surfaceMuted, color: palette.accent, fontSize: '0.8rem', fontWeight: 700 }}>
+                        {winner.linkedResultType === 'team' ? 'Team Result' : winner.linkedResultType === 'individual' ? 'Individual Result' : 'Manual'}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
 
                 <button
                   type="button"
@@ -349,7 +401,9 @@ const Winners = () => {
                     <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Team</th>
                     <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Branch</th>
                     <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Event</th>
+                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Year</th>
                     <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Medal</th>
+                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Source</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -358,11 +412,56 @@ const Winners = () => {
                     <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.teamName || '-'}</td>
                     <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.branch || '-'}</td>
                     <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.eventName || '-'}</td>
+                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.year || '-'}</td>
                     <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.medal || '-'}</td>
+                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>
+                      {activeImage.linkedResultType === 'team'
+                        ? 'Team Result'
+                        : activeImage.linkedResultType === 'individual'
+                          ? 'Individual Result'
+                          : 'Manual'}
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
+
+            {activeImage.year ? (
+              <div style={{ marginTop: '14px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <a
+                  href={`/results?year=${encodeURIComponent(activeImage.year)}`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    border: `1px solid ${palette.border}`,
+                    background: palette.surfaceAlt,
+                    color: palette.text,
+                    textDecoration: 'none',
+                    fontWeight: 700
+                  }}
+                >
+                  Open Results
+                </a>
+                <a
+                  href={`/points-table?year=${encodeURIComponent(activeImage.year)}`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    border: `1px solid ${palette.accent}`,
+                    background: palette.accent,
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    fontWeight: 700
+                  }}
+                >
+                  Open Points Table
+                </a>
+              </div>
+            ) : null}
 
             <button
               onClick={() => setActiveImage(null)}

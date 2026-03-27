@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import OptimizedImage from '../components/OptimizedImage';
 import api from '../services/api';
@@ -53,13 +54,14 @@ const palette = {
 const cardHoverShadow = '0 18px 36px rgba(15, 23, 42, 0.22)';
 
 const Results = () => {
-
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedYear = String(searchParams.get('year') || '').trim();
   const currentYear = String(new Date().getFullYear());
   const [results, setResults] = useState([]);
   const [groupResults, setGroupResults] = useState([]);
   const [activeImage, setActiveImage] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedYear, setSelectedYear] = useState(requestedYear || currentYear);
 
   useEffect(() => {
     const fetchResultsData = async () => {
@@ -94,24 +96,41 @@ const Results = () => {
     ])
   ).sort((a, b) => b - a);
 
+  const resolvedSelectedYear = availableYears.length === 0
+    ? ''
+    : availableYears.includes(Number(selectedYear))
+      ? String(selectedYear)
+      : requestedYear && availableYears.includes(Number(requestedYear))
+        ? requestedYear
+        : availableYears.includes(Number(currentYear))
+          ? currentYear
+          : String(availableYears[0]);
+
   useEffect(() => {
-    if (availableYears.length === 0) {
-      if (selectedYear !== currentYear) {
-        setSelectedYear(currentYear);
-      }
-      return;
+    if (resolvedSelectedYear !== String(selectedYear || '')) {
+      setSelectedYear(resolvedSelectedYear);
     }
+  }, [resolvedSelectedYear, selectedYear]);
 
-    const preferredYear = availableYears.includes(Number(currentYear))
-      ? currentYear
-      : String(availableYears[0]);
-
-    if (!availableYears.includes(Number(selectedYear)) || selectedYear === currentYear) {
-      setSelectedYear(preferredYear);
+  useEffect(() => {
+    if (requestedYear && requestedYear !== String(selectedYear || '')) {
+      setSelectedYear(requestedYear);
     }
-  }, [availableYears, currentYear, selectedYear]);
+  }, [requestedYear, selectedYear]);
 
-  const filteredResults = allResults.filter((result) => String(result.year) === String(selectedYear));
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    if (resolvedSelectedYear) {
+      next.set('year', resolvedSelectedYear);
+    } else {
+      next.delete('year');
+    }
+    if (next.toString() !== searchParams.toString()) {
+      setSearchParams(next, { replace: true });
+    }
+  }, [resolvedSelectedYear, searchParams, setSearchParams]);
+
+  const filteredResults = allResults.filter((result) => String(result.year) === String(resolvedSelectedYear));
 
   const groupedResults = filteredResults.reduce((acc, result) => {
     const year = result.year || 'Unknown';
@@ -160,7 +179,7 @@ const Results = () => {
         <select
           id="results-year-filter"
           name="results-year-filter"
-          value={selectedYear}
+          value={resolvedSelectedYear}
           onChange={(e) => setSelectedYear(e.target.value)}
           style={{
             padding: '10px 14px',
@@ -173,6 +192,9 @@ const Results = () => {
             fontSize: '14px'
           }}
         >
+          {availableYears.length === 0 ? (
+            <option value="">No years available</option>
+          ) : null}
           {availableYears.map((year) => (
             <option key={year} value={String(year)}>
               {year}
@@ -603,6 +625,3 @@ const Results = () => {
 };
 
 export default Results;
-
-
-

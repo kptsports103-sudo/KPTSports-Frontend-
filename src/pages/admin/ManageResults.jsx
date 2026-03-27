@@ -26,6 +26,11 @@ const normalizeName = (name) => {
   return (name || '').toLowerCase().trim().replace(/\s+/g, ' ');
 };
 
+const normalizeEventLabel = (item) => {
+  const label = String(item?.eventName || item?.event_title || item?.event || '').trim();
+  return label;
+};
+
 const getSemesterOptions = (diplomaYear) => {
   if (String(diplomaYear) === '1') return ['1', '2'];
   if (String(diplomaYear) === '2') return ['3', '4'];
@@ -45,6 +50,9 @@ const ManageResults = () => {
   const [playersById, setPlayersById] = useState({});
   const [playersByYear, setPlayersByYear] = useState({});
   const [bulkRows, setBulkRows] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [registrations, setRegistrations] = useState([]);
+  const [selectedRegistrationId, setSelectedRegistrationId] = useState('');
 
   const [isEditing, setIsEditing] = useState(false);
   const [isGroupEditing, setIsGroupEditing] = useState(false);
@@ -99,6 +107,8 @@ const ManageResults = () => {
     fetchResults();
     fetchGroupResults();
     fetchPlayers();
+    fetchEvents();
+    fetchRegistrations();
   }, []);
 
   const fetchResults = async () => {
@@ -250,6 +260,24 @@ const ManageResults = () => {
       setPlayersByYear(cleanedYearMap);
     } catch (error) {
       console.error('Failed to fetch players:', error);
+    }
+  };
+
+  const fetchEvents = async () => {
+    try {
+      const res = await api.get('/events');
+      setEvents(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      console.error('Failed to fetch events:', error);
+    }
+  };
+
+  const fetchRegistrations = async () => {
+    try {
+      const res = await api.get('/registrations');
+      setRegistrations(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      console.error('Failed to fetch registrations:', error);
     }
   };
 
@@ -575,7 +603,7 @@ const ManageResults = () => {
             }
             return {
               name: member?.name || '',
-              branch: '',
+              branch: member?.branch || '',
               diplomaYear: member?.diplomaYear ? String(member.diplomaYear) : '',
               semester: member?.semester ? String(member.semester) : ''
             };
@@ -587,6 +615,7 @@ const ManageResults = () => {
     setEditingGroupId(item._id);
     setIsGroupEditing(true);
     setGroupMemberSelection({});
+    setSelectedRegistrationId('');
   };
 
   const getGroupYearPlayers = () => {
@@ -623,6 +652,32 @@ const ManageResults = () => {
     }));
   };
 
+  const applyRegistrationRoster = (registrationId) => {
+    const registration = registrations.find((item) => String(item?._id || item?.id || '') === String(registrationId || ''));
+    if (!registration) return;
+
+    const roster = Array.isArray(registration.members) ? registration.members : [];
+    if (!roster.length) {
+      alert('Selected registration does not have roster members.');
+      return;
+    }
+
+    setSelectedRegistrationId(String(registration?._id || registration?.id || ''));
+    setGroupForm((prev) => ({
+      ...prev,
+      teamName: String(registration.teamName || prev.teamName || registration.teamHeadName || '').trim(),
+      event: String(registration.eventName || prev.event || '').trim(),
+      year: String(registration.year || roster[0]?.year || prev.year || '').trim(),
+      manualMembers: roster.map((member) => ({
+        name: String(member?.name || '').trim(),
+        branch: String(member?.branch || '').trim(),
+        diplomaYear: String(member?.year || '').trim(),
+        semester: String(member?.sem || '').trim(),
+      })),
+    }));
+    setGroupMemberSelection({});
+  };
+
   const handleGroupSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -652,11 +707,19 @@ const ManageResults = () => {
             playerMasterId: matched.masterId,
             playerId: matched.id || '',
             name: matched.name,
+            branch: matched.branch || row.branch || '',
             diplomaYear: diplomaYear || matched.diplomaYear || null,
             semester
           };
         }
-        return { playerMasterId: null, playerId: null, name: row.name, diplomaYear: diplomaYear || null, semester };
+        return {
+          playerMasterId: null,
+          playerId: null,
+          name: row.name,
+          branch: row.branch || '',
+          diplomaYear: diplomaYear || null,
+          semester
+        };
       });
 
       const combinedMembers = [...manualMembersResolved];
@@ -705,6 +768,7 @@ const ManageResults = () => {
       setIsGroupEditing(false);
       setEditingGroupId(null);
       setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: [{ name: '', branch: '', diplomaYear: '', semester: '' }], medal: '', imageUrl: '' });
+      setSelectedRegistrationId('');
       
       // Log the activity
       await activityLogService.logActivity(
@@ -1001,6 +1065,42 @@ const ManageResults = () => {
     ])
   ).sort((a, b) => b - a);
 
+  const eventOptions = React.useMemo(() => {
+    return Array.from(
+      new Set(
+        [
+          ...events.map((item) => normalizeEventLabel(item)),
+          ...data.flatMap((yearBlock) => (yearBlock.results || []).map((item) => String(item?.event || '').trim())),
+          ...groupData.flatMap((yearBlock) => (yearBlock.results || []).map((item) => String(item?.event || '').trim())),
+        ].filter(Boolean)
+      )
+    ).sort((left, right) => left.localeCompare(right, 'en', { sensitivity: 'base' }));
+  }, [data, events, groupData]);
+
+  const registrationOptions = React.useMemo(() => {
+    const eventKey = normalizeName(groupForm.event);
+    const yearKey = String(groupForm.year || '').trim();
+
+    return registrations
+      .filter((registration) => {
+        const registrationEvent = normalizeName(registration?.eventName || '');
+        const registrationYear = String(
+          registration?.year ||
+          registration?.members?.[0]?.year ||
+          ''
+        ).trim();
+
+        const matchesEvent = !eventKey || registrationEvent === eventKey;
+        const matchesYear = !yearKey || registrationYear === yearKey;
+        return matchesEvent && matchesYear;
+      })
+      .sort((left, right) => {
+        const leftLabel = `${left?.eventName || ''} ${left?.teamName || left?.teamHeadName || ''}`;
+        const rightLabel = `${right?.eventName || ''} ${right?.teamName || right?.teamHeadName || ''}`;
+        return leftLabel.localeCompare(rightLabel, 'en', { sensitivity: 'base' });
+      });
+  }, [groupForm.event, groupForm.year, registrations]);
+
   const displayedData = data.filter(d => d.year === Number(selectedYear));
   const displayedGroupData = groupData.filter(g => g.year === Number(selectedYear));
 
@@ -1011,6 +1111,15 @@ const ManageResults = () => {
         <h2 style={styles.title}>🏆 Update Results</h2>
         <p style={styles.activitySubtitle}>Manage results page content</p>
         <PageLatestChangeCard pageName="Results Page" />
+        <div style={styles.syncNote}>
+          Event names come from Annual Sports Celebration Data Entry. Team results can also load locked rosters from
+          Sports Meet Registration so Winners, Results, and the Points Table stay aligned.
+        </div>
+        <datalist id="manage-results-event-options">
+          {eventOptions.map((eventName) => (
+            <option key={eventName} value={eventName} />
+          ))}
+        </datalist>
 
         {/* YEAR SELECT (TOP CENTER like Players) */}
         <div style={{ textAlign: 'center', marginBottom: 16 }}>
@@ -1048,6 +1157,7 @@ const ManageResults = () => {
                 setIsGroupEditing(false);
                 setEditingGroupId(null);
                 setGroupForm({ teamName: '', event: '', year: '', memberIds: [], members: [], manualMembers: [{ name: '', branch: '', diplomaYear: '', semester: '' }], medal: '', imageUrl: '' });
+                setSelectedRegistrationId('');
               }}
               style={styles.topBtnSecondary}
             >
@@ -1482,7 +1592,19 @@ const ManageResults = () => {
                       <input id="result-kpm-no" name="result-kpm-no" style={styles.input} value={form.kpmNo} readOnly />
                     </td>
                     <td style={styles.cell}>
-                      <input id="result-event" name="result-event" style={styles.input} value={form.event} onChange={e => setForm({ ...form, event: e.target.value })} required />
+                      <select
+                        id="result-event"
+                        name="result-event"
+                        style={styles.select}
+                        value={form.event}
+                        onChange={e => setForm({ ...form, event: e.target.value })}
+                        required
+                      >
+                        <option value="">Select Event</option>
+                        {eventOptions.map((eventName) => (
+                          <option key={eventName} value={eventName}>{eventName}</option>
+                        ))}
+                      </select>
                     </td>
                     <td style={styles.cell}>
                       <input id="result-year" name="result-year" type="number" style={styles.input} value={form.year} onChange={e => setForm({ ...form, year: e.target.value })} required />
@@ -1567,8 +1689,9 @@ const ManageResults = () => {
                             key={eventIndex}
                             id={`bulk-event-${idx}-${eventIndex}`}
                             name={`bulk-event-${idx}-${eventIndex}`}
+                            list="manage-results-event-options"
                             style={{ ...styles.input, marginTop: 6 }}
-                            placeholder={`Event ${eventIndex + 1}`}
+                            placeholder={`Select Event ${eventIndex + 1}`}
                             value={row[`event_${eventIndex}`] || ''}
                             onChange={e => handleBulkRowChange(idx, `event_${eventIndex}`, e.target.value)}
                             disabled={row.status === 'saved'}
@@ -1706,13 +1829,21 @@ const ManageResults = () => {
                     />
                   </td>
                   <td style={styles.cell}>
-                    <input
+                    <select
                       id="group-event"
                       name="group-event"
-                      style={styles.input}
+                      style={styles.select}
                       value={groupForm.event}
-                      onChange={e => setGroupForm({ ...groupForm, event: e.target.value })}
-                    />
+                      onChange={e => {
+                        setGroupForm({ ...groupForm, event: e.target.value });
+                        setSelectedRegistrationId('');
+                      }}
+                    >
+                      <option value="">Select Event</option>
+                      {eventOptions.map((eventName) => (
+                        <option key={eventName} value={eventName}>{eventName}</option>
+                      ))}
+                    </select>
                   </td>
                   <td style={styles.cell}>
                     <select
@@ -1723,6 +1854,7 @@ const ManageResults = () => {
                       onChange={e => {
                         setGroupForm({ ...groupForm, year: e.target.value });
                         setGroupMemberSelection({});
+                        setSelectedRegistrationId('');
                       }}
                     >
                       <option value="">Select Year</option>
@@ -1758,6 +1890,42 @@ const ManageResults = () => {
                 <tr style={styles.bodyRow}>
                   <td style={styles.cell} colSpan={5}>
                     <div>
+                      <div style={styles.registrationSyncCard}>
+                        <div style={styles.registrationSyncTitle}>Load Locked Team Roster</div>
+                        <div style={styles.registrationSyncText}>
+                          Choose a team from Sports Meet Registration to pull names, branch, year, and semester into
+                          this team result.
+                        </div>
+                        <div style={styles.registrationSyncActions}>
+                          <select
+                            id="group-registration-source"
+                            name="group-registration-source"
+                            style={styles.select}
+                            value={selectedRegistrationId}
+                            onChange={(e) => setSelectedRegistrationId(e.target.value)}
+                          >
+                            <option value="">Select Registered Team</option>
+                            {registrationOptions.map((registration) => {
+                              const registrationId = String(registration?._id || registration?.id || '');
+                              const rosterCount = Array.isArray(registration?.members) ? registration.members.length : 0;
+                              const registrationYear = String(registration?.year || registration?.members?.[0]?.year || '').trim();
+                              return (
+                                <option key={registrationId} value={registrationId}>
+                                  {`${registration.eventName || 'Event'} | ${registration.teamName || registration.teamHeadName || 'Individual'} | Y${registrationYear || '-'} | ${rosterCount} players`}
+                                </option>
+                              );
+                            })}
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() => applyRegistrationRoster(selectedRegistrationId)}
+                            style={styles.topBtnPrimary}
+                            disabled={!selectedRegistrationId}
+                          >
+                            Load Registration Team
+                          </button>
+                        </div>
+                      </div>
                       <div style={{ marginBottom: 14 }}>
                         <div style={{ display: 'flex', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
                           <button
@@ -2005,6 +2173,17 @@ const styles = {
     fontSize: 13
   },
 
+  syncNote: {
+    marginBottom: 14,
+    padding: '12px 14px',
+    background: '#eff6ff',
+    border: '1px solid #bfdbfe',
+    borderRadius: 10,
+    color: '#1e3a8a',
+    fontSize: 13,
+    lineHeight: 1.6
+  },
+
   activityEmpty: {
     padding: '12px 16px',
     background: '#ffffff',
@@ -2064,6 +2243,35 @@ const styles = {
     backgroundColor: '#ffffff',
     outline: 'none',
     boxShadow: 'none'
+  },
+
+  registrationSyncCard: {
+    marginBottom: 14,
+    padding: 14,
+    borderRadius: 10,
+    border: '1px solid #dbeafe',
+    background: '#f8fbff'
+  },
+
+  registrationSyncTitle: {
+    fontSize: 14,
+    fontWeight: 700,
+    color: '#1e3a8a',
+    marginBottom: 6
+  },
+
+  registrationSyncText: {
+    fontSize: 13,
+    color: '#475569',
+    marginBottom: 10,
+    lineHeight: 1.5
+  },
+
+  registrationSyncActions: {
+    display: 'flex',
+    gap: 10,
+    flexWrap: 'wrap',
+    alignItems: 'center'
   },
 
   /* ================= TABLE ================= */
