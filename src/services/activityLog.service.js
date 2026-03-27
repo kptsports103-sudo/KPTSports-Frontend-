@@ -35,6 +35,8 @@ const ROUTE_LABELS = [
   [/^\/admin\/abuse-logs$/, 'Abuse Logs'],
   [/^\/sports-dashboard$/, 'Sports Dashboard'],
   [/^\/verify\/.+$/, 'Certificate Verification'],
+  [/^\/winners$/, 'Winners'],
+  [/^\/points-table$/, 'Points Table'],
   [/^\/results$/, 'Results'],
   [/^\/gallery$/, 'Gallery'],
   [/^\/events$/, 'Events'],

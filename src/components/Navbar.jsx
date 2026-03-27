@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { to: '/about', label: 'About' },
   { to: '/history', label: 'History' },
   { to: '/gallery', label: 'Gallery' },
+  { to: '/winners', label: 'Winners' },
   { to: '/results', label: 'Results' }
 ];
 
@@ -226,7 +227,13 @@ const Navbar = () => {
                 Register
               </button>
               <button type="button" onClick={() => navigate('/results')}>
+                Results
+              </button>
+              <button type="button" onClick={() => navigate('/winners')}>
                 Winners
+              </button>
+              <button type="button" onClick={() => navigate('/points-table')}>
+                Points Table
               </button>
             </div>
           </li>

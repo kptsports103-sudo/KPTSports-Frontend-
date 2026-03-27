@@ -38,6 +38,8 @@ const getCaptureBaseUrl = () => {
 const createEmptyForm = () => ({
   eventName: '',
   playerName: '',
+  teamName: '',
+  branch: '',
   medal: 'Gold',
   imageUrl: '',
   imagePublicId: '',
@@ -287,6 +289,8 @@ const ManageWinners = () => {
     setForm({
       eventName: winner.eventName || '',
       playerName: winner.playerName || '',
+      teamName: winner.teamName || '',
+      branch: winner.branch || '',
       medal: winner.medal || 'Gold',
       imageUrl: winner.imageUrl || '',
       imagePublicId: winner.imagePublicId || '',
@@ -415,6 +419,8 @@ const ManageWinners = () => {
     const payload = {
       eventName: form.eventName.trim(),
       playerName: form.playerName.trim(),
+      teamName: form.teamName.trim(),
+      branch: form.branch.trim(),
       medal: form.medal,
       imageUrl: form.imageUrl,
       imagePublicId: form.imagePublicId,
@@ -465,6 +471,8 @@ const ManageWinners = () => {
         [
           { field: 'Event Name', after: payload.eventName || '-' },
           { field: 'Player Name', after: payload.playerName || '-' },
+          { field: 'Team Name', after: payload.teamName || '-' },
+          { field: 'Branch', after: payload.branch || '-' },
           { field: 'Medal', after: payload.medal || '-' },
           { field: 'Operation', after: editingId ? 'Update' : 'Create' },
         ]
@@ -496,6 +504,8 @@ const ManageWinners = () => {
         [
           { field: 'Event Name', before: winner.eventName || '-', after: '-' },
           { field: 'Player Name', before: winner.playerName || '-', after: '-' },
+          { field: 'Team Name', before: winner.teamName || '-', after: '-' },
+          { field: 'Branch', before: winner.branch || '-', after: '-' },
           { field: 'Medal', before: winner.medal || '-', after: '-' },
           { field: 'Operation', after: 'Delete' },
         ]
@@ -588,6 +598,28 @@ const ManageWinners = () => {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label htmlFor="winner-team-name" style={containerStyles.label}>Team Name</label>
+              <input
+                id="winner-team-name"
+                value={form.teamName}
+                onChange={(event) => setForm((current) => ({ ...current, teamName: event.target.value }))}
+                style={containerStyles.input}
+                placeholder="CSE Champions"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="winner-branch" style={containerStyles.label}>Branch</label>
+              <input
+                id="winner-branch"
+                value={form.branch}
+                onChange={(event) => setForm((current) => ({ ...current, branch: event.target.value }))}
+                style={containerStyles.input}
+                placeholder="Computer Science"
+              />
             </div>
 
             <div>
@@ -860,6 +892,16 @@ const ManageWinners = () => {
                 <p style={{ margin: '8px 0 0 0', color: '#475569', fontSize: 16 }}>
                   {form.eventName || 'Event name will be shown here'}
                 </p>
+                {form.teamName ? (
+                  <p style={{ margin: '10px 0 0 0', color: '#0b3ea8', fontSize: 14, fontWeight: 700 }}>
+                    Team: {form.teamName}
+                  </p>
+                ) : null}
+                {form.branch ? (
+                  <p style={{ margin: '6px 0 0 0', color: '#475569', fontSize: 14 }}>
+                    Branch: {form.branch}
+                  </p>
+                ) : null}
               </div>
 
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -882,6 +924,8 @@ const ManageWinners = () => {
               <tr style={containerStyles.headerRow}>
                 <th style={{ ...containerStyles.headerCell, textAlign: 'left' }}>Photo</th>
                 <th style={{ ...containerStyles.headerCell, textAlign: 'left' }}>Player</th>
+                <th style={{ ...containerStyles.headerCell, textAlign: 'left' }}>Team</th>
+                <th style={{ ...containerStyles.headerCell, textAlign: 'left' }}>Branch</th>
                 <th style={{ ...containerStyles.headerCell, textAlign: 'left' }}>Event</th>
                 <th style={{ ...containerStyles.headerCell, textAlign: 'center' }}>Medal</th>
                 <th style={{ ...containerStyles.headerCell, textAlign: 'right' }}>Actions</th>
@@ -890,7 +934,7 @@ const ManageWinners = () => {
             <tbody>
               {winners.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ ...containerStyles.cell, textAlign: 'center', color: '#64748b', padding: '28px 16px' }}>
+                  <td colSpan={7} style={{ ...containerStyles.cell, textAlign: 'center', color: '#64748b', padding: '28px 16px' }}>
                     No winners added yet.
                   </td>
                 </tr>
@@ -911,6 +955,8 @@ const ManageWinners = () => {
                     />
                   </td>
                   <td style={{ ...containerStyles.cell, fontWeight: 700 }}>{winner.playerName}</td>
+                  <td style={containerStyles.cell}>{winner.teamName || '-'}</td>
+                  <td style={containerStyles.cell}>{winner.branch || '-'}</td>
                   <td style={containerStyles.cell}>{winner.eventName}</td>
                   <td style={{ ...containerStyles.cell, textAlign: 'center' }}>
                     <span

@@ -16,6 +16,8 @@ const History = lazy(() => import('../pages/History'));
 const Events = lazy(() => import('../pages/Events'));
 const AnnualSportsCelebration = lazy(() => import('../pages/AnnualSportsCelebration'));
 const Gallery = lazy(() => import('../pages/Gallery'));
+const Winners = lazy(() => import('../pages/Winners'));
+const PointsTable = lazy(() => import('../pages/PointsTable'));
 const Results = lazy(() => import('../pages/Results'));
 const Login = lazy(() => import('../pages/Login'));
 const OTPVerify = lazy(() => import('../pages/OTPVerify'));
@@ -104,6 +106,8 @@ const AppContent = () => {
             <Route path="/events" element={<Events />} />
             <Route path="/sports-celebration" element={<AnnualSportsCelebration />} />
             <Route path="/gallery" element={<Gallery />} />
+            <Route path="/winners" element={<Winners />} />
+            <Route path="/points-table" element={<PointsTable />} />
             <Route path="/results" element={<Results />} />
             <Route path="/verify/:id" element={<VerifyCertificate />} />
             <Route path="/winner-camera" element={<WinnerCameraCapture />} />

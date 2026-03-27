@@ -227,7 +227,7 @@ function Home() {
         <section id="winners" className="section-shell">
           <header className="section-header section-header--with-action">
             <h2>Latest Winners</h2>
-            <button className="section-view-more" type="button" onClick={() => navigate('/results')}>
+            <button className="section-view-more" type="button" onClick={() => navigate('/winners')}>
               View All Winners
             </button>
           </header>
@@ -251,6 +251,13 @@ function Home() {
                 <div className="winner-preview-card__body">
                   <p className="winner-preview-card__event">{winner.eventName}</p>
                   <h3>{winner.playerName}</h3>
+                  {winner.teamName || winner.branch ? (
+                    <p className="winner-preview-card__description">
+                      {[winner.teamName ? `Team: ${winner.teamName}` : '', winner.branch ? `Branch: ${winner.branch}` : '']
+                        .filter(Boolean)
+                        .join(' | ')}
+                    </p>
+                  ) : null}
                   <p className="winner-preview-card__description">
                     Honored for outstanding performance in {winner.eventName}.
                   </p>

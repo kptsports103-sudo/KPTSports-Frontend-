@@ -89,10 +89,28 @@ const ROUTES = [
     type: 'website',
   },
   {
+    test: (pathname) => pathname === '/winners',
+    title: 'Sports Winners | KPT Sports',
+    description:
+      'View published winner details, medal highlights, and winner photos from KPT Sports.',
+    canonical: '/winners',
+    robots: PUBLIC_ROBOTS,
+    type: 'website',
+  },
+  {
+    test: (pathname) => pathname === '/points-table',
+    title: 'Points Table | KPT Sports',
+    description:
+      'View Indoor and Outdoor sports points tables, team points, single-game points, and the leading branch on KPT Sports.',
+    canonical: '/points-table',
+    robots: PUBLIC_ROBOTS,
+    type: 'website',
+  },
+  {
     test: (pathname) => pathname === '/results',
     title: 'Sports Results | KPT Sports',
     description:
-      'Find medal winners, team achievements, and year-wise results published on the KPT Sports website.',
+      'Find year-wise sports results, individual medals, and team achievements published on the KPT Sports website.',
     canonical: '/results',
     robots: PUBLIC_ROBOTS,
     type: 'website',

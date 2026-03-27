@@ -37,6 +37,18 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://kpt-sports-frontend.vercel.app/winners</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://kpt-sports-frontend.vercel.app/points-table</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://kpt-sports-frontend.vercel.app/results</loc>
     <lastmod>2026-03-11</lastmod>
     <changefreq>weekly</changefreq>
