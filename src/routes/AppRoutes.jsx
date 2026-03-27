@@ -45,6 +45,7 @@ const Approvals = lazy(() => import('../pages/super-admin/Approvals'));
 const AbuseLogs = lazy(() => import('../pages/super-admin/AbuseLogs'));
 const SportsDashboard = lazy(() => import('../pages/SportsDashboard'));
 const VerifyCertificate = lazy(() => import('../pages/VerifyCertificate'));
+const WinnerCameraCapture = lazy(() => import('../pages/WinnerCameraCapture'));
 
 import ProtectedRoute from '../components/ProtectedRoute';
 
@@ -64,6 +65,7 @@ const AppContent = () => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/otp-verify';
   const isAdmin = location.pathname.startsWith('/admin');
+  const isStandaloneRoute = location.pathname === '/winner-camera';
   const isDashboardRoute =
     isAdmin ||
     location.pathname.startsWith('/dashboard') ||
@@ -89,8 +91,8 @@ const AppContent = () => {
 
   return (
     <div className="app-wrapper">
-      {!isAuthPage && !isDashboardRoute && <TopBar toggleTheme={toggleTheme} />}
-      {!isAuthPage && !isDashboardRoute && <Navbar />}
+      {!isAuthPage && !isDashboardRoute && !isStandaloneRoute && <TopBar toggleTheme={toggleTheme} />}
+      {!isAuthPage && !isDashboardRoute && !isStandaloneRoute && <Navbar />}
 
       <main className="app-content">
         <Suspense fallback={<div style={{ padding: '24px' }}>Loading...</div>}>
@@ -104,6 +106,7 @@ const AppContent = () => {
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/results" element={<Results />} />
             <Route path="/verify/:id" element={<VerifyCertificate />} />
+            <Route path="/winner-camera" element={<WinnerCameraCapture />} />
             <Route path="/login" element={<Login />} />
             <Route path="/otp-verify" element={<OTPVerify />} />
             <Route path="/sports-dashboard" element={<ProtectedRoute roles={["admin", "superadmin"]}><SportsDashboard /></ProtectedRoute>} />
@@ -135,7 +138,7 @@ const AppContent = () => {
           </Routes>
         </Suspense>
       </main>
-      {!isAuthPage && !isDashboardRoute && <Footer />}
+      {!isAuthPage && !isDashboardRoute && !isStandaloneRoute && <Footer />}
     </div>
   );
 };

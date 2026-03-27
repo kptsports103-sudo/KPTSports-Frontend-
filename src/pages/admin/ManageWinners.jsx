@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Camera, Pencil, Save, Trash2, Trophy, Upload, X } from 'lucide-react';
+import QRCode from 'qrcode';
+import { Camera, CheckCircle2, Copy, Pencil, QrCode, RefreshCcw, Save, Smartphone, Trash2, Trophy, Upload, X } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import api from '../../services/api';
 import activityLogService from '../../services/activityLog.service';
 import { confirmAction } from '../../utils/notify';
 import PageLatestChangeCard from '../../components/PageLatestChangeCard';
+import { SITE_URL } from '../../seo/siteMeta';
 
 const MEDAL_OPTIONS = ['Gold', 'Silver', 'Bronze'];
 
@@ -12,6 +14,25 @@ const medalTheme = {
   Gold: { background: '#fef3c7', color: '#92400e', border: '#fcd34d' },
   Silver: { background: '#e5e7eb', color: '#374151', border: '#cbd5e1' },
   Bronze: { background: '#fde68a', color: '#9a3412', border: '#f59e0b' },
+};
+
+const captureStatusTheme = {
+  waiting: { background: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', label: 'Waiting for phone photo' },
+  uploaded: { background: '#ecfdf5', color: '#047857', border: '#a7f3d0', label: 'Phone photo ready' },
+  error: { background: '#fef2f2', color: '#b91c1c', border: '#fecaca', label: 'Phone sync error' },
+  expired: { background: '#fff7ed', color: '#c2410c', border: '#fed7aa', label: 'Phone link expired' },
+  idle: { background: '#f8fafc', color: '#334155', border: '#cbd5e1', label: 'Phone link inactive' },
+};
+
+const getCaptureBaseUrl = () => {
+  if (typeof window === 'undefined') return SITE_URL;
+
+  const hostname = String(window.location.hostname || '').toLowerCase();
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return SITE_URL;
+  }
+
+  return window.location.origin.replace(/\/+$/, '');
 };
 
 const createEmptyForm = () => ({
@@ -137,8 +158,14 @@ const ManageWinners = () => {
   const [editingId, setEditingId] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
+  const [capturedImage, setCapturedImage] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [captureSession, setCaptureSession] = useState(null);
+  const [captureQrCode, setCaptureQrCode] = useState('');
+  const [captureStatus, setCaptureStatus] = useState('idle');
+  const [captureMessage, setCaptureMessage] = useState('');
+  const [isPreparingCapture, setIsPreparingCapture] = useState(false);
 
   useEffect(() => {
     fetchWinners();
@@ -156,6 +183,55 @@ const ManageWinners = () => {
     return () => URL.revokeObjectURL(objectUrl);
   }, [selectedFile]);
 
+  useEffect(() => {
+    if (!captureSession?.sessionId || captureStatus !== 'waiting') {
+      return undefined;
+    }
+
+    let isCancelled = false;
+
+    const pollCaptureSession = async () => {
+      try {
+        const response = await api.get(`/winners/capture-sessions/${captureSession.sessionId}`);
+        if (isCancelled) return;
+
+        const sessionData = response?.data || {};
+        setCaptureSession((current) => (current ? { ...current, ...sessionData } : current));
+
+        if (sessionData.status === 'uploaded' && sessionData.imageUrl) {
+          setCapturedImage({
+            imageUrl: sessionData.imageUrl,
+            imagePublicId: sessionData.imagePublicId || '',
+          });
+          setSelectedFile(null);
+          setPreviewUrl('');
+          setCaptureStatus('uploaded');
+          setCaptureMessage('Phone photo received. It is filled into the form preview and ready to save.');
+        }
+      } catch (error) {
+        if (isCancelled) return;
+
+        if (error?.response?.status === 404 || error?.response?.status === 410) {
+          setCaptureStatus('expired');
+          setCaptureMessage('Phone camera link expired. Create a new link to continue.');
+          return;
+        }
+
+        console.error('Failed to sync winner capture session:', error);
+        setCaptureStatus('error');
+        setCaptureMessage(error?.response?.data?.message || 'Failed to sync phone photo.');
+      }
+    };
+
+    pollCaptureSession();
+    const intervalId = window.setInterval(pollCaptureSession, 2500);
+
+    return () => {
+      isCancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [captureSession?.sessionId, captureStatus]);
+
   const fetchWinners = async () => {
     try {
       const response = await api.get('/winners');
@@ -166,7 +242,40 @@ const ManageWinners = () => {
     }
   };
 
-  const resetForm = () => {
+  const clearCaptureUi = () => {
+    setCaptureSession(null);
+    setCaptureQrCode('');
+    setCaptureStatus('idle');
+    setCaptureMessage('');
+  };
+
+  const releaseCaptureSession = async ({ preserveAsset = false } = {}) => {
+    const activeSessionId = captureSession?.sessionId;
+
+    clearCaptureUi();
+    if (!preserveAsset) {
+      setCapturedImage(null);
+    }
+
+    if (!activeSessionId || preserveAsset) {
+      return;
+    }
+
+    try {
+      await api.delete(`/winners/capture-sessions/${activeSessionId}`);
+    } catch (error) {
+      console.error('Failed to clean up winner capture session:', error);
+    }
+  };
+
+  const resetForm = ({ preserveCaptureAsset = false } = {}) => {
+    if (preserveCaptureAsset) {
+      clearCaptureUi();
+      setCapturedImage(null);
+    } else {
+      void releaseCaptureSession();
+    }
+
     setForm(createEmptyForm());
     setEditingId(null);
     setSelectedFile(null);
@@ -174,6 +283,7 @@ const ManageWinners = () => {
   };
 
   const handleEdit = (winner) => {
+    void releaseCaptureSession();
     setForm({
       eventName: winner.eventName || '',
       playerName: winner.playerName || '',
@@ -184,6 +294,7 @@ const ManageWinners = () => {
     setEditingId(winner._id);
     setSelectedFile(null);
     setPreviewUrl('');
+    setCapturedImage(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -197,14 +308,80 @@ const ManageWinners = () => {
       return;
     }
 
+    void releaseCaptureSession();
     setSelectedFile(file);
   };
 
+  const handleStartPhoneCapture = async () => {
+    setIsPreparingCapture(true);
+    setCaptureStatus('waiting');
+    setCaptureMessage('');
+
+    try {
+      await releaseCaptureSession();
+
+      const response = await api.post('/winners/capture-sessions');
+      const sessionId = String(response?.data?.sessionId || '').trim();
+      const token = String(response?.data?.token || '').trim();
+      const expiresAt = response?.data?.expiresAt || null;
+
+      if (!sessionId || !token) {
+        throw new Error('Capture session did not return a valid phone link.');
+      }
+
+      const mobileUrl = `${getCaptureBaseUrl()}/winner-camera?session=${encodeURIComponent(sessionId)}&token=${encodeURIComponent(token)}`;
+      const qrCodeDataUrl = await QRCode.toDataURL(mobileUrl, {
+        width: 240,
+        margin: 1,
+      });
+
+      setCaptureSession({
+        sessionId,
+        expiresAt,
+        mobileUrl,
+        status: 'pending',
+        imageUrl: '',
+        imagePublicId: '',
+      });
+      setCaptureQrCode(qrCodeDataUrl);
+      setCaptureStatus('waiting');
+      setCaptureMessage('Scan this QR code on the phone, take the photo, and it will appear here automatically.');
+      setSelectedFile(null);
+      setPreviewUrl('');
+    } catch (error) {
+      console.error('Failed to start winner phone capture:', error);
+      clearCaptureUi();
+      setCaptureStatus('error');
+      setCaptureMessage(error?.response?.data?.message || error?.message || 'Failed to generate phone camera link.');
+    } finally {
+      setIsPreparingCapture(false);
+    }
+  };
+
+  const handleCopyPhoneLink = async () => {
+    if (!captureSession?.mobileUrl) return;
+
+    try {
+      await navigator.clipboard.writeText(captureSession.mobileUrl);
+      setCaptureMessage('Phone link copied. Open it on the phone and take the photo there.');
+    } catch (error) {
+      console.error('Failed to copy phone link:', error);
+      alert('Unable to copy the phone link automatically. Open it directly from the QR code.');
+    }
+  };
+
   const uploadImage = async () => {
-    if (!selectedFile) {
+    if (!selectedFile && !capturedImage?.imageUrl) {
       return {
         imageUrl: form.imageUrl,
         imagePublicId: form.imagePublicId,
+      };
+    }
+
+    if (!selectedFile && capturedImage?.imageUrl) {
+      return {
+        imageUrl: capturedImage.imageUrl,
+        imagePublicId: capturedImage.imagePublicId || '',
       };
     }
 
@@ -251,6 +428,8 @@ const ManageWinners = () => {
     setIsSaving(true);
 
     try {
+      const activeCaptureSessionId = captureSession?.sessionId;
+      const activeCapturedImageId = capturedImage?.imagePublicId || '';
       const uploadedImage = await uploadImage();
       payload.imageUrl = uploadedImage.imageUrl;
       payload.imagePublicId = uploadedImage.imagePublicId;
@@ -266,8 +445,16 @@ const ManageWinners = () => {
         await api.post('/winners', payload);
       }
 
+      if (activeCaptureSessionId && activeCapturedImageId && payload.imagePublicId === activeCapturedImageId) {
+        try {
+          await api.post(`/winners/capture-sessions/${activeCaptureSessionId}/claim`);
+        } catch (claimError) {
+          console.error('Failed to claim winner capture session:', claimError);
+        }
+      }
+
       await fetchWinners();
-      resetForm();
+      resetForm({ preserveCaptureAsset: true });
 
       await activityLogService.logActivity(
         editingId ? 'Updated Winner' : 'Created Winner',
@@ -319,8 +506,16 @@ const ManageWinners = () => {
     }
   };
 
-  const currentPreview = previewUrl || form.imageUrl || '';
+  const currentPreview = previewUrl || capturedImage?.imageUrl || form.imageUrl || '';
   const isEditing = Boolean(editingId);
+  const previewSourceLabel = previewUrl
+    ? 'Photo selected from this device'
+    : capturedImage?.imageUrl
+      ? 'Photo received from phone'
+      : form.imageUrl
+        ? 'Current saved winner photo'
+        : '';
+  const captureTheme = captureStatusTheme[captureStatus] || captureStatusTheme.idle;
 
   return (
     <AdminLayout>
@@ -342,7 +537,7 @@ const ManageWinners = () => {
                 {isEditing ? 'Edit Winner' : 'Add Winner'}
               </h4>
               <p style={{ margin: '6px 0 0 0', color: '#475569', fontSize: 14 }}>
-                Upload a photo or capture one directly from a mobile device camera.
+                Upload from this device, or scan a phone link to capture a photo and auto-fill it here.
               </p>
             </div>
 
@@ -411,7 +606,7 @@ const ManageWinners = () => {
                 }}
               >
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {selectedFile?.name || (form.imageUrl ? 'Current image selected' : 'Choose image or open camera')}
+                  {selectedFile?.name || (capturedImage?.imageUrl ? 'Phone photo selected' : (form.imageUrl ? 'Current image selected' : 'Choose image or open camera'))}
                 </span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#0b3ea8', fontWeight: 700 }}>
                   <Upload size={16} />
@@ -426,7 +621,152 @@ const ManageWinners = () => {
                 onChange={handleFileChange}
                 style={{ display: 'none' }}
               />
+              <p style={{ margin: '8px 0 0 0', fontSize: 12, color: '#64748b' }}>
+                On mobile this can open the camera directly. On laptop, use the phone link below.
+              </p>
             </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: 20,
+              borderRadius: 16,
+              border: '1px solid #dbe4ee',
+              background: '#f8fafc',
+              padding: 18,
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 16, fontWeight: 700, color: '#0f172a' }}>
+                  <Smartphone size={18} color="#0b3ea8" />
+                  Phone Camera Link
+                </div>
+                <p style={{ margin: '8px 0 0 0', color: '#475569', fontSize: 14, maxWidth: 640 }}>
+                  Use this when the laptop camera picker is not enough. Scan the QR code on your phone, take the photo there, and the winner photo preview here updates automatically.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  style={containerStyles.button}
+                  onClick={handleStartPhoneCapture}
+                  disabled={isPreparingCapture || isSaving || isUploading}
+                >
+                  {captureSession ? <RefreshCcw size={16} /> : <QrCode size={16} />}
+                  {isPreparingCapture ? 'Preparing...' : (captureSession ? 'Generate New Link' : 'Use Phone Camera')}
+                </button>
+                {captureSession ? (
+                  <button
+                    type="button"
+                    style={containerStyles.button}
+                    onClick={() => void releaseCaptureSession()}
+                    disabled={isPreparingCapture || isSaving || isUploading}
+                  >
+                    <X size={16} />
+                    Close Link
+                  </button>
+                ) : null}
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: 14,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '7px 12px',
+                borderRadius: 999,
+                fontSize: 13,
+                fontWeight: 700,
+                border: `1px solid ${captureTheme.border}`,
+                background: captureTheme.background,
+                color: captureTheme.color,
+              }}
+            >
+              {captureStatus === 'uploaded' ? <CheckCircle2 size={16} /> : <Smartphone size={16} />}
+              {captureTheme.label}
+            </div>
+
+            {captureMessage ? (
+              <p style={{ margin: '10px 0 0 0', color: '#475569', fontSize: 14 }}>
+                {captureMessage}
+              </p>
+            ) : null}
+
+            {captureSession ? (
+              <div style={{ marginTop: 16, display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', alignItems: 'start' }}>
+                <div
+                  style={{
+                    borderRadius: 16,
+                    border: '1px solid #dbe4ee',
+                    background: '#ffffff',
+                    padding: 16,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: 220,
+                  }}
+                >
+                  {captureQrCode ? (
+                    <img
+                      src={captureQrCode}
+                      alt="Winner phone camera QR code"
+                      style={{ width: '100%', maxWidth: 220, height: 'auto', display: 'block' }}
+                    />
+                  ) : (
+                    <div style={{ color: '#64748b', fontSize: 14 }}>Generating QR code...</div>
+                  )}
+                </div>
+
+                <div style={{ display: 'grid', gap: 12 }}>
+                  <div
+                    style={{
+                      borderRadius: 14,
+                      border: '1px solid #dbe4ee',
+                      background: '#ffffff',
+                      padding: 14,
+                    }}
+                  >
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 8 }}>Phone Link</div>
+                    <a
+                      href={captureSession.mobileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ color: '#0b3ea8', wordBreak: 'break-all', fontSize: 13, textDecoration: 'none' }}
+                    >
+                      {captureSession.mobileUrl}
+                    </a>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    <button type="button" style={containerStyles.button} onClick={handleCopyPhoneLink}>
+                      <Copy size={16} />
+                      Copy Link
+                    </button>
+                    <a
+                      href={captureSession.mobileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ ...containerStyles.button, textDecoration: 'none' }}
+                    >
+                      <Smartphone size={16} />
+                      Open on Phone
+                    </a>
+                  </div>
+
+                  <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>
+                    1. Open the QR/link on the phone.
+                    <br />
+                    2. Take the winner photo there.
+                    <br />
+                    3. Keep this page open. The preview here updates automatically.
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div style={{ marginTop: 20, display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
@@ -439,7 +779,14 @@ const ManageWinners = () => {
                 minHeight: 260,
               }}
             >
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 10 }}>Preview</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: 10 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Preview</div>
+                {previewSourceLabel ? (
+                  <div style={{ fontSize: 12, color: '#475569', fontWeight: 600 }}>
+                    {previewSourceLabel}
+                  </div>
+                ) : null}
+              </div>
               {currentPreview ? (
                 <img
                   src={currentPreview}
