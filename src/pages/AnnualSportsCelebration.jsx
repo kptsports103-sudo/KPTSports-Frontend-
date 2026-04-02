@@ -8,6 +8,18 @@ const initialForm = { eventId: '', teamName: '', teamHeadName: '' };
 const blankMember = () => ({ name: '', branch: '', registerNumber: '', year: '1', sem: '1' });
 const TEAM_EVENT_KEYWORDS = ['relay', 'cricket', 'kabaddi', 'volleyball', 'march past', 'marchpast'];
 
+const deriveRegistrationStatus = (startDate, endDate) => {
+  const safeStartDate = String(startDate || '').trim();
+  const safeEndDate = String(endDate || '').trim();
+  const today = new Date();
+  const currentDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  if (!safeStartDate || !safeEndDate) return 'Closed';
+  if (safeStartDate > safeEndDate) return 'Closed';
+
+  return currentDate >= safeStartDate && currentDate <= safeEndDate ? 'Open' : 'Closed';
+};
+
 const getSemOptionsForYear = (year) => {
   if (year === '1') return ['1', '2'];
   if (year === '2') return ['3', '4'];
@@ -28,27 +40,10 @@ const normalizeEvent = (item) => ({
   eventTime: item.eventTime || 'TBA',
   registrationStartDate: item.registrationStartDate || 'TBA',
   registrationEndDate: item.registrationEndDate || 'TBA',
+  registrationStatus: item.registrationStatus || deriveRegistrationStatus(item.registrationStartDate, item.registrationEndDate),
   teamSizeMin: item.teamSizeMin ?? null,
   teamSizeMax: item.teamSizeMax ?? null,
 });
-
-const normalizeRegistration = (item) => {
-  const members = Array.isArray(item.members)
-    ? item.members
-    : item.playerName
-      ? [{ name: item.playerName || '', branch: item.branch || '', registerNumber: item.registerNumber || '', year: item.year || '1', sem: item.sem || '1' }]
-      : [];
-  return {
-    id: item._id || item.id,
-    eventName: item.eventName || '',
-    teamName: item.teamName || '',
-    teamHeadName: item.teamHeadName || '',
-    year: item.year || '',
-    sem: item.sem || '',
-    status: item.status || 'Locked',
-    members,
-  };
-};
 
 const inferTeamEvent = (event) => {
   const byType = (event.eventType || '').toLowerCase() === 'team';
@@ -72,36 +67,26 @@ const getTeamSizeRules = (event) => {
 export default function AnnualSportsCelebration() {
   const [searchParams] = useSearchParams();
   const [events, setEvents] = useState([]);
-  const [registrations, setRegistrations] = useState([]);
   const [activeTab, setActiveTab] = useState('events');
   const [loadingEvents, setLoadingEvents] = useState(true);
-  const [loadingRegs, setLoadingRegs] = useState(false);
 
   const [form, setForm] = useState(initialForm);
   const [members, setMembers] = useState([blankMember()]);
   const [memberCount, setMemberCount] = useState(1);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [search, setSearch] = useState('');
-  const [yearFilter, setYearFilter] = useState('all');
+  const [reviewData, setReviewData] = useState(null);
+  const [confirmChecked, setConfirmChecked] = useState(false);
+  const [submittedSummary, setSubmittedSummary] = useState(null);
 
   const indoor = useMemo(() => events.filter((e) => e.category === 'Indoor'), [events]);
   const outdoor = useMemo(() => events.filter((e) => e.category === 'Outdoor'), [events]);
   const selectedEvent = useMemo(() => events.find((e) => e.id === form.eventId) || null, [events, form.eventId]);
   const teamRule = useMemo(() => getTeamSizeRules(selectedEvent), [selectedEvent]);
-  const filteredRegs = useMemo(() => {
-    return registrations.filter((item) => {
-      const q = search.trim().toLowerCase();
-      const matchSearch =
-        !q ||
-        item.eventName.toLowerCase().includes(q) ||
-        item.teamName.toLowerCase().includes(q) ||
-        item.teamHeadName.toLowerCase().includes(q) ||
-        item.members.some((m) => m.name.toLowerCase().includes(q) || m.registerNumber.toLowerCase().includes(q) || m.branch.toLowerCase().includes(q));
-      const matchYear = yearFilter === 'all' || item.year === yearFilter || item.members.some((m) => String(m.year || '') === yearFilter);
-      return matchSearch && matchYear;
-    });
-  }, [registrations, search, yearFilter]);
+  const firstOpenEventId = useMemo(
+    () => events.find((item) => item.registrationStatus !== 'Closed')?.id || '',
+    [events]
+  );
 
   useEffect(() => {
     const tab = String(searchParams.get('tab') || '').toLowerCase();
@@ -121,7 +106,7 @@ export default function AnnualSportsCelebration() {
         const res = await api.get('/events');
         const list = Array.isArray(res.data) ? res.data.map(normalizeEvent) : [];
         setEvents(list);
-        setForm((p) => ({ ...p, eventId: p.eventId || list[0]?.id || '' }));
+        setForm((p) => ({ ...p, eventId: p.eventId || list.find((item) => item.registrationStatus !== 'Closed')?.id || '' }));
       } finally {
         setLoadingEvents(false);
       }
@@ -130,25 +115,13 @@ export default function AnnualSportsCelebration() {
   }, []);
 
   useEffect(() => {
-    if (activeTab !== 'registration') return;
-    const run = async () => {
-      setLoadingRegs(true);
-      try {
-        const res = await api.get('/registrations');
-        setRegistrations(Array.isArray(res.data) ? res.data.map(normalizeRegistration) : []);
-      } finally {
-        setLoadingRegs(false);
-      }
-    };
-    run();
-  }, [activeTab]);
-
-  useEffect(() => {
     if (!selectedEvent) return;
     const nextCount = teamRule.isTeam ? teamRule.min : 1;
     setMemberCount(nextCount);
     setMembers(Array.from({ length: nextCount }, () => blankMember()));
     setForm((p) => ({ ...p, teamName: '' }));
+    setReviewData(null);
+    setConfirmChecked(false);
   }, [selectedEvent, teamRule.isTeam, teamRule.min]);
 
   useEffect(() => {
@@ -162,10 +135,18 @@ export default function AnnualSportsCelebration() {
 
   const changeForm = (event) => {
     const { name, value } = event.target;
+    setError('');
+    setReviewData(null);
+    setConfirmChecked(false);
+    setSubmittedSummary(null);
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const updateMember = (index, field, value) => {
+    setError('');
+    setReviewData(null);
+    setConfirmChecked(false);
+    setSubmittedSummary(null);
     setMembers((prev) => {
       const next = [...prev];
       const current = { ...next[index], [field]: value };
@@ -178,41 +159,95 @@ export default function AnnualSportsCelebration() {
     });
   };
 
-  const submit = async (event) => {
-    event.preventDefault();
-    setError('');
-    setSubmitting(true);
-    try {
-      if (!form.eventId || !form.teamHeadName.trim()) throw new Error('Select event and enter Team Head Name.');
-      if (teamRule.isTeam && !form.teamName.trim()) throw new Error('Team Name is required for team events.');
-      const cleanedMembers = members.map((m) => ({
-        name: m.name.trim(),
-        branch: m.branch.trim(),
-        registerNumber: m.registerNumber.trim(),
-        year: String(m.year || '').trim(),
-        sem: String(m.sem || '').trim(),
-      }));
-      for (let i = 0; i < cleanedMembers.length; i += 1) {
-        const row = cleanedMembers[i];
-        if (!row.name || !row.branch || !row.registerNumber || !row.year || !row.sem) throw new Error(`Row ${i + 1}: fill Name, Branch, Register Number, Year, Sem.`);
+  const buildRegistrationDraft = () => {
+    if (!form.eventId || !form.teamHeadName.trim()) {
+      throw new Error('Select an open event and enter Team Head Name.');
+    }
+
+    if (!selectedEvent) {
+      throw new Error('Selected event was not found.');
+    }
+
+    if (selectedEvent.registrationStatus === 'Closed') {
+      throw new Error('This event is closed for registration.');
+    }
+
+    if (teamRule.isTeam && !form.teamName.trim()) {
+      throw new Error('Team Name is required for team events.');
+    }
+
+    const cleanedMembers = members.map((member) => ({
+      name: member.name.trim(),
+      branch: member.branch.trim(),
+      registerNumber: member.registerNumber.trim(),
+      year: String(member.year || '').trim(),
+      sem: String(member.sem || '').trim(),
+    }));
+
+    for (let i = 0; i < cleanedMembers.length; i += 1) {
+      const row = cleanedMembers[i];
+      if (!row.name || !row.branch || !row.registerNumber || !row.year || !row.sem) {
+        throw new Error(`Row ${i + 1}: fill Name, Branch, Register Number, Year, Sem.`);
       }
-      await api.post('/registrations', {
+    }
+
+    return {
+      payload: {
         eventId: form.eventId,
         teamName: teamRule.isTeam ? form.teamName.trim() : '',
         teamHeadName: form.teamHeadName.trim(),
         year: cleanedMembers[0]?.year || '',
         sem: cleanedMembers[0]?.sem || '',
         members: cleanedMembers,
-      });
-      setForm((p) => ({ ...p, teamName: '', teamHeadName: '' }));
-      setMembers(Array.from({ length: memberCount }, () => blankMember()));
-      const res = await api.get('/registrations');
-      setRegistrations(Array.isArray(res.data) ? res.data.map(normalizeRegistration) : []);
+      },
+      summary: {
+        eventName: selectedEvent.eventName,
+        category: selectedEvent.category,
+        eventType: teamRule.isTeam ? 'Team / Roster' : 'Individual',
+        teamName: teamRule.isTeam ? form.teamName.trim() : '',
+        teamHeadName: form.teamHeadName.trim(),
+        members: cleanedMembers,
+      },
+    };
+  };
+
+  const submit = (event) => {
+    event.preventDefault();
+    setError('');
+    setSubmittedSummary(null);
+
+    try {
+      const nextReview = buildRegistrationDraft();
+      setReviewData(nextReview);
+      setConfirmChecked(false);
+    } catch (e) {
+      setError(e.message || 'Registration review failed.');
+    }
+  };
+
+  const confirmSubmit = async () => {
+    if (!reviewData) return;
+
+    setError('');
+    setSubmitting(true);
+    try {
+      await api.post('/registrations', reviewData.payload);
+      setSubmittedSummary(reviewData.summary);
+      setReviewData(null);
+      setConfirmChecked(false);
+      setForm((p) => ({ ...p, eventId: firstOpenEventId || p.eventId || '', teamName: '', teamHeadName: '' }));
+      setMemberCount(teamRule.isTeam ? teamRule.min : 1);
+      setMembers(Array.from({ length: teamRule.isTeam ? teamRule.min : 1 }, () => blankMember()));
     } catch (e) {
       setError(e.response?.data?.error || e.message || 'Registration failed.');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const cancelReview = () => {
+    setReviewData(null);
+    setConfirmChecked(false);
   };
 
   return (
@@ -253,20 +288,27 @@ export default function AnnualSportsCelebration() {
           events={events}
           form={form}
           members={members}
+          selectedEvent={selectedEvent}
           teamRule={teamRule}
           memberCount={memberCount}
-          setMemberCount={setMemberCount}
+          setMemberCount={(value) => {
+            setError('');
+            setReviewData(null);
+            setConfirmChecked(false);
+            setSubmittedSummary(null);
+            setMemberCount(value);
+          }}
           changeForm={changeForm}
           updateMember={updateMember}
           submit={submit}
+          reviewData={reviewData}
+          confirmChecked={confirmChecked}
+          setConfirmChecked={setConfirmChecked}
+          confirmSubmit={confirmSubmit}
+          cancelReview={cancelReview}
+          submittedSummary={submittedSummary}
           submitting={submitting}
           error={error}
-          filteredRegs={filteredRegs}
-          loadingRegs={loadingRegs}
-          search={search}
-          setSearch={setSearch}
-          yearFilter={yearFilter}
-          setYearFilter={setYearFilter}
         />
       )}
     </div>
