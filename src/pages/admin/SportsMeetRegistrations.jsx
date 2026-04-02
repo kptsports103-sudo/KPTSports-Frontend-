@@ -12,6 +12,17 @@ const PDF_COLUMNS = [
   { key: 'signature', label: 'Signature', width: 32, align: 'center' },
 ];
 
+const INDIVIDUAL_PDF_COLUMNS = [
+  { key: 'eventName', label: 'Event', width: 42, align: 'left' },
+  { key: 'name', label: 'Student', width: 45, align: 'left' },
+  { key: 'branch', label: 'Branch', width: 63, align: 'left' },
+  { key: 'registerNumber', label: 'Register No', width: 38, align: 'center' },
+  { key: 'year', label: 'Year', width: 14, align: 'center' },
+  { key: 'sem', label: 'Sem', width: 14, align: 'center' },
+  { key: 'teamHeadName', label: 'Head', width: 33, align: 'left' },
+  { key: 'signature', label: 'Signature', width: 24, align: 'center' },
+];
+
 const normalizeEvent = (item) => ({
   id: String(item?._id || item?.id || ''),
   eventName: item?.eventName || item?.event_title || '',
@@ -94,15 +105,13 @@ const buildPdfFileName = (registrations) => {
   return 'annual-sports-celebration-player-registration-form.pdf';
 };
 
-const drawRegistrationSheetPage = (doc, registration, members, renderedDate, renderedTime, showSignatures) => {
+const isTeamRegistration = (registration) =>
+  Boolean(String(registration?.teamName || '').trim()) ||
+  (Array.isArray(registration?.members) ? registration.members.length : 0) > 1;
+
+const startPdfPage = (doc, renderedDate, renderedTime) => {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const tableX = 12;
-  const tableY = 62;
-  const headerHeight = 10;
-  const rowHeight = 9;
-  const tableWidth = pageWidth - 24;
-  const tableHeight = headerHeight + members.length * rowHeight;
 
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, pageWidth, pageHeight, 'F');
@@ -113,44 +122,77 @@ const drawRegistrationSheetPage = (doc, registration, members, renderedDate, ren
 
   doc.setTextColor(25, 31, 45);
   doc.setFont('times', 'bold');
-  doc.setFontSize(21);
-  doc.text('Annual Sports Celebration', pageWidth / 2, 18, { align: 'center' });
+  doc.setFontSize(18);
+  doc.text('Annual Sports Celebration', pageWidth / 2, 15, { align: 'center' });
 
   doc.setDrawColor(225, 228, 232);
-  doc.line(12, 24, pageWidth - 12, 24);
+  doc.line(12, 20, pageWidth - 12, 20);
 
-  doc.setFontSize(18);
-  doc.text('Player Registration Form', pageWidth / 2, 37, { align: 'center' });
+  doc.setFontSize(14);
+  doc.text('Player Registration Form', pageWidth / 2, 28, { align: 'center' });
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.text('Date:', pageWidth - 52, 30);
-  doc.text('Time:', pageWidth - 52, 40);
+  doc.setFontSize(9);
+  doc.text('Date:', pageWidth - 54, 13);
+  doc.text('Time:', pageWidth - 54, 21);
 
   doc.setFont('helvetica', 'normal');
-  doc.text(renderedDate, pageWidth - 38, 30);
-  doc.text(renderedTime, pageWidth - 38, 40);
+  doc.text(renderedDate, pageWidth - 40, 13);
+  doc.text(renderedTime, pageWidth - 40, 21);
+
+  return {
+    pageWidth,
+    pageHeight,
+    contentX: 10,
+    contentY: 34,
+    contentWidth: pageWidth - 20,
+    contentBottom: pageHeight - 12,
+  };
+};
+
+const getTeamBlockHeight = (rowCount) => 17 + rowCount * 5.1;
+
+const getTeamBlockCapacity = (availableHeight) =>
+  Math.max(1, Math.floor((availableHeight - 17) / 5.1));
+
+const drawTeamRegistrationBlock = (doc, registration, members, x, y, width, partLabel = '') => {
+  const summaryHeight = 7;
+  const headerHeight = 5.5;
+  const rowHeight = 5.1;
+  const tableX = x + 2;
+  const tableY = y + 10;
+  const tableWidth = width - 4;
+  const tableHeight = headerHeight + members.length * rowHeight;
+  const blockHeight = 17 + members.length * rowHeight;
+
+  doc.setDrawColor(221, 225, 230);
+  doc.setLineWidth(0.25);
+  doc.roundedRect(x, y, width, blockHeight, 3, 3, 'S');
 
   doc.setFillColor(247, 248, 250);
   doc.setDrawColor(224, 226, 230);
-  doc.roundedRect(12, 48, pageWidth - 24, 12, 3, 3, 'FD');
+  doc.roundedRect(x + 2, y + 2, width - 4, summaryHeight, 2, 2, 'FD');
 
-  doc.setFontSize(9.5);
-  drawPdfSummaryField(doc, 'Event:', registration.eventName || '-', 16, 55.5, 62);
-  drawPdfSummaryField(doc, 'Team:', registration.teamName || 'Individual', 82, 55.5, 78);
-  drawPdfSummaryField(doc, 'Head:', registration.teamHeadName || '-', 173, 55.5, 102);
+  doc.setFontSize(7.2);
+  drawPdfSummaryField(doc, 'Event:', registration.eventName || '-', x + 5, y + 6.4, 70);
+  drawPdfSummaryField(doc, 'Team:', registration.teamName || 'Individual', x + 76, y + 6.4, 88);
+  drawPdfSummaryField(doc, 'Head:', registration.teamHeadName || '-', x + 164, y + 6.4, 70);
+  if (partLabel) {
+    doc.setFont('helvetica', 'bold');
+    doc.text(partLabel, x + width - 6, y + 6.4, { align: 'right' });
+  }
 
   doc.setFillColor(245, 246, 248);
-  doc.rect(tableX, tableY, pageWidth - 24, headerHeight, 'F');
+  doc.rect(tableX, tableY, tableWidth, headerHeight, 'F');
   doc.roundedRect(tableX, tableY, tableWidth, tableHeight, 3, 3, 'S');
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8.8);
+  doc.setFontSize(6.9);
 
   let currentX = tableX;
   PDF_COLUMNS.forEach((column) => {
-    const textX = column.align === 'center' ? currentX + column.width / 2 : currentX + 3;
-    doc.text(column.label, textX, tableY + 6.5, column.align === 'center' ? { align: 'center' } : undefined);
+    const textX = column.align === 'center' ? currentX + column.width / 2 : currentX + 2;
+    doc.text(column.label, textX, tableY + 3.9, column.align === 'center' ? { align: 'center' } : undefined);
     currentX += column.width;
     if (currentX < tableX + tableWidth) {
       doc.line(currentX, tableY, currentX, tableY + tableHeight);
@@ -161,15 +203,76 @@ const drawRegistrationSheetPage = (doc, registration, members, renderedDate, ren
 
   members.forEach((member, index) => {
     const rowY = tableY + headerHeight + index * rowHeight;
-    const textY = rowY + 5.9;
+    const textY = rowY + 3.6;
     let cellX = tableX;
 
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.4);
+    doc.setFontSize(6.8);
 
     PDF_COLUMNS.forEach((column) => {
       const rawValue = column.key === 'signature' ? '' : member[column.key];
-      const safeText = truncatePdfText(doc, rawValue || '', column.width - 6);
+      const safeText =
+        column.key === 'signature' ? '' : truncatePdfText(doc, rawValue || '', column.width - 4);
+      const textX = column.align === 'center' ? cellX + column.width / 2 : cellX + 2;
+      doc.text(safeText, textX, textY, column.align === 'center' ? { align: 'center' } : undefined);
+      cellX += column.width;
+    });
+
+    doc.line(tableX, rowY + rowHeight, tableX + tableWidth, rowY + rowHeight);
+  });
+};
+
+const drawIndividualRegistrationsPage = (doc, rows, renderedDate, renderedTime) => {
+  const page = startPdfPage(doc, renderedDate, renderedTime);
+  const uniqueEvents = [...new Set(rows.map((row) => row.eventName).filter(Boolean))];
+  const eventLabel = uniqueEvents.length === 1 ? uniqueEvents[0] : 'Multiple Individual Events';
+  const summaryY = page.contentY;
+  const tableX = page.contentX;
+  const tableY = summaryY + 12;
+  const tableWidth = page.contentWidth;
+  const headerHeight = 8;
+  const rowHeight = 11.8;
+  const tableHeight = headerHeight + rows.length * rowHeight;
+
+  doc.setFillColor(247, 248, 250);
+  doc.setDrawColor(224, 226, 230);
+  doc.roundedRect(page.contentX, summaryY, page.contentWidth, 9, 3, 3, 'FD');
+  doc.setFontSize(8.8);
+  drawPdfSummaryField(doc, 'Event:', eventLabel, page.contentX + 4, summaryY + 5.9, 112);
+  drawPdfSummaryField(doc, 'Type:', 'Individual Registration', page.contentX + 122, summaryY + 5.9, 72);
+  drawPdfSummaryField(doc, 'Count:', String(rows.length), page.contentX + 214, summaryY + 5.9, 40);
+
+  doc.setFillColor(245, 246, 248);
+  doc.rect(tableX, tableY, tableWidth, headerHeight, 'F');
+  doc.roundedRect(tableX, tableY, tableWidth, tableHeight, 3, 3, 'S');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+
+  let currentX = tableX;
+  INDIVIDUAL_PDF_COLUMNS.forEach((column) => {
+    const textX = column.align === 'center' ? currentX + column.width / 2 : currentX + 3;
+    doc.text(column.label, textX, tableY + 5.2, column.align === 'center' ? { align: 'center' } : undefined);
+    currentX += column.width;
+    if (currentX < tableX + tableWidth) {
+      doc.line(currentX, tableY, currentX, tableY + tableHeight);
+    }
+  });
+
+  doc.line(tableX, tableY + headerHeight, tableX + tableWidth, tableY + headerHeight);
+
+  rows.forEach((row, index) => {
+    const rowY = tableY + headerHeight + index * rowHeight;
+    const textY = rowY + 7;
+    let cellX = tableX;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.8);
+
+    INDIVIDUAL_PDF_COLUMNS.forEach((column) => {
+      const rawValue = column.key === 'signature' ? '' : row[column.key];
+      const safeText =
+        column.key === 'signature' ? '' : truncatePdfText(doc, rawValue || '', column.width - 6);
       const textX = column.align === 'center' ? cellX + column.width / 2 : cellX + 3;
       doc.text(safeText, textX, textY, column.align === 'center' ? { align: 'center' } : undefined);
       cellX += column.width;
@@ -177,19 +280,6 @@ const drawRegistrationSheetPage = (doc, registration, members, renderedDate, ren
 
     doc.line(tableX, rowY + rowHeight, tableX + tableWidth, rowY + rowHeight);
   });
-
-  if (showSignatures) {
-    const signatureLineY = Math.max(tableY + tableHeight + 4, pageHeight - 24);
-
-    doc.setDrawColor(31, 41, 55);
-    doc.line(18, signatureLineY, 120, signatureLineY);
-    doc.line(pageWidth - 120, signatureLineY, pageWidth - 18, signatureLineY);
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9.8);
-    doc.text('Student Welfare Officer', 69, signatureLineY + 6, { align: 'center' });
-    doc.text('Sports Officer', pageWidth - 69, signatureLineY + 6, { align: 'center' });
-  }
 };
 
 const exportRegistrationSheets = (registrations) => {
@@ -202,32 +292,90 @@ const exportRegistrationSheets = (registrations) => {
     hour: '2-digit',
     minute: '2-digit',
   });
-  let firstPage = true;
+  const teamRegistrations = registrations.filter(isTeamRegistration);
+  const individualRows = registrations
+    .filter((registration) => !isTeamRegistration(registration))
+    .map((registration) => {
+      const member = registration.visibleMembers?.[0] || registration.members?.[0] || {};
+      return {
+        eventName: registration.eventName || '',
+        teamHeadName: registration.teamHeadName || '',
+        name: member.name || '',
+        branch: member.branch || '',
+        registerNumber: member.registerNumber || '',
+        year: member.year || '',
+        sem: member.sem || '',
+      };
+    });
 
-  registrations.forEach((registration) => {
-    const members = (registration.visibleMembers || registration.members || []).map((member) => ({
-      ...member,
-    }));
+  let needsNewPage = false;
 
-    let startIndex = 0;
-    while (startIndex < members.length) {
-      if (!firstPage) {
+  const openPage = () => {
+    if (needsNewPage) {
+      doc.addPage('a4', 'landscape');
+    }
+    needsNewPage = true;
+    return startPdfPage(doc, renderedDate, renderedTime);
+  };
+
+  if (teamRegistrations.length > 0) {
+    let page = openPage();
+    let currentY = page.contentY;
+
+    teamRegistrations.forEach((registration) => {
+      const members = registration.visibleMembers || registration.members || [];
+      let remainingMembers = [...members];
+      let part = 1;
+
+      while (remainingMembers.length > 0) {
+        const availableHeight = page.contentBottom - currentY;
+        const capacity = getTeamBlockCapacity(availableHeight);
+
+        if (capacity < 1 || availableHeight < getTeamBlockHeight(1)) {
+          page = openPage();
+          currentY = page.contentY;
+          continue;
+        }
+
+        const chunkSize = Math.min(remainingMembers.length, capacity);
+        const memberChunk = remainingMembers.slice(0, chunkSize);
+        const blockHeight = getTeamBlockHeight(memberChunk.length);
+        const needsContinuation = remainingMembers.length > chunkSize;
+        const partLabel =
+          needsContinuation || part > 1 ? `Part ${part}` : '';
+
+        drawTeamRegistrationBlock(
+          doc,
+          registration,
+          memberChunk,
+          page.contentX,
+          currentY,
+          page.contentWidth,
+          partLabel
+        );
+
+        currentY += blockHeight + 4;
+        remainingMembers = remainingMembers.slice(chunkSize);
+        part += 1;
+
+        if (remainingMembers.length > 0 && currentY + getTeamBlockHeight(1) > page.contentBottom) {
+          page = openPage();
+          currentY = page.contentY;
+        }
+      }
+    });
+  }
+
+  if (individualRows.length > 0) {
+    for (let index = 0; index < individualRows.length; index += 10) {
+      const rows = individualRows.slice(index, index + 10);
+      if (needsNewPage) {
         doc.addPage('a4', 'landscape');
       }
-
-      const remaining = members.length - startIndex;
-      const showSignatures = remaining <= 14;
-      const rowsOnPage = showSignatures
-        ? remaining
-        : Math.min(15, Math.max(1, remaining - 14));
-      const pageMembers = members.slice(startIndex, startIndex + rowsOnPage);
-
-      drawRegistrationSheetPage(doc, registration, pageMembers, renderedDate, renderedTime, showSignatures);
-
-      startIndex += rowsOnPage;
-      firstPage = false;
+      drawIndividualRegistrationsPage(doc, rows, renderedDate, renderedTime);
+      needsNewPage = true;
     }
-  });
+  }
 
   doc.save(buildPdfFileName(registrations));
 };
