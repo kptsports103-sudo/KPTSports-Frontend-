@@ -13,6 +13,11 @@ export default function RegistrationSection({
   teamRule,
   memberCount,
   setMemberCount,
+  branchOptions,
+  applyBranchToAll,
+  sharedBranch,
+  toggleApplyBranchToAll,
+  updateSharedBranch,
   changeForm,
   updateMember,
   submit,
@@ -99,6 +104,35 @@ export default function RegistrationSection({
             </select>
           ) : null}
 
+          <div style={styles.branchTools}>
+            <label style={styles.checkboxRow}>
+              <input
+                type="checkbox"
+                checked={applyBranchToAll}
+                onChange={(event) => toggleApplyBranchToAll(event.target.checked)}
+              />
+              <span>Apply one branch to all players</span>
+            </label>
+
+            {applyBranchToAll ? (
+              <select
+                id="registration-shared-branch"
+                name="sharedBranch"
+                value={sharedBranch}
+                onChange={(event) => updateSharedBranch(event.target.value)}
+                style={styles.input}
+                required
+              >
+                <option value="">Select Branch...</option>
+                {branchOptions.map((branch) => (
+                  <option key={branch} value={branch}>
+                    {branch}
+                  </option>
+                ))}
+              </select>
+            ) : null}
+          </div>
+
           <div style={styles.tableWrap}>
             <table style={styles.table}>
               <thead>
@@ -125,13 +159,24 @@ export default function RegistrationSection({
                       />
                     </td>
                     <td style={styles.td}>
-                      <input
+                      <select
                         id={`registration-member-branch-${i}`}
                         name={`memberBranch-${i}`}
                         style={styles.rowInput}
-                        value={member.branch}
+                        value={applyBranchToAll ? sharedBranch : member.branch}
                         onChange={(e) => updateMember(i, 'branch', e.target.value)}
-                      />
+                        disabled={applyBranchToAll}
+                      >
+                        <option value="">Select Branch...</option>
+                        {branchOptions.map((branch) => (
+                          <option key={branch} value={branch}>
+                            {branch}
+                          </option>
+                        ))}
+                      </select>
+                      {applyBranchToAll ? (
+                        <div style={styles.miniText}>Common branch applied to every player.</div>
+                      ) : null}
                     </td>
                     <td style={styles.td}>
                       <input
@@ -330,6 +375,14 @@ const styles = {
     fontSize: 14,
     background: 'var(--app-surface)',
     color: 'var(--app-text)'
+  },
+  branchTools: {
+    display: 'grid',
+    gap: 10,
+    padding: '10px 12px',
+    border: '1px solid var(--app-border)',
+    borderRadius: 12,
+    background: 'var(--app-surface-alt)'
   },
   tableWrap: { border: '1px solid var(--app-border)', borderRadius: 12, overflowX: 'auto' },
   table: { width: '100%', minWidth: 780, borderCollapse: 'collapse' },

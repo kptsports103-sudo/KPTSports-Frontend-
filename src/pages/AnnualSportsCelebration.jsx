@@ -5,7 +5,17 @@ import EventsSection from './sports-celebration/EventsSection';
 import RegistrationSection from './sports-celebration/RegistrationSection';
 
 const initialForm = { eventId: '', teamName: '', teamHeadName: '' };
-const blankMember = () => ({ name: '', branch: '', registerNumber: '', year: '1', sem: '1' });
+const BRANCH_OPTIONS = [
+  'Computer Science and Engineering',
+  'Automobile Engineering',
+  'Chemical Engineering',
+  'Civil Engineering',
+  'Electronics and Communication Engineering',
+  'Electrical and Electronics Engineering',
+  'Mechanical Engineering',
+  'Polymer Technology',
+];
+const blankMember = (branch = '') => ({ name: '', branch, registerNumber: '', year: '1', sem: '1' });
 const TEAM_EVENT_KEYWORDS = ['relay', 'cricket', 'kabaddi', 'volleyball', 'march past', 'marchpast'];
 
 const deriveRegistrationStatus = (startDate, endDate) => {
@@ -78,6 +88,8 @@ export default function AnnualSportsCelebration() {
   const [reviewData, setReviewData] = useState(null);
   const [confirmChecked, setConfirmChecked] = useState(false);
   const [submittedSummary, setSubmittedSummary] = useState(null);
+  const [applyBranchToAll, setApplyBranchToAll] = useState(false);
+  const [sharedBranch, setSharedBranch] = useState('');
 
   const indoor = useMemo(() => events.filter((e) => e.category === 'Indoor'), [events]);
   const outdoor = useMemo(() => events.filter((e) => e.category === 'Outdoor'), [events]);
@@ -118,7 +130,7 @@ export default function AnnualSportsCelebration() {
     if (!selectedEvent) return;
     const nextCount = teamRule.isTeam ? teamRule.min : 1;
     setMemberCount(nextCount);
-    setMembers(Array.from({ length: nextCount }, () => blankMember()));
+    setMembers(Array.from({ length: nextCount }, () => blankMember(applyBranchToAll ? sharedBranch : '')));
     setForm((p) => ({ ...p, teamName: '' }));
     setReviewData(null);
     setConfirmChecked(false);
@@ -127,26 +139,33 @@ export default function AnnualSportsCelebration() {
   useEffect(() => {
     setMembers((prev) => {
       const next = [...prev];
-      while (next.length < memberCount) next.push(blankMember());
+      while (next.length < memberCount) next.push(blankMember(applyBranchToAll ? sharedBranch : ''));
       next.length = memberCount;
+      if (applyBranchToAll && sharedBranch) {
+        return next.map((member) => ({ ...member, branch: sharedBranch }));
+      }
       return next;
     });
-  }, [memberCount]);
+  }, [memberCount, applyBranchToAll, sharedBranch]);
 
-  const changeForm = (event) => {
-    const { name, value } = event.target;
+  const clearReviewState = () => {
     setError('');
     setReviewData(null);
     setConfirmChecked(false);
     setSubmittedSummary(null);
+  };
+
+  const changeForm = (event) => {
+    const { name, value } = event.target;
+    clearReviewState();
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const updateMember = (index, field, value) => {
-    setError('');
-    setReviewData(null);
-    setConfirmChecked(false);
-    setSubmittedSummary(null);
+    clearReviewState();
+    if (field === 'branch' && index === 0) {
+      setSharedBranch(value);
+    }
     setMembers((prev) => {
       const next = [...prev];
       const current = { ...next[index], [field]: value };
@@ -157,6 +176,25 @@ export default function AnnualSportsCelebration() {
       next[index] = current;
       return next;
     });
+  };
+
+  const updateSharedBranch = (value) => {
+    clearReviewState();
+    setSharedBranch(value);
+    if (!applyBranchToAll) return;
+    setMembers((prev) => prev.map((member) => ({ ...member, branch: value })));
+  };
+
+  const toggleApplyBranchToAll = (checked) => {
+    clearReviewState();
+    setApplyBranchToAll(checked);
+    if (!checked) return;
+
+    const nextSharedBranch = sharedBranch || members[0]?.branch || '';
+    if (nextSharedBranch) {
+      setSharedBranch(nextSharedBranch);
+      setMembers((prev) => prev.map((member) => ({ ...member, branch: nextSharedBranch })));
+    }
   };
 
   const buildRegistrationDraft = () => {
@@ -189,6 +227,11 @@ export default function AnnualSportsCelebration() {
       if (!row.name || !row.branch || !row.registerNumber || !row.year || !row.sem) {
         throw new Error(`Row ${i + 1}: fill Name, Branch, Register Number, Year, Sem.`);
       }
+    }
+
+    const registerNumbers = cleanedMembers.map((member) => member.registerNumber.toLowerCase());
+    if (new Set(registerNumbers).size !== registerNumbers.length) {
+      throw new Error('Each player must have a unique Register Number.');
     }
 
     return {
@@ -237,7 +280,9 @@ export default function AnnualSportsCelebration() {
       setConfirmChecked(false);
       setForm((p) => ({ ...p, eventId: firstOpenEventId || p.eventId || '', teamName: '', teamHeadName: '' }));
       setMemberCount(teamRule.isTeam ? teamRule.min : 1);
-      setMembers(Array.from({ length: teamRule.isTeam ? teamRule.min : 1 }, () => blankMember()));
+      setMembers(
+        Array.from({ length: teamRule.isTeam ? teamRule.min : 1 }, () => blankMember(applyBranchToAll ? sharedBranch : ''))
+      );
     } catch (e) {
       setError(e.response?.data?.error || e.message || 'Registration failed.');
     } finally {
@@ -292,12 +337,14 @@ export default function AnnualSportsCelebration() {
           teamRule={teamRule}
           memberCount={memberCount}
           setMemberCount={(value) => {
-            setError('');
-            setReviewData(null);
-            setConfirmChecked(false);
-            setSubmittedSummary(null);
+            clearReviewState();
             setMemberCount(value);
           }}
+          branchOptions={BRANCH_OPTIONS}
+          applyBranchToAll={applyBranchToAll}
+          sharedBranch={sharedBranch}
+          toggleApplyBranchToAll={toggleApplyBranchToAll}
+          updateSharedBranch={updateSharedBranch}
           changeForm={changeForm}
           updateMember={updateMember}
           submit={submit}
