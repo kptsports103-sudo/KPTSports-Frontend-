@@ -244,6 +244,7 @@ const SportsMeetRegistrations = () => {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deletingKey, setDeletingKey] = useState('');
+  const [deletingRegistrationId, setDeletingRegistrationId] = useState('');
 
   const load = async () => {
     try {
@@ -469,9 +470,37 @@ const SportsMeetRegistrations = () => {
 
       await load();
     } catch (deleteError) {
-      setError(deleteError.response?.data?.error || deleteError.message || 'Delete failed');
+      const apiError = deleteError.response?.data?.error || deleteError.message || 'Delete failed';
+      if (/^Minimum \d+ players required\./i.test(apiError)) {
+        setError(`${apiError} Use Delete Team to remove the full team registration.`);
+      } else {
+        setError(apiError);
+      }
     } finally {
       setDeletingKey('');
+    }
+  };
+
+  const deleteRegistration = async (registration) => {
+    const label = registration.teamName || registration.eventName || 'this registration';
+    const confirmed = window.confirm(`Delete full team registration for ${label}?`);
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingRegistrationId(registration.id);
+      setError('');
+
+      if (draft?.registrationId === registration.id) {
+        cancelEdit();
+      }
+
+      await api.delete(`/registrations/${registration.id}`);
+      await load();
+    } catch (deleteError) {
+      setError(deleteError.response?.data?.error || deleteError.message || 'Delete team failed');
+    } finally {
+      setDeletingRegistrationId('');
     }
   };
 
@@ -578,6 +607,15 @@ const SportsMeetRegistrations = () => {
                         {registration.visibleMembers.length} player
                         {registration.visibleMembers.length === 1 ? '' : 's'} in this list
                       </div>
+                    </div>
+                    <div style={styles.cardActions}>
+                      <button
+                        onClick={() => deleteRegistration(registration)}
+                        disabled={Boolean(editingKey) || Boolean(deletingKey) || deletingRegistrationId === registration.id}
+                        style={styles.deleteTeamBtn}
+                      >
+                        {deletingRegistrationId === registration.id ? 'Deleting Team...' : 'Delete Team'}
+                      </button>
                     </div>
                   </div>
 
@@ -778,14 +816,14 @@ const SportsMeetRegistrations = () => {
                                   <>
                                     <button
                                       onClick={() => beginEdit(registration, member)}
-                                      disabled={Boolean(editingKey) || Boolean(deletingKey)}
+                                      disabled={Boolean(editingKey) || Boolean(deletingKey) || deletingRegistrationId === registration.id}
                                       style={styles.smallBtn}
                                     >
                                       Edit
                                     </button>
                                     <button
                                       onClick={() => deleteMember(registration, member)}
-                                      disabled={Boolean(editingKey) || isDeleting}
+                                      disabled={Boolean(editingKey) || isDeleting || deletingRegistrationId === registration.id}
                                       style={styles.deleteBtn}
                                     >
                                       {isDeleting ? 'Deleting...' : 'Delete'}
@@ -905,6 +943,11 @@ const styles = {
     flexWrap: 'wrap',
     marginBottom: 12,
   },
+  cardActions: {
+    display: 'flex',
+    gap: 8,
+    alignItems: 'center',
+  },
   cardTitle: {
     fontSize: 20,
     fontWeight: 700,
@@ -993,6 +1036,15 @@ const styles = {
     padding: '7px 10px',
     cursor: 'pointer',
     fontWeight: 600,
+  },
+  deleteTeamBtn: {
+    border: '1px solid #ef4444',
+    background: '#ef4444',
+    color: '#fff',
+    borderRadius: 8,
+    padding: '8px 12px',
+    cursor: 'pointer',
+    fontWeight: 700,
   },
 };
 
