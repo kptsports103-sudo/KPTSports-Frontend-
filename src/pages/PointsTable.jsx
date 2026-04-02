@@ -28,8 +28,6 @@ const palette = {
 
 const normalizeKey = (value) => String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
 
-const hasAnnualSportsEvent = (eventName, eventLookup) => eventLookup.has(normalizeKey(eventName));
-
 const buildEventLookup = (events) => {
   const lookup = new Map();
 
@@ -47,30 +45,6 @@ const buildEventLookup = (events) => {
           lookup.set(key, payload);
         }
       });
-  });
-
-  return lookup;
-};
-
-const buildPlayerLookup = (groupedPlayers) => {
-  const lookup = new Map();
-
-  Object.values(groupedPlayers || {}).forEach((players) => {
-    (players || []).forEach((player) => {
-      const branch = String(player?.branch || '').trim();
-      if (!branch) return;
-
-      const masterId = String(player?.masterId || '').trim();
-      const playerId = String(player?.id || '').trim();
-
-      if (masterId && !lookup.has(`master:${masterId}`)) {
-        lookup.set(`master:${masterId}`, branch);
-      }
-
-      if (playerId && !lookup.has(`player:${playerId}`)) {
-        lookup.set(`player:${playerId}`, branch);
-      }
-    });
   });
 
   return lookup;
@@ -124,49 +98,26 @@ const resolveCategory = (eventName, eventLookup) => {
   return 'Unassigned';
 };
 
-const resolveIndividualBranch = (result, playerLookup) => {
-  const explicitBranch = String(result?.branch || '').trim();
-  if (explicitBranch) return explicitBranch;
-
-  const masterId = String(result?.playerMasterId || '').trim();
-  const playerId = String(result?.playerId || '').trim();
-
-  return (
-    playerLookup.get(`master:${masterId}`) ||
-    playerLookup.get(`player:${playerId}`) ||
-    'Unknown Branch'
-  );
+const resolveWinnerKind = (winner) => {
+  const linkedType = String(winner?.linkedResultType || '').trim().toLowerCase();
+  if (linkedType === 'team') return 'team';
+  if (linkedType === 'individual') return 'individual';
+  if (String(winner?.teamName || '').trim()) return 'team';
+  return 'individual';
 };
 
-const resolveTeamBranch = (groupResult, playerLookup) => {
-  const memberBranches = Array.from(
-    new Set(
-      (Array.isArray(groupResult?.members) ? groupResult.members : [])
-        .map((member) => {
-          const explicitBranch = String(member?.branch || '').trim();
-          if (explicitBranch) return explicitBranch;
+const resolveWinnerLabel = (winner, kind) => {
+  const branch = String(winner?.branch || '').trim();
+  const teamName = String(winner?.teamName || '').trim();
 
-          const masterId = String(member?.playerMasterId || '').trim();
-          const playerId = String(member?.playerId || '').trim();
+  if (branch) return branch;
+  if (teamName) return teamName;
 
-          return (
-            playerLookup.get(`master:${masterId}`) ||
-            playerLookup.get(`player:${playerId}`) ||
-            ''
-          );
-        })
-        .filter(Boolean)
-    )
-  );
-
-  if (memberBranches.length === 1) return memberBranches[0];
-  if (memberBranches.length > 1) return String(groupResult?.teamName || '').trim() || 'Mixed Team';
-  return String(groupResult?.teamName || '').trim() || 'Unassigned Team';
+  return kind === 'team' ? 'Unassigned Team' : 'Unknown Branch';
 };
 
-const buildSummary = ({ results, groupResults, events, players, selectedYear }) => {
+const buildSummary = ({ winners, events, selectedYear }) => {
   const eventLookup = buildEventLookup(events);
-  const playerLookup = buildPlayerLookup(players);
 
   const overallMap = new Map();
   const indoorMap = new Map();
@@ -174,7 +125,7 @@ const buildSummary = ({ results, groupResults, events, players, selectedYear }) 
   const unassignedMap = new Map();
 
   const includeYear = (value) =>
-    selectedYear === 'all' || String(value || '') === String(selectedYear);
+    !selectedYear || selectedYear === 'all' || String(value || '') === String(selectedYear);
 
   const addToBuckets = (category, label, kind, medal, points) => {
     addPointsToMap(overallMap, label, kind, medal, points);
@@ -192,30 +143,18 @@ const buildSummary = ({ results, groupResults, events, players, selectedYear }) 
     addPointsToMap(unassignedMap, label, kind, medal, points);
   };
 
-  (results || []).forEach((result) => {
-    if (!includeYear(result?.year)) return;
+  (winners || []).forEach((winner) => {
+    if (!includeYear(winner?.year)) return;
 
-    const medal = String(result?.medal || '').trim();
-    const points = INDIVIDUAL_POINTS[medal] || 0;
+    const medal = String(winner?.medal || '').trim();
+    const kind = resolveWinnerKind(winner);
+    const points = kind === 'team' ? (TEAM_POINTS[medal] || 0) : (INDIVIDUAL_POINTS[medal] || 0);
     if (!points) return;
 
-    const label = resolveIndividualBranch(result, playerLookup);
-    const category = resolveCategory(result?.event, eventLookup);
+    const label = resolveWinnerLabel(winner, kind);
+    const category = resolveCategory(winner?.eventName, eventLookup);
 
-    addToBuckets(category, label, 'individual', medal, points);
-  });
-
-  (groupResults || []).forEach((groupResult) => {
-    if (!includeYear(groupResult?.year)) return;
-
-    const medal = String(groupResult?.medal || '').trim();
-    const points = TEAM_POINTS[medal] || 0;
-    if (!points) return;
-
-    const label = resolveTeamBranch(groupResult, playerLookup);
-    const category = resolveCategory(groupResult?.event, eventLookup);
-
-    addToBuckets(category, label, 'team', medal, points);
+    addToBuckets(category, label, kind, medal, points);
   });
 
   const overallRows = sortRows(overallMap);
@@ -293,10 +232,8 @@ export default function PointsTable() {
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedYear = String(searchParams.get('year') || '').trim();
   const currentYear = String(new Date().getFullYear());
-  const [results, setResults] = useState([]);
-  const [groupResults, setGroupResults] = useState([]);
+  const [winners, setWinners] = useState([]);
   const [events, setEvents] = useState([]);
-  const [players, setPlayers] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState(requestedYear || currentYear);
 
@@ -304,25 +241,16 @@ export default function PointsTable() {
     const fetchPointsData = async () => {
       setLoading(true);
 
-      const [resultsResponse, groupResultsResponse, eventsResponse, playersResponse] = await Promise.allSettled([
-        api.get('/results'),
-        api.get('/group-results'),
+      const [winnersResponse, eventsResponse] = await Promise.allSettled([
+        api.get('/winners'),
         api.get('/events'),
-        api.get('/home/players'),
       ]);
 
-      if (resultsResponse.status === 'fulfilled') {
-        setResults(Array.isArray(resultsResponse.value?.data) ? resultsResponse.value.data : []);
+      if (winnersResponse.status === 'fulfilled') {
+        setWinners(Array.isArray(winnersResponse.value?.data) ? winnersResponse.value.data : []);
       } else {
-        console.error('Failed to fetch points table results:', resultsResponse.reason);
-        setResults([]);
-      }
-
-      if (groupResultsResponse.status === 'fulfilled') {
-        setGroupResults(Array.isArray(groupResultsResponse.value?.data) ? groupResultsResponse.value.data : []);
-      } else {
-        console.error('Failed to fetch points table team results:', groupResultsResponse.reason);
-        setGroupResults([]);
+        console.error('Failed to fetch points table winners:', winnersResponse.reason);
+        setWinners([]);
       }
 
       if (eventsResponse.status === 'fulfilled') {
@@ -332,40 +260,21 @@ export default function PointsTable() {
         setEvents([]);
       }
 
-      if (playersResponse.status === 'fulfilled') {
-        setPlayers(playersResponse.value?.data || {});
-      } else {
-        console.error('Failed to fetch players for branch lookup:', playersResponse.reason);
-        setPlayers({});
-      }
-
       setLoading(false);
     };
 
     fetchPointsData();
   }, []);
 
-  const annualEventLookup = useMemo(() => buildEventLookup(events), [events]);
-
-  const annualResults = useMemo(
-    () => results.filter((result) => hasAnnualSportsEvent(result?.event, annualEventLookup)),
-    [annualEventLookup, results]
-  );
-
-  const annualGroupResults = useMemo(
-    () => groupResults.filter((groupResult) => hasAnnualSportsEvent(groupResult?.event, annualEventLookup)),
-    [annualEventLookup, groupResults]
-  );
-
   const availableYears = useMemo(() => {
     return Array.from(
       new Set(
-        [...annualResults, ...annualGroupResults]
+        winners
           .map((item) => Number(item?.year))
           .filter(Boolean)
       )
     ).sort((left, right) => right - left);
-  }, [annualGroupResults, annualResults]);
+  }, [winners]);
 
   const resolvedSelectedYear = useMemo(() => {
     if (availableYears.length === 0) return '';
@@ -410,8 +319,8 @@ export default function PointsTable() {
   }, [resolvedSelectedYear, searchParams, setSearchParams]);
 
   const summary = useMemo(
-    () => buildSummary({ results: annualResults, groupResults: annualGroupResults, events, players, selectedYear: resolvedSelectedYear }),
-    [annualGroupResults, annualResults, events, players, resolvedSelectedYear]
+    () => buildSummary({ winners, events, selectedYear: resolvedSelectedYear }),
+    [events, resolvedSelectedYear, winners]
   );
 
   return (
@@ -435,11 +344,13 @@ export default function PointsTable() {
         }}
       >
         <p style={{ margin: 0, color: palette.accent, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-          Annual Sports Celebration
+          Winner Based Scoring
         </p>
         <h1 style={{ margin: '0.55rem 0 0', fontSize: '2.5rem' }}>Points Table</h1>
         <p style={{ margin: '0.8rem 0 0', color: palette.muted, maxWidth: '820px', lineHeight: 1.7 }}>
-          This page counts only Annual Sports Celebration events. State Inter-Polytechnic results are not included. Indoor and Outdoor events are shown separately, with 5, 3, 1 points for single games and 10, 7, 4 points for team games.
+          This page calculates points directly from published winner cards. Individual winners use 5, 3, 1 points and
+          team winners use 10, 7, 4 points. Indoor and Outdoor sections use Annual Sports Celebration event mapping
+          when the winner event matches a configured event name.
         </p>
       </header>
 
@@ -454,7 +365,7 @@ export default function PointsTable() {
         <div style={styles.summaryCard}>
           <div style={styles.summaryLabel}>Leading Branch / Team</div>
           <div style={styles.summaryValue}>{summary.leader?.label || 'No data'}</div>
-          <div style={styles.summarySub}>{summary.leader ? `${summary.leader.totalPoints} points` : 'Points will appear after results are added.'}</div>
+          <div style={styles.summarySub}>{summary.leader ? `${summary.leader.totalPoints} points` : 'Points will appear after winners are added.'}</div>
         </div>
         <div style={styles.summaryCard}>
           <div style={styles.summaryLabel}>Individual Points</div>
@@ -534,11 +445,10 @@ export default function PointsTable() {
           </select>
         </div>
 
-        {!loading && availableYears.length === 0 ? (
+        {!loading && winners.length === 0 ? (
           <div style={styles.syncNotice}>
-            Points Table is empty because it reads only Annual Sports Celebration result entries. Winner cards on the
-            KPT Sports Winners page do not create points by themselves. Add an Individual Result or Team Result in
-            Admin - Manage Results, then link the winner card if you want both pages to match.
+            Points Table is empty because no winner cards have been added yet. Add winners in Admin - Manage Winners
+            and they will create points automatically.
           </div>
         ) : null}
       </section>
@@ -551,17 +461,17 @@ export default function PointsTable() {
         <>
           <PointsSection
             title="Overall Points Table"
-            subtitle="Combined Annual Sports Celebration points for the selected year."
+            subtitle="Combined winner-card points for the selected year."
             rows={summary.overallRows}
           />
           <PointsSection
             title="Indoor Events"
-            subtitle="Annual Sports Celebration points collected from Indoor events only."
+            subtitle="Winner-card points collected from events mapped as Indoor."
             rows={summary.indoorRows}
           />
           <PointsSection
             title="Outdoor Events"
-            subtitle="Annual Sports Celebration points collected from Outdoor events only."
+            subtitle="Winner-card points collected from events mapped as Outdoor."
             rows={summary.outdoorRows}
           />
           {summary.unassignedRows.length > 0 ? (

@@ -107,7 +107,8 @@ const Winners = () => {
           KPT Sports Winners
         </h1>
         <p style={{ margin: '0.85rem 0 0', color: palette.muted, maxWidth: '760px', lineHeight: 1.7 }}>
-          This page shows winner details only. Each card includes the winner photo, player name, event name, team name, branch, and medal.
+          Each card includes the winner photo, player name, event name, team name, branch, and medal, and these
+          winner cards also feed the Points Table.
         </p>
       </header>
 

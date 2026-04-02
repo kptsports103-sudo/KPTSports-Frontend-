@@ -757,14 +757,14 @@ const ManageWinners = () => {
         <PageLatestChangeCard pageName="Winners Page" />
 
         <div style={containerStyles.infoCard}>
-          <h4 style={containerStyles.infoTitle}>Winners page does not feed the Points Table</h4>
+          <h4 style={containerStyles.infoTitle}>Winners page feeds the Points Table</h4>
           <p style={containerStyles.infoText}>
-            Entries saved here appear on the public Winners page only. They do not create result records for the
-            Results page or the Points Table. To show a medal inside the Points Table, add the same record in
-            Manage Results and make sure the event exists in the Annual Sports Celebration events list.
+            Entries saved here appear on the public Winners page and create points automatically. Linking a winner to
+            Manage Results is optional and only needed when you want the public Results page to stay synced with the
+            same medal, branch, event, and year.
           </p>
-          <Link to="/admin/manage-results" style={containerStyles.infoLink}>
-            Open Manage Results
+          <Link to="/points-table" style={containerStyles.infoLink}>
+            Open Points Table
           </Link>
         </div>
 
@@ -790,8 +790,8 @@ const ManageWinners = () => {
           <div style={containerStyles.sourceCard}>
             <h5 style={containerStyles.sourceTitle}>Winner Source</h5>
             <p style={containerStyles.sourceText}>
-              Link this winner to an Individual Result or Team Result from Annual Sports Celebration. That keeps the
-              event, medal, branch, and year aligned with the public Results page and the Points Table.
+              Link this winner to an Individual Result or Team Result when you want the public Results page to stay
+              aligned. Points are created from the winner card itself, even in manual mode.
             </p>
             <div style={containerStyles.grid}>
               <div>
@@ -865,7 +865,7 @@ const ManageWinners = () => {
               <Trophy size={14} />
               {isLinkedWinner
                 ? 'Linked winners sync event, branch, medal, and year from Manage Results'
-                : 'Manual mode lets you create a showcase card without linking a result'}
+                : 'Manual mode still creates points without linking a result'}
             </div>
           </div>
 

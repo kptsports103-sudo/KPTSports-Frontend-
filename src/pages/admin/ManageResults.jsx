@@ -1113,7 +1113,7 @@ const ManageResults = () => {
         <PageLatestChangeCard pageName="Results Page" />
         <div style={styles.syncNote}>
           Event names come from Annual Sports Celebration Data Entry. Team results can also load locked rosters from
-          Sports Meet Registration so Winners, Results, and the Points Table stay aligned.
+          Sports Meet Registration so Results and linked winner cards stay aligned.
         </div>
         <datalist id="manage-results-event-options">
           {eventOptions.map((eventName) => (
