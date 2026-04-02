@@ -6,39 +6,62 @@ const initialForm = {
   category: 'Outdoor',
   sportType: 'Athletics',
   eventType: 'Individual',
-  teamSizeMin: '',
-  teamSizeMax: '',
-  level: 'Open',
+  teamSizeMin: '1',
+  teamSizeMax: '1',
   gender: 'Mixed',
   venue: '',
   eventDate: '',
   eventTime: '',
   registrationStartDate: '',
   registrationEndDate: '',
-  registrationStatus: 'Open',
 };
 
-const sportsTypeOptions = ['Athletics', 'Team Sport', 'Mind Sport', 'Fitness'];
-const levelOptions = ['Open', 'Beginner', 'Intermediate', 'Advanced'];
+const sportsTypeOptions = ['Athletics', 'Team Sports', 'Others'];
 const genderOptions = ['Male', 'Female', 'Mixed'];
+
+const normalizeName = (value) => String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+
+const normalizeSportType = (value) => {
+  const safeValue = String(value || '').trim().toLowerCase();
+  if (safeValue === 'team sport' || safeValue === 'team sports') return 'Team Sports';
+  if (safeValue === 'athletics') return 'Athletics';
+  return 'Others';
+};
+
+const deriveRegistrationStatus = (startDate, endDate) => {
+  const safeStartDate = String(startDate || '').trim();
+  const safeEndDate = String(endDate || '').trim();
+  const today = new Date();
+  const currentDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  if (!safeStartDate || !safeEndDate) return 'Closed';
+  if (safeStartDate > safeEndDate) return 'Closed';
+
+  return currentDate >= safeStartDate && currentDate <= safeEndDate ? 'Open' : 'Closed';
+};
 
 const normalizeEvent = (item) => ({
   ...item,
   id: item._id || item.id,
   eventName: item.eventName || item.event_title || '',
   category: item.category || 'Outdoor',
-  sportType: item.sportType || 'Athletics',
-  eventType: item.eventType || 'Individual',
-  teamSizeMin: item.teamSizeMin ?? '',
-  teamSizeMax: item.teamSizeMax ?? '',
-  level: item.level || item.event_level || 'Open',
+  sportType: normalizeSportType(item.sportType),
+  eventType: normalizeSportType(item.sportType) === 'Team Sports' ? 'Team' : item.eventType || 'Individual',
+  teamSizeMin:
+    (normalizeSportType(item.sportType) === 'Team Sports' ? 'Team' : item.eventType || 'Individual') === 'Team'
+      ? (item.teamSizeMin ?? '')
+      : '1',
+  teamSizeMax:
+    (normalizeSportType(item.sportType) === 'Team Sports' ? 'Team' : item.eventType || 'Individual') === 'Team'
+      ? (item.teamSizeMax ?? '')
+      : '1',
   gender: item.gender || 'Mixed',
   venue: item.venue || '',
   eventDate: item.eventDate || item.date || item.event_date || '',
   eventTime: item.eventTime || '',
   registrationStartDate: item.registrationStartDate || '',
   registrationEndDate: item.registrationEndDate || '',
-  registrationStatus: item.registrationStatus || item.status || 'Open',
+  registrationStatus: deriveRegistrationStatus(item.registrationStartDate, item.registrationEndDate),
 });
 
 const formatValue = (value, fallback = 'TBA') => {
@@ -47,7 +70,7 @@ const formatValue = (value, fallback = 'TBA') => {
 };
 
 const getTeamSizeText = (item) => {
-  if (item.eventType !== 'Team') return '-';
+  if (item.eventType !== 'Team') return '1';
   return `${formatValue(item.teamSizeMin, '-')} - ${formatValue(item.teamSizeMax, '-')}`;
 };
 
@@ -91,9 +114,13 @@ const SportsMeetDataEntry = () => {
     setForm((prev) => {
       const updated = { ...prev, [name]: value };
 
+      if (name === 'sportType' && value === 'Team Sports') {
+        updated.eventType = 'Team';
+      }
+
       if (name === 'eventType' && value === 'Individual') {
-        updated.teamSizeMin = '';
-        updated.teamSizeMax = '';
+        updated.teamSizeMin = '1';
+        updated.teamSizeMax = '1';
       }
 
       return updated;
@@ -106,16 +133,27 @@ const SportsMeetDataEntry = () => {
     setError('');
   };
 
+  const registrationStatusPreview = useMemo(
+    () => deriveRegistrationStatus(form.registrationStartDate, form.registrationEndDate),
+    [form.registrationEndDate, form.registrationStartDate]
+  );
+
   const buildPayload = () => ({
     eventName: form.eventName.trim(),
     event_title: form.eventName.trim(),
     category: form.category,
-    sportType: form.sportType,
-    eventType: form.eventType,
-    teamSizeMin: form.eventType === 'Team' && form.teamSizeMin !== '' ? Number(form.teamSizeMin) : null,
-    teamSizeMax: form.eventType === 'Team' && form.teamSizeMax !== '' ? Number(form.teamSizeMax) : null,
-    level: form.level,
-    event_level: form.level,
+    sportType: normalizeSportType(form.sportType),
+    eventType: normalizeSportType(form.sportType) === 'Team Sports' ? 'Team' : form.eventType,
+    teamSizeMin:
+      (normalizeSportType(form.sportType) === 'Team Sports' || form.eventType === 'Team') && form.teamSizeMin !== ''
+        ? Number(form.teamSizeMin)
+        : 1,
+    teamSizeMax:
+      (normalizeSportType(form.sportType) === 'Team Sports' || form.eventType === 'Team') && form.teamSizeMax !== ''
+        ? Number(form.teamSizeMax)
+        : 1,
+    level: '',
+    event_level: '',
     gender: form.gender,
     venue: form.venue.trim(),
     eventDate: form.eventDate,
@@ -124,12 +162,19 @@ const SportsMeetDataEntry = () => {
     eventTime: form.eventTime,
     registrationStartDate: form.registrationStartDate,
     registrationEndDate: form.registrationEndDate,
-    registrationStatus: form.registrationStatus,
-    status: form.registrationStatus,
+    registrationStatus: deriveRegistrationStatus(form.registrationStartDate, form.registrationEndDate),
+    status: deriveRegistrationStatus(form.registrationStartDate, form.registrationEndDate),
   });
 
   const validateForm = (payload) => {
     if (!payload.eventName) return 'Event name is required.';
+
+    const duplicateEvent = events.find(
+      (item) => item.id !== editingId && normalizeName(item.eventName) === normalizeName(payload.eventName)
+    );
+    if (duplicateEvent) {
+      return 'That event name already exists. Enter a different event name.';
+    }
 
     if (
       payload.eventType === 'Team' &&
@@ -190,16 +235,14 @@ const SportsMeetDataEntry = () => {
       category: item.category || 'Outdoor',
       sportType: item.sportType || 'Athletics',
       eventType: item.eventType || 'Individual',
-      teamSizeMin: item.teamSizeMin ?? '',
-      teamSizeMax: item.teamSizeMax ?? '',
-      level: item.level || 'Open',
+      teamSizeMin: item.eventType === 'Team' ? (item.teamSizeMin ?? '') : '1',
+      teamSizeMax: item.eventType === 'Team' ? (item.teamSizeMax ?? '') : '1',
       gender: item.gender || 'Mixed',
       venue: item.venue || '',
       eventDate: item.eventDate || '',
       eventTime: item.eventTime || '',
       registrationStartDate: item.registrationStartDate || '',
       registrationEndDate: item.registrationEndDate || '',
-      registrationStatus: item.registrationStatus || 'Open',
     });
 
     setError('');
@@ -291,17 +334,15 @@ const SportsMeetDataEntry = () => {
             ))}
           </select>
 
-          <select style={styles.input} name="eventType" value={form.eventType} onChange={onChange}>
+          <select
+            style={styles.input}
+            name="eventType"
+            value={form.eventType}
+            onChange={onChange}
+            disabled={form.sportType === 'Team Sports'}
+          >
             <option value="Individual">Individual</option>
             <option value="Team">Team</option>
-          </select>
-
-          <select style={styles.input} name="level" value={form.level} onChange={onChange}>
-            {levelOptions.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
           </select>
 
           <select style={styles.input} name="gender" value={form.gender} onChange={onChange}>
@@ -373,17 +414,30 @@ const SportsMeetDataEntry = () => {
           </div>
         </div>
 
-        <p style={styles.fieldHint}>
-          Date format clue: use calendar picker (DD-MM-YYYY). Select registration start/end dates in the top-right section.
-        </p>
-
         <div style={styles.grid2}>
-          <select style={styles.input} name="registrationStatus" value={form.registrationStatus} onChange={onChange}>
-            <option value="Open">Open</option>
-            <option value="Closed">Closed</option>
-          </select>
-
-          <div style={styles.freeBox}>Entry Fee: Free</div>
+          <div style={styles.autoStatusBox}>
+            <div style={styles.autoStatusLabel}>Registration Status</div>
+            <div
+              style={{
+                ...styles.statusPill,
+                ...(registrationStatusPreview === 'Closed' ? styles.statusClosed : styles.statusOpen),
+                width: 'fit-content',
+              }}
+            >
+              {registrationStatusPreview}
+            </div>
+            <div style={styles.fieldHint}>
+              Registration opens automatically only between the start and end date.
+            </div>
+          </div>
+          <div style={styles.autoStatusBox}>
+            <div style={styles.autoStatusLabel}>Sport Rules</div>
+            <div style={{ color: '#0f172a', fontWeight: 700 }}>
+              {form.sportType === 'Team Sports'
+                ? 'Team Sports automatically use Team event type.'
+                : 'Athletics and Others can use Individual or Team.'}
+            </div>
+          </div>
         </div>
 
         {error ? <div style={styles.errorBox}>{error}</div> : null}
@@ -430,13 +484,13 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
         <thead>
           <tr>
             <th style={styles.th}>Event</th>
-            <th style={styles.th}>Type</th>
-            <th style={styles.th}>Level</th>
+            <th style={styles.th}>Sport Type</th>
+            <th style={styles.th}>Event Type</th>
             <th style={styles.th}>Team Size</th>
             <th style={styles.th}>Date</th>
             <th style={styles.th}>Time</th>
             <th style={styles.th}>Venue</th>
-            <th style={styles.th}>Status</th>
+            <th style={styles.th}>Registration</th>
             <th style={styles.th}>Actions</th>
           </tr>
         </thead>
@@ -453,10 +507,10 @@ const EventsTable = ({ title, items, onEdit, onDelete }) => (
               <tr key={item.id} style={styles.row}>
                 <td style={styles.td}>
                   <strong>{formatValue(item.eventName, 'Untitled Event')}</strong>
-                  <div style={styles.meta}>{formatValue(item.sportType, 'General')}</div>
+                  <div style={styles.meta}>{formatValue(item.category, 'General')}</div>
                 </td>
+                <td style={styles.td}>{formatValue(item.sportType, '-')}</td>
                 <td style={styles.td}>{formatValue(item.eventType, '-')}</td>
-                <td style={styles.td}>{formatValue(item.level, '-')}</td>
                 <td style={styles.td}>{getTeamSizeText(item)}</td>
                 <td style={styles.td}>{formatValue(item.eventDate)}</td>
                 <td style={styles.td}>{formatValue(item.eventTime, '-')}</td>
@@ -622,6 +676,22 @@ const styles = {
     margin: '-4px 0 0',
     fontSize: '0.84rem',
     color: '#64748b',
+  },
+
+  autoStatusBox: {
+    border: '1px solid #cbd5e1',
+    borderRadius: 12,
+    padding: '12px 14px',
+    background: '#fff',
+    display: 'grid',
+    gap: 8,
+    alignContent: 'start',
+  },
+
+  autoStatusLabel: {
+    fontSize: '0.82rem',
+    fontWeight: 700,
+    color: '#334155',
   },
 
   freeBox: {

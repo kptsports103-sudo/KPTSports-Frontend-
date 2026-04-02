@@ -27,17 +27,13 @@ const toSeedEvent = (eventName, category) => ({
   id: `${eventName}-${category}`.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
   eventName,
   category,
-  sportType: category === 'Indoor' ? 'Mind Sport' : 'Athletics',
-  entryFee: '',
-  level: 'Open',
+  sportType: eventName === 'Cricket' || eventName === 'Kabaddi' || eventName === 'Volleyball' ? 'Team Sports' : 'Athletics',
   gender: 'Mixed',
   eventType: eventName === 'Cricket' || eventName === 'Kabaddi' || eventName === 'Volleyball' ? 'Team' : 'Individual',
-  maxParticipants: '',
-  maxTeams: '',
   date: '',
   time: '',
   venue: '',
-  status: 'Open',
+  status: 'Closed',
 });
 
 export const SPORTS_MEET_SEED = [

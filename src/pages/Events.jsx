@@ -164,7 +164,6 @@ const Events = () => {
               <div key={index} style={eventItem}>
                 <h3 style={eventTitle}>{event.event_title}</h3>
                 <div style={eventDetails}>
-                  <p><strong>Level:</strong> {event.event_level}</p>
                   <p><strong>Date:</strong> {new Date(event.event_date).toLocaleDateString()}</p>
                   <p><strong>Venue:</strong> {event.venue}, {event.city}</p>
                 </div>
