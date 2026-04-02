@@ -70,6 +70,16 @@ const resolveTeamWinnerBranch = (groupResult) => {
   return String(groupResult?.teamName || '').trim();
 };
 
+const getTeamRoster = (groupResult) =>
+  (Array.isArray(groupResult?.members) ? groupResult.members : [])
+    .map((member) => ({
+      name: String(member?.name || '').trim(),
+      branch: String(member?.branch || '').trim(),
+      diplomaYear: String(member?.diplomaYear || '').trim(),
+      semester: String(member?.semester || '').trim(),
+    }))
+    .filter((member) => member.name);
+
 const containerStyles = {
   page: {
     background: '#f4f6f8',
@@ -297,6 +307,13 @@ const ManageWinners = () => {
         return leftLabel.localeCompare(rightLabel, 'en', { sensitivity: 'base' });
       });
   }, [sourceYearFilter, teamResults]);
+
+  const selectedTeamResult = useMemo(() => {
+    if (form.linkedResultType !== 'team' || !form.linkedResultId) return null;
+    return teamResults.find((item) => String(item?._id || '') === String(form.linkedResultId)) || null;
+  }, [form.linkedResultId, form.linkedResultType, teamResults]);
+
+  const selectedTeamRoster = useMemo(() => getTeamRoster(selectedTeamResult), [selectedTeamResult]);
 
   useEffect(() => {
     if (availableSourceYears.length === 0) return;
@@ -855,7 +872,7 @@ const ManageWinners = () => {
                     <option key={item._id} value={item._id}>
                       {form.linkedResultType === 'individual'
                         ? `${item.year} | ${item.event} | ${item.name} | ${item.branch || '-'} | ${item.medal}`
-                        : `${item.year} | ${item.event} | ${item.teamName} | ${resolveTeamWinnerBranch(item) || '-'} | ${item.medal}`}
+                        : `${item.year} | ${item.event} | ${item.teamName} | ${resolveTeamWinnerBranch(item) || '-'} | ${item.medal} | ${getTeamRoster(item).length} players`}
                     </option>
                   ))}
                 </select>
@@ -867,6 +884,98 @@ const ManageWinners = () => {
                 ? 'Linked winners sync event, branch, medal, and year from Manage Results'
                 : 'Manual mode still creates points without linking a result'}
             </div>
+            {form.linkedResultType === 'team' ? (
+              <div
+                style={{
+                  marginTop: 14,
+                  padding: 16,
+                  borderRadius: 14,
+                  border: '1px solid #bfdbfe',
+                  background: '#ffffff',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div>
+                    <h6 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1d4ed8' }}>Team Source Preview</h6>
+                    <p style={{ margin: '6px 0 0 0', color: '#475569', fontSize: 13, lineHeight: 1.6 }}>
+                      Check the team event, team name, and roster before saving. Team player names on the public Winners
+                      page come from this linked team result.
+                    </p>
+                  </div>
+                  <Link to="/admin/sports-meet-registrations" style={containerStyles.infoLink}>
+                    Open Sports Meet Registration
+                  </Link>
+                </div>
+
+                {selectedTeamResult ? (
+                  <>
+                    <div
+                      style={{
+                        marginTop: 14,
+                        display: 'grid',
+                        gap: 12,
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Event</div>
+                        <div style={{ marginTop: 6, color: '#0f172a', fontWeight: 700 }}>{selectedTeamResult.event || '-'}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Team Name</div>
+                        <div style={{ marginTop: 6, color: '#0f172a', fontWeight: 700 }}>{selectedTeamResult.teamName || '-'}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Branch / Label</div>
+                        <div style={{ marginTop: 6, color: '#0f172a', fontWeight: 700 }}>{resolveTeamWinnerBranch(selectedTeamResult) || '-'}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Players</div>
+                        <div style={{ marginTop: 6, color: '#0f172a', fontWeight: 700 }}>{selectedTeamRoster.length}</div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: 14 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 8 }}>
+                        Team Players
+                      </div>
+                      {selectedTeamRoster.length === 0 ? (
+                        <div style={{ color: '#64748b', fontSize: 13 }}>No player names found in this linked team result.</div>
+                      ) : (
+                        <div style={{ display: 'grid', gap: 8 }}>
+                          {selectedTeamRoster.map((member, index) => (
+                            <div
+                              key={`${member.name}-${index}`}
+                              style={{
+                                padding: '10px 12px',
+                                borderRadius: 10,
+                                border: '1px solid #dbeafe',
+                                background: '#f8fbff',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                gap: 12,
+                                flexWrap: 'wrap',
+                              }}
+                            >
+                              <span style={{ color: '#0f172a', fontWeight: 700 }}>{member.name}</span>
+                              <span style={{ color: '#475569', fontSize: 13 }}>
+                                {[member.branch, member.diplomaYear ? `Year ${member.diplomaYear}` : '', member.semester ? `Sem ${member.semester}` : '']
+                                  .filter(Boolean)
+                                  .join(' | ') || 'Player info not available'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ marginTop: 14, color: '#64748b', fontSize: 13 }}>
+                    Select a linked team result to preview the event, team name, and player names.
+                  </div>
+                )}
+              </div>
+            ) : null}
           </div>
 
           <div style={containerStyles.grid}>

@@ -30,9 +30,20 @@ const palette = {
 
 const MEDAL_FILTERS = ['All', 'Gold', 'Silver', 'Bronze'];
 
+const getVisibleTeamMembers = (winner) =>
+  (Array.isArray(winner?.teamMembers) ? winner.teamMembers : [])
+    .map((member) => ({
+      name: String(member?.name || '').trim(),
+      branch: String(member?.branch || '').trim(),
+      diplomaYear: Number(member?.diplomaYear) || null,
+      semester: String(member?.semester || '').trim(),
+    }))
+    .filter((member) => member.name);
+
 const Winners = () => {
   const [winners, setWinners] = useState([]);
   const [activeImage, setActiveImage] = useState(null);
+  const [showPlayersPanel, setShowPlayersPanel] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMedal, setSelectedMedal] = useState('All');
   const [selectedYear, setSelectedYear] = useState('All');
@@ -78,6 +89,18 @@ const Winners = () => {
       )
     ).sort((left, right) => Number(right) - Number(left));
   }, [winners]);
+
+  const openWinnerModal = (winner, initialShowPlayers = false) => {
+    setActiveImage(winner);
+    setShowPlayersPanel(initialShowPlayers);
+  };
+
+  const closeWinnerModal = () => {
+    setActiveImage(null);
+    setShowPlayersPanel(false);
+  };
+
+  const activeTeamMembers = useMemo(() => getVisibleTeamMembers(activeImage), [activeImage]);
 
   return (
     <div
@@ -322,22 +345,40 @@ const Winners = () => {
                   </div>
                 ) : null}
 
-                <button
-                  type="button"
-                  onClick={() => setActiveImage(winner)}
-                  style={{
-                    marginTop: '1rem',
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    color: palette.accent,
-                    cursor: 'pointer',
-                    fontSize: '0.95rem',
-                    fontWeight: '600'
-                  }}
-                >
-                  View Winner Details
-                </button>
+                <div style={{ marginTop: '1rem', display: 'flex', gap: '0.9rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => openWinnerModal(winner, false)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      color: palette.accent,
+                      cursor: 'pointer',
+                      fontSize: '0.95rem',
+                      fontWeight: '600'
+                    }}
+                  >
+                    View Winner Details
+                  </button>
+                  {getVisibleTeamMembers(winner).length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => openWinnerModal(winner, true)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        color: palette.text,
+                        cursor: 'pointer',
+                        fontSize: '0.95rem',
+                        fontWeight: '600'
+                      }}
+                    >
+                      See Players
+                    </button>
+                  ) : null}
+                </div>
               </div>
             </article>
           ))}
@@ -355,7 +396,7 @@ const Winners = () => {
             alignItems: 'center',
             zIndex: 999
           }}
-          onClick={() => setActiveImage(null)}
+          onClick={closeWinnerModal}
         >
           <div
             style={{
@@ -386,46 +427,128 @@ const Winners = () => {
               }}
             />
 
-            <div
-              style={{
-                marginTop: '14px',
-                background: palette.surfaceAlt,
-                border: `1px solid ${palette.border}`,
-                borderRadius: '10px',
-                overflow: 'hidden'
-              }}
-            >
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: palette.surfaceMuted }}>
-                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Winner</th>
-                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Team</th>
-                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Branch</th>
-                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Event</th>
-                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Year</th>
-                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Medal</th>
-                    <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Source</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.playerName || '-'}</td>
-                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.teamName || '-'}</td>
-                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.branch || '-'}</td>
-                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.eventName || '-'}</td>
-                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.year || '-'}</td>
-                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.medal || '-'}</td>
-                    <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>
-                      {activeImage.linkedResultType === 'team'
-                        ? 'Team Result'
-                        : activeImage.linkedResultType === 'individual'
-                          ? 'Individual Result'
-                          : 'Manual'}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            {activeTeamMembers.length > 0 ? (
+              <div style={{ marginTop: '14px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowPlayersPanel(false)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    border: `1px solid ${showPlayersPanel ? palette.border : palette.accent}`,
+                    background: showPlayersPanel ? palette.surfaceAlt : palette.accent,
+                    color: showPlayersPanel ? palette.text : '#ffffff',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Winner Details
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPlayersPanel(true)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    border: `1px solid ${showPlayersPanel ? palette.accent : palette.border}`,
+                    background: showPlayersPanel ? palette.accent : palette.surfaceAlt,
+                    color: showPlayersPanel ? '#ffffff' : palette.text,
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  See Players
+                </button>
+              </div>
+            ) : null}
+
+            {!showPlayersPanel ? (
+              <div
+                style={{
+                  marginTop: '14px',
+                  background: palette.surfaceAlt,
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: '10px',
+                  overflow: 'hidden'
+                }}
+              >
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: palette.surfaceMuted }}>
+                      <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Winner</th>
+                      <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Team</th>
+                      <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Branch</th>
+                      <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Event</th>
+                      <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Year</th>
+                      <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Medal</th>
+                      <th style={{ padding: '10px', textAlign: 'left', color: palette.text, borderBottom: `1px solid ${palette.border}` }}>Source</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.playerName || '-'}</td>
+                      <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.teamName || '-'}</td>
+                      <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.branch || '-'}</td>
+                      <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.eventName || '-'}</td>
+                      <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.year || '-'}</td>
+                      <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>{activeImage.medal || '-'}</td>
+                      <td style={{ padding: '10px', borderBottom: `1px solid ${palette.border}`, color: palette.text }}>
+                        {activeImage.linkedResultType === 'team'
+                          ? 'Team Result'
+                          : activeImage.linkedResultType === 'individual'
+                            ? 'Individual Result'
+                            : 'Manual'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div
+                style={{
+                  marginTop: '14px',
+                  background: palette.surfaceAlt,
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: '10px',
+                  padding: '14px'
+                }}
+              >
+                <h3 style={{ margin: 0, color: palette.text, fontSize: '1.05rem' }}>
+                  Team Players{activeImage.teamName ? ` - ${activeImage.teamName}` : ''}
+                </h3>
+                <p style={{ margin: '8px 0 0', color: palette.muted }}>
+                  Player names are taken from the linked team result roster.
+                </p>
+                <div style={{ marginTop: '14px', display: 'grid', gap: '10px' }}>
+                  {activeTeamMembers.map((member, index) => (
+                    <div
+                      key={`${member.name}-${index}`}
+                      style={{
+                        borderRadius: '10px',
+                        border: `1px solid ${palette.border}`,
+                        background: palette.surface,
+                        padding: '12px 14px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: '12px',
+                        flexWrap: 'wrap'
+                      }}
+                    >
+                      <span style={{ color: palette.text, fontWeight: 700 }}>{member.name}</span>
+                      <span style={{ color: palette.muted, fontSize: '0.92rem' }}>
+                        {[member.branch, member.diplomaYear ? `Year ${member.diplomaYear}` : '', member.semester ? `Sem ${member.semester}` : '']
+                          .filter(Boolean)
+                          .join(' | ') || 'Player details not available'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {activeImage.year ? (
               <div style={{ marginTop: '14px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -465,7 +588,7 @@ const Winners = () => {
             ) : null}
 
             <button
-              onClick={() => setActiveImage(null)}
+              onClick={closeWinnerModal}
               style={{
                 position: 'absolute',
                 top: '10px',
