@@ -9,7 +9,7 @@ const PDF_COLUMNS = [
   { key: 'registerNumber', label: 'Register No', width: 50, align: 'center' },
   { key: 'year', label: 'Year', width: 20, align: 'center' },
   { key: 'sem', label: 'Sem', width: 18, align: 'center' },
-  { key: 'status', label: 'Status', width: 32, align: 'center' },
+  { key: 'signature', label: 'Signature', width: 32, align: 'center' },
 ];
 
 const normalizeEvent = (item) => ({
@@ -168,8 +168,8 @@ const drawRegistrationSheetPage = (doc, registration, members, renderedDate, ren
     doc.setFontSize(8.4);
 
     PDF_COLUMNS.forEach((column) => {
-      const rawValue = column.key === 'status' ? registration.status || 'Locked' : member[column.key];
-      const safeText = truncatePdfText(doc, rawValue || '-', column.width - 6);
+      const rawValue = column.key === 'signature' ? '' : member[column.key];
+      const safeText = truncatePdfText(doc, rawValue || '', column.width - 6);
       const textX = column.align === 'center' ? cellX + column.width / 2 : cellX + 3;
       doc.text(safeText, textX, textY, column.align === 'center' ? { align: 'center' } : undefined);
       cellX += column.width;
@@ -207,7 +207,6 @@ const exportRegistrationSheets = (registrations) => {
   registrations.forEach((registration) => {
     const members = (registration.visibleMembers || registration.members || []).map((member) => ({
       ...member,
-      status: registration.status || 'Locked',
     }));
 
     let startIndex = 0;
@@ -291,7 +290,6 @@ const SportsMeetRegistrations = () => {
           teamHeadName: String(registration.teamHeadName || '').trim(),
           year: String(registration.year || '').trim(),
           sem: String(registration.sem || '').trim(),
-          status: String(registration.status || 'Locked').trim() || 'Locked',
           members,
         };
       }),
@@ -375,7 +373,6 @@ const SportsMeetRegistrations = () => {
       eventName: registration.eventName,
       teamName: registration.teamName,
       teamHeadName: registration.teamHeadName,
-      status: registration.status,
       name: member.name,
       branch: member.branch,
       registerNumber: member.registerNumber,
@@ -582,7 +579,6 @@ const SportsMeetRegistrations = () => {
                         {registration.visibleMembers.length === 1 ? '' : 's'} in this list
                       </div>
                     </div>
-                    <div style={styles.statusChip}>{registration.status || 'Locked'}</div>
                   </div>
 
                   <div style={styles.infoBar}>
@@ -665,7 +661,7 @@ const SportsMeetRegistrations = () => {
                           <th style={styles.th}>Register No</th>
                           <th style={styles.th}>Year</th>
                           <th style={styles.th}>Sem</th>
-                          <th style={styles.th}>Status</th>
+                          <th style={styles.th}>Signature</th>
                           <th style={styles.th}>Action</th>
                         </tr>
                       </thead>
@@ -759,7 +755,7 @@ const SportsMeetRegistrations = () => {
                                   member.sem || '-'
                                 )}
                               </td>
-                              <td style={styles.td}>{registration.status || 'Locked'}</td>
+                              <td style={styles.td}></td>
                               <td style={styles.td}>
                                 {isEditing ? (
                                   <>
@@ -918,14 +914,6 @@ const styles = {
     marginTop: 4,
     color: '#6b7280',
     fontSize: 13,
-  },
-  statusChip: {
-    borderRadius: 999,
-    background: '#eef2ff',
-    color: '#3730a3',
-    padding: '6px 10px',
-    fontSize: 12,
-    fontWeight: 700,
   },
   infoBar: {
     display: 'flex',
