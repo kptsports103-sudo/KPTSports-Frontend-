@@ -2,13 +2,11 @@ import { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   BarChart3,
-  CheckCircle2,
   ClipboardList,
   LayoutDashboard,
   Lock,
   LogOut,
   Settings2,
-  ShieldAlert,
   ShieldBan,
   UserCog,
   Users,
@@ -24,10 +22,8 @@ const superAdminMenuItems = [
   { path: "/admin/iam/users", label: "IAM Users", Icon: UserCog },
   { path: "/admin/users-manage", label: "Users Management", Icon: Users },
   { path: "/admin/audit-logs", label: "Interaction Logs", Icon: ClipboardList },
-  { path: "/admin/errors", label: "Error Dashboard", Icon: ShieldAlert },
   { path: "/admin/media-stats", label: "Analytics", Icon: BarChart3 },
   { path: "/admin/login-activity", label: "Login Activity", Icon: Lock },
-  { path: "/admin/approvals", label: "Approvals", Icon: CheckCircle2 },
   { path: "/admin/abuse-logs", label: "Abuse Logs", Icon: ShieldBan },
   { path: "/admin/settings", label: "Settings", Icon: Settings2 },
 ];

@@ -11,11 +11,10 @@ const quickLinks = [
   { to: "/admin/iam/users", label: "Manage IAM Users" },
   { to: "/admin/users-manage", label: "Users Management" },
   { to: "/admin/audit-logs", label: "Audit Logs" },
-  { to: "/admin/errors", label: "Error Dashboard" },
   { to: "/admin/media-stats", label: "Media Stats" },
   { to: "/admin/login-activity", label: "Login Activity" },
-  { to: "/admin/approvals", label: "Approvals" },
   { to: "/admin/abuse-logs", label: "Abuse Logs" },
+  { to: "/admin/settings", label: "Settings" },
 ];
 
 const SOURCE_LABELS = {
@@ -132,9 +131,9 @@ const SuperAdminDashboard = () => {
     const queueItems = [];
     if (failedActions > 0) {
       queueItems.push({
-        to: "/admin/errors",
+        to: "/admin/audit-logs",
         label: `${failedActions} failed actions need review`,
-        description: "Inspect unresolved requests and application errors.",
+        description: "Review failing requests inside the audit log feed.",
         tone: "warning",
       });
     }

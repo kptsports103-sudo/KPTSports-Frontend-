@@ -40,10 +40,8 @@ const UsersManage = lazy(() => import('../pages/admin/UsersManage'));
 const SuperAdminDashboard = lazy(() => import('../pages/super-admin/SuperAdminDashboard'));
 const CreateUser = lazy(() => import('../pages/super-admin/CreateUser'));
 const AuditLogs = lazy(() => import('../pages/super-admin/AuditLogs'));
-const ErrorDashboard = lazy(() => import('../pages/super-admin/ErrorDashboard'));
 const MediaStats = lazy(() => import('../pages/super-admin/MediaStats'));
 const LoginActivityPage = lazy(() => import('../pages/super-admin/LoginActivityPage'));
-const Approvals = lazy(() => import('../pages/super-admin/Approvals'));
 const AbuseLogs = lazy(() => import('../pages/super-admin/AbuseLogs'));
 const SuperAdminSettings = lazy(() => import('../pages/super-admin/SuperAdminSettings'));
 const SportsDashboard = lazy(() => import('../pages/SportsDashboard'));
@@ -135,10 +133,8 @@ const AppContent = () => {
             <Route path="/admin/users-manage" element={<ProtectedRoute exactRoles={["superadmin", "admin", "creator"]}><UsersManage /></ProtectedRoute>} />
             <Route path="/admin/iam/create" element={<ProtectedRoute role="superadmin"><CreateUser /></ProtectedRoute>} />
             <Route path="/admin/audit-logs" element={<ProtectedRoute role="superadmin"><AuditLogs /></ProtectedRoute>} />
-            <Route path="/admin/errors" element={<ProtectedRoute role="superadmin"><ErrorDashboard /></ProtectedRoute>} />
             <Route path="/admin/media-stats" element={<ProtectedRoute roles={["admin", "superadmin"]}><MediaStats /></ProtectedRoute>} />
             <Route path="/admin/login-activity" element={<ProtectedRoute role="superadmin"><LoginActivityPage /></ProtectedRoute>} />
-            <Route path="/admin/approvals" element={<ProtectedRoute role="superadmin"><Approvals /></ProtectedRoute>} />
             <Route path="/admin/abuse-logs" element={<ProtectedRoute role="superadmin"><AbuseLogs /></ProtectedRoute>} />
             <Route path="/admin/settings" element={<ProtectedRoute role="superadmin"><SuperAdminSettings /></ProtectedRoute>} />
           </Routes>
