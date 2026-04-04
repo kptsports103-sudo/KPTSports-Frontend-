@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 
 const INDIVIDUAL_POINTS = {
@@ -352,6 +352,30 @@ export default function PointsTable() {
           team winners use 10, 7, 4 points. Indoor and Outdoor sections use Annual Sports Celebration event mapping
           when the winner event matches a configured event name.
         </p>
+        <div
+          style={{
+            display: 'flex',
+            gap: '0.75rem',
+            flexWrap: 'wrap',
+            marginTop: '1rem'
+          }}
+        >
+          <Link to="/sports-celebration?tab=events" style={styles.quickLink}>
+            Events
+          </Link>
+          <Link to="/sports-celebration?tab=registration" style={styles.quickLink}>
+            Registration
+          </Link>
+          <Link to="/winners" style={styles.quickLink}>
+            Winners
+          </Link>
+          <Link to="/results" style={styles.quickLink}>
+            Results
+          </Link>
+          <Link to="/points-table" style={styles.quickLinkActive}>
+            Points Table
+          </Link>
+        </div>
       </header>
 
       <section
@@ -488,6 +512,28 @@ export default function PointsTable() {
 }
 
 const styles = {
+  quickLink: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '9px 13px',
+    borderRadius: '10px',
+    border: `1px solid ${palette.border}`,
+    background: palette.surfaceAlt,
+    color: palette.text,
+    textDecoration: 'none',
+    fontWeight: 600
+  },
+  quickLinkActive: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '9px 13px',
+    borderRadius: '10px',
+    border: `1px solid ${palette.accent}`,
+    background: palette.accent,
+    color: '#ffffff',
+    textDecoration: 'none',
+    fontWeight: 700
+  },
   summaryCard: {
     padding: '1.1rem 1.2rem',
     borderRadius: '18px',

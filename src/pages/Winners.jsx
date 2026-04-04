@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import OptimizedImage from '../components/OptimizedImage';
 import api from '../services/api';
 
@@ -133,6 +134,30 @@ const Winners = () => {
           Each card includes the winner photo, player name, event name, team name, branch, and medal, and these
           winner cards also feed the Points Table.
         </p>
+        <div
+          style={{
+            display: 'flex',
+            gap: '0.75rem',
+            flexWrap: 'wrap',
+            marginTop: '1rem'
+          }}
+        >
+          <Link to="/sports-celebration?tab=events" style={styles.quickLink}>
+            Events
+          </Link>
+          <Link to="/sports-celebration?tab=registration" style={styles.quickLink}>
+            Registration
+          </Link>
+          <Link to="/winners" style={styles.quickLinkActive}>
+            Winners
+          </Link>
+          <Link to="/results" style={styles.quickLink}>
+            Results
+          </Link>
+          <Link to="/points-table" style={styles.quickLink}>
+            Points Table
+          </Link>
+        </div>
       </header>
 
       <section
@@ -611,6 +636,31 @@ const Winners = () => {
       ) : null}
     </div>
   );
+};
+
+const styles = {
+  quickLink: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '9px 13px',
+    borderRadius: '10px',
+    border: `1px solid ${palette.border}`,
+    background: palette.surfaceAlt,
+    color: palette.text,
+    textDecoration: 'none',
+    fontWeight: 600
+  },
+  quickLinkActive: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '9px 13px',
+    borderRadius: '10px',
+    border: `1px solid ${palette.accent}`,
+    background: palette.accent,
+    color: '#ffffff',
+    textDecoration: 'none',
+    fontWeight: 700
+  },
 };
 
 export default Winners;
