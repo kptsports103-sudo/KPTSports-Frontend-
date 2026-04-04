@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  AlertTriangle,
   BarChart3,
   CheckCircle2,
   ClipboardList,
   LayoutDashboard,
   Lock,
   LogOut,
+  Settings2,
   ShieldAlert,
   ShieldBan,
   UserCog,
@@ -29,6 +29,7 @@ const superAdminMenuItems = [
   { path: "/admin/login-activity", label: "Login Activity", Icon: Lock },
   { path: "/admin/approvals", label: "Approvals", Icon: CheckCircle2 },
   { path: "/admin/abuse-logs", label: "Abuse Logs", Icon: ShieldBan },
+  { path: "/admin/settings", label: "Settings", Icon: Settings2 },
 ];
 
 const SuperAdminLayout = ({ children }) => {

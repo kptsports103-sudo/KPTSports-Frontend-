@@ -33,6 +33,7 @@ const ROUTE_LABELS = [
   [/^\/admin\/errors$/, 'Error Dashboard'],
   [/^\/admin\/approvals$/, 'Approvals'],
   [/^\/admin\/abuse-logs$/, 'Abuse Logs'],
+  [/^\/admin\/settings$/, 'Settings'],
   [/^\/sports-dashboard$/, 'Sports Dashboard'],
   [/^\/verify\/.+$/, 'Certificate Verification'],
   [/^\/winners$/, 'Winners'],

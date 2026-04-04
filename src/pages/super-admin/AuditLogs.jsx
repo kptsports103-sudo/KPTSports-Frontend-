@@ -1,22 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 import SuperAdminLayout from "./SuperAdminLayout";
 import activityLogService from "../../services/activityLog.service";
+import "./SuperAdminDataPages.css";
 
 const SOURCE_STYLES = {
-  api: "bg-blue-100 text-blue-800",
-  navigation: "bg-emerald-100 text-emerald-800",
-  auth: "bg-amber-100 text-amber-800",
-  manual: "bg-violet-100 text-violet-800",
-  system: "bg-slate-200 text-slate-800",
+  api: "super-admin-page__pill super-admin-page__pill--blue",
+  navigation: "super-admin-page__pill super-admin-page__pill--green",
+  auth: "super-admin-page__pill super-admin-page__pill--amber",
+  manual: "super-admin-page__pill super-admin-page__pill--violet",
+  system: "super-admin-page__pill super-admin-page__pill--slate",
 };
 
 const ROLE_STYLES = {
-  superadmin: "bg-amber-100 text-amber-900",
-  admin: "bg-blue-100 text-blue-900",
-  creator: "bg-pink-100 text-pink-900",
-  coach: "bg-teal-100 text-teal-900",
-  student: "bg-slate-100 text-slate-800",
-  viewer: "bg-slate-100 text-slate-800",
+  superadmin: "super-admin-page__pill super-admin-page__pill--amber",
+  admin: "super-admin-page__pill super-admin-page__pill--blue",
+  creator: "super-admin-page__pill super-admin-page__pill--violet",
+  coach: "super-admin-page__pill super-admin-page__pill--green",
+  student: "super-admin-page__pill super-admin-page__pill--slate",
+  viewer: "super-admin-page__pill super-admin-page__pill--slate",
 };
 
 const formatDateTime = (value) => {
@@ -81,145 +82,160 @@ const AuditLogs = () => {
 
   return (
     <SuperAdminLayout>
-      <section className="p-6 lg:p-8">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">Audit Logs</h1>
-          <p className="mt-2 text-slate-600">
+      <section className="super-admin-page">
+        <header className="super-admin-page__header">
+          <p className="super-admin-page__eyebrow">System Oversight</p>
+          <h1 className="super-admin-page__title">Audit Logs</h1>
+          <p className="super-admin-page__description">
             Review saved user activity across the application.
           </p>
         </header>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Total Logs</p>
-            <p className="mt-2 text-3xl font-bold text-slate-900">{summary.total}</p>
+        <div className="super-admin-page__stats">
+          <article className="super-admin-page__stat super-admin-page__stat--blue">
+            <p className="super-admin-page__stat-label">Total Logs</p>
+            <p className="super-admin-page__stat-value">{summary.total}</p>
+            <p className="super-admin-page__stat-helper">Tracked system actions</p>
           </article>
-          <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Active Users</p>
-            <p className="mt-2 text-3xl font-bold text-blue-700">{summary.uniqueUsers}</p>
+          <article className="super-admin-page__stat super-admin-page__stat--green">
+            <p className="super-admin-page__stat-label">Active Users</p>
+            <p className="super-admin-page__stat-value">{summary.uniqueUsers}</p>
+            <p className="super-admin-page__stat-helper">Distinct users in current page set</p>
           </article>
-          <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Failed Actions</p>
-            <p className="mt-2 text-3xl font-bold text-rose-700">{summary.failedActions}</p>
+          <article className="super-admin-page__stat super-admin-page__stat--amber">
+            <p className="super-admin-page__stat-label">Failed Actions</p>
+            <p className="super-admin-page__stat-value">{summary.failedActions}</p>
+            <p className="super-admin-page__stat-helper">Responses with error codes</p>
           </article>
         </div>
 
-        <div className="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <input
-              id="audit-logs-search"
-              name="auditLogsSearch"
-              type="text"
-              value={filters.search}
-              onChange={(event) => handleFilterChange("search", event.target.value)}
-              placeholder="Search user, action, page"
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500"
-            />
-            <select
-              id="audit-logs-source"
-              name="auditLogsSource"
-              value={filters.source}
-              onChange={(event) => handleFilterChange("source", event.target.value)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500"
-            >
-              <option value="">All Sources</option>
-              <option value="api">API</option>
-              <option value="navigation">Navigation</option>
-              <option value="auth">Auth</option>
-              <option value="manual">Manual</option>
-              <option value="system">System</option>
-            </select>
-            <select
-              id="audit-logs-role"
-              name="auditLogsRole"
-              value={filters.role}
-              onChange={(event) => handleFilterChange("role", event.target.value)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500"
-            >
-              <option value="">All Roles</option>
-              <option value="superadmin">Super Admin</option>
-              <option value="admin">Admin</option>
-              <option value="creator">Creator</option>
-              <option value="coach">Coach</option>
-              <option value="student">Student</option>
-              <option value="viewer">Viewer</option>
-            </select>
-            <div className="flex gap-3">
-              <button
-                onClick={handleApplyFilters}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
-              >
-                Apply
-              </button>
-              <button
-                onClick={handleReset}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-              >
-                Reset
-              </button>
-            </div>
+        <div className="super-admin-page__filters">
+          <input
+            id="audit-logs-search"
+            name="auditLogsSearch"
+            type="text"
+            value={filters.search}
+            onChange={(event) => handleFilterChange("search", event.target.value)}
+            placeholder="Search user, action, page"
+            className="super-admin-page__field"
+          />
+          <select
+            id="audit-logs-source"
+            name="auditLogsSource"
+            value={filters.source}
+            onChange={(event) => handleFilterChange("source", event.target.value)}
+            className="super-admin-page__field"
+          >
+            <option value="">All Sources</option>
+            <option value="api">API</option>
+            <option value="navigation">Navigation</option>
+            <option value="auth">Auth</option>
+            <option value="manual">Manual</option>
+            <option value="system">System</option>
+          </select>
+          <select
+            id="audit-logs-role"
+            name="auditLogsRole"
+            value={filters.role}
+            onChange={(event) => handleFilterChange("role", event.target.value)}
+            className="super-admin-page__field"
+          >
+            <option value="">All Roles</option>
+            <option value="superadmin">Super Admin</option>
+            <option value="admin">Admin</option>
+            <option value="creator">Creator</option>
+            <option value="coach">Coach</option>
+            <option value="student">Student</option>
+            <option value="viewer">Viewer</option>
+          </select>
+          <div className="super-admin-page__actions">
+            <button onClick={handleApplyFilters} className="super-admin-page__button">
+              Apply
+            </button>
+            <button onClick={handleReset} className="super-admin-page__button super-admin-page__button--secondary">
+              Reset
+            </button>
           </div>
         </div>
 
-        <div className="mt-8 rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 px-6 py-4">
-            <h2 className="text-lg font-semibold text-slate-900">Live Activity Feed</h2>
+        <div className="super-admin-page__panel">
+          <div className="super-admin-page__panel-head">
+            <div>
+              <h2 className="super-admin-page__panel-title">Live Activity Feed</h2>
+              <p className="super-admin-page__panel-copy">
+                Structured user actions, routes, and operational outcomes across protected pages.
+              </p>
+            </div>
           </div>
 
           {error ? (
-            <div className="px-6 py-8 text-sm text-rose-600">{error}</div>
+            <div className="super-admin-page__state super-admin-page__state--error">{error}</div>
           ) : loading ? (
-            <div className="px-6 py-8 text-sm text-slate-500">Loading logs...</div>
+            <div className="super-admin-page__state">Loading logs...</div>
           ) : logs.length === 0 ? (
-            <div className="px-6 py-8 text-sm text-slate-500">No activity logs found.</div>
+            <div className="super-admin-page__state">No activity logs found.</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
+            <div className="super-admin-page__table-wrap">
+              <table className="super-admin-page__table">
+                <thead>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Action</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">User</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Source</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Page</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Route</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Time</th>
+                    <th>Action</th>
+                    <th>User</th>
+                    <th>Source</th>
+                    <th>Page</th>
+                    <th>Route</th>
+                    <th>Status</th>
+                    <th>Time</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
+                <tbody>
                   {logs.map((log) => (
-                    <tr key={log._id} className="align-top">
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-900">{log.action || "-"}</div>
-                        <div className="mt-1 text-xs text-slate-500">{log.details || "-"}</div>
+                    <tr key={log._id}>
+                      <td>
+                        <span className="super-admin-page__cell-title">{log.action || "-"}</span>
+                        <span className="super-admin-page__cell-copy">{log.details || "-"}</span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-700">
-                        <div className="font-medium text-slate-900">{log.adminName || "Unknown User"}</div>
-                        <div>{log.adminEmail || "-"}</div>
-                        <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${ROLE_STYLES[log.role] || ROLE_STYLES.viewer}`}>
+                      <td>
+                        <span className="super-admin-page__cell-title">{log.adminName || "Unknown User"}</span>
+                        <span className="super-admin-page__cell-copy">{log.adminEmail || "-"}</span>
+                        <span className={ROLE_STYLES[log.role] || ROLE_STYLES.viewer}>
                           {log.role || "viewer"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-700">
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${SOURCE_STYLES[log.source] || SOURCE_STYLES.system}`}>
+                      <td>
+                        <span className={SOURCE_STYLES[log.source] || SOURCE_STYLES.system}>
                           {log.source || "manual"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-700">{log.pageName || "-"}</td>
-                      <td className="px-6 py-4 text-xs text-slate-500">
-                        <div>{log.clientPath || "-"}</div>
-                        <div className="mt-1">{log.route || "-"}</div>
+                      <td>
+                        <span className="super-admin-page__cell-title">{log.pageName || "-"}</span>
                       </td>
-                      <td className="px-6 py-4 text-sm">
+                      <td>
+                        <span className="super-admin-page__cell-copy super-admin-page__cell-copy--mono">
+                          {log.clientPath || "-"}
+                        </span>
+                        <span className="super-admin-page__cell-copy super-admin-page__cell-copy--mono">
+                          {log.route || "-"}
+                        </span>
+                      </td>
+                      <td>
                         {log.statusCode ? (
-                          <span className={`font-semibold ${log.statusCode >= 400 ? "text-rose-600" : "text-emerald-600"}`}>
-                            {log.statusCode}
+                          <span
+                            className={
+                              log.statusCode >= 400
+                                ? "super-admin-page__pill super-admin-page__pill--rose"
+                                : "super-admin-page__pill super-admin-page__pill--green"
+                            }
+                          >
+                            {log.statusCode >= 400 ? `Error ${log.statusCode}` : `OK ${log.statusCode}`}
                           </span>
                         ) : (
-                          <span className="text-slate-400">-</span>
+                          <span className="super-admin-page__pill super-admin-page__pill--slate">Pending</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-500">{formatDateTime(log.createdAt)}</td>
+                      <td>
+                        <span className="super-admin-page__cell-title">{formatDateTime(log.createdAt)}</span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -227,22 +243,22 @@ const AuditLogs = () => {
             </div>
           )}
 
-          <div className="flex items-center justify-between border-t border-slate-200 px-6 py-4">
-            <p className="text-sm text-slate-500">
+          <div className="super-admin-page__table-footer">
+            <p className="super-admin-page__table-footer-copy">
               Page {pagination.page || 1} of {pagination.totalPages || 1}
             </p>
-            <div className="flex gap-3">
+            <div className="super-admin-page__actions">
               <button
                 onClick={() => loadLogs(Math.max(1, (pagination.page || 1) - 1), filters)}
                 disabled={(pagination.page || 1) <= 1 || loading}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="super-admin-page__button super-admin-page__button--secondary"
               >
                 Previous
               </button>
               <button
                 onClick={() => loadLogs(Math.min(pagination.totalPages || 1, (pagination.page || 1) + 1), filters)}
                 disabled={(pagination.page || 1) >= (pagination.totalPages || 1) || loading}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="super-admin-page__button super-admin-page__button--secondary"
               >
                 Next
               </button>

@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SuperAdminLayout from "./SuperAdminLayout";
 import activityLogService from "../../services/activityLog.service";
+import "./SuperAdminDataPages.css";
 
 const formatDateTime = (value) => {
   if (!value) return "-";
@@ -30,46 +31,97 @@ const LoginActivityPage = () => {
     loadLogs();
   }, []);
 
+  const summary = useMemo(() => {
+    const uniqueUsers = new Set(logs.map((log) => String(log?.adminId || log?.adminEmail || "")).filter(Boolean)).size;
+    const latest = [...logs]
+      .sort((left, right) => new Date(right?.createdAt || 0) - new Date(left?.createdAt || 0))[0];
+    const superAdminLogins = logs.filter((log) => String(log?.role || "").toLowerCase() === "superadmin").length;
+
+    return {
+      total: logs.length,
+      uniqueUsers,
+      superAdminLogins,
+      latestTime: latest?.createdAt ? formatDateTime(latest.createdAt) : "-",
+    };
+  }, [logs]);
+
   return (
     <SuperAdminLayout>
-      <section className="p-6 lg:p-8">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">Login Activity</h1>
-          <p className="mt-2 text-slate-600">
+      <section className="super-admin-page">
+        <header className="super-admin-page__header">
+          <p className="super-admin-page__eyebrow">Authentication Monitoring</p>
+          <h1 className="super-admin-page__title">Login Activity</h1>
+          <p className="super-admin-page__description">
             Successful authentication events across the system.
           </p>
         </header>
 
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="super-admin-page__stats">
+          <article className="super-admin-page__stat super-admin-page__stat--blue">
+            <p className="super-admin-page__stat-label">Sign-In Events</p>
+            <p className="super-admin-page__stat-value">{summary.total}</p>
+            <p className="super-admin-page__stat-helper">Saved authentication records</p>
+          </article>
+          <article className="super-admin-page__stat super-admin-page__stat--green">
+            <p className="super-admin-page__stat-label">Unique Users</p>
+            <p className="super-admin-page__stat-value">{summary.uniqueUsers}</p>
+            <p className="super-admin-page__stat-helper">Distinct accounts in the current set</p>
+          </article>
+          <article className="super-admin-page__stat super-admin-page__stat--purple">
+            <p className="super-admin-page__stat-label">Super Admin Logins</p>
+            <p className="super-admin-page__stat-value">{summary.superAdminLogins}</p>
+            <p className="super-admin-page__stat-helper">{summary.latestTime}</p>
+          </article>
+        </div>
+
+        <div className="super-admin-page__panel">
+          <div className="super-admin-page__panel-head">
+            <div>
+              <h2 className="super-admin-page__panel-title">Authentication Feed</h2>
+              <p className="super-admin-page__panel-copy">
+                Recent login events with account, role, source IP, and recorded details.
+              </p>
+            </div>
+          </div>
+
           {error ? (
-            <div className="px-6 py-8 text-sm text-rose-600">{error}</div>
+            <div className="super-admin-page__state super-admin-page__state--error">{error}</div>
           ) : loading ? (
-            <div className="px-6 py-8 text-sm text-slate-500">Loading login events...</div>
+            <div className="super-admin-page__state">Loading login events...</div>
           ) : logs.length === 0 ? (
-            <div className="px-6 py-8 text-sm text-slate-500">No login activity found.</div>
+            <div className="super-admin-page__state">No login activity found.</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
+            <div className="super-admin-page__table-wrap">
+              <table className="super-admin-page__table">
+                <thead>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">User</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Role</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">IP Address</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Details</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Time</th>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>IP Address</th>
+                    <th>Details</th>
+                    <th>Time</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
+                <tbody>
                   {logs.map((log) => (
                     <tr key={log._id}>
-                      <td className="px-6 py-4 text-sm text-slate-700">
-                        <div className="font-semibold text-slate-900">{log.adminName || "Unknown User"}</div>
-                        <div>{log.adminEmail || "-"}</div>
+                      <td>
+                        <span className="super-admin-page__cell-title">{log.adminName || "Unknown User"}</span>
+                        <span className="super-admin-page__cell-copy">{log.adminEmail || "-"}</span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-700">{log.role || "-"}</td>
-                      <td className="px-6 py-4 text-sm text-slate-700">{log.ipAddress || "-"}</td>
-                      <td className="px-6 py-4 text-sm text-slate-500">{log.details || log.action || "-"}</td>
-                      <td className="px-6 py-4 text-sm text-slate-500">{formatDateTime(log.createdAt)}</td>
+                      <td>
+                        <span className="super-admin-page__pill super-admin-page__pill--amber">{log.role || "-"}</span>
+                      </td>
+                      <td>
+                        <span className="super-admin-page__cell-title">{log.ipAddress || "-"}</span>
+                        <span className="super-admin-page__cell-copy">Recorded client IP</span>
+                      </td>
+                      <td>
+                        <span className="super-admin-page__cell-copy">{log.details || log.action || "-"}</span>
+                      </td>
+                      <td>
+                        <span className="super-admin-page__cell-title">{formatDateTime(log.createdAt)}</span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

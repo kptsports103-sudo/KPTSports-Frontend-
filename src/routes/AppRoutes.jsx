@@ -45,6 +45,7 @@ const MediaStats = lazy(() => import('../pages/super-admin/MediaStats'));
 const LoginActivityPage = lazy(() => import('../pages/super-admin/LoginActivityPage'));
 const Approvals = lazy(() => import('../pages/super-admin/Approvals'));
 const AbuseLogs = lazy(() => import('../pages/super-admin/AbuseLogs'));
+const SuperAdminSettings = lazy(() => import('../pages/super-admin/SuperAdminSettings'));
 const SportsDashboard = lazy(() => import('../pages/SportsDashboard'));
 const VerifyCertificate = lazy(() => import('../pages/VerifyCertificate'));
 const WinnerCameraCapture = lazy(() => import('../pages/WinnerCameraCapture'));
@@ -139,6 +140,7 @@ const AppContent = () => {
             <Route path="/admin/login-activity" element={<ProtectedRoute role="superadmin"><LoginActivityPage /></ProtectedRoute>} />
             <Route path="/admin/approvals" element={<ProtectedRoute role="superadmin"><Approvals /></ProtectedRoute>} />
             <Route path="/admin/abuse-logs" element={<ProtectedRoute role="superadmin"><AbuseLogs /></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute role="superadmin"><SuperAdminSettings /></ProtectedRoute>} />
           </Routes>
         </Suspense>
       </main>
