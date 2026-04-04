@@ -2,13 +2,14 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { MessageSquareMore, Send, X } from 'lucide-react';
 import './FeedbackWidget.css';
 
-const FEEDBACK_TYPES = ['General', 'Suggestion', 'Bug Report', 'Support'];
+const FEEDBACK_TYPES = ['General', 'Suggestion', 'Bug Report', 'Support', 'Other'];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const createInitialForm = (user) => ({
   fullName: user?.name || '',
   email: user?.email || '',
   type: FEEDBACK_TYPES[0],
+  otherType: '',
   message: '',
 });
 
@@ -94,9 +95,13 @@ const FeedbackWidget = ({
     const { name, value } = event.target;
     setFormData((current) => ({
       ...current,
+      ...(name === 'type' && value !== 'Other' ? { otherType: '' } : {}),
       [name]: value,
     }));
     clearFieldError(name);
+    if (name === 'type' && value !== 'Other') {
+      clearFieldError('otherType');
+    }
   };
 
   const validateForm = () => {
@@ -106,14 +111,16 @@ const FeedbackWidget = ({
       nextErrors.fullName = 'Full name is required.';
     }
 
-    if (!formData.email.trim()) {
-      nextErrors.email = 'Email address is required.';
-    } else if (!EMAIL_PATTERN.test(formData.email.trim())) {
+    if (formData.email.trim() && !EMAIL_PATTERN.test(formData.email.trim())) {
       nextErrors.email = 'Please enter a valid email address.';
     }
 
     if (!formData.message.trim()) {
       nextErrors.message = 'Feedback message is required.';
+    }
+
+    if (formData.type === 'Other' && !formData.otherType.trim()) {
+      nextErrors.otherType = 'Please specify the feedback type.';
     }
 
     return nextErrors;
@@ -136,7 +143,9 @@ const FeedbackWidget = ({
         ...formData,
         fullName: formData.fullName.trim(),
         email: formData.email.trim(),
+        otherType: formData.otherType.trim(),
         message: formData.message.trim(),
+        finalType: formData.type === 'Other' ? formData.otherType.trim() : formData.type,
       };
 
       if (typeof onSubmit === 'function') {
@@ -230,7 +239,7 @@ const FeedbackWidget = ({
                   </div>
 
                   <div className="feedback-widget__field">
-                    <label htmlFor={`${titleId}-email`}>Email Address</label>
+                    <label htmlFor={`${titleId}-email`}>Email Address (Optional)</label>
                     <input
                       id={`${titleId}-email`}
                       name="email"
@@ -260,6 +269,22 @@ const FeedbackWidget = ({
                     ))}
                   </select>
                 </div>
+
+                {formData.type === 'Other' && (
+                  <div className="feedback-widget__field">
+                    <label htmlFor={`${titleId}-otherType`}>Specify Other Type</label>
+                    <input
+                      id={`${titleId}-otherType`}
+                      name="otherType"
+                      type="text"
+                      value={formData.otherType}
+                      onChange={handleChange}
+                      placeholder="Enter custom feedback type"
+                      className={errors.otherType ? 'feedback-widget__control feedback-widget__control--error' : 'feedback-widget__control'}
+                    />
+                    {errors.otherType && <p className="feedback-widget__error">{errors.otherType}</p>}
+                  </div>
+                )}
 
                 <div className="feedback-widget__field">
                   <label htmlFor={`${titleId}-message`}>Feedback Message</label>
