@@ -1,146 +1,110 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { clearAuthStorage } from '../../context/tokenStorage';
-import FeedbackWidget from '../../components/FeedbackWidget';
-import '../../admin.css';
+import { useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  AlertTriangle,
+  BarChart3,
+  CheckCircle2,
+  ClipboardList,
+  LayoutDashboard,
+  Lock,
+  LogOut,
+  ShieldAlert,
+  ShieldBan,
+  UserCog,
+  Users,
+} from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { clearAuthStorage } from "../../context/tokenStorage";
+import FeedbackWidget from "../../components/FeedbackWidget";
+import "../../admin.css";
+import "./SuperAdminLayout.css";
+
+const superAdminMenuItems = [
+  { path: "/admin/super-admin-dashboard", label: "Dashboard", Icon: LayoutDashboard },
+  { path: "/admin/iam/users", label: "IAM Users", Icon: UserCog },
+  { path: "/admin/users-manage", label: "Users Management", Icon: Users },
+  { path: "/admin/audit-logs", label: "Interaction Logs", Icon: ClipboardList },
+  { path: "/admin/errors", label: "Error Dashboard", Icon: ShieldAlert },
+  { path: "/admin/media-stats", label: "Analytics", Icon: BarChart3 },
+  { path: "/admin/login-activity", label: "Login Activity", Icon: Lock },
+  { path: "/admin/approvals", label: "Approvals", Icon: CheckCircle2 },
+  { path: "/admin/abuse-logs", label: "Abuse Logs", Icon: ShieldBan },
+];
 
 const SuperAdminLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
-    // Refresh user data to get latest profileImage from Cloudinary
     if (user) {
       refreshUser();
     }
   }, []);
 
-  const superAdminMenuItems = [
-    { path: '/admin/super-admin-dashboard', label: 'Super Admin Dashboard', icon: '👑' },
-    { path: '/admin/iam/users', label: 'IAM Users', icon: '👥' },
-    { path: '/admin/users-manage', label: 'Users Management', icon: '⚙️' },
-    { path: '/admin/audit-logs', label: 'Audit Logs', icon: '📋' },
-    { path: '/admin/errors', label: 'Error Dashboard', icon: '🚨' },
-    { path: '/admin/media-stats', label: 'Media Stats', icon: '📊' },
-    { path: '/admin/login-activity', label: 'Login Activity', icon: '🔐' },
-    { path: '/admin/approvals', label: 'Approvals', icon: '✅' },
-    { path: '/admin/abuse-logs', label: 'Abuse Logs', icon: '🚫' },
-  ];
-
   const handleLogout = () => {
     clearAuthStorage();
-    navigate('/login', { replace: true });
+    navigate("/login", { replace: true });
   };
 
   return (
-    <div
-      className="dashboard-shell"
-      style={{ '--sidebar-width': isSidebarOpen ? '350px' : '60px' }}
-    >
-      {/* Super Admin Sidebar */}
-      <div className="sidebar" style={{ 
-        width: isSidebarOpen ? '350px' : '60px',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-      }}>
-        {/* Profile Section */}
-        <div 
-          className="profile"
-          style={{
-          }}
-        >
-          
-          <img
-            src={user?.profileImage || "/avatar.png"}
-            alt="Profile"
-            style={{ 
-              width: '150px', 
-              height: '150px', 
-              imageRendering: 'auto', 
-              borderRadius: '12px', 
-              objectFit: 'cover',
-              border: '3px solid rgba(255,255,255,0.3)'
-            }}
-          />
-          {/* User Info Table */}
-          <div style={{ marginTop: '16px' }}>
-            <table style={{ width: '100%', fontSize: '14px', color: '#fff' }}>
-              <tbody>
-                <tr>
-                  <td style={{ padding: '4px 0', fontWeight: 600, color: 'rgba(255,255,255,0.8)', width: '80px' }}>Name:</td>
-                  <td style={{ padding: '4px 0', fontWeight: 600 }}>{user?.name || 'Super Admin'}</td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '4px 0', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>Email:</td>
-                  <td style={{ padding: '4px 0', fontSize: '13px' }}>{user?.email}</td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '4px 0', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>Role:</td>
-                  <td style={{ padding: '4px 0' }}>
-                    <span style={{
-                      padding: '2px 8px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      borderRadius: '12px',
-                      background: '#ffd700',
-                      color: '#000',
-                      textTransform: 'uppercase'
-                    }}>
-                      {user?.role || 'SuperAdmin'}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+    <div className="super-admin-layout">
+      <div className="super-admin-layout__orb super-admin-layout__orb--one" aria-hidden="true" />
+      <div className="super-admin-layout__orb super-admin-layout__orb--two" aria-hidden="true" />
+      <div className="super-admin-layout__orb super-admin-layout__orb--three" aria-hidden="true" />
+
+      <aside className="super-admin-layout__sidebar" aria-label="Super admin navigation">
+        <div className="super-admin-layout__brand">
+          <div className="super-admin-layout__brand-panel">
+            <h1>KPT Bot Admin</h1>
+            <p>Super admin control center</p>
+          </div>
+        </div>
+
+        <nav className="super-admin-layout__nav">
+          {superAdminMenuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            const Icon = item.Icon;
+
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`super-admin-layout__nav-link ${isActive ? "is-active" : ""}`}
+              >
+                <span className="super-admin-layout__nav-icon" aria-hidden="true">
+                  <Icon size={18} />
+                </span>
+                <span className="super-admin-layout__nav-text">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="super-admin-layout__footer">
+          <div className="super-admin-layout__status-card">
+            <p>System Status</p>
+            <div className="super-admin-layout__status-row">
+              <span className="super-admin-layout__status-dot" aria-hidden="true" />
+              <strong>Healthy</strong>
+            </div>
           </div>
 
+          <div className="super-admin-layout__account">
+            <strong>{user?.name || "Super Admin"}</strong>
+            <span>{user?.email || "Secure access session"}</span>
+          </div>
+
+          <button type="button" className="super-admin-layout__logout" onClick={handleLogout}>
+            <LogOut size={16} aria-hidden="true" />
+            <span>Logout</span>
+          </button>
         </div>
+      </aside>
 
-        {/* Logout Button */}
-        <button 
-          className="logout-btn" 
-          onClick={handleLogout}
-          style={{
-            background: 'rgba(255,255,255,0.2)',
-            color: '#fff',
-            border: '1px solid rgba(255,255,255,0.3)'
-          }}
-        >
-          Logout
-        </button>
-
-        {/* Menu */}
-        <div className="menu">
-          {superAdminMenuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`menu-item ${location.pathname === item.path ? 'active' : ''}`}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                textDecoration: 'none',
-                color: 'rgba(255,255,255,0.9)',
-                padding: '12px 20px',
-                borderRadius: '8px',
-                margin: '4px 10px',
-                transition: 'all 0.3s ease',
-                background: location.pathname === item.path ? 'rgba(255,255,255,0.2)' : 'transparent'
-              }}
-            >
-              <span style={{ marginRight: '10px', fontSize: '18px' }}>{item.icon}</span>
-              {isSidebarOpen && <span>{item.label}</span>}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="main-content" style={{ background: '#f8f9fa' }}>
+      <main className="super-admin-layout__main">
         {children}
-      </div>
+      </main>
 
       <FeedbackWidget
         user={user}
@@ -156,6 +120,3 @@ const SuperAdminLayout = ({ children }) => {
 };
 
 export default SuperAdminLayout;
-
-
-

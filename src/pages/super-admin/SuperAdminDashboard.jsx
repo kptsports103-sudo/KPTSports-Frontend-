@@ -223,18 +223,14 @@ const SuperAdminDashboard = () => {
   return (
     <SuperAdminLayout>
       <section className="super-admin-dashboard">
-        <div className="super-admin-dashboard__orb super-admin-dashboard__orb--one" aria-hidden="true" />
-        <div className="super-admin-dashboard__orb super-admin-dashboard__orb--two" aria-hidden="true" />
-        <div className="super-admin-dashboard__orb super-admin-dashboard__orb--three" aria-hidden="true" />
-
         <div className="super-admin-dashboard__surface">
           <header className="super-admin-dashboard__hero">
             <div>
               <p className="super-admin-dashboard__eyebrow">Super Admin Dashboard / Log Viewer</p>
-              <h1>System activity, response counts, and platform oversight</h1>
+              <h1>Interaction logs, response counts, and intent management</h1>
               <p className="super-admin-dashboard__hero-copy">
-                Monitor recorded actions, review high-priority signals, and open core supervision
-                tools from one control surface.
+                Monitor recorded actions, review high-priority signals, and manage core oversight
+                tools from one polished control surface.
               </p>
             </div>
             <span className="super-admin-dashboard__hero-status">{statusLabel}</span>

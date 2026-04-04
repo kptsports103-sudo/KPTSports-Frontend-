@@ -1,36 +1,6 @@
 .super-admin-dashboard {
   position: relative;
-  padding: 32px;
-  overflow: hidden;
-}
-
-.super-admin-dashboard__orb {
-  position: absolute;
-  border-radius: 999px;
-  background: rgba(191, 210, 255, 0.52);
-  filter: blur(2px);
-  pointer-events: none;
-}
-
-.super-admin-dashboard__orb--one {
-  top: -72px;
-  left: -54px;
-  width: 240px;
-  height: 240px;
-}
-
-.super-admin-dashboard__orb--two {
-  top: 12px;
-  right: -48px;
-  width: 180px;
-  height: 180px;
-}
-
-.super-admin-dashboard__orb--three {
-  right: -92px;
-  bottom: -120px;
-  width: 310px;
-  height: 310px;
+  padding: 0;
 }
 
 .super-admin-dashboard__surface {
