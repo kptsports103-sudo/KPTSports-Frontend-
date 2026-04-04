@@ -220,9 +220,9 @@ const FeedbackWidget = ({
                 <div className="feedback-widget__success-icon">
                   <Send size={20} aria-hidden="true" />
                 </div>
-                <h3>Thank you for your feedback</h3>
+                <h3>Thank you!</h3>
                 <p>
-                  Your message has been submitted successfully.
+                  Your feedback has been submitted successfully. We truly value your input and will use it to improve our services.
                 </p>
                 <button type="button" className="feedback-widget__primary" onClick={closeModal}>
                   Close

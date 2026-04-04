@@ -277,7 +277,7 @@ export default function PointsTable() {
   }, [winners]);
 
   const resolvedSelectedYear = useMemo(() => {
-    if (availableYears.length === 0) return '';
+    if (availableYears.length === 0) return String(selectedYear || requestedYear || currentYear);
 
     if (availableYears.some((year) => String(year) === String(selectedYear))) {
       return String(selectedYear);
@@ -295,28 +295,56 @@ export default function PointsTable() {
   }, [availableYears, currentYear, requestedYear, selectedYear]);
 
   useEffect(() => {
-    if (resolvedSelectedYear !== String(selectedYear || '')) {
-      setSelectedYear(resolvedSelectedYear);
+    if (!requestedYear) {
+      return;
     }
-  }, [resolvedSelectedYear, selectedYear]);
+
+    setSelectedYear((currentSelectedYear) => (
+      String(currentSelectedYear || '') === requestedYear ? currentSelectedYear : requestedYear
+    ));
+  }, [requestedYear]);
 
   useEffect(() => {
-    if (requestedYear && requestedYear !== String(selectedYear || '')) {
-      setSelectedYear(requestedYear);
+    if (availableYears.length === 0) {
+      return;
     }
-  }, [requestedYear, selectedYear]);
+
+    setSelectedYear((currentSelectedYear) => {
+      const normalizedCurrent = String(currentSelectedYear || '').trim();
+
+      if (availableYears.some((year) => String(year) === normalizedCurrent)) {
+        return normalizedCurrent;
+      }
+
+      if (requestedYear && availableYears.some((year) => String(year) === requestedYear)) {
+        return requestedYear;
+      }
+
+      if (availableYears.includes(Number(currentYear))) {
+        return currentYear;
+      }
+
+      return String(availableYears[0]);
+    });
+  }, [availableYears, currentYear, requestedYear]);
 
   useEffect(() => {
+    if (availableYears.length === 0) {
+      return;
+    }
+
+    if (requestedYear === String(resolvedSelectedYear || '')) {
+      return;
+    }
+
     const next = new URLSearchParams(searchParams);
     if (resolvedSelectedYear) {
       next.set('year', resolvedSelectedYear);
     } else {
       next.delete('year');
     }
-    if (next.toString() !== searchParams.toString()) {
-      setSearchParams(next, { replace: true });
-    }
-  }, [resolvedSelectedYear, searchParams, setSearchParams]);
+    setSearchParams(next, { replace: true });
+  }, [availableYears.length, requestedYear, resolvedSelectedYear, searchParams, setSearchParams]);
 
   const summary = useMemo(
     () => buildSummary({ winners, events, selectedYear: resolvedSelectedYear }),

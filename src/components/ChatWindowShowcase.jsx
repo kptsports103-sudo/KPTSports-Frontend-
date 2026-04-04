@@ -525,7 +525,7 @@ const buildPointsAnswer = (data) => {
 
 const buildFallbackAnswer = () =>
   createAssistantMessage({
-    text: 'I can answer known questions about event schedules, registration deadlines, latest winners, published results, and the points table. Try one of the quick questions below.',
+    text: 'I do not have a mapped answer for that question yet. I can help with event schedules, registration deadlines, latest winners, published results, and the points table. Try one of the quick questions below.',
     linkLabel: 'Browse Sports Pages',
     linkTo: '/sports-celebration',
   });
@@ -577,7 +577,7 @@ const ChatWindowShowcase = () => {
   const [dataStatus, setDataStatus] = useState('demo');
   const [messages, setMessages] = useState(() => [
     createAssistantMessage({
-      text: 'Ask a known question about events, registration deadlines, winners, results, or the points table. I will match the intent and return a mapped response.',
+      text: 'Ask a known question about events, registration deadlines, winners, results, or the points table. If a query is unsupported, I return a safe fallback reply instead of guessing.',
     }),
   ]);
   const [inputValue, setInputValue] = useState('');
@@ -647,6 +647,7 @@ const ChatWindowShowcase = () => {
       'Who are the latest winners?',
       'Who leads the points table?',
       'What results are available?',
+      'Can you book my hostel room?',
     ];
   }, [assistantData]);
 
@@ -679,17 +680,19 @@ const ChatWindowShowcase = () => {
     <section className="section-shell chat-window-showcase" aria-labelledby="chat-window-showcase-title">
       <div className="chat-window-showcase__panel">
         <div className="chat-window-showcase__content">
-          <p className="chat-window-showcase__eyebrow">Live FAQ Assistant</p>
-          <h2 id="chat-window-showcase-title">Known Query Response</h2>
+          <p className="chat-window-showcase__eyebrow">Live FAQ And Fallback Assistant</p>
+          <h2 id="chat-window-showcase-title">Known And Fallback Query Response</h2>
           <p className="chat-window-showcase__description">
             This is now a working website feature, not just an image. Ask a known sports-domain
             question and the assistant matches the intent, reads the public site data, and returns
-            the mapped response directly inside the chat window.
+            the mapped response directly inside the chat window. If the question is unclear or out
+            of scope, it shows a safe fallback response instead of an incorrect answer.
           </p>
 
-          <div className="chat-window-showcase__badges" aria-label="Known response capabilities">
+          <div className="chat-window-showcase__badges" aria-label="Known and fallback response capabilities">
             <span className="chat-window-showcase__badge">Recognized intent</span>
             <span className="chat-window-showcase__badge">Mapped response</span>
+            <span className="chat-window-showcase__badge">Fallback safe reply</span>
             <span className="chat-window-showcase__badge">Fast local matching</span>
             <span className="chat-window-showcase__badge">{statusLabel}</span>
           </div>
@@ -722,7 +725,7 @@ const ChatWindowShowcase = () => {
           <div className="chat-window-showcase__chat-header">
             <div>
               <h3>KPT Sports Assistant</h3>
-              <p>FAQ-style query matching for known sports data</p>
+              <p>Known queries, mapped responses, and safe fallback replies</p>
             </div>
             <span className={`chat-window-showcase__status chat-window-showcase__status--${dataStatus}`}>
               {statusLabel}
@@ -767,11 +770,14 @@ const ChatWindowShowcase = () => {
 
           <form className="chat-window-showcase__composer" onSubmit={handleSubmit}>
             <input
+              id="kpt-sports-assistant-query"
+              name="kptSportsAssistantQuery"
               type="text"
               value={inputValue}
               onChange={(event) => setInputValue(event.target.value)}
-              placeholder="Ask about events, registration, winners, results, or points table..."
+              placeholder="Ask about events, registration, winners, results, points table, or try an unsupported question..."
               aria-label="Ask the KPT Sports assistant"
+              autoComplete="off"
               className="chat-window-showcase__input"
             />
             <button type="submit" className="chat-window-showcase__send" disabled={isTyping}>

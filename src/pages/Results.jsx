@@ -97,7 +97,7 @@ const Results = () => {
   ).sort((a, b) => b - a);
 
   const resolvedSelectedYear = availableYears.length === 0
-    ? ''
+    ? String(selectedYear || requestedYear || currentYear)
     : availableYears.includes(Number(selectedYear))
       ? String(selectedYear)
       : requestedYear && availableYears.includes(Number(requestedYear))
@@ -107,28 +107,56 @@ const Results = () => {
           : String(availableYears[0]);
 
   useEffect(() => {
-    if (resolvedSelectedYear !== String(selectedYear || '')) {
-      setSelectedYear(resolvedSelectedYear);
+    if (!requestedYear) {
+      return;
     }
-  }, [resolvedSelectedYear, selectedYear]);
+
+    setSelectedYear((currentSelectedYear) => (
+      String(currentSelectedYear || '') === requestedYear ? currentSelectedYear : requestedYear
+    ));
+  }, [requestedYear]);
 
   useEffect(() => {
-    if (requestedYear && requestedYear !== String(selectedYear || '')) {
-      setSelectedYear(requestedYear);
+    if (availableYears.length === 0) {
+      return;
     }
-  }, [requestedYear, selectedYear]);
+
+    setSelectedYear((currentSelectedYear) => {
+      const normalizedCurrent = String(currentSelectedYear || '').trim();
+
+      if (availableYears.includes(Number(normalizedCurrent))) {
+        return normalizedCurrent;
+      }
+
+      if (requestedYear && availableYears.includes(Number(requestedYear))) {
+        return requestedYear;
+      }
+
+      if (availableYears.includes(Number(currentYear))) {
+        return currentYear;
+      }
+
+      return String(availableYears[0]);
+    });
+  }, [availableYears, currentYear, requestedYear]);
 
   useEffect(() => {
+    if (availableYears.length === 0) {
+      return;
+    }
+
+    if (requestedYear === String(resolvedSelectedYear || '')) {
+      return;
+    }
+
     const next = new URLSearchParams(searchParams);
     if (resolvedSelectedYear) {
       next.set('year', resolvedSelectedYear);
     } else {
       next.delete('year');
     }
-    if (next.toString() !== searchParams.toString()) {
-      setSearchParams(next, { replace: true });
-    }
-  }, [resolvedSelectedYear, searchParams, setSearchParams]);
+    setSearchParams(next, { replace: true });
+  }, [availableYears.length, requestedYear, resolvedSelectedYear, searchParams, setSearchParams]);
 
   const filteredResults = allResults.filter((result) => String(result.year) === String(resolvedSelectedYear));
 
