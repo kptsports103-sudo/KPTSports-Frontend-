@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import EventsSection from './sports-celebration/EventsSection';
 import RegistrationSection from './sports-celebration/RegistrationSection';
@@ -311,18 +311,16 @@ export default function AnnualSportsCelebration() {
         <p style={{ marginTop: 8, opacity: 0.85, color: 'var(--app-text-muted)' }}>
           Events are managed from CreatorDashboard. Registration is <b>Free</b>.
         </p>
-        <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-          <button style={activeTab === 'events' ? styles.btnActive : styles.btn} onClick={() => setActiveTab('events')}>
-            Events
-          </button>
-          <button style={activeTab === 'registration' ? styles.btnActive : styles.btn} onClick={() => setActiveTab('registration')}>
-            Registration
-          </button>
-        </div>
         <div style={styles.quickLinks}>
-          <a href="/winners" style={styles.quickLink}>Winners</a>
-          <a href="/results" style={styles.quickLink}>Results</a>
-          <a href="/points-table" style={styles.quickLink}>Points Table</a>
+          <Link to="/sports-celebration?tab=events" style={activeTab === 'events' ? styles.quickLinkActive : styles.quickLink}>
+            Events
+          </Link>
+          <Link to="/sports-celebration?tab=registration" style={activeTab === 'registration' ? styles.quickLinkActive : styles.quickLink}>
+            Registration
+          </Link>
+          <Link to="/winners" style={styles.quickLink}>Winners</Link>
+          <Link to="/results" style={styles.quickLink}>Results</Link>
+          <Link to="/points-table" style={styles.quickLink}>Points Table</Link>
         </div>
       </header>
 
@@ -370,23 +368,6 @@ const styles = {
     background: 'var(--app-surface)',
     boxShadow: 'var(--app-shadow)'
   },
-  btn: {
-    padding: '10px 14px',
-    borderRadius: 10,
-    border: '1px solid var(--app-border)',
-    cursor: 'pointer',
-    background: 'var(--app-surface)',
-    color: 'var(--app-text)'
-  },
-  btnActive: {
-    padding: '10px 14px',
-    borderRadius: 10,
-    border: '1px solid var(--page-accent)',
-    cursor: 'pointer',
-    background: 'var(--page-accent-soft)',
-    color: 'var(--page-accent)',
-    fontWeight: 700
-  },
   quickLinks: {
     display: 'flex',
     gap: 10,
@@ -403,5 +384,16 @@ const styles = {
     color: 'var(--app-text)',
     textDecoration: 'none',
     fontWeight: 600
+  },
+  quickLinkActive: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '9px 13px',
+    borderRadius: 10,
+    border: '1px solid var(--page-accent)',
+    background: 'var(--page-accent-soft)',
+    color: 'var(--page-accent)',
+    textDecoration: 'none',
+    fontWeight: 700
   },
 };

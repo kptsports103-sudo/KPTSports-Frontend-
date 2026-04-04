@@ -223,11 +223,13 @@ const Navbar = () => {
                 Events
               </button>
               <button type="button" onClick={() => navigate('/sports-celebration?tab=registration')}>
-                Register
+                Registration
               </button>
-            
               <button type="button" onClick={() => navigate('/winners')}>
                 Winners
+              </button>
+              <button type="button" onClick={() => navigate('/results')}>
+                Results
               </button>
               <button type="button" onClick={() => navigate('/points-table')}>
                 Points Table
