@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaCalendarCheck, FaMedal, FaTrophy, FaUsers } from 'react-icons/fa';
+import ChatWindowShowcase from '../components/ChatWindowShowcase';
 import OptimizedImage from '../components/OptimizedImage';
 import api from '../services/api';
 import './Home.css';
@@ -183,6 +184,8 @@ function Home() {
           <span className="home-hero__scroll-arrow">v</span>
         </div>
       </section>
+
+      <ChatWindowShowcase />
 
       {showDeferredSections && content.announcements.length > 0 ? (
         <section id="announcements" className="section-shell">

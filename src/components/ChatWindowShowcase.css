@@ -1,0 +1,193 @@
+.chat-window-showcase {
+  padding-top: 48px;
+}
+
+.chat-window-showcase__panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 28px;
+  align-items: center;
+  border: 1px solid var(--card-border);
+  border-radius: 28px;
+  padding: clamp(22px, 3vw, 34px);
+  background:
+    radial-gradient(circle at top left, rgba(226, 184, 75, 0.18), transparent 28%),
+    linear-gradient(145deg, var(--home-surface), var(--home-surface-alt));
+  box-shadow: 0 20px 42px rgba(9, 29, 65, 0.1);
+  overflow: hidden;
+}
+
+.chat-window-showcase__content {
+  position: relative;
+  z-index: 1;
+}
+
+.chat-window-showcase__eyebrow {
+  margin: 0 0 10px;
+  color: #285fca;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.chat-window-showcase__content h2 {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.7rem);
+  color: var(--ink-700);
+}
+
+.chat-window-showcase__description {
+  margin: 14px 0 0;
+  max-width: 58ch;
+  color: var(--home-text-muted);
+  font-size: 1rem;
+  line-height: 1.72;
+}
+
+.chat-window-showcase__badges,
+.chat-window-showcase__prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chat-window-showcase__badges {
+  margin-top: 20px;
+}
+
+.chat-window-showcase__prompts {
+  margin-top: 18px;
+}
+
+.chat-window-showcase__badge,
+.chat-window-showcase__prompt {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.chat-window-showcase__badge {
+  border: 1px solid rgba(40, 95, 202, 0.16);
+  background: rgba(40, 95, 202, 0.08);
+  color: #17438f;
+}
+
+.chat-window-showcase__prompt {
+  border: 1px solid rgba(10, 39, 82, 0.14);
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--home-text);
+  box-shadow: 0 10px 22px rgba(13, 42, 87, 0.08);
+}
+
+.chat-window-showcase__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.chat-window-showcase__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.chat-window-showcase__action:hover {
+  transform: translateY(-2px);
+}
+
+.chat-window-showcase__action--primary {
+  background: linear-gradient(135deg, #14376d, #2158c9);
+  color: #ffffff;
+  box-shadow: 0 16px 30px rgba(21, 56, 116, 0.24);
+}
+
+.chat-window-showcase__action--secondary {
+  border: 1px solid rgba(10, 39, 82, 0.14);
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--ink-700);
+}
+
+.chat-window-showcase__visual {
+  position: relative;
+}
+
+.chat-window-showcase__visual-frame {
+  position: relative;
+  border-radius: 24px;
+  padding: 14px;
+  background: linear-gradient(180deg, rgba(8, 26, 57, 0.1), rgba(33, 88, 201, 0.04));
+  border: 1px solid rgba(10, 39, 82, 0.12);
+  box-shadow: 0 22px 50px rgba(9, 29, 65, 0.14);
+}
+
+.chat-window-showcase__visual-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+@media (max-width: 1024px) {
+  .chat-window-showcase__panel {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-window-showcase__visual {
+    order: -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .chat-window-showcase {
+    padding-top: 32px;
+  }
+
+  .chat-window-showcase__panel {
+    border-radius: 22px;
+    padding: 18px;
+  }
+
+  .chat-window-showcase__actions {
+    flex-direction: column;
+  }
+
+  .chat-window-showcase__action {
+    width: 100%;
+  }
+}
+
+body.dark-mode .chat-window-showcase__eyebrow {
+  color: #8ab4ff;
+}
+
+body.dark-mode .chat-window-showcase__badge {
+  border-color: rgba(138, 180, 255, 0.16);
+  background: rgba(138, 180, 255, 0.12);
+  color: #d9e8ff;
+}
+
+body.dark-mode .chat-window-showcase__prompt {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--home-text);
+}
+
+body.dark-mode .chat-window-showcase__action--secondary {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--home-text);
+}

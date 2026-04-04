@@ -22,6 +22,8 @@ const FeedbackWidget = ({
   triggerClassName = '',
   useDefaultTriggerStyles = true,
   showTriggerIcon = true,
+  interactive = true,
+  disabledReason = '',
   onSubmit,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -174,12 +176,18 @@ const FeedbackWidget = ({
 
   return (
     <>
-      <button type="button" className={triggerClasses} onClick={openModal}>
+      <button
+        type="button"
+        className={triggerClasses}
+        onClick={interactive ? openModal : undefined}
+        disabled={!interactive}
+        title={!interactive && disabledReason ? disabledReason : undefined}
+      >
         {showTriggerIcon && <MessageSquareMore size={18} aria-hidden="true" />}
         <span>{triggerLabel}</span>
       </button>
 
-      {isOpen && (
+      {interactive && isOpen && (
         <div className="feedback-widget__overlay" onClick={closeModal}>
           <div
             className="feedback-widget__dialog"
@@ -230,6 +238,7 @@ const FeedbackWidget = ({
                       id={`${titleId}-fullName`}
                       name="fullName"
                       type="text"
+                      autoComplete="name"
                       value={formData.fullName}
                       onChange={handleChange}
                       placeholder="Enter your full name"
@@ -244,6 +253,7 @@ const FeedbackWidget = ({
                       id={`${titleId}-email`}
                       name="email"
                       type="email"
+                      autoComplete="email"
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="Enter your email address"
@@ -258,6 +268,7 @@ const FeedbackWidget = ({
                   <select
                     id={`${titleId}-type`}
                     name="type"
+                    autoComplete="off"
                     value={formData.type}
                     onChange={handleChange}
                     className="feedback-widget__control"
@@ -277,6 +288,7 @@ const FeedbackWidget = ({
                       id={`${titleId}-otherType`}
                       name="otherType"
                       type="text"
+                      autoComplete="off"
                       value={formData.otherType}
                       onChange={handleChange}
                       placeholder="Enter custom feedback type"
@@ -291,6 +303,7 @@ const FeedbackWidget = ({
                   <textarea
                     id={`${titleId}-message`}
                     name="message"
+                    autoComplete="off"
                     value={formData.message}
                     onChange={handleChange}
                     placeholder="Write your feedback here"

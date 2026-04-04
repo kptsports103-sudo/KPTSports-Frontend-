@@ -147,6 +147,9 @@ const SuperAdminLayout = ({ children }) => {
         title="Share Your Feedback"
         description="We value your thoughts and suggestions about the super admin dashboard experience."
         contextLabel="Super Admin Dashboard"
+        triggerLabel="Share Your Feedback"
+        interactive={false}
+        disabledReason="Visitors can submit feedback from the public website."
       />
     </div>
   );

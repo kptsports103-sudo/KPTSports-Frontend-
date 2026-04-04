@@ -1,0 +1,111 @@
+<svg width="1280" height="900" viewBox="0 0 1280 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="60" x2="1160" y2="840" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7FAFF"/>
+      <stop offset="1" stop-color="#EEF4FF"/>
+    </linearGradient>
+    <linearGradient id="header" x1="180" y1="120" x2="1100" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#102544"/>
+      <stop offset="1" stop-color="#2158C9"/>
+    </linearGradient>
+    <linearGradient id="userBubble" x1="780" y1="0" x2="1040" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2D6DFF"/>
+      <stop offset="1" stop-color="#4A90FF"/>
+    </linearGradient>
+    <filter id="shadow" x="110" y="86" width="1060" height="736" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="16"/>
+      <feGaussianBlur stdDeviation="20"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0941176 0 0 0 0 0.180392 0 0 0 0 0.368627 0 0 0 0.16 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_1" result="shape"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="900" fill="url(#bg)"/>
+  <circle cx="180" cy="140" r="110" fill="#D7E7FF" fill-opacity="0.55"/>
+  <circle cx="1120" cy="760" r="150" fill="#D9E6FF" fill-opacity="0.58"/>
+  <circle cx="1060" cy="120" r="72" fill="#C6D8FF" fill-opacity="0.55"/>
+
+  <g filter="url(#shadow)">
+    <rect x="150" y="110" width="980" height="656" rx="28" fill="#FFFFFF"/>
+  </g>
+
+  <rect x="150" y="110" width="980" height="92" rx="28" fill="url(#header)"/>
+  <rect x="150" y="164" width="980" height="38" fill="url(#header)"/>
+  <circle cx="208" cy="156" r="26" fill="#FFFFFF" fill-opacity="0.16"/>
+  <circle cx="208" cy="156" r="18" fill="#FFFFFF" fill-opacity="0.18"/>
+  <path d="M206 148C212.627 148 218 153.373 218 160V164H194V160C194 153.373 199.373 148 206 148ZM206 145C202.686 145 200 142.314 200 139C200 135.686 202.686 133 206 133C209.314 133 212 135.686 212 139C212 142.314 209.314 145 206 145Z" fill="#FFFFFF"/>
+  <text x="248" y="150" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">KPT Sports Assistant</text>
+  <text x="248" y="178" fill="#D7E6FF" font-family="Segoe UI, Arial, sans-serif" font-size="16">Live chatbot support for events, registration, winners, and results</text>
+  <circle cx="1020" cy="156" r="8" fill="#5CFF9A"/>
+  <text x="1038" y="162" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600">Online</text>
+  <circle cx="1080" cy="156" r="5" fill="#FFFFFF" fill-opacity="0.7"/>
+  <circle cx="1098" cy="156" r="5" fill="#FFFFFF" fill-opacity="0.7"/>
+  <circle cx="1116" cy="156" r="5" fill="#FFFFFF" fill-opacity="0.7"/>
+
+  <rect x="182" y="228" width="916" height="430" rx="24" fill="#F6F9FF"/>
+  <rect x="1076" y="252" width="6" height="362" rx="3" fill="#DBE7FF"/>
+  <rect x="1076" y="342" width="6" height="94" rx="3" fill="#A8C2F7"/>
+
+  <text x="210" y="256" fill="#8090AC" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600">Today, 10:24 AM</text>
+
+  <rect x="214" y="286" width="430" height="118" rx="24" fill="#FFFFFF"/>
+  <text x="246" y="324" fill="#1D2B44" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Assistant</text>
+  <text x="246" y="356" fill="#4B5B78" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    <tspan x="246" dy="0">Welcome back. I can help with Annual Sports</tspan>
+    <tspan x="246" dy="28">Celebration events, registration status, results,</tspan>
+    <tspan x="246" dy="28">and winner details.</tspan>
+  </text>
+  <text x="246" y="424" fill="#8A98B2" font-family="Segoe UI, Arial, sans-serif" font-size="14">10:24 AM</text>
+
+  <rect x="676" y="430" width="360" height="94" rx="24" fill="url(#userBubble)"/>
+  <text x="710" y="468" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">You</text>
+  <text x="710" y="500" fill="#EFF5FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    <tspan x="710" dy="0">Show me upcoming indoor events</tspan>
+    <tspan x="710" dy="28">and registration details.</tspan>
+  </text>
+  <text x="944" y="546" fill="#DDE9FF" font-family="Segoe UI, Arial, sans-serif" font-size="14" text-anchor="end">10:25 AM</text>
+
+  <rect x="214" y="442" width="480" height="166" rx="24" fill="#FFFFFF"/>
+  <text x="246" y="478" fill="#1D2B44" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Assistant</text>
+  <text x="246" y="510" fill="#4B5B78" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    <tspan x="246" dy="0">Upcoming indoor events:</tspan>
+    <tspan x="246" dy="30">1. Shuttle Badminton Singles</tspan>
+    <tspan x="246" dy="28">2. Chess Championship</tspan>
+    <tspan x="246" dy="28">3. Table Tennis Doubles</tspan>
+    <tspan x="246" dy="28">Registration closes on 18 March, 5:00 PM.</tspan>
+  </text>
+  <text x="246" y="636" fill="#8A98B2" font-family="Segoe UI, Arial, sans-serif" font-size="14">10:25 AM</text>
+
+  <rect x="246" y="650" width="116" height="34" rx="17" fill="#EDF3FF"/>
+  <text x="304" y="672" fill="#2352BE" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle">Helpful</text>
+  <rect x="374" y="650" width="148" height="34" rx="17" fill="#F3F6FB"/>
+  <text x="448" y="672" fill="#6A7A95" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle">Needs Review</text>
+
+  <rect x="746" y="574" width="290" height="74" rx="24" fill="url(#userBubble)"/>
+  <text x="780" y="618" fill="#EFF5FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    Register me for volleyball trials.
+  </text>
+  <text x="958" y="664" fill="#DDE9FF" font-family="Segoe UI, Arial, sans-serif" font-size="14" text-anchor="end">10:26 AM</text>
+
+  <rect x="214" y="700" width="170" height="50" rx="25" fill="#FFFFFF"/>
+  <circle cx="252" cy="725" r="8" fill="#9AB4E8"/>
+  <circle cx="282" cy="725" r="8" fill="#6F93DD"/>
+  <circle cx="312" cy="725" r="8" fill="#9AB4E8"/>
+  <text x="344" y="731" fill="#6A7A95" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600">Typing...</text>
+
+  <rect x="182" y="688" width="916" height="1" fill="#E2EBFA"/>
+  <rect x="186" y="700" width="908" height="56" rx="20" fill="#FFFFFF"/>
+  <rect x="206" y="714" width="676" height="30" rx="15" fill="#F1F5FD"/>
+  <text x="230" y="734" fill="#95A4BD" font-family="Segoe UI, Arial, sans-serif" font-size="18">Type your message here...</text>
+  <rect x="904" y="706" width="56" height="44" rx="16" fill="#EDF3FF"/>
+  <path d="M922 728H943" stroke="#4268B8" stroke-width="3" stroke-linecap="round"/>
+  <path d="M932.5 717.5V738.5" stroke="#4268B8" stroke-width="3" stroke-linecap="round"/>
+  <rect x="974" y="706" width="100" height="44" rx="16" fill="#1F5ADB"/>
+  <path d="M1003 727L1019 720L1013 736L1008 730L1003 727Z" fill="#FFFFFF"/>
+
+  <text x="150" y="836" fill="#62748E" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">Chat Window Interface Mockup</text>
+  <text x="150" y="864" fill="#8595AE" font-family="Segoe UI, Arial, sans-serif" font-size="15">Includes user and chatbot message bubbles, timestamps, feedback controls, typing indicator, and scrollable history.</text>
+</svg>
