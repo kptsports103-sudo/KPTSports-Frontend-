@@ -2,6 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./Footer.css";
+import FeedbackWidget from "./FeedbackWidget";
 import VisitorCounter from "./VisitorCounter";
 import {
   FaCheckCircle,
@@ -115,7 +116,15 @@ const Footer = () => {
       </div>
 
       {/* Feedback Button */}
-      <button className="feedback-btn">Feedback</button>
+      <FeedbackWidget
+        title="Share Your Feedback"
+        description="We value your thoughts and suggestions about the KPT Sports website."
+        contextLabel="Website Feedback"
+        triggerLabel="Feedback"
+        triggerClassName="feedback-btn"
+        useDefaultTriggerStyles={false}
+        showTriggerIcon={false}
+      />
     </footer>
   );
 };

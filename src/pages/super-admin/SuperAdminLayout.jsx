@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { clearAuthStorage } from '../../context/tokenStorage';
+import FeedbackWidget from '../../components/FeedbackWidget';
 import '../../admin.css';
 
 const SuperAdminLayout = ({ children }) => {
@@ -140,6 +141,13 @@ const SuperAdminLayout = ({ children }) => {
       <div className="main-content" style={{ background: '#f8f9fa' }}>
         {children}
       </div>
+
+      <FeedbackWidget
+        user={user}
+        title="Share Your Feedback"
+        description="We value your thoughts and suggestions about the super admin dashboard experience."
+        contextLabel="Super Admin Dashboard"
+      />
     </div>
   );
 };
